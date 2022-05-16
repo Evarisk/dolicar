@@ -51,3 +51,74 @@ MyPageName = My page name
 #
 MyWidget = My widget
 MyWidgetDescription = My widget description
+
+
+#
+# RegistrationCertificateFr - Carte grise
+#
+
+# Right - Droit
+ReadRegistrationCertificateFr = Consulter la carte grise
+CreateRegistrationCertificateFr = Créer/Modifier la carte grise
+DeleteRegistrationCertificateFr = Supprimer la carte grise
+
+# Trigger - Déclencheur
+
+# Mod Numbering - Modèle de numérotation
+DigiriskListingRisksPhotoDocumentNumberingModule = Modèle de numérotation des listing des risques avec photos de Digirisk
+DigiriskListingRisksPhotoStandardModel = Renvoie le numéro sous la forme RLPn où n est un compteur séquentiel sans rupture et sans remise à 0.
+
+
+# Data - Donnée
+RegistrationCertificateFr = Carte grise
+NewRegistrationCertificateFr = Nouvelle carte grise
+ModifyRegistrationCertificateFr = Modifier la carte grise
+ListRegistrationCertificateFr = Liste des cartes grises
+RegistrationNumber = Numéro d'immatriculation
+FirstRegistrationDate = Date de la première immatriculation
+OwnerFullName = Nom et prénom du propriétaire
+RegistrationAddress = Adresse du propriétaire
+OwnerVehicle = Propriétaire du véhicule ?
+OwnerNumber = Nombre de propriétaire
+SecondOwnerName = Nom du second propriétaire
+VehicleBrand = Marque du véhicule
+VehicleType = Type, variante, version du véhicule
+VehicleCNIT = Code National d’Identification du Type du véhicule
+VehicleModel = Modèle du véhicule
+VehicleSerialNumber = Numéro de série du véhicule
+TechnicalPTAC = Masse en charge maximale techniquement admissible (en kg)
+PTAC = Masse en charge maximale (en kg)
+PTRA = Masse en charge maximale de l'ensemble (en kg)
+VehicleWeight = Masse du véhicule (en kg)
+VehicleEmptyWeight = Poids à vide (en kg)
+ValidityPeriod = Période de validité
+VehicleRegistrationDate = Date de d'immatriculation de la carte grise
+VehicleCategory = Catégorie du véhicule
+NationalType = Genre national
+EuropeanBodyWork = Carrosserie - norme européenne
+NationalBodyWork = Carrosserie - norme nationnale
+TypeApprovalNumber = Numéro de réception par type
+CylinderCapacity = Cylindrée (en cm3)
+MaximumNetPower = Puissance nette maximale (en kW)
+FuelType = Type de carburant ou source d'énergie
+NationalAdministrativePower = Puissance administrative nationale ou «Chevaux fiscaux»
+PowerToWeightRatio = Rapport puissance/masse (en kW/kg)
+SeatingCapacity = Nombre de places assises
+StationaryCapacity = Nombre de places debout autorisé
+StationaryNoiseLevel = Niveau sonore à l’arrêt (en dB)
+MotorSpeed = Vitesse de rotation du moteur (en min-1)
+COEmission = Rejet de CO2 (en g/km)
+EnvironmentalCategory = Classe environnementale
+FirstTechnicallnspectionDate = Date du premier contrôle technique
+RegionalTax = Taxe régionale
+ProfessionalTax = Taxe professionnel
+EcologicalTax = Taxe écologique
+ManagementTax = Taxe de gestion
+ForwardingExpensesTax = Taxe de frais d'acheminement
+TotalPriceVehicleRegistration = Prix total de la carte grise
+SpecificDetails1 = Mentions spécifiques 1
+SpecificDetails2 = Mentions spécifiques 2
+SpecificDetails3 = Mentions spécifiques 3
+SpecificDetails4 = Mentions spécifiques 4
+
+

@@ -242,8 +242,8 @@ class modDoliCar extends DolibarrModules
 			//  0 => array(
 			//      'label' => 'MyJob label',
 			//      'jobtype' => 'method',
-			//      'class' => '/dolicar/class/carregistration.class.php',
-			//      'objectname' => 'CarRegistration',
+			//      'class' => '/dolicar/class/registrationcertificatefr.class.php',
+			//      'objectname' => 'RegistrationCertificateFr',
 			//      'method' => 'doScheduledJob',
 			//      'parameters' => '',
 			//      'comment' => 'Comment',
@@ -266,18 +266,18 @@ class modDoliCar extends DolibarrModules
 		/* BEGIN MODULEBUILDER PERMISSIONS */
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Read objects of DoliCar'; // Permission label
-		$this->rights[$r][4] = 'carregistration';
-		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->dolicar->carregistration->read)
+		$this->rights[$r][4] = 'registrationcertificatefr';
+		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->read)
 		$r++;
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Create/Update objects of DoliCar'; // Permission label
-		$this->rights[$r][4] = 'carregistration';
-		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->dolicar->carregistration->write)
+		$this->rights[$r][4] = 'registrationcertificatefr';
+		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->write)
 		$r++;
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete objects of DoliCar'; // Permission label
-		$this->rights[$r][4] = 'carregistration';
-		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->dolicar->carregistration->delete)
+		$this->rights[$r][4] = 'registrationcertificatefr';
+		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->delete)
 		$r++;
 		/* END MODULEBUILDER PERMISSIONS */
 
@@ -297,52 +297,52 @@ class modDoliCar extends DolibarrModules
 			'langs'=>'dolicar@dolicar', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000 + $r,
 			'enabled'=>'$conf->dolicar->enabled', // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled.
-			'perms'=>'1', // Use 'perms'=>'$user->rights->dolicar->carregistration->read' if you want your menu with a permission rules
+			'perms'=>'1', // Use 'perms'=>'$user->rights->dolicar->registrationcertificatefr->read' if you want your menu with a permission rules
 			'target'=>'',
 			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
 		);
 		/* END MODULEBUILDER TOPMENU */
-		/* BEGIN MODULEBUILDER LEFTMENU CARREGISTRATION
+		/* BEGIN MODULEBUILDER LEFTMENU REGISTRATIONCERTIFICATEFR
 		$this->menu[$r++]=array(
 			'fk_menu'=>'fk_mainmenu=dolicar',      // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'=>'left',                          // This is a Left menu entry
-			'titre'=>'CarRegistration',
+			'titre'=>'RegistrationCertificateFr',
 			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
 			'mainmenu'=>'dolicar',
-			'leftmenu'=>'carregistration',
+			'leftmenu'=>'registrationcertificatefr',
 			'url'=>'/dolicar/dolicarindex.php',
 			'langs'=>'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000+$r,
 			'enabled'=>'$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->dolicar->carregistration->read',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->dolicar->registrationcertificatefr->read',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
 			'target'=>'',
 			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
 		);
 		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=dolicar,fk_leftmenu=carregistration',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>'List_CarRegistration',
+			'titre'=>'List_RegistrationCertificateFr',
 			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_carregistration_list',
-			'url'=>'/dolicar/carregistration_list.php',
+			'leftmenu'=>'dolicar_registrationcertificatefr_list',
+			'url'=>'/dolicar/registrationcertificatefr_list.php',
 			'langs'=>'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000+$r,
 			'enabled'=>'$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=>'$user->rights->dolicar->carregistration->read',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->dolicar->registrationcertificatefr->read',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
 			'target'=>'',
 			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
 		);
 		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=dolicar,fk_leftmenu=carregistration',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'fk_menu'=>'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>'New_CarRegistration',
+			'titre'=>'New_RegistrationCertificateFr',
 			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_carregistration_new',
-			'url'=>'/dolicar/carregistration_card.php?action=create',
+			'leftmenu'=>'dolicar_registrationcertificatefr_new',
+			'url'=>'/dolicar/registrationcertificatefr_card.php?action=create',
 			'langs'=>'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000+$r,
 			'enabled'=>'$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=>'$user->rights->dolicar->carregistration->write',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->rights->dolicar->registrationcertificatefr->write',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
 			'target'=>'',
 			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
 		);
@@ -353,10 +353,10 @@ class modDoliCar extends DolibarrModules
             'fk_menu'=>'fk_mainmenu=dolicar',
             // This is a Left menu entry
             'type'=>'left',
-            'titre'=>'List CarRegistration',
+            'titre' => $langs->trans('ListRegistrationCertificateFr'),
             'mainmenu'=>'dolicar',
-            'leftmenu'=>'dolicar_carregistration',
-            'url'=>'/dolicar/carregistration_list.php',
+            'leftmenu'=>'dolicar_registrationcertificatefr',
+            'url'=>'/dolicar/registrationcertificatefr_list.php',
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'dolicar@dolicar',
             'position'=>1100+$r,
@@ -370,13 +370,13 @@ class modDoliCar extends DolibarrModules
         );
         $this->menu[$r++]=array(
             // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-            'fk_menu'=>'fk_mainmenu=dolicar,fk_leftmenu=dolicar_carregistration',
+            'fk_menu' => 'fk_mainmenu=dolicar,fk_leftmenu=dolicar_registrationcertificatefr',
             // This is a Left menu entry
-            'type'=>'left',
-            'titre'=>'New CarRegistration',
+            'type' => 'left',
+            'titre' => $langs->trans('NewRegistrationCertificateFr'),
             'mainmenu'=>'dolicar',
-            'leftmenu'=>'dolicar_carregistration',
-            'url'=>'/dolicar/carregistration_card.php?action=create',
+            'leftmenu'=>'dolicar_registrationcertificatefr',
+            'url'=>'/dolicar/registrationcertificatefr_card.php?action=create',
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'dolicar@dolicar',
             'position'=>1100+$r,
@@ -389,7 +389,7 @@ class modDoliCar extends DolibarrModules
             'user'=>2
         );
 
-		/* END MODULEBUILDER LEFTMENU CARREGISTRATION */
+		/* END MODULEBUILDER LEFTMENU REGISTRATIONCERTIFICATEFR */
 	}
 
 	/**
@@ -427,16 +427,16 @@ class modDoliCar extends DolibarrModules
 		// Document templates
 		$moduledir = dol_sanitizeFileName('dolicar');
 		$myTmpObjects = array();
-		$myTmpObjects['CarRegistration'] = array('includerefgeneration'=>0, 'includedocgeneration'=>0);
+		$myTmpObjects['RegistrationCertificateFr'] = array('includerefgeneration'=>0, 'includedocgeneration'=>0);
 
 		foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
-			if ($myTmpObjectKey == 'CarRegistration') {
+			if ($myTmpObjectKey == 'RegistrationCertificateFr') {
 				continue;
 			}
 			if ($myTmpObjectArray['includerefgeneration']) {
-				$src = DOL_DOCUMENT_ROOT.'/install/doctemplates/'.$moduledir.'/template_carregistrations.odt';
+				$src = DOL_DOCUMENT_ROOT.'/install/doctemplates/'.$moduledir.'/template_registrationcertificatefrs.odt';
 				$dirodt = DOL_DATA_ROOT.'/doctemplates/'.$moduledir;
-				$dest = $dirodt.'/template_carregistrations.odt';
+				$dest = $dirodt.'/template_registrationcertificatefrs.odt';
 
 				if (file_exists($src) && !file_exists($dest)) {
 					require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
