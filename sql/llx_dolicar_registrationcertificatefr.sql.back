@@ -49,7 +49,7 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
 	j_vehicleCategory varchar(128), 
 	j1_national_type varchar(128), 
 	j2_european_bodywork varchar(128), 
-	j3_national_bodywork varchar(128) NOT NULL, 
+	j3_national_bodywork varchar(128), 
 	k_type_approval_number varchar(128), 
 	p1_cylinder_capacity integer, 
 	p2_maximum_net_power integer, 
@@ -73,6 +73,7 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
 	z2_specific_details textarea, 
 	z3_specific_details textarea, 
 	z4_specific_details textarea, 
-	fk_project integer
+	fk_project integer, 
+	fk_lot integer
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

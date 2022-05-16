@@ -135,7 +135,7 @@ class RegistrationCertificateFr extends CommonObject
 		'j_vehicleCategory' => array('type'=>'varchar(128)', 'label'=>'VehicleCategory', 'enabled'=>'1', 'position'=>270, 'notnull'=>0, 'visible'=>3,),
 		'j1_national_type' => array('type'=>'varchar(128)', 'label'=>'NationalType', 'enabled'=>'1', 'position'=>280, 'notnull'=>0, 'visible'=>3,),
 		'j2_european_bodywork' => array('type'=>'varchar(128)', 'label'=>'EuropeanBodyWork', 'enabled'=>'1', 'position'=>290, 'notnull'=>0, 'visible'=>3,),
-		'j3_national_bodywork' => array('type'=>'varchar(128)', 'label'=>'NationalBodyWork', 'enabled'=>'1', 'position'=>300, 'notnull'=>1, 'visible'=>3,),
+		'j3_national_bodywork' => array('type'=>'varchar(128)', 'label'=>'NationalBodyWork', 'enabled'=>'1', 'position'=>300, 'notnull'=>0, 'visible'=>3,),
 		'k_type_approval_number' => array('type'=>'varchar(128)', 'label'=>'TypeApprovalNumber', 'enabled'=>'1', 'position'=>310, 'notnull'=>0, 'visible'=>3,),
 		'p1_cylinder_capacity' => array('type'=>'integer', 'label'=>'CylinderCapacity', 'enabled'=>'1', 'position'=>320, 'notnull'=>0, 'visible'=>3,),
 		'p2_maximum_net_power' => array('type'=>'integer', 'label'=>'MaximumNetPower', 'enabled'=>'1', 'position'=>330, 'notnull'=>0, 'visible'=>3,),
@@ -160,6 +160,7 @@ class RegistrationCertificateFr extends CommonObject
 		'z3_specific_details' => array('type'=>'textarea', 'label'=>'SpecificDetails3', 'enabled'=>'1', 'position'=>520, 'notnull'=>0, 'visible'=>3,),
 		'z4_specific_details' => array('type'=>'textarea', 'label'=>'SpecificDetails4', 'enabled'=>'1', 'position'=>530, 'notnull'=>0, 'visible'=>3,),
 		'fk_project' => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'enabled'=>'1', 'position'=>570, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
+		'fk_lot' => array('type'=>'integer:Productlot:product/stock/class/productlot.class.php:1', 'label'=>'Batch', 'enabled'=>'1', 'position'=>580, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
 	);
 	public $rowid;
 	public $entity;
@@ -219,6 +220,7 @@ class RegistrationCertificateFr extends CommonObject
 	public $z3_specific_details;
 	public $z4_specific_details;
 	public $fk_project;
+	public $fk_lot;
 	// END MODULEBUILDER PROPERTIES
 
 
