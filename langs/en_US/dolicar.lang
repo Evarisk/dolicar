@@ -122,3 +122,11 @@ SpecificDetails3 = Mentions spécifiques 3
 SpecificDetails4 = Mentions spécifiques 4
 
 
+#
+# Other
+#
+
+# Data - Donnée
+Vehicle = Véhicule
+Mileage = Kilométrage
+

@@ -411,13 +411,9 @@ class modDoliCar extends DolibarrModules
 		}
 
 		// Create extrafields during init
-		//include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-		//$extrafields = new ExtraFields($this->db);
-		//$result1=$extrafields->addExtraField('dolicar_myattr1', "New Attr 1 label", 'boolean', 1,  3, 'thirdparty',   0, 0, '', '', 1, '', 0, 0, '', '', 'dolicar@dolicar', '$conf->dolicar->enabled');
-		//$result2=$extrafields->addExtraField('dolicar_myattr2', "New Attr 2 label", 'varchar', 1, 10, 'project',      0, 0, '', '', 1, '', 0, 0, '', '', 'dolicar@dolicar', '$conf->dolicar->enabled');
-		//$result3=$extrafields->addExtraField('dolicar_myattr3', "New Attr 3 label", 'varchar', 1, 10, 'bank_account', 0, 0, '', '', 1, '', 0, 0, '', '', 'dolicar@dolicar', '$conf->dolicar->enabled');
-		//$result4=$extrafields->addExtraField('dolicar_myattr4', "New Attr 4 label", 'select',  1,  3, 'thirdparty',   0, 1, '', array('options'=>array('code1'=>'Val1','code2'=>'Val2','code3'=>'Val3')), 1,'', 0, 0, '', '', 'dolicar@dolicar', '$conf->dolicar->enabled');
-		//$result5=$extrafields->addExtraField('dolicar_myattr5', "New Attr 5 label", 'text',    1, 10, 'user',         0, 0, '', '', 1, '', 0, 0, '', '', 'dolicar@dolicar', '$conf->dolicar->enabled');
+		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+		$extrafields = new ExtraFields($this->db);
+		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1010, '', 'product_lot', 0, 0, '', '', '', '', 1);
 
 		// Permissions
 		$this->remove($options);
