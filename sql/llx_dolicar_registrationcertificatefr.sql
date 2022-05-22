@@ -17,7 +17,6 @@
 CREATE TABLE llx_dolicar_registrationcertificatefr(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	entity integer DEFAULT 1 NOT NULL, 
 	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
 	fk_soc integer, 
 	date_creation datetime NOT NULL, 
@@ -30,7 +29,7 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
 	a_registration_number varchar(128) NOT NULL, 
 	b_first_registration_date datetime, 
 	c1_owner_fullname varchar(255), 
-	c3_registration_address text,
+	c3_registration_address text, 
 	c41_ownerNumber integer, 
 	c41_second_owner_name varchar(128), 
 	e_vehicle_serial_number varchar(128), 
@@ -39,7 +38,7 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
 	c4a_owner_vehicle boolean, 
 	d2_vehicle_type varchar(128), 
 	d21_vehicle_cnit varchar(128), 
-	d3_vehicle_model varchar(128) NOT NULL, 
+	d3_vehicle_model integer NOT NULL, 
 	d1_vehicle_brand varchar(128), 
 	f3_ptra integer, 
 	g_vehicle_weight integer, 
@@ -69,10 +68,10 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
 	y4_management_tax double(24,8), 
 	y5_forwarding_expenses_tax double(24,8), 
 	y6_total_price_vehicle_registration double(24,8), 
-	z1_specific_details text,
-	z2_specific_details text,
-	z3_specific_details text,
-	z4_specific_details text,
+	z1_specific_details text, 
+	z2_specific_details text, 
+	z3_specific_details text, 
+	z4_specific_details text, 
 	fk_project integer, 
 	fk_lot integer
 	-- END MODULEBUILDER FIELDS

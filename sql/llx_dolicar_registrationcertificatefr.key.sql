@@ -16,7 +16,6 @@
 
 -- BEGIN MODULEBUILDER INDEXES
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_rowid (rowid);
-ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_entity (entity);
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_ref (ref);
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_soc (fk_soc);
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_status (status);

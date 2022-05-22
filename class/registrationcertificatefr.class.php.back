@@ -103,7 +103,6 @@ class RegistrationCertificateFr extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>0, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
-		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>30, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'ref' => array('type'=>'varchar(128)', 'label'=>'Ref', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>4, 'noteditable'=>'1', 'default'=>'(PROV)', 'index'=>1, 'searchall'=>1, 'validate'=>'1', 'comment'=>"Reference of object"),
 		'fk_soc' => array('type'=>'integer:Societe:societe/class/societe.class.php:1:status=1 AND entity IN (__SHARED_ENTITIES__)', 'label'=>'ThirdParty', 'enabled'=>'1', 'position'=>560, 'notnull'=>-1, 'visible'=>1, 'index'=>1, 'css'=>'maxwidth500 widthcentpercentminusxx', 'help'=>"LinkToThirparty", 'validate'=>'1',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>40, 'notnull'=>1, 'visible'=>-2,),
@@ -116,7 +115,7 @@ class RegistrationCertificateFr extends CommonObject
 		'a_registration_number' => array('type'=>'varchar(128)', 'label'=>'RegistrationNumber', 'enabled'=>'1', 'position'=>80, 'notnull'=>1, 'visible'=>1,),
 		'b_first_registration_date' => array('type'=>'datetime', 'label'=>'FirstRegistrationDate', 'enabled'=>'1', 'position'=>90, 'notnull'=>0, 'visible'=>3,),
 		'c1_owner_fullname' => array('type'=>'varchar(255)', 'label'=>'OwnerFullName', 'enabled'=>'1', 'position'=>100, 'notnull'=>0, 'visible'=>3,),
-		'c3_registration_address' => array('type'=>'textarea', 'label'=>'RegistrationAddress', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>3,),
+		'c3_registration_address' => array('type'=>'text', 'label'=>'RegistrationAddress', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>3,),
 		'c41_ownerNumber' => array('type'=>'integer', 'label'=>'OwnerNumber', 'enabled'=>'1', 'position'=>130, 'notnull'=>0, 'visible'=>3,),
 		'c41_second_owner_name' => array('type'=>'varchar(128)', 'label'=>'SecondOwnerName', 'enabled'=>'1', 'position'=>140, 'notnull'=>0, 'visible'=>3,),
 		'e_vehicle_serial_number' => array('type'=>'varchar(128)', 'label'=>'VehicleSerialNumber', 'enabled'=>'1', 'position'=>190, 'notnull'=>0, 'visible'=>3,),
@@ -125,7 +124,7 @@ class RegistrationCertificateFr extends CommonObject
 		'c4a_owner_vehicle' => array('type'=>'boolean', 'label'=>'OwnerVehicle', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>3,),
 		'd2_vehicle_type' => array('type'=>'varchar(128)', 'label'=>'VehicleType', 'enabled'=>'1', 'position'=>160, 'notnull'=>0, 'visible'=>3,),
 		'd21_vehicle_cnit' => array('type'=>'varchar(128)', 'label'=>'VehicleCNIT', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>3,),
-		'd3_vehicle_model' => array('type'=>'varchar(128)', 'label'=>'VehicleModel', 'enabled'=>'1', 'position'=>180, 'notnull'=>0, 'visible'=>3,),
+		'd3_vehicle_model' => array('type'=>'integer:Product:product/class/product.class.php:1', 'label'=>'VehicleModel', 'enabled'=>'1', 'position'=>180, 'notnull'=>1, 'visible'=>3, 'css'=>'maxwidth500',),
 		'd1_vehicle_brand' => array('type'=>'varchar(128)', 'label'=>'VehicleBrand', 'enabled'=>'1', 'position'=>150, 'notnull'=>0, 'visible'=>3,),
 		'f3_ptra' => array('type'=>'integer', 'label'=>'PTRA', 'enabled'=>'1', 'position'=>220, 'notnull'=>0, 'visible'=>3,),
 		'g_vehicle_weight' => array('type'=>'integer', 'label'=>'VehicleWeight', 'enabled'=>'1', 'position'=>230, 'notnull'=>0, 'visible'=>3,),
@@ -155,15 +154,14 @@ class RegistrationCertificateFr extends CommonObject
 		'y4_management_tax' => array('type'=>'double(24,8)', 'label'=>'ManagementTax', 'enabled'=>'1', 'position'=>470, 'notnull'=>0, 'visible'=>3,),
 		'y5_forwarding_expenses_tax' => array('type'=>'double(24,8)', 'label'=>'ForwardingExpensesTax', 'enabled'=>'1', 'position'=>480, 'notnull'=>0, 'visible'=>3,),
 		'y6_total_price_vehicle_registration' => array('type'=>'double(24,8)', 'label'=>'TotalPriceVehicleRegistration', 'enabled'=>'1', 'position'=>490, 'notnull'=>0, 'visible'=>3,),
-		'z1_specific_details' => array('type'=>'textarea', 'label'=>'SpecificDetails1', 'enabled'=>'1', 'position'=>500, 'notnull'=>0, 'visible'=>3,),
-		'z2_specific_details' => array('type'=>'textarea', 'label'=>'SpecificDetails2', 'enabled'=>'1', 'position'=>510, 'notnull'=>0, 'visible'=>3,),
-		'z3_specific_details' => array('type'=>'textarea', 'label'=>'SpecificDetails3', 'enabled'=>'1', 'position'=>520, 'notnull'=>0, 'visible'=>3,),
+		'z1_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails1', 'enabled'=>'1', 'position'=>500, 'notnull'=>0, 'visible'=>3,),
+		'z2_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails2', 'enabled'=>'1', 'position'=>510, 'notnull'=>0, 'visible'=>3,),
+		'z3_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails3', 'enabled'=>'1', 'position'=>520, 'notnull'=>0, 'visible'=>3,),
 		'z4_specific_details' => array('type'=>'textarea', 'label'=>'SpecificDetails4', 'enabled'=>'1', 'position'=>530, 'notnull'=>0, 'visible'=>3,),
 		'fk_project' => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'enabled'=>'1', 'position'=>570, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
 		'fk_lot' => array('type'=>'integer:Productlot:product/stock/class/productlot.class.php:1', 'label'=>'Batch', 'enabled'=>'1', 'position'=>580, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
 	);
 	public $rowid;
-	public $entity;
 	public $ref;
 	public $fk_soc;
 	public $date_creation;
