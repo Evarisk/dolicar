@@ -129,4 +129,5 @@ SpecificDetails4 = Mentions spécifiques 4
 # Data - Donnée
 Vehicle = Véhicule
 Mileage = Kilométrage
+ProductLotMileageModifyTrigger = Modification du kilométrage
 
