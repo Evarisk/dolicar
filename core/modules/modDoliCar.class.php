@@ -115,7 +115,8 @@ class modDoliCar extends DolibarrModules
 			),
 			// Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
 			'hooks' => array(
-				'productlotcard'
+				'productlotcard',
+				'invoicecard'
 			),
 			// Set this to 1 if features of module are opened to external users
 			'moduleforexternal' => 0,
@@ -170,9 +171,16 @@ class modDoliCar extends DolibarrModules
 		// Array to add new pages in new tabs
 		$this->tabs = array();
 		// Example:
-		// $this->tabs[] = array('data'=>'objecttype:+tabname1:Title1:mylangfile@dolicar:$user->rights->dolicar->read:/dolicar/mynewtab1.php?id=__ID__');  					// To add a new tab identified by code tabname1
-		// $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@dolicar:$user->rights->othermodule->read:/dolicar/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
-		// $this->tabs[] = array('data'=>'objecttype:-tabname:NU:conditiontoremove');                                                     										// To remove an existing tab identified by code tabname
+		$this->tabs[]    = array('data' => 'invoice:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=invoice');
+		$this->tabs[]    = array('data' => 'order:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=order');
+		$this->tabs[]    = array('data' => 'propal:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=propal');
+
+		//		$this->tabs[]    = array('data' => 'productlot:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=productbatch');
+//		$this->tabs[]    = array('data' => 'product:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=product'); // To add a new tab identified by code tabname1
+//		$this->tabs[]    = array('data' => 'project:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=project');  					// To add a new tab identified by code tabname1
+//		$this->tabs[]    = array('data' => 'thirdparty:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=societe');  					// To add a new tab identified by code tabname1
+//		$this->tabs[]    = array('data' => 'task:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=project_task');  					// To add a new tab identified by code tabname1
+
 		//
 		// Where objecttype can be
 		// 'categories_x'	  to add a tab in category view (replace 'x' by type of category (0=product, 1=supplier, 2=customer, 3=member)
@@ -320,7 +328,7 @@ class modDoliCar extends DolibarrModules
 			'titre'=>'List_RegistrationCertificateFr',
 			'mainmenu'=>'dolicar',
 			'leftmenu'=>'dolicar_registrationcertificatefr_list',
-			'url'=>'/dolicar/registrationcertificatefr_list.php',
+			'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php',
 			'langs'=>'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000+$r,
 			'enabled'=>'$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
@@ -334,7 +342,7 @@ class modDoliCar extends DolibarrModules
 			'titre'=>'New_RegistrationCertificateFr',
 			'mainmenu'=>'dolicar',
 			'leftmenu'=>'dolicar_registrationcertificatefr_new',
-			'url'=>'/dolicar/registrationcertificatefr_card.php?action=create',
+			'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
 			'langs'=>'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000+$r,
 			'enabled'=>'$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
@@ -352,7 +360,7 @@ class modDoliCar extends DolibarrModules
             'titre' => $langs->trans('ListRegistrationCertificateFr'),
             'mainmenu'=>'dolicar',
             'leftmenu'=>'dolicar_registrationcertificatefr',
-            'url'=>'/dolicar/registrationcertificatefr_list.php',
+            'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php',
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'dolicar@dolicar',
             'position'=>1100+$r,
@@ -372,7 +380,7 @@ class modDoliCar extends DolibarrModules
             'titre' => $langs->trans('NewRegistrationCertificateFr'),
             'mainmenu'=>'dolicar',
             'leftmenu'=>'dolicar_registrationcertificatefr',
-            'url'=>'/dolicar/registrationcertificatefr_card.php?action=create',
+            'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'dolicar@dolicar',
             'position'=>1100+$r,

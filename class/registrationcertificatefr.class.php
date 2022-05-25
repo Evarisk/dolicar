@@ -794,7 +794,7 @@ class RegistrationCertificateFr extends CommonObject
 		$label .= '<br>';
 		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
 
-		$url = dol_buildpath('/dolicar/registrationcertificatefr_card.php', 1).'?id='.$this->id;
+		$url = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1).'?id='.$this->id;
 
 		if ($option != 'nolink') {
 			// Add param to save lastsearch_values or not

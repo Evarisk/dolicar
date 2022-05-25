@@ -36,7 +36,7 @@ function registrationcertificatefrPrepareHead($object)
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = dol_buildpath("/dolicar/registrationcertificatefr_card.php", 1).'?id='.$object->id;
+	$head[$h][0] = dol_buildpath("/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php", 1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans("Card");
 	$head[$h][2] = 'card';
 	$h++;
@@ -49,7 +49,7 @@ function registrationcertificatefrPrepareHead($object)
 		if (!empty($object->note_public)) {
 			$nbNote++;
 		}
-		$head[$h][0] = dol_buildpath('/dolicar/registrationcertificatefr_note.php', 1).'?id='.$object->id;
+		$head[$h][0] = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_note.php', 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans('Notes');
 		if ($nbNote > 0) {
 			$head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">'.$nbNote.'</span>' : '');
@@ -63,7 +63,7 @@ function registrationcertificatefrPrepareHead($object)
 	$upload_dir = $conf->dolicar->dir_output."/registrationcertificatefr/".dol_sanitizeFileName($object->ref);
 	$nbFiles = count(dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$'));
 	$nbLinks = Link::count($db, $object->element, $object->id);
-	$head[$h][0] = dol_buildpath("/dolicar/registrationcertificatefr_document.php", 1).'?id='.$object->id;
+	$head[$h][0] = dol_buildpath("/dolicar/view/registrationcertificatefr/registrationcertificatefr_document.php", 1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans('Documents');
 	if (($nbFiles + $nbLinks) > 0) {
 		$head[$h][1] .= '<span class="badge marginleftonlyshort">'.($nbFiles + $nbLinks).'</span>';
@@ -71,7 +71,7 @@ function registrationcertificatefrPrepareHead($object)
 	$head[$h][2] = 'document';
 	$h++;
 
-	$head[$h][0] = dol_buildpath("/dolicar/registrationcertificatefr_agenda.php", 1).'?id='.$object->id;
+	$head[$h][0] = dol_buildpath("/dolicar/view/registrationcertificatefr/registrationcertificatefr_agenda.php", 1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans("Events");
 	$head[$h][2] = 'agenda';
 	$h++;
