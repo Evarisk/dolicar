@@ -17,10 +17,31 @@
  */
 
 /**
- *  \file       registrationcertificatefr_contact.php
+ *  \file       registrationcertificatefr_note.php
  *  \ingroup    dolicar
- *  \brief      Tab for contacts linked to RegistrationCertificateFr
+ *  \brief      Tab for notes on RegistrationCertificateFr
  */
+
+//if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');				// Do not create database handler $db
+//if (! defined('NOREQUIREUSER'))            define('NOREQUIREUSER', '1');				// Do not load object $user
+//if (! defined('NOREQUIRESOC'))             define('NOREQUIRESOC', '1');				// Do not load object $mysoc
+//if (! defined('NOREQUIRETRAN'))            define('NOREQUIRETRAN', '1');				// Do not load object $langs
+//if (! defined('NOSCANGETFORINJECTION'))    define('NOSCANGETFORINJECTION', '1');		// Do not check injection attack on GET parameters
+//if (! defined('NOSCANPOSTFORINJECTION'))   define('NOSCANPOSTFORINJECTION', '1');		// Do not check injection attack on POST parameters
+//if (! defined('NOCSRFCHECK'))              define('NOCSRFCHECK', '1');				// Do not check CSRF attack (test on referer + on token if option MAIN_SECURITY_CSRF_WITH_TOKEN is on).
+//if (! defined('NOTOKENRENEWAL'))           define('NOTOKENRENEWAL', '1');				// Do not roll the Anti CSRF token (used if MAIN_SECURITY_CSRF_WITH_TOKEN is on)
+//if (! defined('NOSTYLECHECK'))             define('NOSTYLECHECK', '1');				// Do not check style html tag into posted data
+//if (! defined('NOREQUIREMENU'))            define('NOREQUIREMENU', '1');				// If there is no need to load and show top and left menu
+//if (! defined('NOREQUIREHTML'))            define('NOREQUIREHTML', '1');				// If we don't need to load the html.form.class.php
+//if (! defined('NOREQUIREAJAX'))            define('NOREQUIREAJAX', '1');       	  	// Do not load ajax.lib.php library
+//if (! defined("NOLOGIN"))                  define("NOLOGIN", '1');					// If this page is public (can be called outside logged session). This include the NOIPCHECK too.
+//if (! defined('NOIPCHECK'))                define('NOIPCHECK', '1');					// Do not check IP defined into conf $dolibarr_main_restrict_ip
+//if (! defined("MAIN_LANG_DEFAULT"))        define('MAIN_LANG_DEFAULT', 'auto');					// Force lang to a particular value
+//if (! defined("MAIN_AUTHENTICATION_MODE")) define('MAIN_AUTHENTICATION_MODE', 'aloginmodule');	// Force authentication handler
+//if (! defined("NOREDIRECTBYMAINTOLOGIN"))  define('NOREDIRECTBYMAINTOLOGIN', 1);		// The main.inc.php does not make a redirect if not logged, instead show simple error message
+//if (! defined("FORCECSP"))                 define('FORCECSP', 'none');				// Disable all Content Security Policies
+//if (! defined('CSRFCHECK_WITH_TOKEN'))     define('CSRFCHECK_WITH_TOKEN', '1');		// Force use of CSRF protection with tokens even for GET
+//if (! defined('NOBROWSERNOTIF'))     		 define('NOBROWSERNOTIF', '1');				// Disable browser notification
 
 // Load Dolibarr environment
 $res = 0;
@@ -53,40 +74,45 @@ if (!$res) {
 	die("Include of main fails");
 }
 
-require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 dol_include_once('/dolicar/class/registrationcertificatefr.class.php');
 dol_include_once('/dolicar/lib/dolicar_registrationcertificatefr.lib.php');
 
 // Load translation files required by the page
-$langs->loadLangs(array("dolicar@dolicar", "companies", "other", "mails"));
+$langs->loadLangs(array("dolicar@dolicar", "companies"));
 
-$id     = (GETPOST('id') ?GETPOST('id', 'int') : GETPOST('facid', 'int')); // For backward compatibility
-$ref    = GETPOST('ref', 'alpha');
-$lineid = GETPOST('lineid', 'int');
-$socid  = GETPOST('socid', 'int');
+// Get parameters
+$id = GETPOST('id', 'int');
+$ref        = GETPOST('ref', 'alpha');
 $action = GETPOST('action', 'aZ09');
+$cancel     = GETPOST('cancel', 'aZ09');
+$backtopage = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
 $object = new RegistrationCertificateFr($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->dolicar->dir_output.'/temp/massgeneration/'.$user->id;
-$hookmanager->initHooks(array('registrationcertificatefrcontact', 'globalcard')); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks(array('registrationcertificatefrnote', 'globalcard')); // Note that conf->hooks_modules contains array
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once  // Must be include, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
+if ($id > 0 || !empty($ref)) {
+	$upload_dir = $conf->dolicar->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity]."/".$object->id;
+}
+
 
 // There is several ways to check permission.
 // Set $enablepermissioncheck to 1 to enable a minimum low level of checks
 $enablepermissioncheck = 0;
 if ($enablepermissioncheck) {
 	$permissiontoread = $user->rights->dolicar->registrationcertificatefr->read;
-	$permission = $user->rights->dolicar->registrationcertificatefr->write;
+	$permissiontoadd = $user->rights->dolicar->registrationcertificatefr->write;
+	$permissionnote = $user->rights->dolicar->registrationcertificatefr->write; // Used by the include of actions_setnotes.inc.php
 } else {
 	$permissiontoread = 1;
-	$permission = 1;
+	$permissiontoadd = 1;
+	$permissionnote = 1;
 }
 
 // Security check (enable the most restrictive one)
@@ -99,38 +125,16 @@ if (!$permissiontoread) accessforbidden();
 
 
 /*
- * Add a new contact
+ * Actions
  */
 
-if ($action == 'addcontact' && $permission) {
-	$contactid = (GETPOST('userid') ? GETPOST('userid', 'int') : GETPOST('contactid', 'int'));
-	$typeid = (GETPOST('typecontact') ? GETPOST('typecontact') : GETPOST('type'));
-	$result = $object->add_contact($contactid, $typeid, GETPOST("source", 'aZ09'));
-
-	if ($result >= 0) {
-		header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
-		exit;
-	} else {
-		if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
-			$langs->load("errors");
-			setEventMessages($langs->trans("ErrorThisContactIsAlreadyDefinedAsThisType"), null, 'errors');
-		} else {
-			setEventMessages($object->error, $object->errors, 'errors');
-		}
-	}
-} elseif ($action == 'swapstatut' && $permission) {
-	// Toggle the status of a contact
-	$result = $object->swapContactStatus(GETPOST('ligne', 'int'));
-} elseif ($action == 'deletecontact' && $permission) {
-	// Deletes a contact
-	$result = $object->delete_contact($lineid);
-
-	if ($result >= 0) {
-		header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
-		exit;
-	} else {
-		dol_print_error($db);
-	}
+$parameters = array();
+$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
+if (empty($reshook)) {
+	include DOL_DOCUMENT_ROOT.'/core/actions_setnotes.inc.php'; // Must be include, not include_once
 }
 
 
@@ -138,32 +142,22 @@ if ($action == 'addcontact' && $permission) {
  * View
  */
 
-$title = $langs->trans('RegistrationCertificateFr')." - ".$langs->trans('ContactsAddresses');
-$help_url = '';
-//$help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
-llxHeader('', $title, $help_url);
-
 $form = new Form($db);
-$formcompany = new FormCompany($db);
-$contactstatic = new Contact($db);
-$userstatic = new User($db);
 
+//$help_url='EN:Customers_Orders|FR:Commandes_Clients|ES:Pedidos de clientes';
+$help_url = '';
+llxHeader('', $langs->trans('RegistrationCertificateFr'), $help_url);
 
-/* *************************************************************************** */
-/*                                                                             */
-/* View and edit mode                                                         */
-/*                                                                             */
-/* *************************************************************************** */
+if ($id > 0 || !empty($ref)) {
+	$object->fetch_thirdparty();
 
-if ($object->id) {
-	/*
-	 * Show tabs
-	 */
 	$head = registrationcertificatefrPrepareHead($object);
 
-	print dol_get_fiche_head($head, 'contact', $langs->trans("RegistrationCertificateFr"), -1, $object->picto);
+	print dol_get_fiche_head($head, 'note', $langs->trans("RegistrationCertificateFr"), -1, $object->picto);
 
-	$linkback = '<a href="'.dol_buildpath('/dolicar/registrationcertificatefr_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+	// Object card
+	// ------------------------------------------------------------
+	$linkback = '<a href="'.dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	/*
@@ -203,22 +197,22 @@ if ($object->id) {
 	 }
 	 }
 	 }*/
-	$morehtmlref .= '</div>';
+	 $morehtmlref .= '</div>';
 
-	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref, '', 0, '', '', 1);
+
+	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+
+
+	print '<div class="fichecenter">';
+	print '<div class="underbanner clearboth"></div>';
+
+
+	$cssclass = "titlefield";
+	include DOL_DOCUMENT_ROOT.'/core/tpl/notes.tpl.php';
+
+	print '</div>';
 
 	print dol_get_fiche_end();
-
-	print '<br>';
-
-	// Contacts lines (modules that overwrite templates must declare this into descriptor)
-	$dirtpls = array_merge($conf->modules_parts['tpl'], array('/core/tpl'));
-	foreach ($dirtpls as $reldir) {
-		$res = @include dol_buildpath($reldir.'/contacts.tpl.php');
-		if ($res) {
-			break;
-		}
-	}
 }
 
 // End of page
