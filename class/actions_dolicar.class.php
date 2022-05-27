@@ -84,6 +84,42 @@ class ActionsDoliCar
 	}
 
 	/**
+	 * Overloading the printCommonFooter function : replacing the parent's function with the one below
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 */
+	public function printCommonFooter($parameters)
+	{
+		global $db, $conf, $langs;
+
+		/* print_r($parameters); print_r($object); echo "action: " . $action; */
+		if ($parameters['currentcontext'] == 'invoicecard') {
+			if (GETPOST('action') == 'create') {
+				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+				$registration_certificate = new RegistrationCertificateFr($db);
+				$output =  $registration_certificate->select_registrationcertificate_list();
+				?>
+				<script>
+					jQuery('td.facture_extras_registrationcertificatefr ').empty()
+					jQuery('td.facture_extras_registrationcertificatefr ').append(<?php echo json_encode($output) ; ?>)
+				</script>
+				<?php
+			}
+
+		}
+
+		if (true) {
+			$this->results   = array('myreturn' => 999);
+			$this->resprints = 'A text to show';
+			return 0; // or return 1 to replace standard code
+		} else {
+			$this->errors[] = 'Error message';
+			return -1;
+		}
+	}
+
+	/**
 	 * Overloading the doActions function : replacing the parent's function with the one below
 	 *
 	 * @param   array           $parameters     Hook metadatas (context, etc...)

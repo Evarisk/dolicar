@@ -109,7 +109,7 @@ class RegistrationCertificateFr extends CommonObject
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>50, 'notnull'=>0, 'visible'=>-2,),
 		'fk_user_creat' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserAuthor', 'enabled'=>'1', 'position'=>540, 'notnull'=>1, 'visible'=>-2,),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModif', 'enabled'=>'1', 'position'=>550, 'notnull'=>-1, 'visible'=>-2,),
-		'entity'        => array('type' => 'integer', 'label' => 'Entity', 'enabled' => '1', 'position' => 30, 'notnull' => 1, 'visible' => -1,),
+		'entity'        => array('type' => 'integer', 'label' => 'Entity', 'enabled' => '1', 'position' => 30, 'notnull' => 1, 'visible' => 0,),
 		'import_key' => array('type'=>'varchar(14)', 'label'=>'ImportId', 'enabled'=>'1', 'position'=>60, 'notnull'=>-1, 'visible'=>-2,),
 		'status' => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>70, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Validé', '9'=>'Annulé'), 'validate'=>'1',),
 		'ref_ext' => array('type'=>'varchar(128)', 'label'=>'RefExt', 'enabled'=>'1', 'position'=>20, 'notnull'=>0, 'visible'=>0,),
@@ -1074,6 +1074,105 @@ class RegistrationCertificateFr extends CommonObject
 			print $langs->trans("ErrorNumberingModuleNotSetup", $this->element);
 			return "";
 		}
+	}
+
+	/**
+	 *  Output html form to select a third party.
+	 *  Note, you must use the select_company to get the component to select a third party. This function must only be called by select_company.
+	 *
+	 * @param  string 		$selected Preselected type
+	 * @param  string 		$htmlname Name of field in form
+	 * @param  string 		$filter Optional filters criteras (example: 's.rowid <> x', 's.client in (1,3)')
+	 * @param  string 		$showempty Add an empty field (Can be '1' or text to use on empty line like 'SelectThirdParty')
+	 * @param  int 			$forcecombo Force to use standard HTML select component without beautification
+	 * @param  array 		$events Event options. Example: array(array('method'=>'getContacts', 'url'=>dol_buildpath('/core/ajax/contacts.php',1), 'htmlname'=>'contactid', 'params'=>array('add-customer-contact'=>'disabled')))
+	 * @param  int 			$outputmode 0=HTML select string, 1=Array
+	 * @param  int 			$limit Limit number of answers
+	 * @param  string 		$morecss Add more css styles to the SELECT component
+	 * @param  int	 		$moreparam Add more parameters onto the select tag. For example 'style="width: 95%"' to avoid select2 component to go over parent container
+	 * @param  bool 		$multiple add [] in the name of element and add 'multiple' attribut
+	 * @param  int 			$noroot
+	 * @return string HTML string with
+	 * @throws Exception
+	 */
+	public function select_registrationcertificate_list($selected = '', $htmlname = 'options_registrationcertificatefr', $filter = '', $showempty = '1', $forcecombo = 0, $events = array(), $outputmode = 0, $limit = 0, $morecss = 'minwidth100', $moreparam = 0, $multiple = false, $noroot = 0, $contextpage = '', $multientitymanagedoff = true)
+	{
+		global $conf, $langs;
+
+		require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+
+		$productlot = new Productlot($this->db);
+
+		$out      = '';
+		$outarray = array();
+
+		$selected = array($selected);
+
+		// Clean $filter that may contains sql conditions so sql code
+		if (function_exists('testSqlAndScriptInject')) {
+			if (testSqlAndScriptInject($filter, 3) > 0) {
+				$filter = '';
+			}
+		}
+		// On recherche les societies
+		$sql  = "SELECT *";
+		$sql .= " FROM " . MAIN_DB_PREFIX . "dolicar_registrationcertificatefr as s";
+
+		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1 && $multientitymanagedoff == false) $sql .= ' WHERE s.entity IN (' . getEntity($this->element) . ')';
+		else $sql                                                                        .= ' WHERE s.entity = ' . $conf->entity;
+
+		if ($filter) $sql .= " AND (" . $filter . ")";
+
+		$sql .= $this->db->order("rowid", "ASC");
+		$sql .= $this->db->plimit($limit, 0);
+
+		// Build output string
+		dol_syslog(get_class($this) . "::select_registrationcertificate_list", LOG_DEBUG);
+		$resql = $this->db->query($sql);
+		$num = '';
+		if ($resql) {
+			if ( ! $forcecombo) {
+				include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
+				$out .= ajax_combobox($htmlname, $events, 0);
+			}
+
+			// Construct $out and $outarray
+			$out .= '<select id="' . $htmlname . '" class="flat' . ($morecss ? ' ' . $morecss : '') . '"' . ($moreparam ? ' ' . $moreparam : '') . ' name="' . $htmlname . ($multiple ? '[]' : '') . '" ' . ($multiple ? 'multiple' : '') . '>' . "\n";
+			$num                  = $this->db->num_rows($resql);
+			$i                    = 0;
+
+			$textifempty          = (($showempty && ! is_numeric($showempty)) ? $langs->trans($showempty) : '');
+			if ($showempty) $out .= '<option value="-1">' . $textifempty . '</option>' . "\n";
+
+			if ($num) {
+				while ($i < $num) {
+					$obj   = $this->db->fetch_object($resql);
+					$productlot->fetch($obj->fk_lot);
+
+					$label =  $obj->ref . ' - ' . $productlot->batch;
+
+					if (empty($outputmode)) {
+						if (in_array($obj->rowid, $selected)) {
+							$out .= '<option value="' . $obj->rowid . '" selected>' . $label . '</option>';
+						} else {
+							$out .= '<option value="' . $obj->rowid . '">' . $label . '</option>';
+						}
+					} else {
+						array_push($outarray, array('key' => $obj->rowid, 'value' => $label, 'label' => $label));
+					}
+
+					$i++;
+					if (($i % 10) == 0) $out .= "\n";
+				}
+			}
+			$out .= '</select>' . "\n";
+		} else {
+			dol_print_error($this->db);
+		}
+
+		$this->result = array('nbofregistrationcertificate' => $num);
+
+		return $out;
 	}
 
 	/**
