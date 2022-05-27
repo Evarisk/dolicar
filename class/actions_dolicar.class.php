@@ -96,36 +96,7 @@ class ActionsDoliCar
 		/* print_r($parameters); print_r($object); echo "action: " . $action; */
 		if ($parameters['currentcontext'] == 'invoicecard') {
 
-			if (GETPOST('action') == 'create') {
-				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-				$registration_certificate = new RegistrationCertificateFr($db);
-				$output =  $registration_certificate->select_registrationcertificate_list();
-				?>
-				<script>
-					jQuery('td.facture_extras_registrationcertificatefr ').empty()
-					jQuery('td.facture_extras_registrationcertificatefr ').append(<?php echo json_encode($output) ; ?>)
-				</script>
-				<?php
-			} else if (GETPOST('action') == 'edit_extras') {
-				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-				require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
-
-				$facture = new Facture($db);
-				$facture->fetch(GETPOST('id'));
-				$facture->fetch_optionals();
-				$registration_certificate_id = $facture->array_options['options_registrationcertificatefr'];
-				$registration_certificate = new RegistrationCertificateFr($db);
-
-				$output =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
-				?>
-				<script>
-					jQuery('td.facture_extras_registrationcertificatefr ').empty()
-					jQuery('td.facture_extras_registrationcertificatefr ').append(<?php echo json_encode($output) ; ?>)
-					jQuery('td.facture_extras_registrationcertificatefr ').append('<input type="submit" class="button" value="Modifier">')
-
-				</script>
-				<?php
-			} else if ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'addline') && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
+			if ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'addline' || GETPOST('action') == 'update_extras' || GETPOST('action') != 'create') && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
 
 				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 				require_once __DIR__ . '/../../../product/stock/class/productlot.class.php';
@@ -138,13 +109,10 @@ class ActionsDoliCar
 				$registration_certificate = new RegistrationCertificateFr($db);
 				$registration_certificate->fetch($registration_certificate_id);
 
-				$output = $registration_certificate->a_registration_number;
 				$outputline =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
 
 				?>
 				<script>
-					jQuery('td.facture_extras_registrationcertificatefr ').empty()
-					jQuery('td.facture_extras_registrationcertificatefr ').append(<?php echo json_encode($output) ; ?>)
 					jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
 					jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').append(<?php echo json_encode($outputline) ; ?>)
 					jQuery('#extrafield_lines_area_create').hide()
@@ -273,7 +241,7 @@ class ActionsDoliCar
 	 */
 	public function beforePDFCreation($parameters, &$object, &$action)
 	{
-		global $conf, $db, $langs;
+		global $conf, $db, $langs, $user;
 
 		$ret = 0;
 		dol_syslog(get_class($this).'::executeHooks action='.$action);
@@ -283,21 +251,51 @@ class ActionsDoliCar
 		|| (in_array('propalcard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_PROPALCARD))
 		|| (in_array('invoicecard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_INVOICECARD))
 		) {
-//
-//			$object->fetchObjectLinked();
-//			$registrationcertificatefr = array_shift($object->linkedObjects['dolicar_registrationcertificatefr']);
-//
-//			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-//
-//			$product = new Product($db);
-//			$product->fetch($registrationcertificatefr->d3_vehicle_model);
-//
-//			$productlot = new ProductLot($db);
-//			$productlot->fetch(0, $registrationcertificatefr->d3_vehicle_model, $registrationcertificatefr->a_registration_number);
-//
-//			$object->note_public = $langs->transnoentities('RegistrationNumber') . ' : ' . $registrationcertificatefr->a_registration_number . '<br>';
-//			$object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . $product->ref . '<br>';
-//			$object->note_public .= $langs->transnoentities('Mileage') . ' : ' . $productlot->array_options['options_mileage'] . '<br>';
+
+			$object->fetch_optionals();
+
+			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+
+			$registrationcertificatefr = new RegistrationCertificateFr($db);
+			$registrationcertificatefr->fetch($object->array_options['options_registrationcertificatefr']);
+
+			$product = new Product($db);
+			$product->fetch($registrationcertificatefr->d3_vehicle_model);
+
+			$productlot = new ProductLot($db);
+			$productlot->fetch($registrationcertificatefr->fk_lot);
+
+			if (empty($object->array_options["options_dolicar_data"])) {
+
+				$dolicar_data = array(
+					'registration_number' => $registrationcertificatefr->a_registration_number,
+					'vehicle_model' => $product->ref,
+					'mileage' => $productlot->array_options['options_mileage']
+				);
+
+				$dolicar_data_json = json_encode($dolicar_data);
+				$object->array_options["options_dolicar_data"] = $dolicar_data_json;
+				$object->update($user);
+			}
+
+			$dolicar_data_decoded = json_decode($object->array_options["options_dolicar_data"]);
+
+			$object->note_public = '';
+
+			foreach($dolicar_data_decoded as $key => $data) {
+				switch ($key) {
+					case 'registration_number' :
+						$object->note_public .= $langs->transnoentities('RegistrationNumber') . ' : ' . $data . '<br>';
+						break;
+					case 'vehicle_model' :
+						$object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . $data . '<br>';
+						break;
+					case 'mileage' :
+						$object->note_public .=$langs->transnoentities('Mileage') . ' : ' . $data . '<br>';
+						break;
+				}
+			}
 		}
 
 		return $ret;
