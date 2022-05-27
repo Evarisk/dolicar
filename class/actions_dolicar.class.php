@@ -105,6 +105,48 @@ class ActionsDoliCar
 					jQuery('td.facture_extras_registrationcertificatefr ').append(<?php echo json_encode($output) ; ?>)
 				</script>
 				<?php
+			} else if (GETPOST('action') == 'edit_extras') {
+				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+				require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
+
+				$facture = new Facture($db);
+				$facture->fetch(GETPOST('id'));
+				$facture->fetch_optionals();
+				$registration_certificate_id = $facture->array_options['options_registrationcertificatefr'];
+				$registration_certificate = new RegistrationCertificateFr($db);
+
+				$output =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
+				?>
+				<script>
+					jQuery('td.facture_extras_registrationcertificatefr ').empty()
+					jQuery('td.facture_extras_registrationcertificatefr ').append(<?php echo json_encode($output) ; ?>)
+					jQuery('td.facture_extras_registrationcertificatefr ').append('<input type="submit" class="button" value="Modifier">')
+
+				</script>
+				<?php
+			} else if ((GETPOST('action') == '' || empty(GETPOST('action'))) && GETPOST('facid') > 0) {
+
+				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+				require_once __DIR__ . '/../../../product/stock/class/productlot.class.php';
+				require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
+
+				$facture = new Facture($db);
+				$facture->fetch(GETPOST('facid'));
+				$facture->fetch_optionals();
+				$registration_certificate_id = $facture->array_options['options_registrationcertificatefr'];
+				$registration_certificate = new RegistrationCertificateFr($db);
+				$registration_certificate->fetch($registration_certificate_id);
+
+				$productlot = new Productlot($db);
+				$productlot->fetch($registration_certificate->fk_lot);
+
+				$output = $productlot->batch;
+				?>
+				<script>
+					jQuery('td.facture_extras_registrationcertificatefr ').empty()
+					jQuery('td.facture_extras_registrationcertificatefr ').append(<?php echo json_encode($output) ; ?>)
+				</script>
+				<?php
 			}
 
 		}
