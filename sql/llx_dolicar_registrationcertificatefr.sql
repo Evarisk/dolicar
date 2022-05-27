@@ -39,7 +39,7 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
 	c4a_owner_vehicle boolean, 
 	d2_vehicle_type varchar(128), 
 	d21_vehicle_cnit varchar(128), 
-	d3_vehicle_model integer NOT NULL, 
+	d3_vehicle_model integer NOT NULL,
 	d1_vehicle_brand varchar(128), 
 	f3_ptra integer, 
 	g_vehicle_weight integer, 
