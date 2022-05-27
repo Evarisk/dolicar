@@ -95,6 +95,7 @@ class ActionsDoliCar
 
 		/* print_r($parameters); print_r($object); echo "action: " . $action; */
 		if ($parameters['currentcontext'] == 'invoicecard') {
+
 			if (GETPOST('action') == 'create') {
 				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 				$registration_certificate = new RegistrationCertificateFr($db);
@@ -124,27 +125,29 @@ class ActionsDoliCar
 
 				</script>
 				<?php
-			} else if ((GETPOST('action') == '' || empty(GETPOST('action'))) && GETPOST('facid') > 0) {
+			} else if ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'addline') && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
 
 				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 				require_once __DIR__ . '/../../../product/stock/class/productlot.class.php';
 				require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
 
 				$facture = new Facture($db);
-				$facture->fetch(GETPOST('facid'));
+				$facture->fetch(GETPOST('facid') ?: GETPOST('id'));
 				$facture->fetch_optionals();
 				$registration_certificate_id = $facture->array_options['options_registrationcertificatefr'];
 				$registration_certificate = new RegistrationCertificateFr($db);
 				$registration_certificate->fetch($registration_certificate_id);
 
-				$productlot = new Productlot($db);
-				$productlot->fetch($registration_certificate->fk_lot);
+				$output = $registration_certificate->a_registration_number;
+				$outputline =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
 
-				$output = $productlot->batch;
 				?>
 				<script>
 					jQuery('td.facture_extras_registrationcertificatefr ').empty()
 					jQuery('td.facture_extras_registrationcertificatefr ').append(<?php echo json_encode($output) ; ?>)
+					jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
+					jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').append(<?php echo json_encode($outputline) ; ?>)
+					jQuery('#extrafield_lines_area_create').hide()
 				</script>
 				<?php
 			}
@@ -280,21 +283,21 @@ class ActionsDoliCar
 		|| (in_array('propalcard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_PROPALCARD))
 		|| (in_array('invoicecard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_INVOICECARD))
 		) {
-
-			$object->fetchObjectLinked();
-			$registrationcertificatefr = array_shift($object->linkedObjects['dolicar_registrationcertificatefr']);
-
-			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-
-			$product = new Product($db);
-			$product->fetch($registrationcertificatefr->d3_vehicle_model);
-
-			$productlot = new ProductLot($db);
-			$productlot->fetch(0, $registrationcertificatefr->d3_vehicle_model, $registrationcertificatefr->a_registration_number);
-
-			$object->note_public = $langs->transnoentities('RegistrationNumber') . ' : ' . $registrationcertificatefr->a_registration_number . '<br>';
-			$object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . $product->ref . '<br>';
-			$object->note_public .= $langs->transnoentities('Mileage') . ' : ' . $productlot->array_options['options_mileage'] . '<br>';
+//
+//			$object->fetchObjectLinked();
+//			$registrationcertificatefr = array_shift($object->linkedObjects['dolicar_registrationcertificatefr']);
+//
+//			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+//
+//			$product = new Product($db);
+//			$product->fetch($registrationcertificatefr->d3_vehicle_model);
+//
+//			$productlot = new ProductLot($db);
+//			$productlot->fetch(0, $registrationcertificatefr->d3_vehicle_model, $registrationcertificatefr->a_registration_number);
+//
+//			$object->note_public = $langs->transnoentities('RegistrationNumber') . ' : ' . $registrationcertificatefr->a_registration_number . '<br>';
+//			$object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . $product->ref . '<br>';
+//			$object->note_public .= $langs->transnoentities('Mileage') . ' : ' . $productlot->array_options['options_mileage'] . '<br>';
 		}
 
 		return $ret;

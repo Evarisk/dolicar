@@ -419,7 +419,8 @@ class modDoliCar extends DolibarrModules
 		$extrafields = new ExtraFields($this->db);
 		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1010, '', 'product_lot', 0, 0, '', '', '', '', 1);
 		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'facture', 0, 0, '', '', '', '', 0);
-		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:62:"dolicar_registrationcertificatefr:ref:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1040, '', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
 
 		// Permissions
 		$this->remove($options);
