@@ -130,4 +130,8 @@ SpecificDetails4 = Mentions spécifiques 4
 Vehicle = Véhicule
 Mileage = Kilométrage
 ProductLotMileageModifyTrigger = Modification du kilométrage
+Car = Voiture
+Truck = Poids lourd
+Bicycle = Vélo
+CommercialVehicle = Utilitaire
 

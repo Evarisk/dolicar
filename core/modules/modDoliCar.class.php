@@ -465,11 +465,33 @@ class modDoliCar extends DolibarrModules
 		if ($conf->global->DOLICAR__TAGS_SET == 0) {
 			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
-			$tags = new Categorie($this->db);
+			$tag = new Categorie($this->db);
 
-			$tags->label = $langs->transnoentities('Vehicle');
-			$tags->type = 'product';
-			$tags->create($user);
+			$tag->label = $langs->transnoentities('Vehicle');
+			$tag->type = 'product';
+			$result = $tag->create($user);
+
+			if ($result > 0) {
+				$tag->label = $langs->transnoentities('Car');
+				$tag->type = 'product';
+				$tag->fk_parent = $result;
+				$tag->create($user);
+
+				$tag->label = $langs->transnoentities('Truck');
+				$tag->type = 'product';
+				$tag->fk_parent = $result;
+				$tag->create($user);
+
+				$tag->label = $langs->transnoentities('Bicycle');
+				$tag->type = 'product';
+				$tag->fk_parent = $result;
+				$tag->create($user);
+
+				$tag->label = $langs->transnoentities('CommercialVehicle');
+				$tag->type = 'product';
+				$tag->fk_parent = $result;
+				$tag->create($user);
+			}
 
 			dolibarr_set_const($this->db, 'DOLICAR_TAGS_SET', 1, 'integer', 0, '', $conf->entity);
 		}
