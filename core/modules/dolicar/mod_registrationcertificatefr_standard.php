@@ -36,7 +36,7 @@ class mod_registrationcertificatefr_standard extends ModeleNumRefRegistrationCer
 	 */
 	public $version = 'dolibarr'; // 'development', 'experimental', 'dolibarr'
 
-	public $prefix = 'REGISTRATIONCERTIFICATEFR';
+	public $prefix = 'RCF';
 
 	/**
 	 * @var string Error code (or message)

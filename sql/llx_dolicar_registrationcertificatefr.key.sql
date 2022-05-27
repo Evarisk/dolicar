@@ -21,6 +21,8 @@ ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registra
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_status (status);
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_project (fk_project);
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_lot (fk_lot);
+ALTER TABLE llx_dolicar_registrationcertificatefr ADD UNIQUE uk_registrationcertificate_ref (ref, entity);
+
 -- END MODULEBUILDER INDEXES
 
 --ALTER TABLE llx_dolicar_registrationcertificatefr ADD UNIQUE INDEX uk_dolicar_registrationcertificatefr_fieldxy(fieldx, fieldy);

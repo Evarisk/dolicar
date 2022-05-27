@@ -17,7 +17,7 @@
 CREATE TABLE llx_dolicar_registrationcertificatefr(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
-	ref varchar(128) DEFAULT '(PROV)' NOT NULL, 
+	ref varchar(128) NOT NULL,
 	fk_soc integer, 
 	date_creation datetime NOT NULL, 
 	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
@@ -25,7 +25,7 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
     fk_user_modif integer,
     entity integer DEFAULT 1,
     import_key varchar(14),
-	status integer NOT NULL, 
+	status integer NOT NULL DEFAULT 1,
 	ref_ext varchar(128), 
 	a_registration_number varchar(128) NOT NULL, 
 	b_first_registration_date datetime, 
