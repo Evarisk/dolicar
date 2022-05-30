@@ -42,88 +42,42 @@ class modDoliCar extends DolibarrModules
 	{
 		global $langs, $conf;
 		$this->db = $db;
-
-		// Id for module (must be unique).
-		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
 		$this->numero = 436380; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
-
-		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'dolicar';
-
-		// Family can be 'base' (core modules),'crm','financial','hr','projects','products','ecm','technic' (transverse modules),'interface' (link with external tools),'other','...'
-		// It is used to group modules by family in module setup page
 		$this->family = "";
-
-		// Module position in the family on 2 digits ('01', '10', '20', ...)
 		$this->module_position = '';
-
-		// Gives the possibility for the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)
 		$this->familyinfo = array('Eoxia' => array('position' => '01', 'label' => $langs->trans("Eoxia")));
-		// Module label (no space allowed), used if translation string 'ModuleDoliCarName' not found (DoliCar is name of module).
 		$this->name = preg_replace('/^mod/i', '', get_class($this));
-
-		// Module description, used if translation string 'ModuleDoliCarDesc' not found (DoliCar is name of module).
 		$this->description = $langs->trans("DoliCarDescription");
-		// Used only if file README.md and README-LL.md not found.
 		$this->descriptionlong = $langs->trans("DoliCarDescription");
-
-		// Author
 		$this->editor_name = 'Eoxia';
 		$this->editor_url = 'https://www.eoxia.com';
-
-		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 		$this->version = '0.0.1';
-		// Url to the file with your last numberversion of this module
-		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
-
-		// Key used in llx_const table to save module status enabled/disabled (where DOLICAR is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
-
-		// Name of image file used for this module.
-		// If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
-		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
-		// To use a supported fa-xxx css style of font awesome, use this->picto='xxx'
 		$this->picto = 'dolicar256px@dolicar';
 
-		// Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array(
-			// Set this to 1 if module has its own trigger directory (core/triggers)
 			'triggers' => 1,
-			// Set this to 1 if module has its own login method file (core/login)
 			'login' => 0,
-			// Set this to 1 if module has its own substitution function file (core/substitutions)
 			'substitutions' => 0,
-			// Set this to 1 if module has its own menus handler directory (core/menus)
 			'menus' => 0,
-			// Set this to 1 if module overwrite template dir (core/tpl)
 			'tpl' => 0,
-			// Set this to 1 if module has its own barcode directory (core/modules/barcode)
 			'barcode' => 0,
-			// Set this to 1 if module has its own models directory (core/modules/xxx)
 			'models' => 1,
-			// Set this to 1 if module has its own printing directory (core/modules/printing)
 			'printing' => 0,
-			// Set this to 1 if module has its own theme directory (theme)
 			'theme' => 0,
-			// Set this to relative path of css file if module has its own css file
 			'css' => array(
-				//    '/dolicar/css/dolicar.css.php',
 			),
-			// Set this to relative path of js file if module must load a js on all pages
 			'js' => array(
-				//   '/dolicar/js/dolicar.js.php',
 			),
-			// Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
 			'hooks' => array(
 				'productlotcard',
 				'invoicecard'
 			),
-			// Set this to 1 if features of module are opened to external users
 			'moduleforexternal' => 0,
 		);
 
 		// Data directories to create when module is enabled.
-		// Example: this->dirs = array("/dolicar/temp","/dolicar/subdir");
 		$this->dirs = array("/dolicar/temp");
 
 		// Config pages. Put here list of php page, stored into dolicar/admin directory, to use to setup module.
@@ -147,21 +101,8 @@ class modDoliCar extends DolibarrModules
 		// Messages at activation
 		$this->warnings_activation = array(); // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
 		$this->warnings_activation_ext = array(); // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
-		//$this->automatic_activation = array('FR'=>'DoliCarWasAutomaticallyActivatedBecauseOfYourCountryChoice');
-		//$this->always_enabled = true;								// If true, can't be disabled
 
-		// Constants
-		// List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
-		// Example: $this->const=array(1 => array('DOLICAR_MYNEWCONST1', 'chaine', 'myvalue', 'This is a constant to add', 1),
-		//                             2 => array('DOLICAR_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
-		// );
 		$this->const = array();
-
-		// Some keys to add into the overwriting translation tables
-		/*$this->overwrite_translation = array(
-			'en_US:ParentCompany'=>'Parent company or reseller',
-			'fr_FR:ParentCompany'=>'Maison mère ou revendeur'
-		)*/
 
 		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
 			$conf->dolicar = new stdClass();
@@ -175,93 +116,18 @@ class modDoliCar extends DolibarrModules
 		$this->tabs[]    = array('data' => 'order:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=order');
 		$this->tabs[]    = array('data' => 'propal:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=propal');
 
-		//		$this->tabs[]    = array('data' => 'productlot:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=productbatch');
-//		$this->tabs[]    = array('data' => 'product:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=product'); // To add a new tab identified by code tabname1
-//		$this->tabs[]    = array('data' => 'project:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=project');  					// To add a new tab identified by code tabname1
-//		$this->tabs[]    = array('data' => 'thirdparty:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=societe');  					// To add a new tab identified by code tabname1
-//		$this->tabs[]    = array('data' => 'task:+control:Control:dolismq@dolismq:$user->rights->dolismq->control->read:/custom/dolismq/view/control/control_list.php?fromid=__ID__&fromtype=project_task');  					// To add a new tab identified by code tabname1
-
-		//
-		// Where objecttype can be
-		// 'categories_x'	  to add a tab in category view (replace 'x' by type of category (0=product, 1=supplier, 2=customer, 3=member)
-		// 'contact'          to add a tab in contact view
-		// 'contract'         to add a tab in contract view
-		// 'group'            to add a tab in group view
-		// 'intervention'     to add a tab in intervention view
-		// 'invoice'          to add a tab in customer invoice view
-		// 'invoice_supplier' to add a tab in supplier invoice view
-		// 'member'           to add a tab in fundation member view
-		// 'opensurveypoll'	  to add a tab in opensurvey poll view
-		// 'order'            to add a tab in customer order view
-		// 'order_supplier'   to add a tab in supplier order view
-		// 'payment'		  to add a tab in payment view
-		// 'payment_supplier' to add a tab in supplier payment view
-		// 'product'          to add a tab in product view
-		// 'propal'           to add a tab in propal view
-		// 'project'          to add a tab in project view
-		// 'stock'            to add a tab in stock view
-		// 'thirdparty'       to add a tab in third party view
-		// 'user'             to add a tab in user view
-
 		// Dictionaries
 		$this->dictionaries = array();
-		/* Example:
-		$this->dictionaries=array(
-			'langs'=>'dolicar@dolicar',
-			// List of tables we want to see into dictonnary editor
-			'tabname'=>array(MAIN_DB_PREFIX."table1", MAIN_DB_PREFIX."table2", MAIN_DB_PREFIX."table3"),
-			// Label of tables
-			'tablib'=>array("Table1", "Table2", "Table3"),
-			// Request to select fields
-			'tabsql'=>array('SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table1 as f', 'SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table2 as f', 'SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table3 as f'),
-			// Sort order
-			'tabsqlsort'=>array("label ASC", "label ASC", "label ASC"),
-			// List of fields (result of select to show dictionary)
-			'tabfield'=>array("code,label", "code,label", "code,label"),
-			// List of fields (list of fields to edit a record)
-			'tabfieldvalue'=>array("code,label", "code,label", "code,label"),
-			// List of fields (list of fields for insert)
-			'tabfieldinsert'=>array("code,label", "code,label", "code,label"),
-			// Name of columns with primary key (try to always name it 'rowid')
-			'tabrowid'=>array("rowid", "rowid", "rowid"),
-			// Condition to show each dictionary
-			'tabcond'=>array($conf->dolicar->enabled, $conf->dolicar->enabled, $conf->dolicar->enabled)
-		);
-		*/
 
 		// Boxes/Widgets
 		// Add here list of php file(s) stored in dolicar/core/boxes that contains a class to show a widget.
 		$this->boxes = array(
-			//  0 => array(
-			//      'file' => 'dolicarwidget1.php@dolicar',
-			//      'note' => 'Widget provided by DoliCar',
-			//      'enabledbydefaulton' => 'Home',
-			//  ),
-			//  ...
 		);
 
 		// Cronjobs (List of cron jobs entries to add when module is enabled)
 		// unit_frequency must be 60 for minute, 3600 for hour, 86400 for day, 604800 for week
 		$this->cronjobs = array(
-			//  0 => array(
-			//      'label' => 'MyJob label',
-			//      'jobtype' => 'method',
-			//      'class' => '/dolicar/class/registrationcertificatefr.class.php',
-			//      'objectname' => 'RegistrationCertificateFr',
-			//      'method' => 'doScheduledJob',
-			//      'parameters' => '',
-			//      'comment' => 'Comment',
-			//      'frequency' => 2,
-			//      'unitfrequency' => 3600,
-			//      'status' => 0,
-			//      'test' => '$conf->dolicar->enabled',
-			//      'priority' => 50,
-			//  ),
 		);
-		// Example: $this->cronjobs=array(
-		//    0=>array('label'=>'My label', 'jobtype'=>'method', 'class'=>'/dir/class/file.class.php', 'objectname'=>'MyClass', 'method'=>'myMethod', 'parameters'=>'param1, param2', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>'$conf->dolicar->enabled', 'priority'=>50),
-		//    1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'param1, param2', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>'$conf->dolicar->enabled', 'priority'=>50)
-		// );
 
 		// Permissions provided by this module
 		$this->rights = array();
@@ -283,7 +149,6 @@ class modDoliCar extends DolibarrModules
 		$this->rights[$r][4] = 'registrationcertificatefr';
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->delete)
 		$r++;
-		/* END MODULEBUILDER PERMISSIONS */
 
 		// Main menu entries to add
 		$this->menu = array();
@@ -305,52 +170,6 @@ class modDoliCar extends DolibarrModules
 			'target'=>'',
 			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
 		);
-		/* END MODULEBUILDER TOPMENU */
-		/* BEGIN MODULEBUILDER LEFTMENU REGISTRATIONCERTIFICATEFR
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=dolicar',      // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',                          // This is a Left menu entry
-			'titre'=>'RegistrationCertificateFr',
-			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'registrationcertificatefr',
-			'url'=>'/dolicar/dolicarindex.php',
-			'langs'=>'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->dolicar->registrationcertificatefr->read',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
-		);
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>'List_RegistrationCertificateFr',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_registrationcertificatefr_list',
-			'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php',
-			'langs'=>'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=>'$user->rights->dolicar->registrationcertificatefr->read',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
-		);
-		$this->menu[$r++]=array(
-			'fk_menu'=>'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left',			                // This is a Left menu entry
-			'titre'=>'New_RegistrationCertificateFr',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_registrationcertificatefr_new',
-			'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
-			'langs'=>'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000+$r,
-			'enabled'=>'$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'=>'$user->rights->dolicar->registrationcertificatefr->write',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
-			'target'=>'',
-			'user'=>2,				                // 0=Menu for internal users, 1=external users, 2=both
-		);
-		*/
 
         $this->menu[$r++]=array(
             // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
@@ -407,6 +226,8 @@ class modDoliCar extends DolibarrModules
 	public function init($options = '')
 	{
 		global $conf, $langs, $user;
+
+		$langs->load('dolicar@dolicar');
 
 		//$result = $this->_load_tables('/install/mysql/tables/', 'dolicar');
 		$result = $this->_load_tables('/dolicar/sql/');
