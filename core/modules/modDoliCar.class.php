@@ -102,7 +102,11 @@ class modDoliCar extends DolibarrModules
 		$this->warnings_activation = array(); // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
 		$this->warnings_activation_ext = array(); // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
 
-		$this->const = array();
+		$this->const = array(
+			1 => array('DOLICAR_DEFAULT_PROJECT', 'integer', 0, '', 0, 'current'),
+			2 => array('DOLICAR_DEFAULT_WAREHOUSE', 'integer', 0, '', 0, 'current'),
+			3 => array('DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'),
+		);
 
 		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
 			$conf->dolicar = new stdClass();
@@ -281,6 +285,42 @@ class modDoliCar extends DolibarrModules
 					"INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type, entity) VALUES('generic_".strtolower($myTmpObjectKey)."_odt', '".$this->db->escape(strtolower($myTmpObjectKey))."', ".((int) $conf->entity).")"
 				));
 			}
+		}
+
+		//Project
+//		if ($conf->global->DOLICAR_DEFAULT_PROJECT == 0) {
+//			require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
+//			require_once DOL_DOCUMENT_ROOT . '/core/modules/project/mod_project_simple.php';
+//
+//			//Backward compatibility
+//			$project = new Project($this->db);
+//			$projectRef  = new $conf->global->PROJECT_ADDON();
+//			$third_party = new Societe($this->db);
+//
+//			$project->ref         = $projectRef->getNextValue($third_party, $project);
+//			$project->title       = $langs->trans('ClientWarehouse') . ' - ' . $conf->global->MAIN_INFO_SOCIETE_NOM;
+//			$project->description = $langs->trans('ClientWarehouseDescription');
+//			$project->date_c      = dol_now();
+//			$project->date_start  = dol_now();
+//			$project->usage_task = 1;
+//			$project->statut       = 1;
+//			$project_id            = $project->create($user);
+//
+//			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+//			$tags = new Categorie($this->db);
+//
+//			$tags->fetch('', 'Dolicar');
+//			$tags->add_type($project, 'project');
+//		}
+
+		//Warehouse
+		if ($conf->global->DOLICAR_DEFAULT_WAREHOUSE == 0) {
+			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
+			$warehouse = new Entrepot($this->db);
+			$warehouse->ref = $langs->trans('ClientWarehouse');
+			$warehouse->label = $langs->trans('ClientWarehouse');
+			$warehouse_id = $warehouse->create($user);
+			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE', $warehouse_id, 'integer', 0, '', $conf->entity);
 		}
 
 		//Categorie

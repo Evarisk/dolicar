@@ -135,3 +135,5 @@ Truck = Poids lourd
 Bicycle = Vélo
 CommercialVehicle = Utilitaire
 Batch = Numéro de châssis
+ClientWarehouse = Entrepôt client
+ClientVehicle = Véhicule client

@@ -28,13 +28,30 @@
  */
 function createDefaultLot($product_id)
 {
-	global $db, $user;
+	global $db, $user, $conf, $langs;
 
 	require_once __DIR__ . '/../../../product/stock/class/productlot.class.php';
 
 	$productlot = new Productlot($db);
 	$productlot->fk_product = $product_id;
 	$productlot->batch = generate_random_id();
+
+	$product = new Product($db);
+	$product->fetch($product_id);
+	$product->correct_stock_batch(
+		$user,
+		$conf->global->DOLICAR_DEFAULT_WAREHOUSE,
+		1,
+		0,
+		$langs->trans('ClientVehicle'), // label movement
+		0,
+		'',
+		'',
+		$productlot->batch,
+		'',
+		'dolicar_registrationcertificate',
+		0
+	);
 	return $productlot->create($user);
 }
 
