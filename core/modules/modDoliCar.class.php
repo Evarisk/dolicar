@@ -73,6 +73,8 @@ class modDoliCar extends DolibarrModules
 			'hooks' => array(
 				'productlotcard',
 				'invoicecard',
+				'propalcard',
+				'ordercard',
 				'registrationcertificatefrcard'
 			),
 			'moduleforexternal' => 0,
@@ -88,7 +90,7 @@ class modDoliCar extends DolibarrModules
 		// A condition to hide module
 		$this->hidden = false;
 		// List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
-		$this->depends = array('modProduct', 'modProductBatch');
+		$this->depends = array('modProduct', 'modProductBatch', 'modFacture', 'modPropale', 'modCommande');
 		$this->requiredby = array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->conflictwith = array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 
@@ -244,10 +246,26 @@ class modDoliCar extends DolibarrModules
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
 		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1010, '', 'product_lot', 0, 0, '', '', 1, '', 1);
+
+		// Facture extrafields
 		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'facture', 0, 0, '', '', '', '', 0);
 		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'facturedet', 0, 0, '', '', '', '', 1);
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1040, '', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+
+		// Propale extrafields
+		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'propal', 0, 0, '', '', '', '', 0);
+		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'propaldet', 0, 0, '', '', '', '', 1);
+		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1040, '', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+
+
+		// Commande extrafields
+		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'commande', 0, 0, '', '', '', '', 0);
+		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'commandedet', 0, 0, '', '', '', '', 1);
+		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1040, '', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+
 
 		// Permissions
 		$this->remove($options);
