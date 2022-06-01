@@ -72,7 +72,8 @@ class modDoliCar extends DolibarrModules
 			),
 			'hooks' => array(
 				'productlotcard',
-				'invoicecard'
+				'invoicecard',
+				'registrationcertificatefrcard'
 			),
 			'moduleforexternal' => 0,
 		);

@@ -62,7 +62,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 dol_include_once('/dolicar/class/registrationcertificatefr.class.php');
 dol_include_once('/dolicar/lib/dolicar_registrationcertificatefr.lib.php');
 
-global $conf, $langs, $user, $db;
+global $conf, $langs, $user, $db, $hookmanager;
 
 // Load translation files required by the page
 $langs->loadLangs(array("dolicar@dolicar", "other"));
@@ -202,7 +202,8 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("RegistrationCertificateFr");
 $help_url = '';
-llxHeader('', $title, $help_url);
+$morejs = array('/dolicar/js/dolicar.js.php');
+llxHeader('', $title, $help_url, '', 0, 0,  $morejs);
 
 // Part to create
 if ($action == 'create') {
@@ -222,6 +223,9 @@ if ($action == 'create') {
 	if ($backtopageforcancel) {
 		print '<input type="hidden" name="backtopageforcancel" value="'.$backtopageforcancel.'">';
 	}
+
+	print '<input hidden class="lot-creation-url" value="'. DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create&backtopage='. $_SERVER['PHP_SELF'] . '?action=create&fk_lot=__ID__'.'">';
+//	print '<input hidden class="lot-creation-url" value="'. DOL_URL_ROOT . '/product/stock/product.php?id='. '__PRODUCTID__' .'&action=correction&backtopage='. $_SERVER['PHP_SELF'] . '?action=create&fk_lot=__ID__'.'">';
 
 	print dol_get_fiche_head(array(), '');
 
