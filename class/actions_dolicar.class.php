@@ -127,6 +127,9 @@ class ActionsDoliCar
 							$(obj).hide()
 						}
 					})
+					//Add getNomUrl
+					jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
 			}
