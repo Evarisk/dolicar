@@ -120,6 +120,8 @@ class modDoliCar extends DolibarrModules
 		// Array to add new pages in new tabs
 		$this->tabs = array();
 		$this->tabs[] = array('data' => 'productlot:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot');
+		$this->tabs[] = array('data' => 'thirdparty:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty');
+		$this->tabs[] = array('data' => 'product:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product');
 
 		// Dictionaries
 		$this->dictionaries = array();

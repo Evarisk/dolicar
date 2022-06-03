@@ -155,6 +155,14 @@ if (!empty($fromtype)) {
 			$objectLinked = new Productlot($db);
 			$prehead = 'productlot_prepare_head';
 			break;
+		case 'product' :
+			$objectLinked = new Product($db);
+			$prehead = 'product_prepare_head';
+			break;
+		case 'thirdparty' :
+			$objectLinked = new Societe($db);
+			$prehead = 'societe_prepare_head';
+			break;
 	}
 	$objectLinked->fetch($fromid);
 	$head = $prehead($objectLinked);
@@ -176,6 +184,12 @@ if(!empty($fromtype)) {
 	switch ($fromtype) {
 		case 'productlot':
 			$search['fk_lot'] = $fromid;
+			break;
+		case 'product':
+			$search['fk_product'] = $fromid;
+			break;
+		case 'thirdparty':
+			$search['fk_soc'] = $fromid;
 			break;
 	}
 }
