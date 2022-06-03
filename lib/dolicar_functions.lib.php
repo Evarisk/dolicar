@@ -36,23 +36,30 @@ function createDefaultLot($product_id)
 	$productlot->fk_product = $product_id;
 	$productlot->batch = generate_random_id();
 
-	$product = new Product($db);
-	$product->fetch($product_id);
-	$product->correct_stock_batch(
-		$user,
-		$conf->global->DOLICAR_DEFAULT_WAREHOUSE,
-		1,
-		0,
-		$langs->trans('ClientVehicle'), // label movement
-		0,
-		'',
-		'',
-		$productlot->batch,
-		'',
-		'dolicar_registrationcertificate',
-		0
-	);
-	return $productlot->create($user);
+	$lot_id = $productlot->create($user);
+	if ($lot_id > 0) {
+		$product = new Product($db);
+		$product->fetch($product_id);
+		$product->correct_stock_batch(
+			$user,
+			$conf->global->DOLICAR_DEFAULT_WAREHOUSE,
+			1,
+			0,
+			$langs->trans('ClientVehicle'), // label movement
+			0,
+			'',
+			'',
+			$productlot->batch,
+			'',
+			'dolicar_registrationcertificate',
+			0
+		);
+		return $lot_id;
+	} else {
+		return 0;
+	}
+
+
 }
 
 /**

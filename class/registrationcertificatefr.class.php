@@ -317,6 +317,7 @@ class RegistrationCertificateFr extends CommonObject
 			$lot_id = createDefaultLot($this->d3_vehicle_model);
 			$this->fk_lot = $lot_id;
 		}
+
 		$product = new Product($this->db);
 		$product->fetch($this->d3_vehicle_model);
 
