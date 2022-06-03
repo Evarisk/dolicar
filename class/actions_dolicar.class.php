@@ -205,7 +205,139 @@ class ActionsDoliCar
 				</script>
 				<?php
 			}
+		} else if ($parameters['currentcontext'] == 'productlotcard') {
+			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+			require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
+			require_once __DIR__ . '/../../../commande/class/commande.class.php';
+			require_once __DIR__ . '/../../../comm/propal/class/propal.class.php';
+
+			$registration_certificate = new RegistrationCertificateFr($this->db);
+			$facture = new Facture($this->db);
+			$facturedet = new FactureLigne($this->db);
+			$propal = new Propal($this->db);
+			$propaldet = new PropaleLigne($this->db);
+			$commande = new Commande($this->db);
+			$commandedet = new OrderLine($this->db);
+
+			$RC_list = $registration_certificate->fetchAll('', '','','',array('fk_lot'=> GETPOST('id')));
+			$linked_rc_ids = array();
+			$linked_facture_ids = array();
+			if (!empty($RC_list)) {
+				foreach ($RC_list as $rc) {
+					$linked_rc_ids[] = $rc->id;
+					$objectsLinkedList[$rc->id] = $rc->getObjectsLinked();
+				}
+			}
+
+			$outputline = '<table><tr class="titre"><td class="nobordernopadding valignmiddle col-title"><div class="titre inline-block">'. $langs->transnoentities('ObjectsLinked') .'</div></td></tr></table>';
+			$outputline .= '<table><div class="div-table-responsive-no-min"><table class="liste formdoc noborder centpercent"><tbody>';
+			$outputline .= '<tr class="liste_titre">';
+			$outputline .= '<td class="float">'. $langs->transnoentities('ObjectType') .'</td>&nbsp;';
+			$outputline .= '<td class="float">'. $langs->transnoentities('Object') .'</td>&nbsp;';
+			$outputline .= '<td class="float">'. $langs->transnoentities('Mileage') .'</td>&nbsp;';
+			$outputline .= '</tr>';
+
+			if (!empty($objectsLinkedList)) {
+				foreach ($objectsLinkedList as $subList) {
+
+					if (!empty($subList)) {
+						foreach ($subList as $key => $object_ids) {
+							switch ($key) {
+								case 'facture':
+									foreach ($object_ids as $object_id) {
+
+										$facture->fetch($object_id);
+										$facture->fetch_optionals();
+										$outputline .= '<tr>';
+
+										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td>'. $facture->getNomUrl() .'</td>';
+										$outputline .= '<td>'.  $facture->array_options['options_mileage'] .'</td>';
+										$outputline .= '</tr>';
+									}
+								break;
+								case 'facturedet':
+									foreach ($object_ids as $object_id) {
+
+										$facturedet->fetch($object_id);
+										$facturedet->fetch_optionals();
+										$facture->fetch($facturedet->fk_facture);
+										$outputline .= '<tr>';
+
+										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td>'. $facture->getNomUrl() .'</td>';
+										$outputline .= '<td>'.  $facturedet->array_options['options_mileage'] .'</td>';
+										$outputline .= '</tr>';
+									}
+								break;
+								case 'propal':
+									foreach ($object_ids as $object_id) {
+
+										$propal->fetch($object_id);
+										$propal->fetch_optionals();
+										$outputline .= '<tr>';
+
+										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td>'. $propal->getNomUrl() .'</td>';
+										$outputline .= '<td>'.  $propal->array_options['options_mileage'] .'</td>';
+										$outputline .= '</tr>';
+									}
+								break;
+								case 'propaldet':
+									foreach ($object_ids as $object_id) {
+
+										$propaldet->fetch($object_id);
+										$propaldet->fetch_optionals();
+										$propal->fetch($propaldet->fk_propal);
+										$outputline .= '<tr>';
+
+										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td>'. $propal->getNomUrl() .'</td>';
+										$outputline .= '<td>'.  $propaldet->array_options['options_mileage'] .'</td>';
+										$outputline .= '</tr>';
+									}
+								break;
+								case 'commande':
+									foreach ($object_ids as $object_id) {
+
+										$commande->fetch($object_id);
+										$commande->fetch_optionals();
+										$outputline .= '<tr>';
+
+										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td>'. $commande->getNomUrl() .'</td>';
+										$outputline .= '<td>'.  $commande->array_options['options_mileage'] .'</td>';
+										$outputline .= '</tr>';
+									}
+								break;
+								case 'commandedet':
+									foreach ($object_ids as $object_id) {
+
+										$commandedet->fetch($object_id);
+										$commandedet->fetch_optionals();
+										$commande->fetch($commandedet->fk_commande);
+										$outputline .= '<tr>';
+
+										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td>'. $commande->getNomUrl() .'</td>';
+										$outputline .= '<td>'.  $commandedet->array_options['options_mileage'] .'</td>';
+										$outputline .= '</tr>';
+									}
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			$outputline .= '</tbody></table></div>';
+			?>
+			<script>
+				jQuery('.fiche .tabBar .fichecenter').append(<?php echo json_encode($outputline) ?>)
+			</script>
+			<?php
 		}
+
 
 		if (true) {
 			$this->results   = array('myreturn' => 999);
@@ -388,7 +520,6 @@ class ActionsDoliCar
 		}
 	}
 
-
 	/**
 	 * Overloading the doMassActions function : replacing the parent's function with the one below
 	 *
@@ -421,7 +552,6 @@ class ActionsDoliCar
 		}
 	}
 
-
 	/**
 	 * Overloading the addMoreMassActions function : replacing the parent's function with the one below
 	 *
@@ -450,8 +580,6 @@ class ActionsDoliCar
 			return -1;
 		}
 	}
-
-
 
 	/**
 	 * Execute action
