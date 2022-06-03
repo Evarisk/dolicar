@@ -75,6 +75,7 @@ class modDoliCar extends DolibarrModules
 				'invoicecard',
 				'propalcard',
 				'ordercard',
+				'productlotcard',
 				'registrationcertificatefrcard'
 			),
 			'moduleforexternal' => 0,
@@ -118,10 +119,7 @@ class modDoliCar extends DolibarrModules
 
 		// Array to add new pages in new tabs
 		$this->tabs = array();
-		// Example:
-		$this->tabs[]    = array('data' => 'invoice:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=invoice');
-		$this->tabs[]    = array('data' => 'order:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=order');
-		$this->tabs[]    = array('data' => 'propal:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=propal');
+		$this->tabs[] = array('data' => 'productlot:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot');
 
 		// Dictionaries
 		$this->dictionaries = array();

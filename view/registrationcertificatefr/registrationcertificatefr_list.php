@@ -151,34 +151,13 @@ if (!$sortorder) {
 
 if (!empty($fromtype)) {
 	switch ($fromtype) {
-		case 'project' :
-			$objectLinked = new Project($db);
-			$prehead = 'project_prepare_head';
-			break;
-		case 'product' :
-			$objectLinked = new Product($db);
-			$prehead = 'product_prepare_head';
-			break;
-		case 'productbatch' :
+		case 'productlot' :
 			$objectLinked = new Productlot($db);
 			$prehead = 'productlot_prepare_head';
-			break;
-		case 'project_task' :
-			$objectLinked = new Task($db);
-			$prehead = 'task_prepare_head';
-			break;
-		case 'societe' :
-			$objectLinked = new Societe($db);
-			$prehead = 'societe_prepare_head';
-			break;
-		case 'invoice' :
-			$objectLinked = new Facture($db);
-			$prehead = 'facture_prepare_head';
 			break;
 	}
 	$objectLinked->fetch($fromid);
 	$head = $prehead($objectLinked);
-	$linkedObjectsArray = array('sheet', 'user');
 }
 
 // Initialize array of search criterias
@@ -193,7 +172,13 @@ foreach ($object->fields as $key => $val) {
 		$search[$key.'_dtend'] = dol_mktime(23, 59, 59, GETPOST('search_'.$key.'_dtendmonth', 'int'), GETPOST('search_'.$key.'_dtendday', 'int'), GETPOST('search_'.$key.'_dtendyear', 'int'));
 	}
 }
-
+if(!empty($fromtype)) {
+	switch ($fromtype) {
+		case 'productlot':
+			$search['fk_lot'] = $fromid;
+			break;
+	}
+}
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array();
 foreach ($object->fields as $key => $val) {
@@ -293,8 +278,6 @@ if (empty($reshook)) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 }
 
-
-
 /*
  * View
  */
@@ -308,7 +291,6 @@ $help_url = '';
 $title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("RegistrationCertificateFrs"));
 $morejs = array();
 $morecss = array();
-
 
 // Build and execute select
 // --------------------------------------------------------------------
@@ -378,31 +360,6 @@ $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListWhere', $parameters, $object); // Note that $action and $object may have been modified by hook
 $sql .= $hookmanager->resPrint;
 
-/* If a group by is required
-$sql .= " GROUP BY ";
-foreach($object->fields as $key => $val) {
-	$sql .= "t.".$key.", ";
-}
-// Add fields from extrafields
-if (!empty($extrafields->attributes[$object->table_element]['label'])) {
-	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
-		$sql .= ($extrafields->attributes[$object->table_element]['type'][$key] != 'separate' ? "ef.".$key.', ' : '');
-	}
-}
-// Add where from hooks
-$parameters = array();
-$reshook = $hookmanager->executeHooks('printFieldListGroupBy', $parameters, $object);    // Note that $action and $object may have been modified by hook
-$sql .= $hookmanager->resPrint;
-$sql = preg_replace('/,\s*$/', '', $sql);
-*/
-
-// Add HAVING from hooks
-/*
-$parameters = array();
-$reshook = $hookmanager->executeHooks('printFieldListHaving', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPrint;
-*/
-
 // Count total nb of records
 $nbtotalofrecords = '';
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
@@ -441,7 +398,6 @@ if (!$resql) {
 
 $num = $db->num_rows($resql);
 
-
 // Direct jump if only one record found
 if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $search_all && !$page) {
 	$obj = $db->fetch_object($resql);
@@ -455,7 +411,14 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 // --------------------------------------------------------------------
 
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
+if (!empty($fromtype)) {
+	print dol_get_fiche_head($head, 'registrationcertificatefr', $langs->trans("Control"), -1, $objectLinked->picto);
+	dol_banner_tab($objectLinked, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+}
 
+if ($fromid) {
+	print '<div class="underbanner clearboth"></div>';
+}
 // Example : Adding jquery code
 // print '<script type="text/javascript">
 // jQuery(document).ready(function() {
@@ -516,7 +479,9 @@ if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'pr
 }
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
-print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+$extraparams = $fromtype && $fromid ? '?fromtype=' . $fromtype . '&fromid=' . $fromid : '';
+
+print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].$extraparams.'">'."\n";
 if ($optioncss != '') {
 	print '<input type="hidden" name="optioncss" value="'.$optioncss.'">';
 }
