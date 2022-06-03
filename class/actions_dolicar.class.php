@@ -117,69 +117,21 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').append(<?php echo json_encode($outputline) ; ?>)
 					jQuery('#extrafield_lines_area_create').hide()
 					jQuery('#extrafield_lines_area_edit').hide()
-					let rows = jQuery('.valuefieldlinecreate.facturedet_extras_dolicar_data')
-					let mileage = ''
-					rows.each((i, obj) => {
-						if ( $(obj).find('.facturedet_extras_dolicar_data').text().match(/mileage:/)) {
-							mileage = <?php echo json_encode($langs->transnoentities('Mileage') . ' : ') ?> + $(obj).find('.facturedet_extras_dolicar_data').text().split(/mileage:/)[1].split(/}/)[0]
-							$(obj).text(mileage)
-						} else {
-							$(obj).hide()
-						}
-					})
+
 					//Add getNomUrl
 					jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
-			}
-
-			if ( GETPOST('action') != 'create' && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
-
-				global $user;
-				require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
-
-				$facture = new Facture($db);
-				$facture->fetch(GETPOST('facid') ?: GETPOST('id'));
-				$facture->fetch_optionals();
-
-				if (empty($facture->array_options["options_dolicar_data"])) {
-
-					require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-					require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-
-					$registrationcertificatefr = new RegistrationCertificateFr($db);
-					$registrationcertificatefr->fetch($facture->array_options['options_registrationcertificatefr']);
-
-					$product = new Product($db);
-					$product->fetch($registrationcertificatefr->d3_vehicle_model);
-
-					$productlot = new ProductLot($db);
-					$productlot->fetch($registrationcertificatefr->fk_lot);
-
-					$dolicar_data = array(
-						'registration_number' => $registrationcertificatefr->a_registration_number,
-						'vehicle_model' => $product->ref,
-						'mileage' => $productlot->array_options['options_mileage']
-					);
-
-					$dolicar_data_json = json_encode($dolicar_data);
-					$facture->array_options["options_dolicar_data"] = $dolicar_data_json;
-					$facture->update($user);
-				}
-
-				$decoded_json = json_decode($facture->array_options['options_dolicar_data']);
-
-				$output = '<tr><td>'.$langs->trans('Mileage').'</td><td colspan="2">';
-				$output .= $decoded_json->mileage;
-				$output .= '</td></tr>';
-
+			} elseif (GETPOST('action') == 'create'){
 				?>
 				<script>
-					jQuery('.facture_extras_registrationcertificatefr').parent().parent().append(<?php echo json_encode($output)?>)
+					jQuery('.facture_extras_vehicle_model').hide()
+					jQuery('.facture_extras_registration_number').hide()
 				</script>
 				<?php
 			}
+
 		} else if ($parameters['currentcontext'] == 'propalcard') {
 
 			if ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'addline' || GETPOST('action') == 'update_extras' || GETPOST('action') != 'create') && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
@@ -203,72 +155,21 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_create').find('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').append(<?php echo json_encode($outputline) ; ?>)
 					jQuery('#extrafield_lines_area_create').hide()
 					jQuery('#extrafield_lines_area_edit').hide()
-					let rows = jQuery('.valuefieldlinecreate.propaldet_extras_dolicar_data')
-					let mileage = ''
-					rows.each((i, obj) => {
-						if ( $(obj).find('.propaldet_extras_dolicar_data').text().match(/mileage:/)) {
-							mileage = <?php echo json_encode($langs->transnoentities('Mileage') . ' : ') ?> + $(obj).find('.propaldet_extras_dolicar_data').text().split(/mileage:/)[1].split(/}/)[0]
-							$(obj).text(mileage)
-						} else {
-							$(obj).hide()
-						}
-					})
+
 					//Add getNomUrl
 					jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 					jQuery('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
-			}
-
-			if ( GETPOST('action') != 'create' && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
-
-				global $user;
-				require_once __DIR__ . '/../../../comm/propal/class/propal.class.php';
-
-
-				$propal = new Propal($db);
-				$propal->fetch(GETPOST('facid') ?: GETPOST('id'));
-				$propal->fetch_optionals();
-
-				if (empty($propal->array_options["options_dolicar_data"])) {
-
-					require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-					require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-
-					$registrationcertificatefr = new RegistrationCertificateFr($db);
-					$registrationcertificatefr->fetch($propal->array_options['options_registrationcertificatefr']);
-
-					$product = new Product($db);
-					$product->fetch($registrationcertificatefr->d3_vehicle_model);
-
-					$productlot = new ProductLot($db);
-					$productlot->fetch($registrationcertificatefr->fk_lot);
-
-					$dolicar_data = array(
-						'registration_number' => $registrationcertificatefr->a_registration_number,
-						'vehicle_model' => $product->ref,
-						'mileage' => $productlot->array_options['options_mileage']
-					);
-
-					$dolicar_data_json = json_encode($dolicar_data);
-					$propal->array_options["options_dolicar_data"] = $dolicar_data_json;
-					$propal->update($user);
-				}
-
-				$decoded_json = json_decode($propal->array_options['options_dolicar_data']);
-
-				$output = '<tr><td>'.$langs->trans('Mileage').'</td><td colspan="2">';
-				$output .= $decoded_json->mileage;
-				$output .= '</td></tr>';
-
+			} elseif (GETPOST('action') == 'create'){
 				?>
 				<script>
-					jQuery('.propal_extras_registrationcertificatefr').parent().parent().append(<?php echo json_encode($output)?>)
+					jQuery('.propal_extras_vehicle_model').hide()
+					jQuery('.propal_extras_registration_number').hide()
 				</script>
 				<?php
 			}
 		} else if ($parameters['currentcontext'] == 'ordercard') {
-
 			if ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'addline' || GETPOST('action') == 'update_extras' || GETPOST('action') != 'create') && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
 
 				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
@@ -290,67 +191,17 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_create').find('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').append(<?php echo json_encode($outputline) ; ?>)
 					jQuery('#extrafield_lines_area_create').hide()
 					jQuery('#extrafield_lines_area_edit').hide()
-					let rows = jQuery('.valuefieldlinecreate.commandedet_extras_dolicar_data')
-					let mileage = ''
-					rows.each((i, obj) => {
-						if ( $(obj).find('.commandedet_extras_dolicar_data').text().match(/mileage:/)) {
-							mileage = <?php echo json_encode($langs->transnoentities('Mileage') . ' : ') ?> + $(obj).find('.commandedet_extras_dolicar_data').text().split(/mileage:/)[1].split(/}/)[0]
-							$(obj).text(mileage)
-						} else {
-							$(obj).hide()
-						}
-					})
+
 					//Add getNomUrl
 					jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 					jQuery('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
-			}
-
-			if ( GETPOST('action') != 'create' && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
-
-				global $user;
-				require_once __DIR__ . '/../../../commande/class/commande.class.php';
-
-
-				$commande = new Commande($db);
-				$commande->fetch(GETPOST('facid') ?: GETPOST('id'));
-				$commande->fetch_optionals();
-
-				if (empty($commande->array_options["options_dolicar_data"])) {
-
-					require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-					require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-
-					$registrationcertificatefr = new RegistrationCertificateFr($db);
-					$registrationcertificatefr->fetch($commande->array_options['options_registrationcertificatefr']);
-
-					$product = new Product($db);
-					$product->fetch($registrationcertificatefr->d3_vehicle_model);
-
-					$productlot = new ProductLot($db);
-					$productlot->fetch($registrationcertificatefr->fk_lot);
-
-					$dolicar_data = array(
-						'registration_number' => $registrationcertificatefr->a_registration_number,
-						'vehicle_model' => $product->ref,
-						'mileage' => $productlot->array_options['options_mileage']
-					);
-
-					$dolicar_data_json = json_encode($dolicar_data);
-					$commande->array_options["options_dolicar_data"] = $dolicar_data_json;
-					$commande->update($user);
-				}
-
-				$decoded_json = json_decode($commande->array_options['options_dolicar_data']);
-
-				$output = '<tr><td>'.$langs->trans('Mileage').'</td><td colspan="2">';
-				$output .= $decoded_json->mileage;
-				$output .= '</td></tr>';
-
+			} elseif (GETPOST('action') == 'create'){
 				?>
 				<script>
-					jQuery('.commande_extras_registrationcertificatefr').parent().parent().append(<?php echo json_encode($output)?>)
+					jQuery('.commande_extras_vehicle_model').hide()
+					jQuery('.commande_extras_registration_number').hide()
 				</script>
 				<?php
 			}
@@ -396,6 +247,23 @@ class ActionsDoliCar
 				return -1;
 			}
 		} else if ($parameters['currentcontext'] == 'invoicecard') {
+
+			if ( GETPOST('action') == 'add') {
+
+				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+
+				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
+				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
+
+				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
+
+				$product = new Product($this->db);
+				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+
+				$_POST['options_vehicle_model'] = $product->ref;
+			}
+
 			if (GETPOST('action') == 'addline') {
 
 				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
@@ -410,16 +278,38 @@ class ActionsDoliCar
 				$productlot = new ProductLot($this->db);
 				$productlot->fetch($registrationcertificatefr->fk_lot);
 
-				$dolicar_data = array(
-					'registration_number' => $registrationcertificatefr->a_registration_number,
-					'vehicle_model' => $product->ref,
-					'mileage' => $productlot->array_options['options_mileage']
-				);
+				$_POST['options_registrationcertificatefr'] = $object->array_options['options_registrationcertificatefr'];
+				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
+				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_mileage'] = $object->array_options['options_mileage'];
+			}
 
-				$dolicar_data_json = json_encode($dolicar_data);
-				$_POST['options_dolicar_data'] = $dolicar_data_json;
+			if (GETPOST('action') == 'update_extras' && GETPOST('attribute') == 'mileage') {
+				$mileage = GETPOST('options_mileage');
+				foreach ($object->lines as $line) {
+					if ($object->array_options['options_registrationcertificatefr'] == $line->array_options['options_registrationcertificatefr']) {
+						$line->array_options['options_mileage'] = $mileage;
+						$line->update($user);
+					}
+				}
 			}
 		} else if ($parameters['currentcontext'] == 'propalcard') {
+			if ( GETPOST('action') == 'add') {
+
+				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+
+				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
+				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
+
+				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
+
+				$product = new Product($this->db);
+				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+
+				$_POST['options_vehicle_model'] = $product->ref;
+			}
+
 			if (GETPOST('action') == 'addline') {
 
 				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
@@ -434,16 +324,38 @@ class ActionsDoliCar
 				$productlot = new ProductLot($this->db);
 				$productlot->fetch($registrationcertificatefr->fk_lot);
 
-				$dolicar_data = array(
-					'registration_number' => $registrationcertificatefr->a_registration_number,
-					'vehicle_model' => $product->ref,
-					'mileage' => $productlot->array_options['options_mileage']
-				);
+				$_POST['options_registrationcertificatefr'] = $object->array_options['options_registrationcertificatefr'];
+				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
+				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_mileage'] = $object->array_options['options_mileage'];
+			}
 
-				$dolicar_data_json = json_encode($dolicar_data);
-				$_POST['options_dolicar_data'] = $dolicar_data_json;
+			if (GETPOST('action') == 'update_extras' && GETPOST('attribute') == 'mileage') {
+				$mileage = GETPOST('options_mileage');
+				foreach ($object->lines as $line) {
+					if ($object->array_options['options_registrationcertificatefr'] == $line->array_options['options_registrationcertificatefr']) {
+						$line->array_options['options_mileage'] = $mileage;
+						$line->update($user);
+					}
+				}
 			}
 		} else if ($parameters['currentcontext'] == 'ordercard') {
+			if ( GETPOST('action') == 'add') {
+
+				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+
+				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
+				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
+
+				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
+
+				$product = new Product($this->db);
+				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+
+				$_POST['options_vehicle_model'] = $product->ref;
+			}
+
 			if (GETPOST('action') == 'addline') {
 
 				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
@@ -458,14 +370,20 @@ class ActionsDoliCar
 				$productlot = new ProductLot($this->db);
 				$productlot->fetch($registrationcertificatefr->fk_lot);
 
-				$dolicar_data = array(
-					'registration_number' => $registrationcertificatefr->a_registration_number,
-					'vehicle_model' => $product->ref,
-					'mileage' => $productlot->array_options['options_mileage']
-				);
+				$_POST['options_registrationcertificatefr'] = $object->array_options['options_registrationcertificatefr'];
+				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
+				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_mileage'] = $object->array_options['options_mileage'];
+			}
 
-				$dolicar_data_json = json_encode($dolicar_data);
-				$_POST['options_dolicar_data'] = $dolicar_data_json;
+			if (GETPOST('action') == 'update_extras' && GETPOST('attribute') == 'mileage') {
+				$mileage = GETPOST('options_mileage');
+				foreach ($object->lines as $line) {
+					if ($object->array_options['options_registrationcertificatefr'] == $line->array_options['options_registrationcertificatefr']) {
+						$line->array_options['options_mileage'] = $mileage;
+						$line->update($user);
+					}
+				}
 			}
 		}
 	}
@@ -557,26 +475,10 @@ class ActionsDoliCar
 		|| (in_array('propalcard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_PROPALCARD))
 		|| (in_array('invoicecard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_INVOICECARD))
 		) {
-
 			$object->fetch_optionals();
-
-			$dolicar_data_decoded = json_decode($object->array_options["options_dolicar_data"]);
-
-			$object->note_public = '';
-
-			foreach($dolicar_data_decoded as $key => $data) {
-				switch ($key) {
-					case 'registration_number' :
-						$object->note_public .= $langs->transnoentities('RegistrationNumber') . ' : ' . $data . '<br>';
-						break;
-					case 'vehicle_model' :
-						$object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . $data . '<br>';
-						break;
-					case 'mileage' :
-						$object->note_public .=$langs->transnoentities('Mileage') . ' : ' . $data . '<br>';
-						break;
-				}
-			}
+			$object->note_public = $langs->transnoentities('RegistrationNumber') . ' : ' . $object->array_options['options_registration_number'] . '<br>';
+			$object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . $object->array_options['options_vehicle_model'] . '<br>';
+			$object->note_public .= $langs->transnoentities('Mileage') . ' : ' . $object->array_options['options_mileage'] . '<br>';
 		}
 
 		return $ret;

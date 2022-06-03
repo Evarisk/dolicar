@@ -245,27 +245,37 @@ class modDoliCar extends DolibarrModules
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
-		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1010, '', 'product_lot', 0, 0, '', '', 1, '', 1);
+//		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1010, '', 'product_lot', 0, 0, '', '', 1, '', 1);
 
 		// Facture extrafields
-		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'facture', 0, 0, '', '', '', '', 0);
-		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'facturedet', 0, 0, '', '', '', '', 1);
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1040, '', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'facture', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1060, '', 'facturedet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1050, '255', 'facture', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1060, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1050, '255', 'facture', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
 
 		// Propale extrafields
-		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'propal', 0, 0, '', '', '', '', 0);
-		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'propaldet', 0, 0, '', '', '', '', 1);
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1040, '', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-
+		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'propal', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1060, '', 'propaldet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1050, '255', 'propal', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1060, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1050, '255', 'propal', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
 
 		// Commande extrafields
-		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'commande', 0, 0, '', '', '', '', 0);
-		$extrafields->addExtraField('dolicar_data', $langs->transnoentities("DolicarData"), 'varchar', 1020, '2048', 'commandedet', 0, 0, '', '', '', '', 1);
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1040, '', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-
+		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'commande', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1060, '', 'commandedet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1050, '255', 'commande', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1060, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1050, '255', 'commande', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
 
 		// Permissions
 		$this->remove($options);
