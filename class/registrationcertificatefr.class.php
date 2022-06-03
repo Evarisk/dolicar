@@ -313,7 +313,7 @@ class RegistrationCertificateFr extends CommonObject
 	{
 		$this->ref = $this->a_registration_number;
 		$this->status = 1;
-		if (empty($this->fk_lot)) {
+		if (empty($this->fk_lot) || $this->fk_lot == -1) {
 			$lot_id = createDefaultLot($this->d3_vehicle_model);
 			$this->fk_lot = $lot_id;
 		}
