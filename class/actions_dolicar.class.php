@@ -250,26 +250,26 @@ class ActionsDoliCar
 										$facture->fetch_optionals();
 										$outputline .= '<tr>';
 
-										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 										$outputline .= '<td>'. $facture->getNomUrl() .'</td>';
 										$outputline .= '<td>'.  $facture->array_options['options_mileage'] .'</td>';
 										$outputline .= '</tr>';
 									}
 								break;
-								case 'facturedet':
-									foreach ($object_ids as $object_id) {
-
-										$facturedet->fetch($object_id);
-										$facturedet->fetch_optionals();
-										$facture->fetch($facturedet->fk_facture);
-										$outputline .= '<tr>';
-
-										$outputline .= '<td class="nowrap">'. $key .'</td>';
-										$outputline .= '<td>'. $facture->getNomUrl() .'</td>';
-										$outputline .= '<td>'.  $facturedet->array_options['options_mileage'] .'</td>';
-										$outputline .= '</tr>';
-									}
-								break;
+//								case 'facturedet':
+//									foreach ($object_ids as $object_id) {
+//
+//										$facturedet->fetch($object_id);
+//										$facturedet->fetch_optionals();
+//										$facture->fetch($facturedet->fk_facture);
+//										$outputline .= '<tr>';
+//
+//										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
+//										$outputline .= '<td>'. $facture->getNomUrl() .'</td>';
+//										$outputline .= '<td>'.  $facturedet->array_options['options_mileage'] .'</td>';
+//										$outputline .= '</tr>';
+//									}
+//								break;
 								case 'propal':
 									foreach ($object_ids as $object_id) {
 
@@ -277,26 +277,26 @@ class ActionsDoliCar
 										$propal->fetch_optionals();
 										$outputline .= '<tr>';
 
-										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 										$outputline .= '<td>'. $propal->getNomUrl() .'</td>';
 										$outputline .= '<td>'.  $propal->array_options['options_mileage'] .'</td>';
 										$outputline .= '</tr>';
 									}
 								break;
-								case 'propaldet':
-									foreach ($object_ids as $object_id) {
-
-										$propaldet->fetch($object_id);
-										$propaldet->fetch_optionals();
-										$propal->fetch($propaldet->fk_propal);
-										$outputline .= '<tr>';
-
-										$outputline .= '<td class="nowrap">'. $key .'</td>';
-										$outputline .= '<td>'. $propal->getNomUrl() .'</td>';
-										$outputline .= '<td>'.  $propaldet->array_options['options_mileage'] .'</td>';
-										$outputline .= '</tr>';
-									}
-								break;
+//								case 'propaldet':
+//									foreach ($object_ids as $object_id) {
+//
+//										$propaldet->fetch($object_id);
+//										$propaldet->fetch_optionals();
+//										$propal->fetch($propaldet->fk_propal);
+//										$outputline .= '<tr>';
+//
+//										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
+//										$outputline .= '<td>'. $propal->getNomUrl() .'</td>';
+//										$outputline .= '<td>'.  $propaldet->array_options['options_mileage'] .'</td>';
+//										$outputline .= '</tr>';
+//									}
+//								break;
 								case 'commande':
 									foreach ($object_ids as $object_id) {
 
@@ -304,26 +304,26 @@ class ActionsDoliCar
 										$commande->fetch_optionals();
 										$outputline .= '<tr>';
 
-										$outputline .= '<td class="nowrap">'. $key .'</td>';
+										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 										$outputline .= '<td>'. $commande->getNomUrl() .'</td>';
 										$outputline .= '<td>'.  $commande->array_options['options_mileage'] .'</td>';
 										$outputline .= '</tr>';
 									}
 								break;
-								case 'commandedet':
-									foreach ($object_ids as $object_id) {
-
-										$commandedet->fetch($object_id);
-										$commandedet->fetch_optionals();
-										$commande->fetch($commandedet->fk_commande);
-										$outputline .= '<tr>';
-
-										$outputline .= '<td class="nowrap">'. $key .'</td>';
-										$outputline .= '<td>'. $commande->getNomUrl() .'</td>';
-										$outputline .= '<td>'.  $commandedet->array_options['options_mileage'] .'</td>';
-										$outputline .= '</tr>';
-									}
-								break;
+//								case 'commandedet':
+//									foreach ($object_ids as $object_id) {
+//
+//										$commandedet->fetch($object_id);
+//										$commandedet->fetch_optionals();
+//										$commande->fetch($commandedet->fk_commande);
+//										$outputline .= '<tr>';
+//
+//										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
+//										$outputline .= '<td>'. $commande->getNomUrl() .'</td>';
+//										$outputline .= '<td>'.  $commandedet->array_options['options_mileage'] .'</td>';
+//										$outputline .= '</tr>';
+//									}
+//								break;
 							}
 						}
 					}

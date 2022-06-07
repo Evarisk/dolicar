@@ -141,3 +141,6 @@ Batch = Numéro de châssis
 ClientWarehouse = Entrepôt client
 ClientVehicle = Véhicule client
 DefaultVehicle = Véhicule par défaut
+facture = Facture
+commande = Commande
+propal = Proposition commerciale
