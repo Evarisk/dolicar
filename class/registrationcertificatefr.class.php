@@ -1249,6 +1249,7 @@ class RegistrationCertificateFr extends CommonObject
 		$sql .= " FROM ".MAIN_DB_PREFIX."facture_extrafields as t";
 		$sql .= " WHERE 1 = 1";
 		$sql .= ' AND registrationcertificatefr =' . $this->id;
+		$sql .= ' ORDER BY t.mileage DESC';
 
 		$resql = $this->db->query($sql);
 
@@ -1293,6 +1294,7 @@ class RegistrationCertificateFr extends CommonObject
 		$sql .= " FROM ".MAIN_DB_PREFIX."facturedet_extrafields as t";
 		$sql .= " WHERE 1 = 1";
 		$sql .= ' AND registrationcertificatefr =' . $this->id;
+		$sql .= ' ORDER BY t.mileage DESC';
 
 		$resql = $this->db->query($sql);
 
@@ -1336,6 +1338,7 @@ class RegistrationCertificateFr extends CommonObject
 		$sql .= " FROM ".MAIN_DB_PREFIX."propal_extrafields as t";
 		$sql .= " WHERE 1 = 1";
 		$sql .= ' AND registrationcertificatefr =' . $this->id;
+		$sql .= ' ORDER BY t.mileage DESC';
 
 		$resql = $this->db->query($sql);
 
@@ -1379,6 +1382,7 @@ class RegistrationCertificateFr extends CommonObject
 		$sql .= " FROM ".MAIN_DB_PREFIX."propaldet_extrafields as t";
 		$sql .= " WHERE 1 = 1";
 		$sql .= ' AND registrationcertificatefr =' . $this->id;
+		$sql .= ' ORDER BY t.mileage DESC';
 
 		$resql = $this->db->query($sql);
 
@@ -1422,6 +1426,7 @@ class RegistrationCertificateFr extends CommonObject
 		$sql .= " FROM ".MAIN_DB_PREFIX."commande_extrafields as t";
 		$sql .= " WHERE 1 = 1";
 		$sql .= ' AND registrationcertificatefr =' . $this->id;
+		$sql .= ' ORDER BY t.mileage DESC';
 
 		$resql = $this->db->query($sql);
 
@@ -1465,6 +1470,7 @@ class RegistrationCertificateFr extends CommonObject
 		$sql .= " FROM ".MAIN_DB_PREFIX."commandedet_extrafields as t";
 		$sql .= " WHERE 1 = 1";
 		$sql .= ' AND registrationcertificatefr =' . $this->id;
+		$sql .= ' ORDER BY t.mileage DESC';
 
 		$resql = $this->db->query($sql);
 

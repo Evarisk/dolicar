@@ -235,6 +235,7 @@ class ActionsDoliCar
 			$outputline .= '<td class="float">'. $langs->transnoentities('ObjectType') .'</td>&nbsp;';
 			$outputline .= '<td class="float">'. $langs->transnoentities('Object') .'</td>&nbsp;';
 			$outputline .= '<td class="float">'. $langs->transnoentities('Mileage') .'</td>&nbsp;';
+			$outputline .= '<td class="float">'. $langs->transnoentities('Date') .'</td>&nbsp;';
 			$outputline .= '</tr>';
 
 			if (!empty($objectsLinkedList)) {
@@ -253,6 +254,7 @@ class ActionsDoliCar
 										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 										$outputline .= '<td>'. $facture->getNomUrl() .'</td>';
 										$outputline .= '<td>'.  $facture->array_options['options_mileage'] .'</td>';
+										$outputline .= '<td>'.  dol_print_date($facture->date_creation, 'dayhour') .'</td>';
 										$outputline .= '</tr>';
 									}
 								break;
@@ -267,6 +269,7 @@ class ActionsDoliCar
 //										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 //										$outputline .= '<td>'. $facture->getNomUrl() .'</td>';
 //										$outputline .= '<td>'.  $facturedet->array_options['options_mileage'] .'</td>';
+//										$outputline .= '<td>'.  dol_print_date($facturedet->date_creation, 'dayhour') .'</td>';
 //										$outputline .= '</tr>';
 //									}
 //								break;
@@ -280,6 +283,7 @@ class ActionsDoliCar
 										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 										$outputline .= '<td>'. $propal->getNomUrl() .'</td>';
 										$outputline .= '<td>'.  $propal->array_options['options_mileage'] .'</td>';
+										$outputline .= '<td>'.  dol_print_date($propal->date_creation, 'dayhour') .'</td>';
 										$outputline .= '</tr>';
 									}
 								break;
@@ -294,6 +298,7 @@ class ActionsDoliCar
 //										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 //										$outputline .= '<td>'. $propal->getNomUrl() .'</td>';
 //										$outputline .= '<td>'.  $propaldet->array_options['options_mileage'] .'</td>';
+//										$outputline .= '<td>'.  dol_print_date($propaldet->date_creation, 'dayhour') .'</td>';
 //										$outputline .= '</tr>';
 //									}
 //								break;
@@ -307,6 +312,7 @@ class ActionsDoliCar
 										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 										$outputline .= '<td>'. $commande->getNomUrl() .'</td>';
 										$outputline .= '<td>'.  $commande->array_options['options_mileage'] .'</td>';
+										$outputline .= '<td>'.  dol_print_date($commande->date_creation, 'dayhour') .'</td>';
 										$outputline .= '</tr>';
 									}
 								break;
@@ -321,6 +327,7 @@ class ActionsDoliCar
 //										$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
 //										$outputline .= '<td>'. $commande->getNomUrl() .'</td>';
 //										$outputline .= '<td>'.  $commandedet->array_options['options_mileage'] .'</td>';
+//										$outputline .= '<td>'.  dol_print_date($commandedet->date_creation, 'dayhour') .'</td>';
 //										$outputline .= '</tr>';
 //									}
 //								break;
