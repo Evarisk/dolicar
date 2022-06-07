@@ -91,7 +91,7 @@ class modDoliCar extends DolibarrModules
 		// A condition to hide module
 		$this->hidden = false;
 		// List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
-		$this->depends = array('modProduct', 'modProductBatch', 'modFacture', 'modPropale', 'modCommande');
+		$this->depends = array('modProduct', 'modProductBatch', 'modFacture', 'modPropale', 'modCommande', 'modCategorie');
 		$this->requiredby = array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
 		$this->conflictwith = array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 
@@ -110,6 +110,9 @@ class modDoliCar extends DolibarrModules
 			1 => array('DOLICAR_DEFAULT_PROJECT', 'integer', 0, '', 0, 'current'),
 			2 => array('DOLICAR_DEFAULT_WAREHOUSE', 'integer', 0, '', 0, 'current'),
 			3 => array('DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'),
+			4 => array('DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'),
+			5 => array('DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'),
+			6 => array('DOLICAR_VEHICLE_TAG', 'integer', 0, '', 0, 'current'),
 		);
 
 		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -353,7 +356,7 @@ class modDoliCar extends DolibarrModules
 		}
 
 		//Categorie
-		if ($conf->global->DOLICAR__TAGS_SET == 0) {
+		if ($conf->global->DOLICAR_TAGS_SET == 0) {
 			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
 			$tag = new Categorie($this->db);
@@ -382,11 +385,35 @@ class modDoliCar extends DolibarrModules
 				$tag->type = 'product';
 				$tag->fk_parent = $result;
 				$tag->create($user);
+
+				dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $result, 'integer', 0, '', $conf->entity);
+
 			}
 
 			dolibarr_set_const($this->db, 'DOLICAR_TAGS_SET', 1, 'integer', 0, '', $conf->entity);
 		}
 
+		// Default product
+
+		if ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 0) {
+			require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+			$product = new Product($this->db);
+
+			$product->ref = $langs->transnoentities('DefaultVehicle');
+			$product->label = $langs->transnoentities('DefaultVehicle');
+			$result = $product->create($user);
+
+			if ($result > 0) {
+				dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE', $result, 'integer', 0, '', $conf->entity);
+				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+				$tag = new Categorie($this->db);
+				$tag->fetch($conf->global->DOLICAR_VEHICLE_TAG);
+				$tag->add_type($product, 'product');
+
+			}
+			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
+		}
 		return $this->_init($sql, $options);
 	}
 

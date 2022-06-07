@@ -140,3 +140,4 @@ CommercialVehicle = Utilitaire
 Batch = Numéro de châssis
 ClientWarehouse = Entrepôt client
 ClientVehicle = Véhicule client
+DefaultVehicle = Véhicule par défaut
