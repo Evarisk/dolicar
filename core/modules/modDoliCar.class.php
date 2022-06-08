@@ -127,7 +127,45 @@ class modDoliCar extends DolibarrModules
 		$this->tabs[] = array('data' => 'product:+registrationcertificatefr:RegistrationCertificateFr:dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product');
 
 		// Dictionaries
-		$this->dictionaries = array();
+		$this->dictionaries = array(
+			'langs' => 'dolicar@dolicar',
+			// List of tables we want to see into dictonnary editor
+			'tabname' => array(
+				MAIN_DB_PREFIX . "c_car_brands",
+			),
+			// Label of tables
+			'tablib' => array(
+				"CarBrands"
+			),
+			// Request to select fields
+			'tabsql' => array(
+				'SELECT f.rowid as rowid, f.ref, f.label, f.description, f.active FROM ' . MAIN_DB_PREFIX . 'c_car_brands as f',
+			),
+			// Sort order
+			'tabsqlsort' => array(
+				"label ASC"
+			),
+			// List of fields (result of select to show dictionary)
+			'tabfield' => array(
+				"ref,label,description"
+			),
+			// List of fields (list of fields to edit a record)
+			'tabfieldvalue' => array(
+				"ref,label,description"
+			),
+			// List of fields (list of fields for insert)
+			'tabfieldinsert' => array(
+				"ref,label,description"
+			),
+			// Name of columns with primary key (try to always name it 'rowid')
+			'tabrowid' => array(
+				"rowid"
+			),
+			// Condition to show each dictionary
+			'tabcond' => array(
+				$conf->dolicar->enabled
+			)
+		);
 
 		// Boxes/Widgets
 		// Add here list of php file(s) stored in dolicar/core/boxes that contains a class to show a widget.

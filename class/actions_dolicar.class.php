@@ -336,11 +336,22 @@ class ActionsDoliCar
 					}
 				}
 			}
-
 			$outputline .= '</tbody></table></div>';
 			?>
 			<script>
 				jQuery('.fiche .tabBar .fichecenter').append(<?php echo json_encode($outputline) ?>)
+			</script>
+			<?php
+		} else if ($parameters['currentcontext'] == 'registrationcertificatefrcard') {
+			$registration_certificate = new RegistrationCertificateFr($db);
+			GETPOST('id') > 0 ? $registration_certificate->fetch(GETPOST('id')) : '';
+
+			$output = dolicar_select_dictionary('d1_vehicle_brand', 'c_car_brands', 'label', 'label', GETPOST('d1_vehicle_brand') ?:(GETPOST('id') > 0 ? $registration_certificate->d1_vehicle_brand : ''), 1);
+			print ajax_combobox('selectd1_vehicle_brand');
+			?>
+			<script>
+				//jQuery('.field_d1_vehicle_brand .valuefieldcreate').html(<?php //echo 'salut'?>//)
+				jQuery('.field_d1_vehicle_brand .valuefieldcreate').html(<?php echo json_encode($output) ?>)
 			</script>
 			<?php
 		}
