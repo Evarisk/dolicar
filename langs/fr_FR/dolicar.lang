@@ -124,6 +124,7 @@ RegistrationCertificateFrs = Cartes grises
 ObjectsLinked = Objets liés
 ObjectType = Type d'objet
 Object = Objet
+DefaultBrand = Marque par défaut
 
 #
 # Other

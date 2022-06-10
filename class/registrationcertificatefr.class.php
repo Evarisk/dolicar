@@ -311,7 +311,7 @@ class RegistrationCertificateFr extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
-		global $conf;
+		global $conf, $langs;
 		$this->ref = $this->a_registration_number;
 		$this->status = 1;
 		if (empty($this->fk_lot) || $this->fk_lot == -1) {
@@ -321,11 +321,11 @@ class RegistrationCertificateFr extends CommonObject
 		if (empty($this->d3_vehicle_model) || $this->d3_vehicle_model == -1) {
 			$this->d3_vehicle_model = $conf->global->DOLICAR_DEFAULT_VEHICLE;
 		}
+		if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
+			$this->d1_vehicle_brand = $langs->trans('DefaultBrand');
+		}
 
-		$product = new Product($this->db);
-		$product->fetch($this->d3_vehicle_model);
-
-		$resultcreate = $this->createCommon($user, $notrigger);
+			$resultcreate = $this->createCommon($user, $notrigger);
 
 		return $resultcreate;
 	}
@@ -548,7 +548,11 @@ class RegistrationCertificateFr extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
+		global $langs;
 		$this->ref = $this->a_registration_number;
+		if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
+			$this->d1_vehicle_brand = $langs->trans('DefaultBrand');
+		}
 		return $this->updateCommon($user, $notrigger);
 	}
 
