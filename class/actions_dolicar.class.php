@@ -343,14 +343,30 @@ class ActionsDoliCar
 			</script>
 			<?php
 		} else if ($parameters['currentcontext'] == 'registrationcertificatefrcard') {
+			require_once __DIR__ . '/../../../categories/class/categorie.class.php';
+			$category = new Categorie($db);
 			$registration_certificate = new RegistrationCertificateFr($db);
 			GETPOST('id') > 0 ? $registration_certificate->fetch(GETPOST('id')) : '';
 
 			$output = dolicar_select_dictionary('d1_vehicle_brand', 'c_car_brands', 'label', 'label', GETPOST('d1_vehicle_brand') ?:(GETPOST('id') > 0 ? $registration_certificate->d1_vehicle_brand : ''), 1);
 			print ajax_combobox('selectd1_vehicle_brand');
+			$category->fetch($conf->global->DOLICAR_VEHICLE_TAG);
+			$objects_in_categ = $category->getObjectsInCateg('product');
+			$product_ids = array();
+			if (!empty($objects_in_categ)) {
+				foreach ($objects_in_categ as $object_in_categ) {
+					$product_ids[$object_in_categ->id] = $object_in_categ->id;
+				}
+			}
 			?>
 			<script>
-				//jQuery('.field_d1_vehicle_brand .valuefieldcreate').html(<?php //echo 'salut'?>//)
+				//remove products that have not the vehicle tag
+				let array_ids = <?php echo json_encode($product_ids); ?>;
+				jQuery('#d3_vehicle_model').find('option').each(function() {
+					if ($(this).attr('value') != -1) {
+						Object.values(array_ids).includes($(this).attr('value')) ? console.log('oui') : $(this).remove()
+					}
+				})
 				jQuery('.field_d1_vehicle_brand .valuefieldcreate').html(<?php echo json_encode($output) ?>)
 			</script>
 			<?php

@@ -34,7 +34,7 @@ function createDefaultLot($product_id)
 
 	$productlot = new Productlot($db);
 	$productlot->fk_product = $product_id;
-	$productlot->batch = generate_random_id();
+	$productlot->batch = dolicar_generate_random_id();
 
 	$lot_id = $productlot->create($user);
 	if ($lot_id > 0) {
@@ -68,7 +68,7 @@ function createDefaultLot($product_id)
  *  @param  int 	$car 	Length of string to generate key
  *  @return string
  */
-function generate_random_id($car = 16)
+function dolicar_generate_random_id($car = 16)
 {
 	$string = "";
 	$chaine = "abcdefghijklmnopqrstuvwxyz123456789";

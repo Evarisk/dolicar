@@ -427,12 +427,11 @@ class modDoliCar extends DolibarrModules
 				dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $result, 'integer', 0, '', $conf->entity);
 
 			}
-
+			dolibarr_set_const($this->db, 'CATEGORIE_RECURSIV_ADD', 1, 'integer', 0, '', $conf->entity);
 			dolibarr_set_const($this->db, 'DOLICAR_TAGS_SET', 1, 'integer', 0, '', $conf->entity);
 		}
 
 		// Default product
-
 		if ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 0) {
 			require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 			$product = new Product($this->db);
