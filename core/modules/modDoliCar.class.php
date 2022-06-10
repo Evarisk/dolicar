@@ -247,7 +247,7 @@ class modDoliCar extends DolibarrModules
             'titre' => $langs->trans('NewRegistrationCertificateFr'),
             'mainmenu'=>'dolicar',
             'leftmenu'=>'dolicar_registrationcertificatefr',
-            'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
+            'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create&d3_vehicle_model='.$conf->global->DOLICAR_DEFAULT_VEHICLE,
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'dolicar@dolicar',
             'position'=>1100+$r,
