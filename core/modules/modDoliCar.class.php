@@ -114,6 +114,7 @@ class modDoliCar extends DolibarrModules
 			5 => array('DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'),
 			6 => array('DOLICAR_VEHICLE_TAG', 'integer', 0, '', 0, 'current'),
 			7 => array('DOLICAR_MENU_DEFAULT_VEHICLE_UPDATED', 'integer', 0, '', 0, 'current'),
+			8 => array('DOLICAR_HIDE_REGISTRATIONCERTIFICATE', 'integer', 1, '', 0, 'current'),
 		);
 
 		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -199,6 +200,14 @@ class modDoliCar extends DolibarrModules
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->delete)
 		$r++;
 
+		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
+		$this->rights[$r][1] = 'Read admin page of DoliCar'; // Permission label
+		$this->rights[$r][4] = 'adminpage';
+		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->delete)
+		$r++;
+
+		$langs->load("dolicar@dolicar");
+
 		// Main menu entries to add
 		$this->menu = array();
 		$r = 0;
@@ -260,6 +269,20 @@ class modDoliCar extends DolibarrModules
             // 0=Menu for internal users, 1=external users, 2=both
             'user'=>2
         );
+		$this->menu[$r++] = array(
+			'fk_menu' => 'fk_mainmenu=dolicar',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type' => 'left',			                // This is a Left menu entry
+			'titre' => '<i class="fas fa-cog"></i>  ' . $langs->trans('DolicarConfig'),
+			'mainmenu' => 'dolicar',
+			'leftmenu' => 'dolicarconfig',
+			'url' => '/dolicar/admin/setup.php',
+			'langs' => 'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position' => 48520 + $r,
+			'enabled' => '$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+			'perms' => '$user->rights->dolicar->adminpage->read',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
+			'target' => '',
+			'user' => 0,				                // 0=Menu for internal users, 1=external users, 2=both
+		);
 
 		/* END MODULEBUILDER LEFTMENU REGISTRATIONCERTIFICATEFR */
 	}

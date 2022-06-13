@@ -245,7 +245,56 @@ if ($action == 'create') {
 	print dol_get_fiche_end();
 
 	print $form->buttonsSaveCancel("Create");
-
+	if ($conf->global->DOLICAR_HIDE_REGISTRATIONCERTIFICATE) :
+	?>
+	<script>
+		$('.field_b_first_registration_date').hide()
+		$('.field_c1_owner_fullname').hide()
+		$('.field_c3_registration_address').hide()
+		$('.field_c4a_owner_vehicle').hide()
+		$('.field_c41_ownerNumber').hide()
+		$('.field_c41_second_owner_name').hide()
+		$('.field_d1_vehicle_brand').hide()
+		$('.field_d2_vehicle_type').hide()
+		$('.field_d21_vehicle_cnit').hide()
+		$('.field_e_vehicle_serial_number').hide()
+		$('.field_f1_techincal_ptac').hide()
+		$('.field_f2_ptac').hide()
+		$('.field_f3_ptra').hide()
+		$('.field_g_vehicle_weight').hide()
+		$('.field_g1_vehicle_empty_weight').hide()
+		$('.field_h_validity_period').hide()
+		$('.field_i_vehicle_registration_date').hide()
+		$('.field_j_vehicleCategory').hide()
+		$('.field_j1_national_type').hide()
+		$('.field_j2_european_bodywork').hide()
+		$('.field_j3_national_bodywork').hide()
+		$('.field_k_type_approval_number').hide()
+		$('.field_p1_cylinder_capacity').hide()
+		$('.field_p2_maximum_net_power').hide()
+		$('.field_p3_fuel_type').hide()
+		$('.field_p6_national_administrative_power').hide()
+		$('.field_q_power_to_weight_ratio').hide()
+		$('.field_s1_seatingCapacity').hide()
+		$('.field_s2_standing_capacity').hide()
+		$('.field_u1_stationary_noise_level').hide()
+		$('.field_u2_motor_speed').hide()
+		$('.field_v7_co2_emission').hide()
+		$('.field_v9_environmental_category').hide()
+		$('.field_x1_first_technical_inspection_date').hide()
+		$('.field_y1_regional_tax').hide()
+		$('.field_y2_professional_tax').hide()
+		$('.field_y3_ecological_tax').hide()
+		$('.field_y4_management_tax').hide()
+		$('.field_y5_forwarding_expenses_tax').hide()
+		$('.field_y6_total_price_vehicle_registration').hide()
+		$('.field_z1_specific_details').hide()
+		$('.field_z2_specific_details').hide()
+		$('.field_z3_specific_details').hide()
+		$('.field_z4_specific_details').hide()
+	</script>
+	<?php
+	endif;
 	print '</form>';
 
 	//dol_set_focus('input[name="ref"]');

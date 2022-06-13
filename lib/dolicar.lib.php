@@ -52,6 +52,11 @@ function dolicarAdminPrepareHead()
 	$head[$h][2] = 'about';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/dolicar/admin/registrationcertificate.php", 1);
+	$head[$h][1] = $langs->trans("RegistrationCertificate");
+	$head[$h][2] = 'registrationcertificate';
+	$h++;
+
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
 	//$this->tabs = array(
