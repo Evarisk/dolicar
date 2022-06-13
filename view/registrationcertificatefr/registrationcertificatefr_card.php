@@ -245,7 +245,7 @@ if ($action == 'create') {
 	print dol_get_fiche_end();
 
 	print $form->buttonsSaveCancel("Create");
-	if ($conf->global->DOLICAR_HIDE_REGISTRATIONCERTIFICATE) :
+	if ($conf->global->DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS) :
 	?>
 	<script>
 		$('.field_b_first_registration_date').hide()

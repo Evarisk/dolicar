@@ -281,7 +281,31 @@ print '<td class="center">';
 print  $langs->trans("RegistrationCertificateShowFieldsDescription");
 print '</td>';
 print '<td class="center">';
-print ajax_constantonoff('DOLICAR_HIDE_REGISTRATIONCERTIFICATE');
+print ajax_constantonoff('DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS');
+print '</td>';
+print '</tr>';
+print '</form>';
+
+print '</table>';
+print '</div>';
+
+print load_fiche_titre($langs->trans("ProductBatch"), '', '');
+
+print '<div class="div-table-responsive-no-min">';
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->trans("Parameters") . '</td>';
+print '<td class="center">' . $langs->trans("ShortInfo") . '</td>';
+print '<td class="center">' . $langs->trans("Status") . '</td>';
+print '</tr>';
+
+// Show logo for company
+print '<tr class="oddeven"><td>' . $langs->trans("HideObjectDetsDolicarDetails") . '</td>';
+print '<td class="center">';
+print  $langs->trans("HideObjectDetsDolicarDetailsDescription");
+print '</td>';
+print '<td class="center">';
+print ajax_constantonoff('DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS');
 print '</td>';
 print '</tr>';
 print '</form>';

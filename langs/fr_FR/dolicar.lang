@@ -128,6 +128,8 @@ Object = Objet
 DefaultBrand = Marque par défaut
 RegistrationCertificateShowFields = Cacher les champs de la carte grise
 RegistrationCertificateShowFieldsDescription = Cette option permet de cacher/afficher une partie des champs de la carte grise
+HideObjectDetsDolicarDetails = Cacher le détail de Dolicar des lignes d'objets
+HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
 
 #
 # Other
@@ -149,3 +151,4 @@ DefaultVehicle = Véhicule par défaut
 facture = Facture
 commande = Commande
 propal = Proposition commerciale
+ProductBatch = Numéro de lot/série

@@ -123,6 +123,16 @@ class ActionsDoliCar
 					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
+				if ($conf->global->DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS) :
+					?>
+					<script>
+						jQuery('.facturedet_extras_registrationcertificatefr').hide()
+						jQuery('.facturedet_extras_mileage').hide()
+						jQuery('.facturedet_extras_vehicle_model').hide()
+						jQuery('.facturedet_extras_registration_number').hide()
+					</script>
+				<?php
+				endif;
 			} elseif (GETPOST('action') == 'create'){
 				?>
 				<script>
@@ -161,6 +171,16 @@ class ActionsDoliCar
 					jQuery('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
+				if ($conf->global->DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS) :
+					?>
+					<script>
+						jQuery('.propaldet_extras_registrationcertificatefr').hide()
+						jQuery('.propaldet_extras_mileage').hide()
+						jQuery('.propaldet_extras_vehicle_model').hide()
+						jQuery('.propaldet_extras_registration_number').hide()
+					</script>
+				<?php
+				endif;
 			} elseif (GETPOST('action') == 'create'){
 				?>
 				<script>
@@ -197,6 +217,16 @@ class ActionsDoliCar
 					jQuery('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
+				if ($conf->global->DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS) :
+					?>
+					<script>
+						jQuery('.commandedet_extras_registrationcertificatefr').hide()
+						jQuery('.commandedet_extras_mileage').hide()
+						jQuery('.commandedet_extras_vehicle_model').hide()
+						jQuery('.commandedet_extras_registration_number').hide()
+					</script>
+					<?php
+				endif;
 			} elseif (GETPOST('action') == 'create'){
 				?>
 				<script>
@@ -205,7 +235,8 @@ class ActionsDoliCar
 				</script>
 				<?php
 			}
-		} else if ($parameters['currentcontext'] == 'productlotcard' && GETPOST('action') != 'create') {
+		} else
+			if ($parameters['currentcontext'] == 'productlotcard' && GETPOST('action') != 'create') {
 			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 			require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
 			require_once __DIR__ . '/../../../commande/class/commande.class.php';
