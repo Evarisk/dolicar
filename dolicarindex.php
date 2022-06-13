@@ -95,6 +95,7 @@ llxHeader("", $langs->trans("DoliCarArea"));
 
 print load_fiche_titre($langs->trans("DoliCarArea"), '', 'dolicar.png@dolicar');
 
+require_once __DIR__ . '/core/tpl/dolicar_preinstall.php';
 print '<div class="fichecenter"><div class="fichethirdleft">';
 
 

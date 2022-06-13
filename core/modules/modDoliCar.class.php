@@ -113,6 +113,7 @@ class modDoliCar extends DolibarrModules
 			4 => array('DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'),
 			5 => array('DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'),
 			6 => array('DOLICAR_VEHICLE_TAG', 'integer', 0, '', 0, 'current'),
+			7 => array('DOLICAR_MENU_DEFAULT_VEHICLE_UPDATED', 'integer', 0, '', 0, 'current'),
 		);
 
 		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -447,7 +448,6 @@ class modDoliCar extends DolibarrModules
 				$tag = new Categorie($this->db);
 				$tag->fetch($conf->global->DOLICAR_VEHICLE_TAG);
 				$tag->add_type($product, 'product');
-
 			}
 			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
 		}
