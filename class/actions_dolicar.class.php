@@ -205,7 +205,7 @@ class ActionsDoliCar
 				</script>
 				<?php
 			}
-		} else if ($parameters['currentcontext'] == 'productlotcard') {
+		} else if ($parameters['currentcontext'] == 'productlotcard' && GETPOST('action') != 'create') {
 			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 			require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
 			require_once __DIR__ . '/../../../commande/class/commande.class.php';
