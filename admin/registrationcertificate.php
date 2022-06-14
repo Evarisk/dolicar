@@ -253,7 +253,7 @@ if ($action == 'updateMask') {
 $form = new Form($db);
 
 $help_url = '';
-$page_name = "DoliCarSetup";
+$page_name = $langs->transnoentities('DolicarSetup');
 
 llxHeader('', $langs->trans($page_name), $help_url);
 
