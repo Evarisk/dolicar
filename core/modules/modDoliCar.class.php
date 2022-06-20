@@ -460,6 +460,7 @@ class modDoliCar extends DolibarrModules
 		}
 
 		if ($conf->global->DOLICAR_VEHICLE_TAG == 0) {
+			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 			$tag = new Categorie($this->db);
 			$tag->rechercher(0, $langs->transnoentities('Car'), 'product');
 			if ($tag->id > 0) {
