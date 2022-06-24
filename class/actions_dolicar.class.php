@@ -393,7 +393,7 @@ class ActionsDoliCar
 			<script>
 				//remove products that have not the vehicle tag
 				let array_ids = <?php echo json_encode($product_ids); ?>;
-				jQuery('#d3_vehicle_model').find('option').each(function() {
+				jQuery('#fk_product').find('option').each(function() {
 					if ($(this).attr('value') != -1) {
 						Object.values(array_ids).includes($(this).attr('value')) ? console.log('oui') : $(this).remove()
 					}
@@ -456,7 +456,7 @@ class ActionsDoliCar
 				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
 
 				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+				$product->fetch($registrationcertificatefr->fk_product);
 
 				$_POST['options_vehicle_model'] = $product->ref;
 			}
@@ -470,7 +470,7 @@ class ActionsDoliCar
 				$registrationcertificatefr->fetch($object->array_options['options_registrationcertificatefr']);
 
 				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+				$product->fetch($registrationcertificatefr->fk_product);
 
 				$productlot = new ProductLot($this->db);
 				$productlot->fetch($registrationcertificatefr->fk_lot);
@@ -502,7 +502,7 @@ class ActionsDoliCar
 				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
 
 				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+				$product->fetch($registrationcertificatefr->fk_product);
 
 				$_POST['options_vehicle_model'] = $product->ref;
 			}
@@ -516,7 +516,7 @@ class ActionsDoliCar
 				$registrationcertificatefr->fetch($object->array_options['options_registrationcertificatefr']);
 
 				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+				$product->fetch($registrationcertificatefr->fk_product);
 
 				$productlot = new ProductLot($this->db);
 				$productlot->fetch($registrationcertificatefr->fk_lot);
@@ -548,7 +548,7 @@ class ActionsDoliCar
 				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
 
 				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+				$product->fetch($registrationcertificatefr->fk_product);
 
 				$_POST['options_vehicle_model'] = $product->ref;
 			}
@@ -562,7 +562,7 @@ class ActionsDoliCar
 				$registrationcertificatefr->fetch($object->array_options['options_registrationcertificatefr']);
 
 				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->d3_vehicle_model);
+				$product->fetch($registrationcertificatefr->fk_product);
 
 				$productlot = new ProductLot($this->db);
 				$productlot->fetch($registrationcertificatefr->fk_lot);

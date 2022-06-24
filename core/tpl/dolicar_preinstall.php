@@ -5,7 +5,7 @@ if ($conf->global->DOLICAR_MENU_DEFAULT_VEHICLE_UPDATED == 0) {
 
 	require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 
-	$url = '/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create&d3_vehicle_model=' . $conf->global->DOLICAR_DEFAULT_VEHICLE;
+	$url = '/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create&fk_product=' . $conf->global->DOLICAR_DEFAULT_VEHICLE;
 
 	$sql = "UPDATE ".MAIN_DB_PREFIX."menu SET";
 	$sql .= " url='".$db->escape($url)."'";
