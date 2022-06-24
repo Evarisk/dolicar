@@ -119,10 +119,16 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
+				if (GETPOST('action') != 'edit_extras') {
+					?>
+					<script>
+						jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+					</script>
+					<?php
+				}
 				if ($conf->global->DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS) :
 					?>
 					<script>
@@ -167,10 +173,16 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 					jQuery('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
+				if (GETPOST('action') != 'edit_extras') {
+					?>
+					<script>
+						jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+					</script>
+					<?php
+				}
 				if ($conf->global->DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS) :
 					?>
 					<script>
@@ -213,10 +225,16 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 					jQuery('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
 				</script>
 				<?php
+                if (GETPOST('action') != 'edit_extras') {
+					?>
+					<script>
+						jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+					</script>
+					<?php
+				}
 				if ($conf->global->DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS) :
 					?>
 					<script>
