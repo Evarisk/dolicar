@@ -686,8 +686,11 @@ class ActionsDoliCar
 		|| (in_array('propalcard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_PROPALCARD))
 		|| (in_array('invoicecard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_INVOICECARD))
 		) {
+			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+			$registrationcertificatefr = new RegistrationCertificateFr($this->db);
+			$registrationcertificatefr->fetch($object->array_options['options_registrationcertificatefr']);
 			$object->fetch_optionals();
-			$object->note_public = $langs->transnoentities('RegistrationNumber') . ' : ' . $object->array_options['options_registration_number'] . '<br>';
+			$object->note_public = $langs->transnoentities('RegistrationNumber') . ' : ' . $registrationcertificatefr->a_registration_number . '<br>';
 			$object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . $object->array_options['options_vehicle_model'] . '<br>';
 			$object->note_public .= $langs->transnoentities('Mileage') . ' : ' . $object->array_options['options_mileage'] . '<br>';
 		}
