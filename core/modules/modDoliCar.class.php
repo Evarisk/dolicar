@@ -333,8 +333,8 @@ class modDoliCar extends DolibarrModules
 
 		// Propaldet extrafields
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1040, '', 'propaldet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1050, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("ProductLinked"), 'varchar', 1040, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'propaldet', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propaldet', 0, 0, '', '', 1, '', 0);
 
 		// Commande extrafields
