@@ -253,8 +253,7 @@ class ActionsDoliCar
 				</script>
 				<?php
 			}
-		} else
-			if ($parameters['currentcontext'] == 'productlotcard' && GETPOST('action') != 'create') {
+		} else if ($parameters['currentcontext'] == 'productlotcard' && GETPOST('action') != 'create') {
 			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 			require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
 			require_once __DIR__ . '/../../../commande/class/commande.class.php';
@@ -306,7 +305,7 @@ class ActionsDoliCar
 										$outputline .= '<td>'.  dol_print_date($facture->date_creation, 'dayhour') .'</td>';
 										$outputline .= '</tr>';
 									}
-								break;
+									break;
 //								case 'facturedet':
 //									foreach ($object_ids as $object_id) {
 //
@@ -335,7 +334,7 @@ class ActionsDoliCar
 										$outputline .= '<td>'.  dol_print_date($propal->date_creation, 'dayhour') .'</td>';
 										$outputline .= '</tr>';
 									}
-								break;
+									break;
 //								case 'propaldet':
 //									foreach ($object_ids as $object_id) {
 //
@@ -364,7 +363,7 @@ class ActionsDoliCar
 										$outputline .= '<td>'.  dol_print_date($commande->date_creation, 'dayhour') .'</td>';
 										$outputline .= '</tr>';
 									}
-								break;
+									break;
 //								case 'commandedet':
 //									foreach ($object_ids as $object_id) {
 //
@@ -420,16 +419,6 @@ class ActionsDoliCar
 			</script>
 			<?php
 		}
-
-
-		if (true) {
-			$this->results   = array('myreturn' => 999);
-			$this->resprints = 'A text to show';
-			return 0; // or return 1 to replace standard code
-		} else {
-			$this->errors[] = 'Error message';
-			return -1;
-		}
 	}
 
 	/**
@@ -471,12 +460,8 @@ class ActionsDoliCar
 				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
 				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
 
-				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
-
-				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->fk_product);
-
-				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
+				$_POST['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
 			}
 
 			if (GETPOST('action') == 'addline') {
@@ -494,8 +479,8 @@ class ActionsDoliCar
 				$productlot->fetch($registrationcertificatefr->fk_lot);
 
 				$_POST['options_registrationcertificatefr'] = $object->array_options['options_registrationcertificatefr'];
-				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
-				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_registration_number'] = $object->array_options['options_registration_number'];
+				$_POST['options_vehicle_model'] = $object->array_options['options_vehicle_model'];
 				$_POST['options_mileage'] = $object->array_options['options_mileage'];
 			}
 
@@ -517,12 +502,8 @@ class ActionsDoliCar
 				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
 				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
 
-				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
-
-				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->fk_product);
-
-				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
+				$_POST['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
 			}
 
 			if (GETPOST('action') == 'addline') {
@@ -540,8 +521,8 @@ class ActionsDoliCar
 				$productlot->fetch($registrationcertificatefr->fk_lot);
 
 				$_POST['options_registrationcertificatefr'] = $object->array_options['options_registrationcertificatefr'];
-				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
-				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_registration_number'] = $object->array_options['options_registration_number'];
+				$_POST['options_vehicle_model'] = $object->array_options['options_vehicle_model'];
 				$_POST['options_mileage'] = $object->array_options['options_mileage'];
 			}
 
@@ -563,12 +544,8 @@ class ActionsDoliCar
 				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
 				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
 
-				$_POST['options_registration_number']  = $registrationcertificatefr->a_registration_number;
-
-				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->fk_product);
-
-				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
+				$_POST['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
 			}
 
 			if (GETPOST('action') == 'addline') {
@@ -586,8 +563,8 @@ class ActionsDoliCar
 				$productlot->fetch($registrationcertificatefr->fk_lot);
 
 				$_POST['options_registrationcertificatefr'] = $object->array_options['options_registrationcertificatefr'];
-				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
-				$_POST['options_vehicle_model'] = $product->ref;
+				$_POST['options_registration_number'] = $object->array_options['options_registration_number'];
+				$_POST['options_vehicle_model'] = $object->array_options['options_vehicle_model'];
 				$_POST['options_mileage'] = $object->array_options['options_mileage'];
 			}
 
@@ -690,7 +667,7 @@ class ActionsDoliCar
 			$registrationcertificatefr = new RegistrationCertificateFr($this->db);
 			$registrationcertificatefr->fetch($object->array_options['options_registrationcertificatefr']);
 			$object->fetch_optionals();
-			$object->note_public = $langs->transnoentities('RegistrationNumber') . ' : ' . $registrationcertificatefr->a_registration_number . '<br>';
+			$object->note_public = $langs->transnoentities('RegistrationNumber') . ' : ' . $object->array_options['options_registration_number'] . '<br>';
 			$object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . $object->array_options['options_vehicle_model'] . '<br>';
 			$object->note_public .= $langs->transnoentities('Mileage') . ' : ' . $object->array_options['options_mileage'] . '<br>';
 		}

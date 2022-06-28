@@ -183,10 +183,11 @@ class RegistrationCertificateFr extends CommonObject
 	public $f1_techincal_ptac;
 	public $f2_ptac;
 	public $c4a_owner_vehicle;
-	public $d2_vehicle_type;
-	public $d21_vehicle_cnit;
 	public $fk_product;
 	public $d1_vehicle_brand;
+	public $d2_vehicle_type;
+	public $d21_vehicle_cnit;
+	public $d3_vehicle_model;
 	public $f3_ptra;
 	public $g_vehicle_weight;
 	public $g1_vehicle_empty_weight;
