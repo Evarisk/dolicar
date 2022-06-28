@@ -130,7 +130,7 @@ RegistrationCertificateShowFields = Cacher les champs de la carte grise
 RegistrationCertificateShowFieldsDescription = Cette option permet de cacher/afficher une partie des champs de la carte grise
 HideObjectDetsDolicarDetails = Cacher le détail de Dolicar des lignes d'objets
 HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
-ProductLinked = Produit lié
+LinkedProduct = Produit lié
 
 
 

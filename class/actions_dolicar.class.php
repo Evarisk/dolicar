@@ -100,6 +100,7 @@ class ActionsDoliCar
 
 				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 				require_once __DIR__ . '/../../../product/stock/class/productlot.class.php';
+				require_once __DIR__ . '/../../../product/class/product.class.php';
 				require_once __DIR__ . '/../../../compta/facture/class/facture.class.php';
 
 				$facture = new Facture($db);
@@ -110,6 +111,12 @@ class ActionsDoliCar
 				$registration_certificate->fetch($registration_certificate_id);
 
 				$outputline =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
+
+				$product = new Product($db);
+
+				if ($facture->array_options['options_linked_product'] > 0) {
+					$product->fetch($facture->array_options['options_linked_product']);
+				}
 
 				?>
 				<script>
@@ -126,6 +133,7 @@ class ActionsDoliCar
 					?>
 					<script>
 						jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+						jQuery('.facture_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl()) ?>)
 					</script>
 					<?php
 				}
@@ -154,6 +162,7 @@ class ActionsDoliCar
 
 				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 				require_once __DIR__ . '/../../../product/stock/class/productlot.class.php';
+				require_once __DIR__ . '/../../../product/class/product.class.php';
 				require_once __DIR__ . '/../../../comm/propal/class/propal.class.php';
 
 				$propal = new Propal($db);
@@ -165,6 +174,11 @@ class ActionsDoliCar
 
 				$outputline =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
 
+				$product = new Product($db);
+
+				if ($facture->array_options['options_linked_product'] > 0) {
+					$product->fetch($facture->array_options['options_linked_product']);
+				}
 				?>
 				<script>
 					jQuery('#extrafield_lines_area_create').find('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
@@ -180,6 +194,7 @@ class ActionsDoliCar
 					?>
 					<script>
 						jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+						jQuery('.propal_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl()) ?>)
 					</script>
 					<?php
 				}
@@ -206,6 +221,7 @@ class ActionsDoliCar
 
 				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 				require_once __DIR__ . '/../../../product/stock/class/productlot.class.php';
+				require_once __DIR__ . '/../../../product/class/product.class.php';
 				require_once __DIR__ . '/../../../commande/class/commande.class.php';
 
 				$commande = new Commande($db);
@@ -217,6 +233,11 @@ class ActionsDoliCar
 
 				$outputline =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
 
+				$product = new Product($db);
+
+				if ($facture->array_options['options_linked_product'] > 0) {
+					$product->fetch($facture->array_options['options_linked_product']);
+				}
 				?>
 				<script>
 					jQuery('#extrafield_lines_area_create').find('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
@@ -232,6 +253,7 @@ class ActionsDoliCar
 					?>
 					<script>
 						jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+						jQuery('.commande_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl()) ?>)
 					</script>
 					<?php
 				}
