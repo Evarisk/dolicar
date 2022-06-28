@@ -450,7 +450,7 @@ class ActionsDoliCar
 				$this->errors[] = 'Error message';
 				return -1;
 			}
-		} else if ($parameters['currentcontext'] == 'invoicecard') {
+		} else if ($parameters['currentcontext'] == 'invoicecard' || $parameters['currentcontext'] == 'propalcard' || $parameters['currentcontext'] == 'commandecard') {
 
 			if ( GETPOST('action') == 'add') {
 
@@ -484,96 +484,27 @@ class ActionsDoliCar
 				$_POST['options_mileage'] = $object->array_options['options_mileage'];
 			}
 
-			if (GETPOST('action') == 'update_extras' && GETPOST('attribute') == 'mileage') {
-				$mileage = GETPOST('options_mileage');
-				foreach ($object->lines as $line) {
-					if ($object->array_options['options_registrationcertificatefr'] == $line->array_options['options_registrationcertificatefr']) {
-						$line->array_options['options_mileage'] = $mileage;
-						$line->update($user);
-					}
+			if (GETPOST('action') == 'update_extras') {
+				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+
+				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
+
+				if (GETPOST('attribute') == 'registrationcertificatefr') {
+
+					$registrationcertificatefr_id = GETPOST('options_registrationcertificatefr');
+					$registrationcertificatefr->fetch($registrationcertificatefr_id);
+					$object->array_options['options_registration_number'] = $registrationcertificatefr->a_registration_number;
+					$object->array_options['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
+					$object->update($user);
+
 				}
-			}
-		} else if ($parameters['currentcontext'] == 'propalcard') {
-			if ( GETPOST('action') == 'add') {
-
-				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-
-				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
-				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
-
-				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
-				$_POST['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
-			}
-
-			if (GETPOST('action') == 'addline') {
-
-				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-
-				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
-				$registrationcertificatefr->fetch($object->array_options['options_registrationcertificatefr']);
-
-				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->fk_product);
-
-				$productlot = new ProductLot($this->db);
-				$productlot->fetch($registrationcertificatefr->fk_lot);
-
-				$_POST['options_registrationcertificatefr'] = $object->array_options['options_registrationcertificatefr'];
-				$_POST['options_registration_number'] = $object->array_options['options_registration_number'];
-				$_POST['options_vehicle_model'] = $object->array_options['options_vehicle_model'];
-				$_POST['options_mileage'] = $object->array_options['options_mileage'];
-			}
-
-			if (GETPOST('action') == 'update_extras' && GETPOST('attribute') == 'mileage') {
-				$mileage = GETPOST('options_mileage');
-				foreach ($object->lines as $line) {
-					if ($object->array_options['options_registrationcertificatefr'] == $line->array_options['options_registrationcertificatefr']) {
-						$line->array_options['options_mileage'] = $mileage;
-						$line->update($user);
-					}
-				}
-			}
-		} else if ($parameters['currentcontext'] == 'ordercard') {
-			if ( GETPOST('action') == 'add') {
-
-				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-
-				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
-				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
-
-				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
-				$_POST['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
-			}
-
-			if (GETPOST('action') == 'addline') {
-
-				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
-
-				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
-				$registrationcertificatefr->fetch($object->array_options['options_registrationcertificatefr']);
-
-				$product = new Product($this->db);
-				$product->fetch($registrationcertificatefr->fk_product);
-
-				$productlot = new ProductLot($this->db);
-				$productlot->fetch($registrationcertificatefr->fk_lot);
-
-				$_POST['options_registrationcertificatefr'] = $object->array_options['options_registrationcertificatefr'];
-				$_POST['options_registration_number'] = $object->array_options['options_registration_number'];
-				$_POST['options_vehicle_model'] = $object->array_options['options_vehicle_model'];
-				$_POST['options_mileage'] = $object->array_options['options_mileage'];
-			}
-
-			if (GETPOST('action') == 'update_extras' && GETPOST('attribute') == 'mileage') {
-				$mileage = GETPOST('options_mileage');
-				foreach ($object->lines as $line) {
-					if ($object->array_options['options_registrationcertificatefr'] == $line->array_options['options_registrationcertificatefr']) {
-						$line->array_options['options_mileage'] = $mileage;
-						$line->update($user);
+				if (GETPOST('attribute') == 'mileage') {
+					$mileage = GETPOST('options_mileage');
+					foreach ($object->lines as $line) {
+						if ($object->array_options['options_registrationcertificatefr'] == $line->array_options['options_registrationcertificatefr']) {
+							$line->array_options['options_mileage'] = $mileage;
+							$line->update($user);
+						}
 					}
 				}
 			}
