@@ -139,7 +139,7 @@ class ActionsDoliCar
 					</script>
 				<?php
 				endif;
-			} elseif (GETPOST('action') == 'create'){
+			} elseif (GETPOST('action') == 'create' || (empty(GETPOST('facid')) && empty(GETPOST('id')))){
 				?>
 				<script>
 					jQuery('.facture_extras_vehicle_model').hide()
@@ -193,7 +193,7 @@ class ActionsDoliCar
 					</script>
 				<?php
 				endif;
-			} elseif (GETPOST('action') == 'create'){
+			} elseif (GETPOST('action') == 'create' || (empty(GETPOST('facid')) && empty(GETPOST('id')))){
 				?>
 				<script>
 					jQuery('.propal_extras_vehicle_model').hide()
@@ -245,7 +245,7 @@ class ActionsDoliCar
 					</script>
 					<?php
 				endif;
-			} elseif (GETPOST('action') == 'create'){
+			} elseif (GETPOST('action') == 'create' || (empty(GETPOST('facid')) && empty(GETPOST('id')))){
 				?>
 				<script>
 					jQuery('.commande_extras_vehicle_model').hide()
