@@ -125,7 +125,7 @@ class RegistrationCertificateFr extends CommonObject
 		'd2_vehicle_type' => array('type'=>'varchar(128)', 'label'=>'VehicleType', 'enabled'=>'1', 'position'=>160, 'notnull'=>0, 'visible'=>3,),
 		'd21_vehicle_cnit' => array('type'=>'varchar(128)', 'label'=>'VehicleCNIT', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>3,),
 		'd3_vehicle_model' => array('type'=>'varchar(128)', 'label'=>'VehicleModel', 'enabled'=>'1', 'position'=>175, 'notnull'=>0, 'visible'=>3,),
-		'fk_product' => array('type'=>'integer:Product:product/class/product.class.php:1', 'label'=>'ProductLinked', 'enabled'=>'1', 'position'=>13, 'notnull'=>0, 'visible'=>3, 'css'=>'maxwidth500'),
+		'fk_product' => array('type'=>'integer:Product:product/class/product.class.php:1', 'label'=>'LinkedProduct', 'enabled'=>'1', 'position'=>13, 'notnull'=>0, 'visible'=>3, 'css'=>'maxwidth500'),
 		'd1_vehicle_brand' => array('type'=>'varchar(128)', 'label'=>'VehicleBrand', 'enabled'=>'1', 'position'=>150, 'notnull'=>0, 'visible'=>3,),
 		'f3_ptra' => array('type'=>'integer', 'label'=>'PTRA', 'enabled'=>'1', 'position'=>220, 'notnull'=>0, 'visible'=>3,),
 		'g_vehicle_weight' => array('type'=>'integer', 'label'=>'VehicleWeight', 'enabled'=>'1', 'position'=>230, 'notnull'=>0, 'visible'=>3,),

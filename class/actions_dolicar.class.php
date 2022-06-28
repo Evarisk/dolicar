@@ -438,6 +438,9 @@ class ActionsDoliCar
 					}
 				})
 				jQuery('.field_d1_vehicle_brand .valuefieldcreate').html(<?php echo json_encode($output) ?>)
+				let newProductHref = jQuery('.field_fk_product .valuefieldcreate').find('.butActionNew').attr('href')
+				let mainCategoryId = <?php echo json_encode($conf->global->DOLICAR_VEHICLE_TAG); ?>;
+				jQuery('#fk_product').closest('.valuefieldcreate').find('.butActionNew').attr('href',newProductHref + '&categories[]=' + mainCategoryId)
 			</script>
 			<?php
 		}
