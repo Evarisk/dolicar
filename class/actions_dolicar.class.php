@@ -494,6 +494,7 @@ class ActionsDoliCar
 
 				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
 				$_POST['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
+				$_POST['options_linked_product'] = $registrationcertificatefr->fk_product;
 			}
 
 			if (GETPOST('action') == 'addline') {
@@ -527,6 +528,7 @@ class ActionsDoliCar
 					$registrationcertificatefr->fetch($registrationcertificatefr_id);
 					$object->array_options['options_registration_number'] = $registrationcertificatefr->a_registration_number;
 					$object->array_options['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
+					$object->array_options['options_linked_product'] = $registrationcertificatefr->fk_product;
 					$object->update($user);
 
 				}
