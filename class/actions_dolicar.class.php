@@ -144,6 +144,7 @@ class ActionsDoliCar
 						jQuery('.facturedet_extras_mileage').hide()
 						jQuery('.facturedet_extras_vehicle_model').hide()
 						jQuery('.facturedet_extras_registration_number').hide()
+						jQuery('.facturedet_extras_linked_product').hide()
 					</script>
 				<?php
 				endif;
@@ -152,6 +153,7 @@ class ActionsDoliCar
 				<script>
 					jQuery('.facture_extras_vehicle_model').hide()
 					jQuery('.facture_extras_registration_number').hide()
+					jQuery('.facture_extras_linked_product').hide()
 				</script>
 				<?php
 			}
@@ -205,6 +207,8 @@ class ActionsDoliCar
 						jQuery('.propaldet_extras_mileage').hide()
 						jQuery('.propaldet_extras_vehicle_model').hide()
 						jQuery('.propaldet_extras_registration_number').hide()
+						jQuery('.propaldet_extras_linked_product').hide()
+
 					</script>
 				<?php
 				endif;
@@ -213,6 +217,7 @@ class ActionsDoliCar
 				<script>
 					jQuery('.propal_extras_vehicle_model').hide()
 					jQuery('.propal_extras_registration_number').hide()
+					jQuery('.propal_extras_linked_product').hide()
 				</script>
 				<?php
 			}
@@ -264,6 +269,7 @@ class ActionsDoliCar
 						jQuery('.commandedet_extras_mileage').hide()
 						jQuery('.commandedet_extras_vehicle_model').hide()
 						jQuery('.commandedet_extras_registration_number').hide()
+						jQuery('.commandedet_extras_linked_product').hide()
 					</script>
 					<?php
 				endif;
@@ -272,6 +278,7 @@ class ActionsDoliCar
 				<script>
 					jQuery('.commande_extras_vehicle_model').hide()
 					jQuery('.commande_extras_registration_number').hide()
+					jQuery('.commande_extras_linked_product').hide()
 				</script>
 				<?php
 			}
