@@ -462,10 +462,10 @@ class modDoliCar extends DolibarrModules
 		}
 
 		//Categorie
-		if ($conf->global->DOLICAR_TAGS_SET == 0) {
-			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+		require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+		$tag = new Categorie($this->db);
 
-			$tag = new Categorie($this->db);
+		if ($conf->global->DOLICAR_TAGS_SET == 0) {
 
 			$tag->label = $langs->transnoentities('Vehicle');
 			$tag->type = 'product';
@@ -529,6 +529,36 @@ class modDoliCar extends DolibarrModules
 				$tag->add_type($product, 'product');
 			}
 			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
+		}
+
+		//Car brands tag
+		dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG_SET', 0, 'integer', 0, '', $conf->entity);
+
+		if ($conf->global->DOLICAR_CAR_BRANDS_TAG_SET == 0) {
+
+			$tag->label = $langs->transnoentities('Brands');
+			$tag->type = 'product';
+			$result = $tag->create($user);
+
+
+			if ($result > 0) {
+
+				$filename = DOL_DOCUMENT_ROOT . '/custom/dolicar/core/car_brands.txt';
+				$file = fopen( $filename, "r" );
+				if ($file) {
+					while (($line = fgets($file)) !== false) {
+						$tag->label = $langs->transnoentities($line);
+						$tag->type = 'product';
+						$tag->fk_parent = $result;
+						$tag->create($user);
+
+					}
+					fclose($file);
+				}
+
+				dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG', $result, 'integer', 0, '', $conf->entity);
+				dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG_SET', 1, 'integer', 0, '', $conf->entity);
+			}
 		}
 		return $this->_init($sql, $options);
 	}

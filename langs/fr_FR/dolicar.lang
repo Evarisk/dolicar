@@ -140,6 +140,7 @@ LinkedProduct = Produit lié
 
 # Data - Donnée
 Settings = Réglages
+Brands = Marques
 Vehicle = Véhicule
 Mileage = Kilométrage
 ProductLotMileageModifyTrigger = Modification du kilométrage
