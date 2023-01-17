@@ -59,6 +59,8 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
+require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
 dol_include_once('/dolicar/class/registrationcertificatefr.class.php');
 dol_include_once('/dolicar/lib/dolicar_registrationcertificatefr.lib.php');
 
@@ -71,6 +73,7 @@ $langs->loadLangs(array("dolicar@dolicar", "other"));
 $id = GETPOST('id', 'int');
 $ref = GETPOST('ref', 'alpha');
 $action = GETPOST('action', 'aZ09');
+$subaction = GETPOST('subaction', 'aZ09');
 $confirm = GETPOST('confirm', 'alpha');
 $cancel = GETPOST('cancel', 'aZ09');
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'registrationcertificatefrcard'; // To manage different context of search
@@ -80,6 +83,8 @@ $lineid   = GETPOST('lineid', 'int');
 
 // Initialize technical objects
 $object = new RegistrationCertificateFr($db);
+$product = new Product($db);
+$category = new Categorie($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->dolicar->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('registrationcertificatefrcard', 'globalcard')); // Note that conf->hooks_modules contains array
@@ -156,6 +161,26 @@ if (empty($reshook)) {
 		}
 	}
 
+	if ($subaction == 'getProductBrand') {
+		$data = json_decode(file_get_contents('php://input'), true);
+
+		$productId = $data['productId'];
+
+		if (!empty($productId) && $productId > 0) {
+			$product->fetch($productId);
+			$categories = $product->getCategoriesCommon('product');
+
+			if (is_array($categories) && !empty($categories)) {
+				foreach($categories as $categoryId) {
+					$category->fetch($categoryId);
+					if ($category->fk_parent == $conf->global->DOLICAR_CAR_BRANDS_TAG) {
+						$brand_name = $category->label;
+					}
+				}
+			}
+		}
+	}
+
 	$triggermodname = 'DOLICAR_REGISTRATIONCERTIFICATEFR_MODIFY'; // Name of trigger action code to execute when we modify record
 
 	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
@@ -214,7 +239,7 @@ if ($action == 'create') {
 
 	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("RegistrationCertificateFr")), '', 'object_'.$object->picto);
 
-	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
+	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="registrationcertificatefr_create">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="add">';
 	if ($backtopage) {
@@ -225,7 +250,7 @@ if ($action == 'create') {
 	}
 
 	print '<input hidden class="lot-creation-url" value="'. DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create&backtopage='. $_SERVER['PHP_SELF'] . '?action=create&fk_lot=__ID__'.'">';
-//	print '<input hidden class="lot-creation-url" value="'. DOL_URL_ROOT . '/product/stock/product.php?id='. '__PRODUCTID__' .'&action=correction&backtopage='. $_SERVER['PHP_SELF'] . '?action=create&fk_lot=__ID__'.'">';
+	print '<input hidden class="car-brand" value="'.$brand_name.'">';
 
 	print dol_get_fiche_head(array(), '');
 

@@ -504,7 +504,6 @@ class modDoliCar extends DolibarrModules
 
 		if ($conf->global->DOLICAR_VEHICLE_TAG == 0) {
 			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-			$tag = new Categorie($this->db);
 			$tag->rechercher(0, $langs->transnoentities('Car'), 'product');
 			if ($tag->id > 0) {
 				dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $tag->id, 'integer', 0, '', $conf->entity);
@@ -524,7 +523,6 @@ class modDoliCar extends DolibarrModules
 				dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE', $result, 'integer', 0, '', $conf->entity);
 				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
-				$tag = new Categorie($this->db);
 				$tag->fetch($conf->global->DOLICAR_VEHICLE_TAG);
 				$tag->add_type($product, 'product');
 			}

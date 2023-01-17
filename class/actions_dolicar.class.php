@@ -425,7 +425,6 @@ class ActionsDoliCar
 			$registration_certificate = new RegistrationCertificateFr($db);
 			GETPOST('id') > 0 ? $registration_certificate->fetch(GETPOST('id')) : '';
 
-			$output = dolicar_select_dictionary('d1_vehicle_brand', 'c_car_brands', 'label', 'label', GETPOST('d1_vehicle_brand') ?:(GETPOST('id') > 0 ? $registration_certificate->d1_vehicle_brand : ''), 1);
 			print ajax_combobox('selectd1_vehicle_brand');
 			$category->fetch($conf->global->DOLICAR_VEHICLE_TAG);
 			$objects_in_categ = $category->getObjectsInCateg('product');
@@ -435,6 +434,10 @@ class ActionsDoliCar
 					$product_ids[$object_in_categ->id] = $object_in_categ->id;
 				}
 			}
+			$category->fetch($conf->global->DOLICAR_CAR_BRANDS_TAG);
+			$brands = $category->get_filles();
+
+
 			?>
 			<script>
 				//remove products that have not the vehicle tag
@@ -444,10 +447,10 @@ class ActionsDoliCar
 						Object.values(array_ids).includes($(this).attr('value')) ? console.log('oui') : $(this).remove()
 					}
 				})
-				jQuery('.field_d1_vehicle_brand .valuefieldcreate').html(<?php echo json_encode($output) ?>)
 				let newProductHref = jQuery('.field_fk_product .valuefieldcreate').find('.butActionNew').attr('href')
 				let mainCategoryId = <?php echo json_encode($conf->global->DOLICAR_VEHICLE_TAG); ?>;
 				jQuery('#fk_product').closest('.valuefieldcreate').find('.butActionNew').attr('href',newProductHref + '&categories[]=' + mainCategoryId)
+
 			</script>
 			<?php
 		}

@@ -150,7 +150,7 @@ window.eoxiaJS.registrationcertificate.init = function() {
  * @return {void}
  */
 window.eoxiaJS.registrationcertificate.event = function() {
-	$( document ).on( 'change', '.field_fk_lot.valuefieldcreate', window.eoxiaJS.registrationcertificate.changeLotCreationHref );
+	$( document ).on( 'change', '#fk_product', window.eoxiaJS.registrationcertificate.actualizeBrand );
 	$(document).ready(() => {
 		let url = $('.lot-creation-url').val()
 		$(document).find('.field_fk_lot .butActionNew').attr('target', '_blank')
@@ -158,14 +158,37 @@ window.eoxiaJS.registrationcertificate.event = function() {
 	})
 }
 
+
 /**
- * Action modal close & validation with key events
+ * Actualize
  *
- * @since   1.0.0
- * @version 8.5.0
+ * @since   0.0.2
+ * @version 0.0.2
  *
  * @return {void}
  */
-window.eoxiaJS.registrationcertificate.changeLotCreationHref = function( event ) {
-	console.log('salut')
+window.eoxiaJS.registrationcertificate.actualizeBrand = function( event ) {
+
+	let token = $('input[name="token"]').val();
+
+	var create_form = document.getElementById('registrationcertificatefr_create')
+	var formData = new FormData(create_form);
+	let productId = formData.get('fk_product');
+
+	let querySeparator = '?'
+	document.URL.match(/\?/) ? querySeparator = '&' : 1
+
+	$.ajax({
+		url: document.URL + querySeparator + 'subaction=getProductBrand&token='+token,
+		data: JSON.stringify({
+			productId: productId,
+		}),
+		type: "POST",
+		processData: false,
+		contentType: false,
+		success: function ( resp ) {
+			$('#d1_vehicle_brand').val($(resp).find('.car-brand').val())
+			$('#d1_vehicle_brand').prop("disabled", true)
+		},
+	});
 };
