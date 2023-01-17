@@ -26,8 +26,7 @@
  * \brief      File containing class for advanced numbering model of RegistrationCertificateFr
  */
 
-dol_include_once('/dolicar/core/modules/dolicar/modules_registrationcertificatefr.php');
-
+require_once __DIR__ . '/../../../core/modules/dolicar/modules_registrationcertificatefr.php');
 
 /**
  *	Class to manage customer Bom numbering rules advanced

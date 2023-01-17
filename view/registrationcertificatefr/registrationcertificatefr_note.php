@@ -74,8 +74,8 @@ if (!$res) {
 	die("Include of main fails");
 }
 
-dol_include_once('/dolicar/class/registrationcertificatefr.class.php');
-dol_include_once('/dolicar/lib/dolicar_registrationcertificatefr.lib.php');
+require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 // Load translation files required by the page
 $langs->loadLangs(array("dolicar@dolicar", "companies"));

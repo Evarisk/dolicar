@@ -31,12 +31,12 @@
  *  \brief      File of class to generate document from standard template
  */
 
-dol_include_once('/dolicar/core/modules/dolicar/modules_registrationcertificatefr.php');
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 
+require_once __DIR__ . '/../../../core/modules/dolicar/modules_registrationcertificatefr.php');
 
 /**
  *	Class to manage PDF template standard_registrationcertificatefr

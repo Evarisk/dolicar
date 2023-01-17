@@ -93,9 +93,8 @@ require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 
 // load dolicar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
-
+require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 // for other modules
-//dol_include_once('/othermodule/class/otherobject.class.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("dolicar@dolicar", "other"));

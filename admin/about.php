@@ -96,7 +96,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 $head = dolicarAdminPrepareHead();
 print dol_get_fiche_head($head, 'about', $langs->trans($page_name), 0, 'dolicar@dolicar');
 
-dol_include_once('/dolicar/core/modules/modDoliCar.class.php');
+require_once __DIR__ . '/../core/modules/modDoliCar.class.php';
 $tmpmodule = new modDoliCar($db);
 print $tmpmodule->getDescLong();
 

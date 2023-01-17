@@ -56,13 +56,13 @@ if (!$res) {
 	die("Include of main fails");
 }
 
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
-dol_include_once('/dolicar/class/registrationcertificatefr.class.php');
-dol_include_once('/dolicar/lib/dolicar_registrationcertificatefr.lib.php');
+require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 global $conf, $langs, $user, $db, $hookmanager;
 

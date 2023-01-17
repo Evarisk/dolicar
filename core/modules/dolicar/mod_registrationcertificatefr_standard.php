@@ -22,7 +22,7 @@
  *  \ingroup    dolicar
  *  \brief      File of class to manage RegistrationCertificateFr numbering rules standard
  */
-dol_include_once('/dolicar/core/modules/dolicar/modules_registrationcertificatefr.php');
+require_once __DIR__ . '/../../../core/modules/dolicar/modules_registrationcertificatefr.php');
 
 
 /**
