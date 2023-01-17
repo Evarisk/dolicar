@@ -391,66 +391,6 @@ class modDoliCar extends DolibarrModules
 
 		$sql = array();
 
-		// Document templates
-		$moduledir = dol_sanitizeFileName('dolicar');
-		$myTmpObjects = array();
-		$myTmpObjects['RegistrationCertificateFr'] = array('includerefgeneration'=>0, 'includedocgeneration'=>0);
-
-		foreach ($myTmpObjects as $myTmpObjectKey => $myTmpObjectArray) {
-			if ($myTmpObjectKey == 'RegistrationCertificateFr') {
-				continue;
-			}
-			if ($myTmpObjectArray['includerefgeneration']) {
-				$src = DOL_DOCUMENT_ROOT.'/install/doctemplates/'.$moduledir.'/template_registrationcertificatefrs.odt';
-				$dirodt = DOL_DATA_ROOT.'/doctemplates/'.$moduledir;
-				$dest = $dirodt.'/template_registrationcertificatefrs.odt';
-
-				if (file_exists($src) && !file_exists($dest)) {
-					require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-					dol_mkdir($dirodt);
-					$result = dol_copy($src, $dest, 0, 0);
-					if ($result < 0) {
-						$langs->load("errors");
-						$this->error = $langs->trans('ErrorFailToCopyFile', $src, $dest);
-						return 0;
-					}
-				}
-
-				$sql = array_merge($sql, array(
-					"DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom = 'standard_".strtolower($myTmpObjectKey)."' AND type = '".$this->db->escape(strtolower($myTmpObjectKey))."' AND entity = ".((int) $conf->entity),
-					"INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type, entity) VALUES('standard_".strtolower($myTmpObjectKey)."', '".$this->db->escape(strtolower($myTmpObjectKey))."', ".((int) $conf->entity).")",
-					"DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom = 'generic_".strtolower($myTmpObjectKey)."_odt' AND type = '".$this->db->escape(strtolower($myTmpObjectKey))."' AND entity = ".((int) $conf->entity),
-					"INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type, entity) VALUES('generic_".strtolower($myTmpObjectKey)."_odt', '".$this->db->escape(strtolower($myTmpObjectKey))."', ".((int) $conf->entity).")"
-				));
-			}
-		}
-
-		//Project
-//		if ($conf->global->DOLICAR_DEFAULT_PROJECT == 0) {
-//			require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-//			require_once DOL_DOCUMENT_ROOT . '/core/modules/project/mod_project_simple.php';
-//
-//			//Backward compatibility
-//			$project = new Project($this->db);
-//			$projectRef  = new $conf->global->PROJECT_ADDON();
-//			$third_party = new Societe($this->db);
-//
-//			$project->ref         = $projectRef->getNextValue($third_party, $project);
-//			$project->title       = $langs->trans('ClientWarehouse') . ' - ' . $conf->global->MAIN_INFO_SOCIETE_NOM;
-//			$project->description = $langs->trans('ClientWarehouseDescription');
-//			$project->date_c      = dol_now();
-//			$project->date_start  = dol_now();
-//			$project->usage_task = 1;
-//			$project->statut       = 1;
-//			$project_id            = $project->create($user);
-//
-//			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-//			$tags = new Categorie($this->db);
-//
-//			$tags->fetch('', 'Dolicar');
-//			$tags->add_type($project, 'project');
-//		}
-
 		//Warehouse
 		if ($conf->global->DOLICAR_DEFAULT_WAREHOUSE == 0) {
 			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
