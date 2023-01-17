@@ -317,7 +317,7 @@ if ($action == 'create') {
 if (($id || $ref) && $action == 'edit') {
 	print load_fiche_titre($langs->trans("RegistrationCertificateFr"), '', 'object_'.$object->picto);
 
-	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
+	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="registrationcertificatefr_edit">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="update">';
 	print '<input type="hidden" name="id" value="'.$object->id.'">';
@@ -327,6 +327,8 @@ if (($id || $ref) && $action == 'edit') {
 	if ($backtopageforcancel) {
 		print '<input type="hidden" name="backtopageforcancel" value="'.$backtopageforcancel.'">';
 	}
+
+	print '<input hidden class="car-brand" value="'.$brand_name.'">';
 
 	print dol_get_fiche_head();
 

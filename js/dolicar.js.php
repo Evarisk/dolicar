@@ -171,8 +171,8 @@ window.eoxiaJS.registrationcertificate.actualizeBrand = function( event ) {
 
 	let token = $('input[name="token"]').val();
 
-	var create_form = document.getElementById('registrationcertificatefr_create')
-	var formData = new FormData(create_form);
+	var form = document.getElementById('registrationcertificatefr_create')? document.getElementById('registrationcertificatefr_create') : document.getElementById('registrationcertificatefr_edit')
+	var formData = new FormData(form);
 	let productId = formData.get('fk_product');
 
 	let querySeparator = '?'
@@ -187,8 +187,8 @@ window.eoxiaJS.registrationcertificate.actualizeBrand = function( event ) {
 		processData: false,
 		contentType: false,
 		success: function ( resp ) {
-			$('#d1_vehicle_brand').val($(resp).find('.car-brand').val())
-			$('#d1_vehicle_brand').prop("disabled", true)
+			$('#d1_vehicle_brand').attr('value', $(resp).find('.car-brand').val())
+			$('#d1_vehicle_brand').prop("readonly", true)
 		},
 	});
 };
