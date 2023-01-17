@@ -420,12 +420,13 @@ class ActionsDoliCar
 			</script>
 			<?php
 		} else if ($parameters['currentcontext'] == 'registrationcertificatefrcard') {
+
+			//Filter products selector with product with "Vehicle" category
 			require_once __DIR__ . '/../../../categories/class/categorie.class.php';
 			$category = new Categorie($db);
 			$registration_certificate = new RegistrationCertificateFr($db);
 			GETPOST('id') > 0 ? $registration_certificate->fetch(GETPOST('id')) : '';
 
-			print ajax_combobox('selectd1_vehicle_brand');
 			$category->fetch($conf->global->DOLICAR_VEHICLE_TAG);
 			$objects_in_categ = $category->getObjectsInCateg('product');
 			$product_ids = array();
@@ -434,9 +435,8 @@ class ActionsDoliCar
 					$product_ids[$object_in_categ->id] = $object_in_categ->id;
 				}
 			}
-			$category->fetch($conf->global->DOLICAR_CAR_BRANDS_TAG);
-			$brands = $category->get_filles();
 
+			$brand_name = get_vehicle_brand(GETPOST('fk_product')?:$registration_certificate->fk_product);
 
 			?>
 			<script>
@@ -451,6 +451,8 @@ class ActionsDoliCar
 				let mainCategoryId = <?php echo json_encode($conf->global->DOLICAR_VEHICLE_TAG); ?>;
 				jQuery('#fk_product').closest('.valuefieldcreate').find('.butActionNew').attr('href',newProductHref + '&categories[]=' + mainCategoryId)
 
+				$('#d1_vehicle_brand').attr('value',<?php echo json_encode($brand_name); ?>)
+				$('#d1_vehicle_brand').prop("readonly", true)
 			</script>
 			<?php
 		}

@@ -135,3 +135,27 @@ function dolicar_select_dictionary($htmlname, $dictionarytable, $keyfield = 'cod
 		dol_print_error($db);
 	}
 }
+
+function get_vehicle_brand($productId) {
+	global $conf, $db;
+
+	$product = new Product($db);
+	$category = new Categorie($db);
+	$brand_name = '';
+
+	if (!empty($productId) && $productId > 0) {
+		$product->fetch($productId);
+		$categories = $product->getCategoriesCommon('product');
+
+		if (is_array($categories) && !empty($categories)) {
+			foreach($categories as $categoryId) {
+				$category->fetch($categoryId);
+				if ($category->fk_parent == $conf->global->DOLICAR_CAR_BRANDS_TAG) {
+					$brand_name = $category->label;
+				}
+			}
+		}
+	}
+
+	return $brand_name;
+}

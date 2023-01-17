@@ -166,19 +166,7 @@ if (empty($reshook)) {
 
 		$productId = $data['productId'];
 
-		if (!empty($productId) && $productId > 0) {
-			$product->fetch($productId);
-			$categories = $product->getCategoriesCommon('product');
-
-			if (is_array($categories) && !empty($categories)) {
-				foreach($categories as $categoryId) {
-					$category->fetch($categoryId);
-					if ($category->fk_parent == $conf->global->DOLICAR_CAR_BRANDS_TAG) {
-						$brand_name = $category->label;
-					}
-				}
-			}
-		}
+		$brand_name = get_vehicle_brand($productId);
 	}
 
 	$triggermodname = 'DOLICAR_REGISTRATIONCERTIFICATEFR_MODIFY'; // Name of trigger action code to execute when we modify record
