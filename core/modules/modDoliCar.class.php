@@ -270,6 +270,96 @@ class modDoliCar extends DolibarrModules
             // 0=Menu for internal users, 1=external users, 2=both
             'user'=>2
         );
+		$this->menu[$r++]=array(
+			'fk_menu' => 'fk_mainmenu=dolicar',
+			'type' => 'left',
+			'titre' => $langs->trans('ThirdParty'),
+			'prefix'   => '<i class="fas fa-building paddingright pictofixedwidth" style=" color: #6c6aa8;"></i>',
+			'mainmenu'=>'dolicar',
+			'leftmenu'=>'dolicar_companies',
+			'url'=>'/societe/index.php?mainmenu=companies',
+			'langs'=>'dolicar@dolicar',
+			'position'=>48520+$r,
+			'enabled'=>'$conf->dolicar->enabled',
+			'perms'=>'1',
+			'target'=>'',
+			'user'=>2
+		);
+		$this->menu[$r++]=array(
+			'fk_menu' => 'fk_mainmenu=dolicar',
+			'type' => 'left',
+			'titre' => $langs->trans('Propale'),
+			'prefix'   => '<i class="fas fa-file-signature infobox-propal paddingright pictofixedwidth"></i>',
+			'mainmenu'=>'dolicar',
+			'leftmenu'=>'dolicar_propales',
+			'url'=>'/comm/propal/index.php?mainmenu=commercial&leftmenu=propals',
+			'langs'=>'dolicar@dolicar',
+			'position'=>48520+$r,
+			'enabled'=>'$conf->dolicar->enabled',
+			'perms'=>'1',
+			'target'=>'',
+			'user'=>2
+		);
+		$this->menu[$r++]=array(
+			'fk_menu' => 'fk_mainmenu=dolicar',
+			'type' => 'left',
+			'titre' => $langs->trans('Invoice'),
+			'prefix'   => '<i class="fas fa-file-invoice-dollar infobox-commande paddingright pictofixedwidth"></i>',
+			'mainmenu'=>'dolicar',
+			'leftmenu'=>'dolicar_invoices',
+			'url'=>'/compta/facture/index.php?mainmenu=billing&leftmenu=customers_bills',
+			'langs'=>'dolicar@dolicar',
+			'position'=>48520+$r,
+			'enabled'=>'$conf->dolicar->enabled',
+			'perms'=>'1',
+			'target'=>'',
+			'user'=>2
+		);
+		$this->menu[$r++]=array(
+			'fk_menu' => 'fk_mainmenu=dolicar',
+			'type' => 'left',
+			'titre' => $langs->trans('Order'),
+			'prefix'   => '<i class="fas fa-file-invoice infobox-commande paddingright pictofixedwidth"></i>',
+			'mainmenu'=>'dolicar',
+			'leftmenu'=>'dolicar_orders',
+			'url'=>'/commande/index.php?mainmenu=commercial&leftmenu=orders',
+			'langs'=>'dolicar@dolicar',
+			'position'=>48520+$r,
+			'enabled'=>'$conf->dolicar->enabled',
+			'perms'=>'1',
+			'target'=>'',
+			'user'=>2
+		);
+		$this->menu[$r++]=array(
+			'fk_menu' => 'fk_mainmenu=dolicar',
+			'type' => 'left',
+			'titre' => $langs->trans('Product'),
+			'prefix'   => '<i class="fas fa-cube pictofixedwidth" style="color : #a69944"></i>',
+			'mainmenu'=>'dolicar',
+			'leftmenu'=>'dolicar_products',
+			'url'=>'/product/index.php?mainmenu=products',
+			'langs'=>'dolicar@dolicar',
+			'position'=>48520+$r,
+			'enabled'=>'$conf->dolicar->enabled',
+			'perms'=>'1',
+			'target'=>'',
+			'user'=>2
+		);
+		$this->menu[$r++]=array(
+			'fk_menu' => 'fk_mainmenu=dolicar,fk_leftmenu=dolicar_products',
+			'type' => 'left',
+			'titre' => $langs->trans('Lot'),
+			'prefix'   => '<i class="fas fa-building paddingright pictofixedwidth"></i>',
+			'mainmenu'=>'dolicar',
+			'leftmenu'=>'dolicar_lot',
+			'url'=>'/product/index.php?mainmenu=products',
+			'langs'=>'dolicar@dolicar',
+			'position'=>48520+$r,
+			'enabled'=>'$conf->dolicar->enabled',
+			'perms'=>'1',
+			'target'=>'',
+			'user'=>2
+		);
 		$this->menu[$r++] = array(
 			'fk_menu' => 'fk_mainmenu=dolicar',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type' => 'left',			                // This is a Left menu entry
