@@ -409,30 +409,30 @@ class modDoliCar extends DolibarrModules
 
 			$tag->label = $langs->transnoentities('Vehicle');
 			$tag->type = 'product';
-			$result = $tag->create($user);
+			$vehicleTag = $tag->create($user);
 
-			if ($result > 0) {
+			if ($vehicleTag > 0) {
 				$tag->label = $langs->transnoentities('Car');
 				$tag->type = 'product';
-				$tag->fk_parent = $result;
+				$tag->fk_parent = $vehicleTag;
 				$tag->create($user);
 
 				$tag->label = $langs->transnoentities('Truck');
 				$tag->type = 'product';
-				$tag->fk_parent = $result;
+				$tag->fk_parent = $vehicleTag;
 				$tag->create($user);
 
 				$tag->label = $langs->transnoentities('Bicycle');
 				$tag->type = 'product';
-				$tag->fk_parent = $result;
+				$tag->fk_parent = $vehicleTag;
 				$tag->create($user);
 
 				$tag->label = $langs->transnoentities('CommercialVehicle');
 				$tag->type = 'product';
-				$tag->fk_parent = $result;
+				$tag->fk_parent = $vehicleTag;
 				$tag->create($user);
 
-				dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $result, 'integer', 0, '', $conf->entity);
+				dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $vehicleTag, 'integer', 0, '', $conf->entity);
 
 			}
 			dolibarr_set_const($this->db, 'CATEGORIE_RECURSIV_ADD', 1, 'integer', 0, '', $conf->entity);
@@ -443,43 +443,20 @@ class modDoliCar extends DolibarrModules
 		}
 
 		if ($conf->global->DOLICAR_VEHICLE_TAG == 0) {
-			require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 			$tag->rechercher(0, $langs->transnoentities('Car'), 'product');
 			if ($tag->id > 0) {
 				dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $tag->id, 'integer', 0, '', $conf->entity);
 			}
 		}
 
-		// Default product
-		if ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 0) {
-			require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-			$product = new Product($this->db);
-
-			$product->ref = $langs->transnoentities('DefaultVehicle');
-			$product->label = $langs->transnoentities('DefaultVehicle');
-			$result = $product->create($user);
-
-			if ($result > 0) {
-				dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE', $result, 'integer', 0, '', $conf->entity);
-				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-
-				$tag->fetch($conf->global->DOLICAR_VEHICLE_TAG);
-				$tag->add_type($product, 'product');
-			}
-			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
-		}
-
 		//Car brands tag
-		dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG_SET', 0, 'integer', 0, '', $conf->entity);
-
 		if ($conf->global->DOLICAR_CAR_BRANDS_TAG_SET == 0) {
 
 			$tag->label = $langs->transnoentities('Brands');
 			$tag->type = 'product';
-			$result = $tag->create($user);
+			$brandTag = $tag->create($user);
 
-
-			if ($result > 0) {
+			if ($brandTag > 0) {
 
 				$filename = DOL_DOCUMENT_ROOT . '/custom/dolicar/core/car_brands.txt';
 				$file = fopen( $filename, "r" );
@@ -487,16 +464,52 @@ class modDoliCar extends DolibarrModules
 					while (($line = fgets($file)) !== false) {
 						$tag->label = $langs->transnoentities($line);
 						$tag->type = 'product';
-						$tag->fk_parent = $result;
+						$tag->fk_parent = $brandTag;
 						$tag->create($user);
-
 					}
 					fclose($file);
 				}
 
-				dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG', $result, 'integer', 0, '', $conf->entity);
+				$tag->label = $langs->transnoentities('DefaultBrand');
+				$tag->type = 'product';
+				$tag->fk_parent = $brandTag;
+				$defaultBrandTag = $tag->create($user);
+
+				dolibarr_set_const($this->db, 'DOLICAR_CAR_DEFAULT_BRAND_TAG', $defaultBrandTag, 'integer', 0, '', $conf->entity);
+				dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG', $brandTag, 'integer', 0, '', $conf->entity);
 				dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG_SET', 1, 'integer', 0, '', $conf->entity);
 			}
+		} elseif ($conf->global->DOLICAR_CAR_BRANDS_TAG_SET == 1 && $conf->global->DOLICAR_CAR_DEFAULT_BRAND_TAG == 0) {
+			$tag->label = $langs->transnoentities('DefaultBrand');
+			$tag->type = 'product';
+			$tag->fk_parent = $conf->global->DOLICAR_CAR_BRANDS_TAG;
+			$defaultBrandTag = $tag->create($user);
+			dolibarr_set_const($this->db, 'DOLICAR_CAR_DEFAULT_BRAND_TAG', $defaultBrandTag, 'integer', 0, '', $conf->entity);
+		}
+
+		// Default product
+		require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+		$product = new Product($this->db);
+
+		if ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 0) {
+			$product->ref = $langs->transnoentities('DefaultVehicle');
+			$product->label = $langs->transnoentities('DefaultVehicle');
+			$defaultVehicle = $product->create($user);
+
+			if ($defaultVehicle > 0) {
+				dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE', $defaultVehicle, 'integer', 0, '', $conf->entity);
+				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+				$tag->fetch($conf->global->DOLICAR_VEHICLE_TAG);
+				$tag->add_type($product, 'product');
+				$tag->fetch($conf->global->DOLICAR_CAR_DEFAULT_BRAND_TAG);
+				$tag->add_type($product, 'product');
+			}
+			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
+		} elseif ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 1) {
+			$product->fetch($conf->global->DOLICAR_DEFAULT_VEHICLE);
+			$tag->fetch($conf->global->DOLICAR_CAR_DEFAULT_BRAND_TAG);
+			$tag->add_type($product, 'product');
 		}
 		return $this->_init($sql, $options);
 	}
