@@ -79,8 +79,8 @@ RegistrationNumber = Numéro d'immatriculation (A)
 FirstRegistrationDate = Date de la première immatriculation (B)
 OwnerFullName = Nom et prénom du propriétaire (C.1)
 RegistrationAddress = Adresse du propriétaire (C.3)
-OwnerVehicle = Propriétaire du véhicule ? (C.4a)
-OwnerNumber = Nombre de propriétaire (C.4.1)
+VehicleOwner = Propriétaire du véhicule ? (C.4a)
+SecondOwnerNumber = Nombre de propriétaires (C.4.1)
 SecondOwnerName = Nom du second propriétaire (C.4.1)
 VehicleBrand = Marque du véhicule (D.1)
 VehicleType = Type, variante, version du véhicule (D.2)
@@ -105,14 +105,14 @@ FuelType = Type de carburant ou source d'énergie (P.3)
 NationalAdministrativePower = Puissance administrative nationale ou «Chevaux fiscaux» (P.6)
 PowerToWeightRatio = Rapport puissance/masse (en kW/kg) (Q)
 SeatingCapacity = Nombre de places assises (S.1)
-StationaryCapacity = Nombre de places debout autorisé (S.2)
+StandingCapacity = Nombre de places debout autorisé (S.2)
 StationaryNoiseLevel = Niveau sonore à l’arrêt (en dB) (U.1)
 MotorSpeed = Vitesse de rotation du moteur (en min-1) (U.2)
-COEmission = Rejet de CO2 (en g/km) (V.7)
+CO2Emission = Rejet de CO2 (en g/km) (V.7)
 EnvironmentalCategory = Classe environnementale (V.9)
-FirstTechnicallnspectionDate = Date du premier contrôle technique (X.1)
+FirstTechnicalInspectionDate = Date du premier contrôle technique (X.1)
 RegionalTax = Taxe régionale (Y.1)
-ProfessionalTax = Taxe professionnel (Y.2)
+ProfessionalTax = Taxe professionnelle (Y.2)
 EcologicalTax = Taxe écologique (Y.3)
 ManagementTax = Taxe de gestion (Y.4)
 ForwardingExpensesTax = Taxe de frais d'acheminement (Y.5)
@@ -131,7 +131,6 @@ RegistrationCertificateShowFieldsDescription = Cette option permet de cacher/aff
 HideObjectDetsDolicarDetails = Cacher le détail de Dolicar des lignes d'objets
 HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
 LinkedProduct = Produit lié
-
 
 
 #
@@ -161,6 +160,7 @@ ThirdParty = Tiers
 Invoice = Facture
 Order = Commande
 Product = Produit
+Display = Afficher
 ProductBatch = Numéro de lot/série
 AgendaModuleRequired = Pour assurer la traçabilité des actions dans Dolicar, assurez-vous que le module Agenda est bien activé
 HowToSetupOtherModules = Pour plus de fonctionnalités sur Dolicar, vous pouvez activer de nombreux modules (Gestion des fournisseurs, des factures, etc.) sur ce lien :

@@ -276,227 +276,67 @@ print '<td class="center">' . $langs->transnoentities("Visible") . '</td>';
 print '<td class="center">' . $langs->transnoentities("ShortInfo") . '</td>';
 print '</tr>';
 
-// Registration number visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowRegistrationNumber") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_A_REGISTRATION_NUMBER_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowRegistrationNumberHelp"));
-print '</td>';
-print '</tr>';
-
-// First registration date visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowFirstRegistrationDate") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_B_FIRST_REGISTRATION_DATE_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowFirstRegistrationDateHelp"));
-print '</td>';
-print '</tr>';
-
-// Owner fullname visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowOwnerFullname") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_C1_OWNER_FULLNAME_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowOwnerFullnameHelp"));
-print '</td>';
-print '</tr>';
-
-// Registration address visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowRegistrationAddress") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_C3_REGISTRATION_ADDRESS_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowRegistrationAddressHelp"));
-print '</td>';
-print '</tr>';
-
-// Owner number visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowOwnerNumber") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_C41_OWNER_NUMBER_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowOwnerNumberHelp"));
-print '</td>';
-print '</tr>';
-
-// Owner second name visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowOwnerSecondName") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_C41_OWNER_SECOND_NAME_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowOwnerSecondNameHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle serial number visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleSerialNumber") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_E_VEHICLE_SERIAL_NUMBER_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleSerialNumberHelp"));
-print '</td>';
-print '</tr>';
-
-// Technical PTAC visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowTechnicalPtac") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_F1_TECHNICAL_PTAC_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowTechnicalPtacHelp"));
-print '</td>';
-print '</tr>';
-
-// PTAC visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowPtac") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_F2_PTAC_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowPtacHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle owner visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleOwner") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_C4A_VEHICLE_OWNER_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleOwnerHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle brand visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleBrand") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_D1_VEHICLE_BRAND_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleBrandHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle type visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleType") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_D2_VEHICLE_TYPE_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleTypeHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle cnit visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleCnit") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_D21_VEHICLE_CNIT_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleCnitHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle model visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleModel") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_D3_VEHICLE_MODEL_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleModelHelp"));
-print '</td>';
-print '</tr>';
-
-// PTRA visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowPtra") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_F3_PTRA_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowPtraHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle weight visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleWeight") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_G_VEHICLE_WEIGHT_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleWeightHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle empty weight visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleEmptyWeight") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_G1_VEHICLE_EMPTY_WEIGHT_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleEmptyWeightHelp"));
-print '</td>';
-print '</tr>';
-
-// Vehicle empty weight visible
-print '<tr class="oddeven"><td>' . $langs->transnoentities("ShowVehicleEmptyWeight") . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_H_VALIDITY_PERIOD_VISIBLE');
-print '</td>';
-print '<td class="center">';
-print $form->textwithpicto('', $langs->transnoentities("ShowVehicleEmptyWeightHelp"));
-print '</td>';
-print '</tr>';
-
 $registrationCertificateFields = [
-	'DOLICAR_H_VALIDITY_PERIOD' => 'ValidityPeriod',
-	'DOLICAR_I_VEHICLE_REGISTRATION_DATE' => 'VehicleRegistrationDate',
-	'DOLICAR_J_VEHICLE_CATEGORY' => 'VehicleCategory',
-	'DOLICAR_J1_NATIONAL_TYPE' => 'NationalType',
-	'DOLICAR_J2_EUROPEAN_BODYWORK' => 'EuropeanBodywork',
-	'DOLICAR_J3_NATIONAL_BODYWORK' => 'NationalBodywork',
-	'DOLICAR_K_TYPE_APPROVAL_NUMBER' => 'TypeApprovalNumber',
-	'DOLICAR_P1_CYLINDER_CAPACITY' => 'CylinderCapcity',
-	'DOLICAR_P2_MAXIMUM_NET_POWER' => 'MaximumNetPower',
-	'DOLICAR_P3_FUEL_TYPE' => 'FuelType',
-	'DOLICAR_P6_NATIONAL_ADMINISTRATIVE_POWER' => 'NationalAdministrativePower',
-	'DOLICAR_H_VALIDITY_PERIOD' => 'ValidityPeriod',
-
+	'A_REGISTRATION_NUMBER'               => 'RegistrationNumber',
+	'B_FIRST_REGISTRATION_DATE'           => 'FirstRegistrationDate',
+	'C1_OWNER_FULLNAME'                   => 'OwnerFullName',
+	'C3_REGISTRATION_ADDRESS'             => 'RegistrationAddress',
+	'C4A_VEHICLE_OWNER'                   => 'VehicleOwner',
+	'C41_SECOND_OWNER_NUMBER'             => 'SecondOwnerNumber',
+	'C41_SECOND_OWNER_NAME'               => 'SecondOwnerName',
+	'D1_VEHICLE_BRAND'                    => 'VehicleBrand',
+	'D2_VEHICLE_TYPE'                     => 'VehicleType',
+	'D21_VEHICLE_CNIT'                    => 'VehicleCNIT',
+	'D3_VEHICLE_MODEL'                    => 'VehicleModel',
+	'E_VEHICLE_SERIAL_NUMBER'             => 'VehicleSerialNumber',
+	'F1_TECHNICAL_PTAC'                   => 'TechnicalPTAC',
+	'F2_PTAC'                             => 'PTAC',
+	'F3_PTRA'                             => 'PTRA',
+	'G_VEHICLE_WEIGHT'                    => 'VehicleWeight',
+	'G1_VEHICLE_EMPTY_WEIGHT'             => 'VehicleEmptyWeight',
+	'H_VALIDITY_PERIOD'                   => 'ValidityPeriod',
+	'I_VEHICLE_REGISTRATION_DATE'         => 'VehicleRegistrationDate',
+	'J_VEHICLE_CATEGORY'                  => 'VehicleCategory',
+	'J1_NATIONAL_TYPE'                    => 'NationalType',
+	'J2_EUROPEAN_BODYWORK'                => 'EuropeanBodyWork',
+	'J3_NATIONAL_BODYWORK'                => 'NationalBodyWork',
+	'K_TYPE_APPROVAL_NUMBER'              => 'TypeApprovalNumber',
+	'P1_CYLINDER_CAPACITY'                => 'CylinderCapacity',
+	'P2_MAXIMUM_NET_POWER'                => 'MaximumNetPower',
+	'P3_FUEL_TYPE'                        => 'FuelType',
+	'P6_NATIONAL_ADMINISTRATIVE_POWER'    => 'NationalAdministrativePower',
+	'Q_POWER_TO_WEIGHT_RATIO'             => 'PowerToWeightRatio',
+	'S1_SEATING_CAPACITY'                 => 'SeatingCapacity',
+	'S2_STANDING_CAPACITY'                => 'StandingCapacity',
+	'U1_STATIONARY_NOISE_LEVEL'           => 'StationaryNoiseLevel',
+	'U2_MOTOR_SPEED'                      => 'MotorSpeed',
+	'V7_CO2_EMISSION'                     => 'CO2Emission',
+	'V9_ENVIRONMENTAL_CATEGORY'           => 'EnvironmentalCategory',
+	'X1_FIRST_TECHNICAL_INSPECTION_DATE'  => 'FirstTechnicalInspectionDate',
+	'Y1_REGIONAL_TAX'                     => 'RegionalTax',
+	'Y2_PROFESSIONAL_TAX'                 => 'ProfessionalTax',
+	'Y3_ECOLOGICAL_TAX'                   => 'EcologicalTax',
+	'Y4_MANAGEMENT_TAX'                   => 'ManagementTax',
+	'Y5_FORWARDING_EXPENSES_TAX'          => 'ForwardingExpensesTax',
+	'Y6_TOTAL_PRICE_VEHICLE_REGISTRATION' => 'TotalPriceVehicleRegistration',
+	'Z1_SPECIFIC_DETAILS'                 => 'SpecificDetails1',
+	'Z2_SPECIFIC_DETAILS'                 => 'SpecificDetails2',
+	'Z3_SPECIFIC_DETAILS'                 => 'SpecificDetails3',
+	'Z4_SPECIFIC_DETAILS'                 => 'SpecificDetails4',
 ];
-		'p1_cylinder_capacity' => array('type'=>'integer', 'label'=>'CylinderCapacity', 'enabled'=>'1', 'position'=>320, 'notnull'=>0, 'visible'=>3,),
-		'p2_maximum_net_power' => array('type'=>'integer', 'label'=>'MaximumNetPower', 'enabled'=>'1', 'position'=>330, 'notnull'=>0, 'visible'=>3,),
-		'p3_fuel_type' => array('type'=>'varchar(128)', 'label'=>'FuelType', 'enabled'=>'1', 'position'=>340, 'notnull'=>0, 'visible'=>3,),
-		'p6_national_administrative_power' => array('type'=>'integer', 'label'=>'NationalAdministrativePower', 'enabled'=>'1', 'position'=>350, 'notnull'=>0, 'visible'=>3,),
-		'q_power_to_weight_ratio' => array('type'=>'integer', 'label'=>'PowerToWeightRatio', 'enabled'=>'1', 'position'=>360, 'notnull'=>0, 'visible'=>3,),
-		's1_seatingCapacity' => array('type'=>'integer', 'label'=>'SeatingCapacity', 'enabled'=>'1', 'position'=>370, 'notnull'=>0, 'visible'=>3,),
-		's2_standing_capacity' => array('type'=>'integer', 'label'=>'StationaryCapacity', 'enabled'=>'1', 'position'=>380, 'notnull'=>0, 'visible'=>3,),
-		'u1_stationary_noise_level' => array('type'=>'integer', 'label'=>'StationaryNoiseLevel', 'enabled'=>'1', 'position'=>390, 'notnull'=>0, 'visible'=>3,),
-		'u2_motor_speed' => array('type'=>'integer', 'label'=>'MotorSpeed', 'enabled'=>'1', 'position'=>400, 'notnull'=>0, 'visible'=>3,),
-		'v7_co2_emission' => array('type'=>'integer', 'label'=>'COEmission', 'enabled'=>'1', 'position'=>410, 'notnull'=>0, 'visible'=>3,),
-		'v9_environmental_category' => array('type'=>'varchar(128)', 'label'=>'EnvironmentalCategory', 'enabled'=>'1', 'position'=>420, 'notnull'=>0, 'visible'=>3,),
-		'x1_first_technical_inspection_date' => array('type'=>'datetime', 'label'=>'FirstTechnicallnspectionDate', 'enabled'=>'1', 'position'=>430, 'notnull'=>0, 'visible'=>3,),
-		'y1_regional_tax' => array('type'=>'double(24,8)', 'label'=>'RegionalTax', 'enabled'=>'1', 'position'=>440, 'notnull'=>0, 'visible'=>3,),
-		'y2_professional_tax' => array('type'=>'double(24,8)', 'label'=>'ProfessionalTax', 'enabled'=>'1', 'position'=>450, 'notnull'=>0, 'visible'=>3,),
-		'y3_ecological_tax' => array('type'=>'double(24,8)', 'label'=>'EcologicalTax', 'enabled'=>'1', 'position'=>460, 'notnull'=>0, 'visible'=>3,),
-		'y4_management_tax' => array('type'=>'double(24,8)', 'label'=>'ManagementTax', 'enabled'=>'1', 'position'=>470, 'notnull'=>0, 'visible'=>3,),
-		'y5_forwarding_expenses_tax' => array('type'=>'double(24,8)', 'label'=>'ForwardingExpensesTax', 'enabled'=>'1', 'position'=>480, 'notnull'=>0, 'visible'=>3,),
-		'y6_total_price_vehicle_registration' => array('type'=>'double(24,8)', 'label'=>'TotalPriceVehicleRegistration', 'enabled'=>'1', 'position'=>490, 'notnull'=>0, 'visible'=>3,),
-		'z1_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails1', 'enabled'=>'1', 'position'=>500, 'notnull'=>0, 'visible'=>3,),
-		'z2_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails2', 'enabled'=>'1', 'position'=>510, 'notnull'=>0, 'visible'=>3,),
-		'z3_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails3', 'enabled'=>'1', 'position'=>520, 'notnull'=>0, 'visible'=>3,),
-		'z4_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails4', 'enabled'=>'1', 'position'=>530, 'notnull'=>0, 'visible'=>3,),
-		'fk_project' => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'enabled'=>'1', 'position'=>16, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
-		'fk_lot' => array('type'=>'intege
-print '</table>';
 
+foreach($registrationCertificateFields as $registrationCertificateCode => $registrationCertificateField) {
+	print '<tr class="oddeven"><td>' . $langs->transnoentities('Display') . ' ' .  $langs->transnoentities($registrationCertificateField) . '</td>';
+	print '<td class="center">';
+	print ajax_constantonoff('DOLICAR_' . $registrationCertificateCode . '_VISIBLE');
+	print '</td>';
+	print '<td class="center">';
+	print $form->textwithpicto('', $langs->transnoentities('Show'. $registrationCertificateField .'Help'));
+	print '</td>';
+	print '</tr>';
+}
+
+print '</table>';
 print '</div>';
 
 print load_fiche_titre($langs->trans("ProductBatch"), '', '');

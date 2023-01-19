@@ -258,56 +258,70 @@ if ($action == 'create') {
 	print dol_get_fiche_end();
 
 	print $form->buttonsSaveCancel("Create");
-	if ($conf->global->DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS) :
-	?>
-	<script>
-		$('.field_b_first_registration_date').hide()
-		$('.field_c1_owner_fullname').hide()
-		$('.field_c3_registration_address').hide()
-		$('.field_c4a_owner_vehicle').hide()
-		$('.field_c41_ownerNumber').hide()
-		$('.field_c41_second_owner_name').hide()
-		$('.field_d1_vehicle_brand').hide()
-		$('.field_d2_vehicle_type').hide()
-		$('.field_d21_vehicle_cnit').hide()
-		$('.field_e_vehicle_serial_number').hide()
-		$('.field_f1_techincal_ptac').hide()
-		$('.field_f2_ptac').hide()
-		$('.field_f3_ptra').hide()
-		$('.field_g_vehicle_weight').hide()
-		$('.field_g1_vehicle_empty_weight').hide()
-		$('.field_h_validity_period').hide()
-		$('.field_i_vehicle_registration_date').hide()
-		$('.field_j_vehicleCategory').hide()
-		$('.field_j1_national_type').hide()
-		$('.field_j2_european_bodywork').hide()
-		$('.field_j3_national_bodywork').hide()
-		$('.field_k_type_approval_number').hide()
-		$('.field_p1_cylinder_capacity').hide()
-		$('.field_p2_maximum_net_power').hide()
-		$('.field_p3_fuel_type').hide()
-		$('.field_p6_national_administrative_power').hide()
-		$('.field_q_power_to_weight_ratio').hide()
-		$('.field_s1_seatingCapacity').hide()
-		$('.field_s2_standing_capacity').hide()
-		$('.field_u1_stationary_noise_level').hide()
-		$('.field_u2_motor_speed').hide()
-		$('.field_v7_co2_emission').hide()
-		$('.field_v9_environmental_category').hide()
-		$('.field_x1_first_technical_inspection_date').hide()
-		$('.field_y1_regional_tax').hide()
-		$('.field_y2_professional_tax').hide()
-		$('.field_y3_ecological_tax').hide()
-		$('.field_y4_management_tax').hide()
-		$('.field_y5_forwarding_expenses_tax').hide()
-		$('.field_y6_total_price_vehicle_registration').hide()
-		$('.field_z1_specific_details').hide()
-		$('.field_z2_specific_details').hide()
-		$('.field_z3_specific_details').hide()
-		$('.field_z4_specific_details').hide()
-	</script>
-	<?php
-	endif;
+
+	$registrationCertificateFields = [
+		'A_REGISTRATION_NUMBER'               => 'RegistrationNumber',
+		'B_FIRST_REGISTRATION_DATE'           => 'FirstRegistrationDate',
+		'C1_OWNER_FULLNAME'                   => 'OwnerFullName',
+		'C3_REGISTRATION_ADDRESS'             => 'RegistrationAddress',
+		'C4A_VEHICLE_OWNER'                   => 'VehicleOwner',
+		'C41_SECOND_OWNER_NUMBER'             => 'SecondOwnerNumber',
+		'C41_SECOND_OWNER_NAME'               => 'SecondOwnerName',
+		'D1_VEHICLE_BRAND'                    => 'VehicleBrand',
+		'D2_VEHICLE_TYPE'                     => 'VehicleType',
+		'D21_VEHICLE_CNIT'                    => 'VehicleCNIT',
+		'D3_VEHICLE_MODEL'                    => 'VehicleModel',
+		'E_VEHICLE_SERIAL_NUMBER'             => 'VehicleSerialNumber',
+		'F1_TECHNICAL_PTAC'                   => 'TechnicalPTAC',
+		'F2_PTAC'                             => 'PTAC',
+		'F3_PTRA'                             => 'PTRA',
+		'G_VEHICLE_WEIGHT'                    => 'VehicleWeight',
+		'G1_VEHICLE_EMPTY_WEIGHT'             => 'VehicleEmptyWeight',
+		'H_VALIDITY_PERIOD'                   => 'ValidityPeriod',
+		'I_VEHICLE_REGISTRATION_DATE'         => 'VehicleRegistrationDate',
+		'J_VEHICLE_CATEGORY'                  => 'VehicleCategory',
+		'J1_NATIONAL_TYPE'                    => 'NationalType',
+		'J2_EUROPEAN_BODYWORK'                => 'EuropeanBodyWork',
+		'J3_NATIONAL_BODYWORK'                => 'NationalBodyWork',
+		'K_TYPE_APPROVAL_NUMBER'              => 'TypeApprovalNumber',
+		'P1_CYLINDER_CAPACITY'                => 'CylinderCapacity',
+		'P2_MAXIMUM_NET_POWER'                => 'MaximumNetPower',
+		'P3_FUEL_TYPE'                        => 'FuelType',
+		'P6_NATIONAL_ADMINISTRATIVE_POWER'    => 'NationalAdministrativePower',
+		'Q_POWER_TO_WEIGHT_RATIO'             => 'PowerToWeightRatio',
+		'S1_SEATING_CAPACITY'                 => 'SeatingCapacity',
+		'S2_STANDING_CAPACITY'                => 'StandingCapacity',
+		'U1_STATIONARY_NOISE_LEVEL'           => 'StationaryNoiseLevel',
+		'U2_MOTOR_SPEED'                      => 'MotorSpeed',
+		'V7_CO2_EMISSION'                     => 'CO2Emission',
+		'V9_ENVIRONMENTAL_CATEGORY'           => 'EnvironmentalCategory',
+		'X1_FIRST_TECHNICAL_INSPECTION_DATE'  => 'FirstTechnicalInspectionDate',
+		'Y1_REGIONAL_TAX'                     => 'RegionalTax',
+		'Y2_PROFESSIONAL_TAX'                 => 'ProfessionalTax',
+		'Y3_ECOLOGICAL_TAX'                   => 'EcologicalTax',
+		'Y4_MANAGEMENT_TAX'                   => 'ManagementTax',
+		'Y5_FORWARDING_EXPENSES_TAX'          => 'ForwardingExpensesTax',
+		'Y6_TOTAL_PRICE_VEHICLE_REGISTRATION' => 'TotalPriceVehicleRegistration',
+		'Z1_SPECIFIC_DETAILS'                 => 'SpecificDetails1',
+		'Z2_SPECIFIC_DETAILS'                 => 'SpecificDetails2',
+		'Z3_SPECIFIC_DETAILS'                 => 'SpecificDetails3',
+		'Z4_SPECIFIC_DETAILS'                 => 'SpecificDetails4',
+	];
+
+	foreach ($registrationCertificateFields as $registrationCertificateCode => $registrationCertificateField) {
+		$fieldName = 'field_' . strtolower($registrationCertificateCode);
+		$confName = 'DOLICAR_' . $registrationCertificateCode . '_VISIBLE';
+		if ($conf->global->$confName < 1) {
+			?>
+			<script>
+				$('.' + <?php echo json_encode($fieldName); ?>).hide()
+			</script>
+			<?php
+		} else {
+			$counter++;
+		}
+	}
+
 	print '</form>';
 
 	//dol_set_focus('input[name="ref"]');
