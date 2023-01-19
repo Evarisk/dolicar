@@ -96,7 +96,6 @@ class RegistrationCertificateFr extends CommonObject
 	 *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
 	 */
 
-	// BEGIN MODULEBUILDER PROPERTIES
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
@@ -116,23 +115,22 @@ class RegistrationCertificateFr extends CommonObject
 		'b_first_registration_date' => array('type'=>'datetime', 'label'=>'FirstRegistrationDate', 'enabled'=>'1', 'position'=>90, 'notnull'=>0, 'visible'=>3,),
 		'c1_owner_fullname' => array('type'=>'varchar(255)', 'label'=>'OwnerFullName', 'enabled'=>'1', 'position'=>100, 'notnull'=>0, 'visible'=>3,),
 		'c3_registration_address' => array('type'=>'text', 'label'=>'RegistrationAddress', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>3,),
-		'c41_ownerNumber' => array('type'=>'integer', 'label'=>'OwnerNumber', 'enabled'=>'1', 'position'=>130, 'notnull'=>0, 'visible'=>3,),
+		'c4a_vehicle_owner' => array('type'=>'boolean', 'label'=>'VehicleOwner', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>3,),
+		'c41_second_owner_number' => array('type'=>'integer', 'label'=>'SecondOwnerNumber', 'enabled'=>'1', 'position'=>130, 'notnull'=>0, 'visible'=>3,),
 		'c41_second_owner_name' => array('type'=>'varchar(128)', 'label'=>'SecondOwnerName', 'enabled'=>'1', 'position'=>140, 'notnull'=>0, 'visible'=>3,),
-		'e_vehicle_serial_number' => array('type'=>'varchar(128)', 'label'=>'VehicleSerialNumber', 'enabled'=>'1', 'position'=>190, 'notnull'=>0, 'visible'=>3,),
-		'f1_techincal_ptac' => array('type'=>'integer', 'label'=>'TechnicalPTAC', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>3,),
-		'f2_ptac' => array('type'=>'integer', 'label'=>'PTAC', 'enabled'=>'1', 'position'=>210, 'notnull'=>0, 'visible'=>3,),
-		'c4a_owner_vehicle' => array('type'=>'boolean', 'label'=>'OwnerVehicle', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>3,),
+		'd1_vehicle_brand' => array('type'=>'varchar(128)', 'label'=>'VehicleBrand', 'enabled'=>'1', 'position'=>150, 'notnull'=>0, 'visible'=>3,),
 		'd2_vehicle_type' => array('type'=>'varchar(128)', 'label'=>'VehicleType', 'enabled'=>'1', 'position'=>160, 'notnull'=>0, 'visible'=>3,),
 		'd21_vehicle_cnit' => array('type'=>'varchar(128)', 'label'=>'VehicleCNIT', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>3,),
 		'd3_vehicle_model' => array('type'=>'varchar(128)', 'label'=>'VehicleModel', 'enabled'=>'1', 'position'=>175, 'notnull'=>0, 'visible'=>3,),
-		'fk_product' => array('type'=>'integer:Product:product/class/product.class.php:1', 'label'=>'LinkedProduct', 'enabled'=>'1', 'position'=>13, 'notnull'=>0, 'visible'=>3, 'css'=>'maxwidth500'),
-		'd1_vehicle_brand' => array('type'=>'varchar(128)', 'label'=>'VehicleBrand', 'enabled'=>'1', 'position'=>150, 'notnull'=>0, 'visible'=>3,),
+		'e_vehicle_serial_number' => array('type'=>'varchar(128)', 'label'=>'VehicleSerialNumber', 'enabled'=>'1', 'position'=>190, 'notnull'=>0, 'visible'=>3,),
+		'f1_technical_ptac' => array('type'=>'integer', 'label'=>'TechnicalPTAC', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>3,),
+		'f2_ptac' => array('type'=>'integer', 'label'=>'PTAC', 'enabled'=>'1', 'position'=>210, 'notnull'=>0, 'visible'=>3,),
 		'f3_ptra' => array('type'=>'integer', 'label'=>'PTRA', 'enabled'=>'1', 'position'=>220, 'notnull'=>0, 'visible'=>3,),
 		'g_vehicle_weight' => array('type'=>'integer', 'label'=>'VehicleWeight', 'enabled'=>'1', 'position'=>230, 'notnull'=>0, 'visible'=>3,),
 		'g1_vehicle_empty_weight' => array('type'=>'integer', 'label'=>'VehicleEmptyWeight', 'enabled'=>'1', 'position'=>240, 'notnull'=>0, 'visible'=>3,),
 		'h_validity_period' => array('type'=>'varchar(128)', 'label'=>'ValidityPeriod', 'enabled'=>'1', 'position'=>250, 'notnull'=>0, 'visible'=>3,),
 		'i_vehicle_registration_date' => array('type'=>'datetime', 'label'=>'VehicleRegistrationDate', 'enabled'=>'1', 'position'=>260, 'notnull'=>0, 'visible'=>3,),
-		'j_vehicleCategory' => array('type'=>'varchar(128)', 'label'=>'VehicleCategory', 'enabled'=>'1', 'position'=>270, 'notnull'=>0, 'visible'=>3,),
+		'j_vehicle_category' => array('type'=>'varchar(128)', 'label'=>'VehicleCategory', 'enabled'=>'1', 'position'=>270, 'notnull'=>0, 'visible'=>3,),
 		'j1_national_type' => array('type'=>'varchar(128)', 'label'=>'NationalType', 'enabled'=>'1', 'position'=>280, 'notnull'=>0, 'visible'=>3,),
 		'j2_european_bodywork' => array('type'=>'varchar(128)', 'label'=>'EuropeanBodyWork', 'enabled'=>'1', 'position'=>290, 'notnull'=>0, 'visible'=>3,),
 		'j3_national_bodywork' => array('type'=>'varchar(128)', 'label'=>'NationalBodyWork', 'enabled'=>'1', 'position'=>300, 'notnull'=>0, 'visible'=>3,),
@@ -142,13 +140,13 @@ class RegistrationCertificateFr extends CommonObject
 		'p3_fuel_type' => array('type'=>'varchar(128)', 'label'=>'FuelType', 'enabled'=>'1', 'position'=>340, 'notnull'=>0, 'visible'=>3,),
 		'p6_national_administrative_power' => array('type'=>'integer', 'label'=>'NationalAdministrativePower', 'enabled'=>'1', 'position'=>350, 'notnull'=>0, 'visible'=>3,),
 		'q_power_to_weight_ratio' => array('type'=>'integer', 'label'=>'PowerToWeightRatio', 'enabled'=>'1', 'position'=>360, 'notnull'=>0, 'visible'=>3,),
-		's1_seatingCapacity' => array('type'=>'integer', 'label'=>'SeatingCapacity', 'enabled'=>'1', 'position'=>370, 'notnull'=>0, 'visible'=>3,),
+		's1_seating_capacity' => array('type'=>'integer', 'label'=>'SeatingCapacity', 'enabled'=>'1', 'position'=>370, 'notnull'=>0, 'visible'=>3,),
 		's2_standing_capacity' => array('type'=>'integer', 'label'=>'StationaryCapacity', 'enabled'=>'1', 'position'=>380, 'notnull'=>0, 'visible'=>3,),
 		'u1_stationary_noise_level' => array('type'=>'integer', 'label'=>'StationaryNoiseLevel', 'enabled'=>'1', 'position'=>390, 'notnull'=>0, 'visible'=>3,),
 		'u2_motor_speed' => array('type'=>'integer', 'label'=>'MotorSpeed', 'enabled'=>'1', 'position'=>400, 'notnull'=>0, 'visible'=>3,),
-		'v7_co2_emission' => array('type'=>'integer', 'label'=>'COEmission', 'enabled'=>'1', 'position'=>410, 'notnull'=>0, 'visible'=>3,),
+		'v7_co2_emission' => array('type'=>'integer', 'label'=>'CO2Emission', 'enabled'=>'1', 'position'=>410, 'notnull'=>0, 'visible'=>3,),
 		'v9_environmental_category' => array('type'=>'varchar(128)', 'label'=>'EnvironmentalCategory', 'enabled'=>'1', 'position'=>420, 'notnull'=>0, 'visible'=>3,),
-		'x1_first_technical_inspection_date' => array('type'=>'datetime', 'label'=>'FirstTechnicallnspectionDate', 'enabled'=>'1', 'position'=>430, 'notnull'=>0, 'visible'=>3,),
+		'x1_first_technical_inspection_date' => array('type'=>'datetime', 'label'=>'FirstTechnicalInspectionDate', 'enabled'=>'1', 'position'=>430, 'notnull'=>0, 'visible'=>3,),
 		'y1_regional_tax' => array('type'=>'double(24,8)', 'label'=>'RegionalTax', 'enabled'=>'1', 'position'=>440, 'notnull'=>0, 'visible'=>3,),
 		'y2_professional_tax' => array('type'=>'double(24,8)', 'label'=>'ProfessionalTax', 'enabled'=>'1', 'position'=>450, 'notnull'=>0, 'visible'=>3,),
 		'y3_ecological_tax' => array('type'=>'double(24,8)', 'label'=>'EcologicalTax', 'enabled'=>'1', 'position'=>460, 'notnull'=>0, 'visible'=>3,),
@@ -159,9 +157,11 @@ class RegistrationCertificateFr extends CommonObject
 		'z2_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails2', 'enabled'=>'1', 'position'=>510, 'notnull'=>0, 'visible'=>3,),
 		'z3_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails3', 'enabled'=>'1', 'position'=>520, 'notnull'=>0, 'visible'=>3,),
 		'z4_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails4', 'enabled'=>'1', 'position'=>530, 'notnull'=>0, 'visible'=>3,),
+		'fk_product' => array('type'=>'integer:Product:product/class/product.class.php:1', 'label'=>'LinkedProduct', 'enabled'=>'1', 'position'=>13, 'notnull'=>0, 'visible'=>3, 'css'=>'maxwidth500'),
 		'fk_project' => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'enabled'=>'1', 'position'=>16, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
 		'fk_lot' => array('type'=>'integer:Productlot:product/stock/class/productlot.class.php:1', 'label'=>'DolicarBatch', 'enabled'=>'1', 'position'=>15, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
 	);
+	// BEGIN MODULEBUILDER PROPERTIES
 	public $rowid;
 	public $ref;
 	public $fk_soc;
