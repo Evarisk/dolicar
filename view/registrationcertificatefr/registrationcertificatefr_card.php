@@ -259,66 +259,21 @@ if ($action == 'create') {
 
 	print $form->buttonsSaveCancel("Create");
 
-	$registrationCertificateFields = [
-		'A_REGISTRATION_NUMBER'               => 'RegistrationNumber',
-		'B_FIRST_REGISTRATION_DATE'           => 'FirstRegistrationDate',
-		'C1_OWNER_FULLNAME'                   => 'OwnerFullName',
-		'C3_REGISTRATION_ADDRESS'             => 'RegistrationAddress',
-		'C4A_VEHICLE_OWNER'                   => 'VehicleOwner',
-		'C41_SECOND_OWNER_NUMBER'             => 'SecondOwnerNumber',
-		'C41_SECOND_OWNER_NAME'               => 'SecondOwnerName',
-		'D1_VEHICLE_BRAND'                    => 'VehicleBrand',
-		'D2_VEHICLE_TYPE'                     => 'VehicleType',
-		'D21_VEHICLE_CNIT'                    => 'VehicleCNIT',
-		'D3_VEHICLE_MODEL'                    => 'VehicleModel',
-		'E_VEHICLE_SERIAL_NUMBER'             => 'VehicleSerialNumber',
-		'F1_TECHNICAL_PTAC'                   => 'TechnicalPTAC',
-		'F2_PTAC'                             => 'PTAC',
-		'F3_PTRA'                             => 'PTRA',
-		'G_VEHICLE_WEIGHT'                    => 'VehicleWeight',
-		'G1_VEHICLE_EMPTY_WEIGHT'             => 'VehicleEmptyWeight',
-		'H_VALIDITY_PERIOD'                   => 'ValidityPeriod',
-		'I_VEHICLE_REGISTRATION_DATE'         => 'VehicleRegistrationDate',
-		'J_VEHICLE_CATEGORY'                  => 'VehicleCategory',
-		'J1_NATIONAL_TYPE'                    => 'NationalType',
-		'J2_EUROPEAN_BODYWORK'                => 'EuropeanBodyWork',
-		'J3_NATIONAL_BODYWORK'                => 'NationalBodyWork',
-		'K_TYPE_APPROVAL_NUMBER'              => 'TypeApprovalNumber',
-		'P1_CYLINDER_CAPACITY'                => 'CylinderCapacity',
-		'P2_MAXIMUM_NET_POWER'                => 'MaximumNetPower',
-		'P3_FUEL_TYPE'                        => 'FuelType',
-		'P6_NATIONAL_ADMINISTRATIVE_POWER'    => 'NationalAdministrativePower',
-		'Q_POWER_TO_WEIGHT_RATIO'             => 'PowerToWeightRatio',
-		'S1_SEATING_CAPACITY'                 => 'SeatingCapacity',
-		'S2_STANDING_CAPACITY'                => 'StandingCapacity',
-		'U1_STATIONARY_NOISE_LEVEL'           => 'StationaryNoiseLevel',
-		'U2_MOTOR_SPEED'                      => 'MotorSpeed',
-		'V7_CO2_EMISSION'                     => 'CO2Emission',
-		'V9_ENVIRONMENTAL_CATEGORY'           => 'EnvironmentalCategory',
-		'X1_FIRST_TECHNICAL_INSPECTION_DATE'  => 'FirstTechnicalInspectionDate',
-		'Y1_REGIONAL_TAX'                     => 'RegionalTax',
-		'Y2_PROFESSIONAL_TAX'                 => 'ProfessionalTax',
-		'Y3_ECOLOGICAL_TAX'                   => 'EcologicalTax',
-		'Y4_MANAGEMENT_TAX'                   => 'ManagementTax',
-		'Y5_FORWARDING_EXPENSES_TAX'          => 'ForwardingExpensesTax',
-		'Y6_TOTAL_PRICE_VEHICLE_REGISTRATION' => 'TotalPriceVehicleRegistration',
-		'Z1_SPECIFIC_DETAILS'                 => 'SpecificDetails1',
-		'Z2_SPECIFIC_DETAILS'                 => 'SpecificDetails2',
-		'Z3_SPECIFIC_DETAILS'                 => 'SpecificDetails3',
-		'Z4_SPECIFIC_DETAILS'                 => 'SpecificDetails4',
-	];
+	$registrationCertificateFields = get_registration_certificate_fields();
 
-	foreach ($registrationCertificateFields as $registrationCertificateCode => $registrationCertificateField) {
-		$fieldName = 'field_' . strtolower($registrationCertificateCode);
-		$confName = 'DOLICAR_' . $registrationCertificateCode . '_VISIBLE';
-		if ($conf->global->$confName < 1) {
-			?>
-			<script>
-				$('.' + <?php echo json_encode($fieldName); ?>).hide()
-			</script>
-			<?php
-		} else {
-			$counter++;
+	if (is_array($registrationCertificateFields) && !empty($registrationCertificateFields)) {
+		foreach ($registrationCertificateFields as $registrationCertificateCode => $registrationCertificateField) {
+			$fieldName = 'field_' . strtolower($registrationCertificateCode);
+			$confName = 'DOLICAR_' . $registrationCertificateCode . '_VISIBLE';
+			if ($conf->global->$confName < 1) {
+				?>
+				<script>
+					$('.' + <?php echo json_encode($fieldName); ?>).hide()
+				</script>
+				<?php
+			} else {
+				$counter++;
+			}
 		}
 	}
 
