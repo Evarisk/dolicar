@@ -23,38 +23,8 @@
  */
 
 // Load Dolibarr environment
-$res = 0;
-// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (!$res && !empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
-	$res = @include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
-}
-// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
-$tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME']; $tmp2 = realpath(__FILE__); $i = strlen($tmp) - 1; $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
-	$i--; $j--;
-}
-if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1))."/main.inc.php")) {
-	$res = @include substr($tmp, 0, ($i + 1))."/main.inc.php";
-}
-if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php")) {
-	$res = @include dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php";
-}
-// Try main.inc.php using relative path
-if (!$res && file_exists("../main.inc.php")) {
-	$res = @include "../main.inc.php";
-}
-if (!$res && file_exists("../../main.inc.php")) {
-	$res = @include "../../main.inc.php";
-}
-if (!$res && file_exists("../../../main.inc.php")) {
-	$res = @include "../../../main.inc.php";
-}
-if (!$res && file_exists("../../../../main.inc.php")) {
-	$res = @include "../../../../main.inc.php";
-}
-if (!$res) {
-	die("Include of main fails");
-}
+if (file_exists("../../dolicar.main.inc.php")) $res = @include "../../dolicar.main.inc.php";
+
 
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
@@ -70,22 +40,23 @@ global $conf, $langs, $user, $db, $hookmanager;
 $langs->loadLangs(array("dolicar@dolicar", "other"));
 
 // Get parameters
-$id = GETPOST('id', 'int');
-$ref = GETPOST('ref', 'alpha');
-$action = GETPOST('action', 'aZ09');
-$subaction = GETPOST('subaction', 'aZ09');
-$confirm = GETPOST('confirm', 'alpha');
-$cancel = GETPOST('cancel', 'aZ09');
-$contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'registrationcertificatefrcard'; // To manage different context of search
-$backtopage = GETPOST('backtopage', 'alpha');
+$id                  = GETPOST('id', 'int');
+$ref                 = GETPOST('ref', 'alpha');
+$action              = GETPOST('action', 'aZ09');
+$subaction           = GETPOST('subaction', 'aZ09');
+$confirm             = GETPOST('confirm', 'alpha');
+$cancel              = GETPOST('cancel', 'aZ09');
+$contextpage         = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'registrationcertificatefrcard'; // To manage different context of search
+$backtopage          = GETPOST('backtopage', 'alpha');
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
-$lineid   = GETPOST('lineid', 'int');
+$lineid              = GETPOST('lineid', 'int');
 
 // Initialize technical objects
-$object = new RegistrationCertificateFr($db);
-$product = new Product($db);
-$category = new Categorie($db);
+$object      = new RegistrationCertificateFr($db);
+$product     = new Product($db);
+$category    = new Categorie($db);
 $extrafields = new ExtraFields($db);
+
 $diroutputmassaction = $conf->dolicar->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('registrationcertificatefrcard', 'globalcard')); // Note that conf->hooks_modules contains array
 
@@ -126,6 +97,12 @@ if ($enablepermissioncheck) {
 	$permissionnote = 1;
 	$permissiondellink = 1;
 }
+
+// Security check - Protection if external user
+saturne_check_access($module, $object, $permissiontoread);
+
+if (empty($conf->dolicar->enabled)) accessforbidden();
+if (!$permissiontoread) accessforbidden();
 
 $upload_dir = $conf->dolicar->multidir_output[isset($object->entity) ? $object->entity : 1].'/registrationcertificatefr';
 
@@ -216,7 +193,7 @@ $formproject = new FormProjets($db);
 $title = $langs->trans("RegistrationCertificateFr");
 $help_url = '';
 $morejs = array('/dolicar/js/dolicar.js.php');
-llxHeader('', $title, $help_url, '', 0, 0,  $morejs);
+saturneHeader($module, $action, $subaction, 0, $title, $help_url, '', 0, 0,  $morejs);
 
 // Part to create
 if ($action == 'create') {
@@ -322,7 +299,7 @@ if (($id || $ref) && $action == 'edit') {
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
 	$res = $object->fetch_optionals();
 
-	$head = registrationcertificatefrPrepareHead($object);
+	$head = registration_certificate_prepare_head($object);
 	print dol_get_fiche_head($head, 'card', $langs->trans("RegistrationCertificateFr"), -1, $object->picto);
 
 	$formconfirm = '';

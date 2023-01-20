@@ -27,7 +27,7 @@
  * @param	RegistrationCertificateFr	$object		RegistrationCertificateFr
  * @return 	array					Array of tabs
  */
-function registrationcertificatefrPrepareHead($object)
+function registration_certificate_prepare_head($object)
 {
 	global $db, $langs, $conf;
 

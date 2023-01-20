@@ -45,38 +45,7 @@
 //if (! defined('NOSESSION'))                define('NOSESSION', '1');					// On CLI mode, no need to use web sessions
 
 // Load Dolibarr environment
-$res = 0;
-// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (!$res && !empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
-	$res = @include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
-}
-// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
-$tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME']; $tmp2 = realpath(__FILE__); $i = strlen($tmp) - 1; $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
-	$i--; $j--;
-}
-if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1))."/main.inc.php")) {
-	$res = @include substr($tmp, 0, ($i + 1))."/main.inc.php";
-}
-if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php")) {
-	$res = @include dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php";
-}
-// Try main.inc.php using relative path
-if (!$res && file_exists("../main.inc.php")) {
-	$res = @include "../main.inc.php";
-}
-if (!$res && file_exists("../../main.inc.php")) {
-	$res = @include "../../main.inc.php";
-}
-if (!$res && file_exists("../../../main.inc.php")) {
-	$res = @include "../../../main.inc.php";
-}
-if (!$res && file_exists("../../../../main.inc.php")) {
-	$res = @include "../../../../main.inc.php";
-}
-if (!$res) {
-	die("Include of main fails");
-}
+if (file_exists("../../dolicar.main.inc.php")) $res = @include "../../dolicar.main.inc.php";
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
@@ -234,16 +203,11 @@ if ($enablepermissioncheck) {
 	$permissiontodelete = 1;
 }
 
-// Security check (enable the most restrictive one)
-if ($user->socid > 0) accessforbidden();
-//if ($user->socid > 0) accessforbidden();
-//$socid = 0; if ($user->socid > 0) $socid = $user->socid;
-//$isdraft = (($object->status == $object::STATUS_DRAFT) ? 1 : 0);
-//restrictedArea($user, $object->element, $object->id, $object->table_element, '', 'fk_soc', 'rowid', $isdraft);
-if (empty($conf->dolicar->enabled)) accessforbidden('Moule not enabled');
+// Security check - Protection if external user
+saturne_check_access($module, $object, $permissiontoread);
+
+if (empty($conf->dolicar->enabled)) accessforbidden();
 if (!$permissiontoread) accessforbidden();
-
-
 
 /*
  * Actions
@@ -423,7 +387,7 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 // Output page
 // --------------------------------------------------------------------
 
-llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
+saturneHeader($module, $action, $subaction, 0, $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
 if (!empty($fromtype)) {
 	print dol_get_fiche_head($head, 'registrationcertificatefr', $langs->trans("Control"), -1, $objectLinked->picto);
 	dol_banner_tab($objectLinked, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
