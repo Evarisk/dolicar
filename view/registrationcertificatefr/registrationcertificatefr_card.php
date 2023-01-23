@@ -25,7 +25,6 @@
 // Load Dolibarr environment
 if (file_exists("../../dolicar.main.inc.php")) $res = @include "../../dolicar.main.inc.php";
 
-
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
@@ -192,8 +191,9 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("RegistrationCertificateFr");
 $help_url = '';
+$morecss = array('/dolicar/css/dolicar.css.php');
 $morejs = array('/dolicar/js/dolicar.js.php');
-saturneHeader($module, $action, $subaction, 0, $title, $help_url, '', 0, 0,  $morejs);
+saturneHeader($module, $action, $subaction, 0, '', $help_url, '', 0, 0, 0, $morejs, $morecss);
 
 // Part to create
 if ($action == 'create') {

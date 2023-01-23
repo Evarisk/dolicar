@@ -387,7 +387,7 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 // Output page
 // --------------------------------------------------------------------
 
-saturneHeader($module, $action, $subaction, 0, $title, $help_url, '', 0, 0, $morejs, $morecss, '', '');
+saturneHeader($module, $action, $subaction, 0, '', $help_url, '', 0, 0, $morejs, $morecss, '', '');
 if (!empty($fromtype)) {
 	print dol_get_fiche_head($head, 'registrationcertificatefr', $langs->trans("Control"), -1, $objectLinked->picto);
 	dol_banner_tab($objectLinked, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);

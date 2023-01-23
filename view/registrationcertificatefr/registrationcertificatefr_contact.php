@@ -113,7 +113,7 @@ if ($action == 'addcontact' && $permission) {
 $title = $langs->trans('RegistrationCertificateFr')." - ".$langs->trans('ContactsAddresses');
 $help_url = '';
 //$help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
-saturneHeader($module, $action, $subaction, 0, $title, $help_url);
+saturneHeader($module, $action, $subaction, 0, '', $help_url);
 
 $form = new Form($db);
 $formcompany = new FormCompany($db);
