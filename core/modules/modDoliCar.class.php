@@ -106,16 +106,18 @@ class modDoliCar extends DolibarrModules
 		$this->warnings_activation = array(); // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
 		$this->warnings_activation_ext = array(); // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
 
+		$i = 0;
 		$this->const = array(
-			1 => array('DOLICAR_DEFAULT_PROJECT', 'integer', 0, '', 0, 'current'),
-			2 => array('DOLICAR_DEFAULT_WAREHOUSE', 'integer', 0, '', 0, 'current'),
-			3 => array('DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'),
-			4 => array('DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'),
-			5 => array('DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'),
-			6 => array('DOLICAR_VEHICLE_TAG', 'integer', 0, '', 0, 'current'),
-			7 => array('DOLICAR_MENU_DEFAULT_VEHICLE_UPDATED', 'integer', 0, '', 0, 'current'),
-			8 => array('DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS', 'integer', 1, '', 0, 'current'),
-			9 => array('DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS', 'integer', 1, '', 0, 'current'),
+			$i++ => array('DOLICAR_DEFAULT_PROJECT', 'integer', 0, '', 0, 'current'),
+			$i++ => array('DOLICAR_DEFAULT_WAREHOUSE', 'integer', 0, '', 0, 'current'),
+			$i++ => array('DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'),
+			$i++ => array('DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'),
+			$i++ => array('DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'),
+			$i++ => array('DOLICAR_VEHICLE_TAG', 'integer', 0, '', 0, 'current'),
+			$i++ => array('DOLICAR_MENU_DEFAULT_VEHICLE_UPDATED', 'integer', 0, '', 0, 'current'),
+			$i++ => array('DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS', 'integer', 1, '', 0, 'current'),
+			$i++ => array('DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS', 'integer', 1, '', 0, 'current'),
+			$i++ => array('DOLICAR_A_REGISTRATION_NUMBER_VISIBLE', 'integer', 1, '', 0, 'current'),
 		);
 
 		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
