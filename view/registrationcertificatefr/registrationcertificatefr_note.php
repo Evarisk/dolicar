@@ -94,7 +94,7 @@ $form = new Form($db);
 
 //$help_url='EN:Customers_Orders|FR:Commandes_Clients|ES:Pedidos de clientes';
 $help_url = '';
-saturneHeader($module, $action, $subaction, 0, $langs->trans('RegistrationCertificateFr'), $help_url);
+saturne_header( 0, $langs->trans('RegistrationCertificateFr'), $help_url);
 
 if ($id > 0 || !empty($ref)) {
 	$object->fetch_thirdparty();

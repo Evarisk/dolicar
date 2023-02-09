@@ -109,7 +109,7 @@ $form = new Form($db);
 $title = $langs->trans("RegistrationCertificateFr").' - '.$langs->trans("Files");
 $help_url = '';
 //$help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
-saturneHeader($module, $action, $subaction, 0, '', $help_url);
+saturne_header( 0, '', $help_url);
 
 if ($object->id) {
 	/*
