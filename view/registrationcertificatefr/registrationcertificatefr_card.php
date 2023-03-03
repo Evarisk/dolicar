@@ -193,7 +193,7 @@ $title = $langs->trans("RegistrationCertificateFr");
 $help_url = '';
 $morecss = array('/dolicar/css/dolicar.css.php');
 $morejs = array('/dolicar/js/dolicar.js.php');
-saturneHeader($module, $action, $subaction, 0, '', $help_url, '', 0, 0, 0, $morejs, $morecss);
+saturne_header( 0, '', $help_url, '', 0, 0, 0, $morejs, $morecss);
 
 // Part to create
 if ($action == 'create') {

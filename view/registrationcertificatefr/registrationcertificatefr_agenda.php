@@ -137,7 +137,7 @@ if ($object->id > 0) {
 	$title = $langs->trans("Agenda");
 	//if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/',$conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->name." - ".$title;
 	$help_url = 'EN:Module_Agenda_En';
-	saturneHeader($module, $action, $subaction, 0, '', $help_url);
+	saturne_header( 0, '', $help_url);
 
 	if (!empty($conf->notification->enabled)) {
 		$langs->load("mails");
