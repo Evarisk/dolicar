@@ -41,6 +41,11 @@ class modDoliCar extends DolibarrModules
 	public function __construct($db)
 	{
 		global $langs, $conf;
+
+		require_once __DIR__ . '/../../../saturne/lib/saturne_functions.lib.php';
+
+		saturne_load_langs(['dolicar@dolicar']);
+
 		$this->db = $db;
 		$this->numero = 436380; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
 		$this->rights_class = 'dolicar';
@@ -187,24 +192,35 @@ class modDoliCar extends DolibarrModules
 		$r = 0;
 		// Add here entries to declare new permissions
 		/* BEGIN MODULEBUILDER PERMISSIONS */
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
+		$this->rights[$r][1] = $langs->trans('LireModule', 'DoliCar');
+		$this->rights[$r][4] = 'lire';
+		$this->rights[$r][5] = 1;
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
+		$this->rights[$r][1] = $langs->trans('ReadModule', 'DoliCar');
+		$this->rights[$r][4] = 'read';
+		$this->rights[$r][5] = 1;
+		$r++;
+
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read objects of DoliCar'; // Permission label
+		$this->rights[$r][1] = $langs->transnoentities('ReadObject', $langs->trans('RegistrationCertificatesFrMin')); // Permission label
 		$this->rights[$r][4] = 'registrationcertificatefr';
-		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->read)
+		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->write)
 		$r++;
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Create/Update objects of DoliCar'; // Permission label
+		$this->rights[$r][1] = $langs->transnoentities('CreateObject', $langs->trans('RegistrationCertificatesFrMin')); // Permission label
 		$this->rights[$r][4] = 'registrationcertificatefr';
 		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->write)
 		$r++;
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Delete objects of DoliCar'; // Permission label
+		$this->rights[$r][1] = $langs->transnoentities('DeleteObject', $langs->trans('RegistrationCertificatesFrMin')); // Permission label
 		$this->rights[$r][4] = 'registrationcertificatefr';
 		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->delete)
 		$r++;
 
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
-		$this->rights[$r][1] = 'Read admin page of DoliCar'; // Permission label
+		$this->rights[$r][1] = $langs->transnoentities('ReadAdminPage', 'DoliCar');
 		$this->rights[$r][4] = 'adminpage';
 		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->delete)
 		$r++;
@@ -243,7 +259,7 @@ class modDoliCar extends DolibarrModules
             'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php',
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'dolicar@dolicar',
-            'position'=>1100+$r,
+            'position'=>1000+$r,
             // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
             'enabled'=>'$conf->dolicar->enabled',
             // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
@@ -263,7 +279,7 @@ class modDoliCar extends DolibarrModules
             'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create&fk_product='.$conf->global->DOLICAR_DEFAULT_VEHICLE,
             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'langs'=>'dolicar@dolicar',
-            'position'=>1100+$r,
+            'position'=>1000+$r,
             // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
             'enabled'=>'$conf->dolicar->enabled',
             // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
@@ -281,7 +297,7 @@ class modDoliCar extends DolibarrModules
 			'leftmenu'=>'dolicar_companies',
 			'url'=>'/societe/index.php?mainmenu=companies',
 			'langs'=>'dolicar@dolicar',
-			'position'=>48520+$r,
+			'position'=>1050+$r,
 			'enabled'=>'$conf->dolicar->enabled',
 			'perms'=>'1',
 			'target'=>'',
@@ -296,7 +312,7 @@ class modDoliCar extends DolibarrModules
 			'leftmenu'=>'dolicar_propales',
 			'url'=>'/comm/propal/index.php?mainmenu=commercial&leftmenu=propals',
 			'langs'=>'dolicar@dolicar',
-			'position'=>48520+$r,
+			'position'=>1050+$r,
 			'enabled'=>'$conf->dolicar->enabled',
 			'perms'=>'1',
 			'target'=>'',
@@ -311,7 +327,7 @@ class modDoliCar extends DolibarrModules
 			'leftmenu'=>'dolicar_invoices',
 			'url'=>'/compta/facture/index.php?mainmenu=billing&leftmenu=customers_bills',
 			'langs'=>'dolicar@dolicar',
-			'position'=>48520+$r,
+			'position'=>1050+$r,
 			'enabled'=>'$conf->dolicar->enabled',
 			'perms'=>'1',
 			'target'=>'',
@@ -326,7 +342,7 @@ class modDoliCar extends DolibarrModules
 			'leftmenu'=>'dolicar_orders',
 			'url'=>'/commande/index.php?mainmenu=commercial&leftmenu=orders',
 			'langs'=>'dolicar@dolicar',
-			'position'=>48520+$r,
+			'position'=>1050+$r,
 			'enabled'=>'$conf->dolicar->enabled',
 			'perms'=>'1',
 			'target'=>'',
@@ -341,7 +357,7 @@ class modDoliCar extends DolibarrModules
 			'leftmenu'=>'dolicar_products',
 			'url'=>'/product/index.php?mainmenu=products',
 			'langs'=>'dolicar@dolicar',
-			'position'=>48520+$r,
+			'position'=>1050+$r,
 			'enabled'=>'$conf->dolicar->enabled',
 			'perms'=>'1',
 			'target'=>'',
@@ -356,27 +372,12 @@ class modDoliCar extends DolibarrModules
 			'leftmenu'=>'dolicar_lot',
 			'url'=>'/product/index.php?mainmenu=products',
 			'langs'=>'dolicar@dolicar',
-			'position'=>48520+$r,
+			'position'=>1050+$r,
 			'enabled'=>'$conf->dolicar->enabled',
 			'perms'=>'1',
 			'target'=>'',
 			'user'=>2
 		);
-		$this->menu[$r++] = array(
-			'fk_menu' => 'fk_mainmenu=dolicar',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type' => 'left',			                // This is a Left menu entry
-			'titre' => '<i class="fas fa-cog"></i>  ' . $langs->trans('DolicarConfig'),
-			'mainmenu' => 'dolicar',
-			'leftmenu' => 'dolicarconfig',
-			'url' => '/dolicar/admin/setup.php',
-			'langs' => 'dolicar@dolicar',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position' => 48520 + $r,
-			'enabled' => '$conf->dolicar->enabled',  // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms' => '$user->rights->dolicar->adminpage->read',			                // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
-			'target' => '',
-			'user' => 0,				                // 0=Menu for internal users, 1=external users, 2=both
-		);
-
 		/* END MODULEBUILDER LEFTMENU REGISTRATIONCERTIFICATEFR */
 	}
 
@@ -403,7 +404,7 @@ class modDoliCar extends DolibarrModules
 		// Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
-//		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1010, '', 'product_lot', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('registrationcertificate_metada', $langs->transnoentities("RegistrationCertificateMetadata"), 'text', 1080, '', 'product_lot', 0, 0, '', '', 1, '', 1);
 
 		// // Facture extrafields
 		// Update
@@ -411,7 +412,6 @@ class modDoliCar extends DolibarrModules
 		$extrafields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'facture', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
 
 		// Add
-
 		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
 		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'facture', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'facture', 0, 0, '', '', 1, '', 1);
