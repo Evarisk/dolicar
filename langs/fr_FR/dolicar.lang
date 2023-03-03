@@ -20,7 +20,8 @@
 # Module label 'ModuleDoliCarName'
 ModuleDoliCarName = DoliCar
 # Module description 'ModuleDoliCarDesc'
-ModuleDoliCarDesc = DoliCar description
+ModuleDoliCarDesc = Gestion et réparations d'un parc automobile
+DoliCarDescription = Gestion et réparations d'un parc automobile
 
 #
 # Admin page
