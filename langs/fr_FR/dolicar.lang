@@ -133,6 +133,8 @@ HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher
 LinkedProduct = Produit lié
 RegistrationCertificateMetadata = Données complémentaires de la carte grise
 RegistrationCertificatesFrMin = cartes grises
+TheRegistrationcertificatefr = la carte grise
+
 
 #
 # Other

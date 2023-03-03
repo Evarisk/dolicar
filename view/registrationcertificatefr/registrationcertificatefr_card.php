@@ -22,8 +22,12 @@
  *		\brief      Page to create/edit/view registrationcertificatefr
  */
 
-// Load Dolibarr environment
-if (file_exists("../../dolicar.main.inc.php")) $res = @include "../../dolicar.main.inc.php";
+// Load DoliCar environment
+if (file_exists('../../dolicar.main.inc.php')) {
+	require_once __DIR__ . '/../../dolicar.main.inc.php';
+} else {
+	die('Include of dolicar main fails');
+}
 
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
@@ -36,7 +40,7 @@ require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 global $conf, $langs, $user, $db, $hookmanager;
 
 // Load translation files required by the page
-$langs->loadLangs(array("dolicar@dolicar", "other"));
+saturne_load_langs(['other']);
 
 // Get parameters
 $id                  = GETPOST('id', 'int');
@@ -98,19 +102,9 @@ if ($enablepermissioncheck) {
 }
 
 // Security check - Protection if external user
-saturne_check_access($module, $object, $permissiontoread);
-
-if (empty($conf->dolicar->enabled)) accessforbidden();
-if (!$permissiontoread) accessforbidden();
+saturne_check_access($permissiontoread);
 
 $upload_dir = $conf->dolicar->multidir_output[isset($object->entity) ? $object->entity : 1].'/registrationcertificatefr';
-
-// Security check (enable the most restrictive one)
-//if ($user->socid > 0) accessforbidden();
-//if ($user->socid > 0) $socid = $user->socid;
-//restrictedArea($user, $object->element, $object->id, $object->table_element, '', 'fk_soc', 'rowid', $isdraft);
-if (empty($conf->dolicar->enabled)) accessforbidden();
-if (!$permissiontoread) accessforbidden();
 
 /*
  * Actions
@@ -191,9 +185,7 @@ $formproject = new FormProjets($db);
 
 $title = $langs->trans("RegistrationCertificateFr");
 $help_url = '';
-$morecss = array('/dolicar/css/dolicar.css.php');
-$morejs = array('/dolicar/js/dolicar.js.php');
-saturne_header( 0, '', $help_url, '', 0, 0, 0, $morejs, $morecss);
+saturne_header( 0, '', $help_url);
 
 // Part to create
 if ($action == 'create') {
@@ -300,8 +292,7 @@ if (($id || $ref) && $action == 'edit') {
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
 	$res = $object->fetch_optionals();
 
-	$head = registration_certificate_prepare_head($object);
-	print dol_get_fiche_head($head, 'card', $langs->trans("RegistrationCertificateFr"), -1, $object->picto);
+	print saturne_get_fiche_head($object, 'card', $langs->trans("RegistrationCertificateFr"));
 
 	$formconfirm = '';
 
@@ -335,14 +326,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
-	$morehtmlref = '<div class="refidno">';
-	$morehtmlref .= '</div>';
-
-
-	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
-
+	saturne_banner_tab($object);
 
 	print '<div class="fichecenter">';
 	print '<div class="fichehalfleft">';
@@ -350,9 +335,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '<table class="border centpercent tableforfield">'."\n";
 
 	// Common attributes
-	//$keyforbreak='fieldkeytoswitchonsecondcolumn';	// We change column just before this field
-	//unset($object->fields['fk_project']);				// Hide field already shown in banner
-	//unset($object->fields['fk_soc']);					// Hide field already shown in banner
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_view.tpl.php';
 
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
@@ -365,7 +347,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '<div class="clearboth"></div>';
 
 	print dol_get_fiche_end();
-
 
 	/*
 	 * Lines

@@ -63,7 +63,7 @@ class RegistrationCertificateFr extends CommonObject
 	/**
 	 * @var string String with name of icon for registrationcertificatefr. Must be the part after the 'object_' into object_registrationcertificatefr.png
 	 */
-	public $picto = 'registrationcertificatefr@dolicar';
+	public $picto = 'fontawesome_fa-car_fas_#d35968';
 
 	const STATUS_VALIDATED = 1;
 	const STATUS_CANCELED = 9;
