@@ -464,14 +464,24 @@ class modDoliCar extends DolibarrModules
 
 		$sql = array();
 
+		require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
+		$warehouse = new Entrepot($this->db);
+
 		//Warehouse
-		if ($conf->global->DOLICAR_DEFAULT_WAREHOUSE == 0) {
-			require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
-			$warehouse = new Entrepot($this->db);
-			$warehouse->ref = $langs->trans('ClientWarehouse');
-			$warehouse->label = $langs->trans('ClientWarehouse');
+		if ($conf->global->DOLICAR_DEFAULT_WAREHOUSE_ID <= 0) {
+			$warehouse->ref = $langs->trans('DolicarWarehouse');
+			$warehouse->label = $langs->trans('DolicarWarehouse');
 			$warehouse_id = $warehouse->create($user);
-			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE', $warehouse_id, 'integer', 0, '', $conf->entity);
+			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE_ID', $warehouse_id, 'integer', 0, '', $conf->entity);
+		}
+
+		if ($conf->global->DOLICAR_DEFAULT_WAREHOUSE_STATUS_UPDATED == 0) {
+			$warehouse->fetch($conf->global->DOLICAR_DEFAULT_WAREHOUSE_ID);
+			$warehouse->statut = 1;
+			$warehouseUpdated = $warehouse->update($warehouse->id, $user);
+			if ($warehouseUpdated > 0) {
+				dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE_STATUS_UPDATED', 1, 'integer', 0, '', $conf->entity);
+			}
 		}
 
 		//Categorie
