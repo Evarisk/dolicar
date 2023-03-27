@@ -42,9 +42,13 @@ class modDoliCar extends DolibarrModules
 	{
 		global $langs, $conf;
 
-		require_once __DIR__ . '/../../../saturne/lib/saturne_functions.lib.php';
-
-		saturne_load_langs(['dolicar@dolicar']);
+		if (file_exists(__DIR__ . '/../../../saturne/lib/saturne_functions.lib.php')) {
+			require_once __DIR__ . '/../../../saturne/lib/saturne_functions.lib.php';
+			saturne_load_langs(['dolicar@dolicar']);
+		} else {
+			$this->error++;
+			$this->errors[] = $langs->trans('activateModuleDependNotSatisfied', 'DoliCar', 'Saturne');
+		}
 
 		$this->db = $db;
 		$this->numero = 436380; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
@@ -377,6 +381,11 @@ class modDoliCar extends DolibarrModules
 		global $conf, $langs, $user;
 
 		$langs->load('dolicar@dolicar');
+
+		if ($this->error > 0) {
+			setEventMessages('', $this->errors, 'errors');
+			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
+		}
 
 		//$result = $this->_load_tables('/install/mysql/tables/', 'dolicar');
 		$result = $this->_load_tables('/dolicar/sql/');
