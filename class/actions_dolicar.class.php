@@ -305,8 +305,10 @@ class ActionsDoliCar
 					$objectsLinkedList[$rc->id] = $rc->getObjectsLinked();
 				}
 			}
+			$pictopath = dol_buildpath('/dolicar/img/dolicar.png', 1);
+			$pictoDoliCar = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
 
-			$outputline = '<table><tr class="titre"><td class="nobordernopadding valignmiddle col-title"><div class="titre inline-block">'. $langs->transnoentities('ObjectsLinked') .'</div></td></tr></table>';
+			$outputline = '<table><tr class="titre"><td class="nobordernopadding valignmiddle col-title"><div class="titre inline-block">'. $pictoDoliCar . $langs->transnoentities('ObjectsLinked') .'</div></td></tr></table>';
 			$outputline .= '<table><div class="div-table-responsive-no-min"><table class="liste formdoc noborder centpercent"><tbody>';
 			$outputline .= '<tr class="liste_titre">';
 			$outputline .= '<td class="float">'. $langs->transnoentities('ObjectType') .'</td>&nbsp;';
