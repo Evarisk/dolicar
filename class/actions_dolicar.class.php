@@ -113,9 +113,13 @@ class ActionsDoliCar
 				$outputline =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
 
 				$product = new Product($db);
+				$productlot = new Productlot($db);
 
 				if ($facture->array_options['options_linked_product'] > 0) {
 					$product->fetch($facture->array_options['options_linked_product']);
+				}
+				if ($facture->array_options['options_linked_lot'] > 0) {
+					$productlot->fetch($facture->array_options['options_linked_lot']);
 				}
 
 				?>
@@ -126,14 +130,15 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 				</script>
 				<?php
 				if (GETPOST('action') != 'edit_extras') {
 					?>
 					<script>
-						jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
-						jQuery('.facture_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl()) ?>)
+						jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+						jQuery('.facture_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
+						jQuery('.facture_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
 					</script>
 					<?php
 				}
@@ -145,6 +150,7 @@ class ActionsDoliCar
 						jQuery('.facturedet_extras_vehicle_model').hide()
 						jQuery('.facturedet_extras_registration_number').hide()
 						jQuery('.facturedet_extras_linked_product').hide()
+						jQuery('.facturedet_extras_linked_lot').hide()
 					</script>
 				<?php
 				endif;
@@ -154,6 +160,7 @@ class ActionsDoliCar
 					jQuery('.facture_extras_vehicle_model').hide()
 					jQuery('.facture_extras_registration_number').hide()
 					jQuery('.facture_extras_linked_product').hide()
+					jQuery('.facture_extras_linked_lot').hide()
 				</script>
 				<?php
 			}
@@ -177,10 +184,16 @@ class ActionsDoliCar
 				$outputline =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
 
 				$product = new Product($db);
+				$productlot = new Productlot($db);
 
 				if ($propal->array_options['options_linked_product'] > 0) {
 					$product->fetch($propal->array_options['options_linked_product']);
 				}
+
+				if ($propal->array_options['options_linked_lot'] > 0) {
+					$productlot->fetch($propal->array_options['options_linked_lot']);
+				}
+
 				?>
 				<script>
 					jQuery('#extrafield_lines_area_create').find('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
@@ -189,14 +202,15 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+					jQuery('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 				</script>
 				<?php
 				if (GETPOST('action') != 'edit_extras') {
 					?>
 					<script>
-						jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
-						jQuery('.propal_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl()) ?>)
+						jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+						jQuery('.propal_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
+						jQuery('.propal_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
 					</script>
 					<?php
 				}
@@ -208,6 +222,7 @@ class ActionsDoliCar
 						jQuery('.propaldet_extras_vehicle_model').hide()
 						jQuery('.propaldet_extras_registration_number').hide()
 						jQuery('.propaldet_extras_linked_product').hide()
+						jQuery('.propaldet_extras_linked_lot').hide()
 
 					</script>
 				<?php
@@ -218,6 +233,7 @@ class ActionsDoliCar
 					jQuery('.propal_extras_vehicle_model').hide()
 					jQuery('.propal_extras_registration_number').hide()
 					jQuery('.propal_extras_linked_product').hide()
+					jQuery('.propal_extras_linked_lot').hide()
 				</script>
 				<?php
 			}
@@ -239,9 +255,14 @@ class ActionsDoliCar
 				$outputline =  $registration_certificate->select_registrationcertificate_list($registration_certificate_id);
 
 				$product = new Product($db);
+				$productlot = new Productlot($db);
 
-				if ($facture->array_options['options_linked_product'] > 0) {
-					$product->fetch($facture->array_options['options_linked_product']);
+				if ($commande->array_options['options_linked_product'] > 0) {
+					$product->fetch($commande->array_options['options_linked_product']);
+				}
+
+				if ($commande->array_options['options_linked_lot'] > 0) {
+					$productlot->fetch($commande->array_options['options_linked_lot']);
 				}
 				?>
 				<script>
@@ -251,14 +272,15 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
+					jQuery('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 				</script>
 				<?php
                 if (GETPOST('action') != 'edit_extras') {
 					?>
 					<script>
-						jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl()) ?>)
-						jQuery('.commande_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl()) ?>)
+						jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+						jQuery('.commande_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
+						jQuery('.commande_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
 					</script>
 					<?php
 				}
@@ -270,6 +292,7 @@ class ActionsDoliCar
 						jQuery('.commandedet_extras_vehicle_model').hide()
 						jQuery('.commandedet_extras_registration_number').hide()
 						jQuery('.commandedet_extras_linked_product').hide()
+						jQuery('.commandedet_extras_linked_lot').hide()
 					</script>
 					<?php
 				endif;
@@ -279,6 +302,7 @@ class ActionsDoliCar
 					jQuery('.commande_extras_vehicle_model').hide()
 					jQuery('.commande_extras_registration_number').hide()
 					jQuery('.commande_extras_linked_product').hide()
+					jQuery('.commande_extras_linked_lot').hide()
 				</script>
 				<?php
 			}
@@ -505,6 +529,7 @@ class ActionsDoliCar
 				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
 				$_POST['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
 				$_POST['options_linked_product'] = $registrationcertificatefr->fk_product;
+				$_POST['options_linked_lot'] = $registrationcertificatefr->fk_lot;
 			}
 
 			if (GETPOST('action') == 'addline') {
@@ -525,6 +550,7 @@ class ActionsDoliCar
 				$_POST['options_registration_number'] = $object->array_options['options_registration_number'];
 				$_POST['options_vehicle_model'] = $object->array_options['options_vehicle_model'];
 				$_POST['options_mileage'] = $object->array_options['options_mileage'];
+				$_POST['options_linked_lot'] = $object->array_options['options_linked_lot'];
 			}
 
 			if (GETPOST('action') == 'update_extras') {
@@ -539,6 +565,7 @@ class ActionsDoliCar
 					$object->array_options['options_registration_number'] = $registrationcertificatefr->a_registration_number;
 					$object->array_options['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
 					$object->array_options['options_linked_product'] = $registrationcertificatefr->fk_product;
+					$object->array_options['options_linked_lot'] = $registrationcertificatefr->fk_lot;
 					$object->update($user);
 
 				}
