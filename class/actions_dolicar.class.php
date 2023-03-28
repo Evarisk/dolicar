@@ -178,8 +178,8 @@ class ActionsDoliCar
 
 				$product = new Product($db);
 
-				if ($facture->array_options['options_linked_product'] > 0) {
-					$product->fetch($facture->array_options['options_linked_product']);
+				if ($propal->array_options['options_linked_product'] > 0) {
+					$product->fetch($propal->array_options['options_linked_product']);
 				}
 				?>
 				<script>
