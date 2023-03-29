@@ -470,7 +470,7 @@ class ActionsDoliCar
 				let array_ids = <?php echo json_encode($product_ids); ?>;
 				jQuery('#fk_product').find('option').each(function() {
 					if ($(this).attr('value') != -1) {
-						Object.values(array_ids).includes($(this).attr('value')) ? console.log('oui') : $(this).remove()
+						Object.values(array_ids).includes($(this).attr('value')) ? '' : $(this).remove()
 					}
 				})
 				let newProductHref = jQuery('.field_fk_product .valuefieldcreate').find('.butActionNew').attr('href')

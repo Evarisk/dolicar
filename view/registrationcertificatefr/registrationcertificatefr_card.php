@@ -215,8 +215,37 @@ if ($action == 'create') {
 	//if (! GETPOSTISSET('fieldname')) $_POST['fieldname'] = 'myvalue';
 
 	print '<table class="border centpercent tableforfieldcreate">'."\n";
-
 	// Common attributes
+	unset($object->fields['fk_lot']);
+	unset($object->fields['fk_product']);
+	unset($object->fields['a_registration_number']);
+
+	//Registration Number
+	print '<tr><td class="fieldrequired">' . $langs->trans('RegistrationNumber') . '</td><td>';
+	print '<input class="maxwidth500 widthcentpercentminusxx" id="a_registration_number" name="a_registration_number" value="'. GETPOST("a_registration_number") .'">';
+	print '</td></tr>';
+
+	//Fk_product
+	$productPost = GETPOST('fk_product') ?: 0;
+	print '<tr><td class="">' . $langs->trans('LinkedProduct') . '</td><td>';
+	$form->select_produits($productPost, 'fk_product', '', 0, 1, -1, 2, '', '', '', '', 'SelectProductsOrServices', 0, 'maxwidth500 widthcentpercentminusxx', 1);
+	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/card.php?action=create&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProduct') . '"></span></a>';
+	print '</td></tr>';
+
+	//Fk_lot
+	$productLotPost = GETPOST('fk_lot') ?: 0;
+	print'<tr id=""><td >';
+	print $langs->trans('DolicarBatch');
+	print '</td><td class="lot-container">';
+	print '<span class="lot-content">';
+
+	dol_strlen(GETPOST('fk_product')) > 0 ? $product->fetch(GETPOST('fk_product')) : 0;
+
+	print dolicar_select_product_lots($productPost, $productLotPost, 'fk_lot', 1, '', '', 0, 'maxwidth500 widthcentpercentminusxx', false, 0, array(), false, '', 'fk_lot');
+	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
+	print '</span>';
+	print '</td></tr>';
+
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_add.tpl.php';
 
 	// Other attributes
@@ -272,6 +301,38 @@ if (($id || $ref) && $action == 'edit') {
 	print dol_get_fiche_head();
 
 	print '<table class="border centpercent tableforfieldedit">'."\n";
+
+	// Common attributes
+	unset($object->fields['ref']);
+	unset($object->fields['fk_lot']);
+	unset($object->fields['fk_product']);
+	unset($object->fields['a_registration_number']);
+
+	//Registration Number
+	print '<tr><td class="fieldrequired">' . $langs->trans('RegistrationNumber') . '</td><td>';
+	print '<input class="maxwidth500 widthcentpercentminusxx" id="a_registration_number" name="a_registration_number" value="'. ($object->a_registration_number ?: GETPOST("a_registration_number")) .'">';
+	print '</td></tr>';
+
+	//Fk_product
+	$productPost = GETPOST('fk_product') ?: $object->fk_product ;
+	print '<tr><td class="">' . $langs->trans('LinkedProduct') . '</td><td>';
+	$form->select_produits($productPost, 'fk_product', '', 0, 1, -1, 2, '', '', '', '', 'SelectProductsOrServices', 0, 'maxwidth500 widthcentpercentminusxx', 1);
+	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/card.php?action=create&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProduct') . '"></span></a>';
+	print '</td></tr>';
+
+	//Fk_lot
+	$productLotPost = GETPOST('fk_lot') ?: $object->fk_lot;
+	print'<tr id=""><td>';
+	print $langs->trans('DolicarBatch');
+	print '</td><td class="lot-container">';
+	print '<span class="lot-content">';
+
+	dol_strlen(GETPOST('fk_product')) > 0 ? $product->fetch(GETPOST('fk_product')) : 0;
+
+	print dolicar_select_product_lots($productPost, $productLotPost, 'fk_lot', 1, '', '', 0, 'maxwidth500 widthcentpercentminusxx', false, 0, array(), false, '', 'fk_lot');
+	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
+	print '</span>';
+	print '</td></tr>';
 
 	// Common attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_edit.tpl.php';
@@ -336,7 +397,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Common attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_view.tpl.php';
-
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
 
