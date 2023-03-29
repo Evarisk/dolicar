@@ -30,9 +30,8 @@ window.dolicar.registrationcertificate.event = function() {
 	$( document ).on( 'change', '#fk_product', window.dolicar.registrationcertificate.actualizeBrand );
 	$( document ).on( 'change', '#fk_product', window.dolicar.registrationcertificate.actualizeProductlot );
 	$( document ).ready(() => {
-		let url = $('.lot-creation-url').val()
-		$(document).find('.field_fk_lot .butActionNew').attr('target', '_blank')
-		$(document).find('.field_fk_lot .butActionNew').attr('href', url)
+		$(document).find('.field_fk_soc .butActionNew').attr('target', '_blank')
+		$(document).find('.field_fk_project .butActionNew').attr('target', '_blank')
 	})
 
 }

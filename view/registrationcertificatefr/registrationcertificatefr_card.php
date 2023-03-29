@@ -206,7 +206,6 @@ if ($action == 'create') {
 		print '<input type="hidden" name="backtopageforcancel" value="'.$backtopageforcancel.'">';
 	}
 
-	print '<input hidden class="lot-creation-url" value="'. DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create&backtopage='. $_SERVER['PHP_SELF'] . '?action=create&fk_lot=__ID__'.'">';
 	print '<input hidden class="car-brand" value="'.$brand_name.'">';
 
 	print dol_get_fiche_head(array(), '');
