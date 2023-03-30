@@ -127,6 +127,50 @@ class modDoliCar extends DolibarrModules
 			$i++ => array('DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS', 'integer', 1, '', 0, 'current'),
 			$i++ => array('DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS', 'integer', 1, '', 0, 'current'),
 			$i++ => array('DOLICAR_A_REGISTRATION_NUMBER_VISIBLE', 'integer', 1, '', 0, 'current'),
+
+			// CONST THIRDPARTY
+			$i++ => ['DOLICAR_THIRDPARTY_CLIENT_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_THIRDPARTY_CLIENT_VALUE', 'integer', 2, '', 0, 'current'],
+			$i++ => ['DOLICAR_THIRDPARTY_NAME_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_THIRDPARTY_PHONE_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_THIRDPARTY_EMAIL_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_THIRDPARTY_WEB_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_THIRDPARTY_PRIVATE_NOTE_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_THIRDPARTY_CATEGORIES_VISIBLE', 'integer', 1, '', 0, 'current'],
+
+			// CONST CONTACT
+			$i++ => ['DOLICAR_CONTACT_LASTNAME_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_CONTACT_FIRSTNAME_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_CONTACT_JOB_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_CONTACT_PHONEPRO_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_CONTACT_EMAIL_VISIBLE', 'integer', 1, '', 0, 'current'],
+
+			// CONST PROJECT
+			$i++ => ['DOLICAR_PROJECT_LABEL_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_PROJECT_OPPORTUNITY_STATUS_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_PROJECT_OPPORTUNITY_STATUS_VALUE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_PROJECT_OPPORTUNITY_AMOUNT_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_PROJECT_OPPORTUNITY_AMOUNT_VALUE', 'integer', 3000, '', 0, 'current'],
+			$i++ => ['DOLICAR_PROJECT_DATE_START_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_PROJECT_CATEGORIES_VISIBLE', 'integer', 1, '', 0, 'current'],
+
+			// CONST TASK
+			$i++ => ['DOLICAR_TASK_LABEL_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_TASK_LABEL_VALUE', 'chaine', $langs->trans('CommercialFollowUp'), '', 0, 'current'],
+			$i++ => ['DOLICAR_TASK_TIMESPENT_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_TASK_TIMESPENT_VALUE', 'integer', 15, '', 0, 'current'],
+
+			// CONST EVENT
+			$i++ => ['DOLICAR_EVENT_TYPE_CODE_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_EVENT_TYPE_CODE_VALUE', 'chaine', 'AC_TEL', '', 0, 'current'],
+			$i++ => ['DOLICAR_EVENT_LABEL_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_EVENT_DATE_START_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_EVENT_DATE_END_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_EVENT_STATUS_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_EVENT_STATUS_VALUE', 'integer', -1, '', 0, 'current'],
+			$i++ => ['DOLICAR_EVENT_DESCRIPTION_VISIBLE', 'integer', 1, '', 0, 'current'],
+			$i++ => ['DOLICAR_EVENT_CATEGORIES_VISIBLE', 'integer', 1, '', 0, 'current'],
+
 		);
 
 		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -365,6 +409,21 @@ class modDoliCar extends DolibarrModules
 			'target'=>'',
 			'user'=>2
 		);
+		$this->menu[$r++] = [
+			'fk_menu'  => 'fk_mainmenu=dolicar', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'     => 'left', // This is a Top menu entry
+			'titre'    => $langs->transnoentities('QuickCreation'),
+			'prefix'   => '<i class="fas fa-plus-circle pictofixedwidth"></i>',
+			'mainmenu' => 'dolicar',
+			'leftmenu' => 'quickcreation',
+			'url'      => '/dolicar/view/registrationcertificatefr/quickcreation.php', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'    => 'dolicar@dolicar',
+			'position' => 1000 + $r,
+			'enabled'  => '$conf->dolicar->enabled', // Define condition to show or hide menu entry. Use '$conf->easycrm->enabled' if entry must be visible if module is enabled.
+			'perms'    => '$user->rights->dolicar->read', // Use 'perms'=>'$user->rights->easycrm->myobject->read' if you want your menu with a permission rules
+			'target'   => '',
+			'user'     => 0, // 0=Menu for internal users, 1=external users, 2=both
+		];
 		/* END MODULEBUILDER LEFTMENU REGISTRATIONCERTIFICATEFR */
 	}
 
