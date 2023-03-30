@@ -22,10 +22,15 @@
  * \brief   DoliCar setup page.
  */
 
-// Load Dolibarr environment
-if (file_exists("../dolicar.main.inc.php")) $res = @include "../dolicar.main.inc.php";
+// Load DoliCar environment
+if (file_exists('../dolicar.main.inc.php')) {
+	require_once __DIR__ . '/../dolicar.main.inc.php';
+} else {
+	die('Include of dolicar main fails');
+}
 
-global $langs, $user;
+// Global variables definitions
+global $conf, $db, $langs, $user;
 
 // Libraries
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
@@ -36,15 +41,14 @@ require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
 //require_once "../class/myclass.class.php";
 
 // Translations
-$langs->loadLangs(array("admin", "dolicar@dolicar"));
+saturne_load_langs(['admin', 'categories']);
 
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('dolicarsetup', 'globalsetup'));
 
 // Access control
-if (!$user->admin) {
-	accessforbidden();
-}
+$permissiontoread = $user->rights->dolicar->adminpage->read;
+saturne_check_access($permissiontoread);
 
 // Parameters
 $action = GETPOST('action', 'aZ09');
@@ -54,67 +58,6 @@ $modulepart = GETPOST('modulepart', 'aZ09');	// Used by actions_setmoduleoptions
 $value = GETPOST('value', 'alpha');
 $label = GETPOST('label', 'alpha');
 $scandir = GETPOST('scan_dir', 'alpha');
-$type = 'myobject';
-
-$arrayofparameters = array(
-	'DOLICAR_MYPARAM1'=>array('type'=>'string', 'css'=>'minwidth500' ,'enabled'=>1),
-	'DOLICAR_MYPARAM2'=>array('type'=>'textarea','enabled'=>1),
-	//'DOLICAR_MYPARAM3'=>array('type'=>'category:'.Categorie::TYPE_CUSTOMER, 'enabled'=>1),
-	//'DOLICAR_MYPARAM4'=>array('type'=>'emailtemplate:thirdparty', 'enabled'=>1),
-	//'DOLICAR_MYPARAM5'=>array('type'=>'yesno', 'enabled'=>1),
-	//'DOLICAR_MYPARAM5'=>array('type'=>'thirdparty_type', 'enabled'=>1),
-	//'DOLICAR_MYPARAM6'=>array('type'=>'securekey', 'enabled'=>1),
-	//'DOLICAR_MYPARAM7'=>array('type'=>'product', 'enabled'=>1),
-);
-
-$error = 0;
-$setupnotempty = 0;
-
-// Set this to 1 to use the factory to manage constants. Warning, the generated module will be compatible with version v15+ only
-$useFormSetup = 0;
-// Convert arrayofparameter into a formSetup object
-if ($useFormSetup && (float) DOL_VERSION >= 15) {
-	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formsetup.class.php';
-	$formSetup = new FormSetup($db);
-
-	// you can use the param convertor
-	$formSetup->addItemsFromParamsArray($arrayofparameters);
-
-	// or use the new system see exemple as follow (or use both because you can ;-) )
-
-	/*
-	// Hôte
-	$item = $formSetup->newItem('NO_PARAM_JUST_TEXT');
-	$item->fieldOverride = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'];
-	$item->cssClass = 'minwidth500';
-
-	// Setup conf DOLICAR_MYPARAM1 as a simple string input
-	$item = $formSetup->newItem('DOLICAR_MYPARAM1');
-
-	// Setup conf DOLICAR_MYPARAM1 as a simple textarea input but we replace the text of field title
-	$item = $formSetup->newItem('DOLICAR_MYPARAM2');
-	$item->nameText = $item->getNameText().' more html text ';
-
-	// Setup conf DOLICAR_MYPARAM3
-	$item = $formSetup->newItem('DOLICAR_MYPARAM3');
-	$item->setAsThirdpartyType();
-
-	// Setup conf DOLICAR_MYPARAM4 : exemple of quick define write style
-	$formSetup->newItem('DOLICAR_MYPARAM4')->setAsYesNo();
-
-	// Setup conf DOLICAR_MYPARAM5
-	$formSetup->newItem('DOLICAR_MYPARAM5')->setAsEmailTemplate('thirdparty');
-
-	// Setup conf DOLICAR_MYPARAM6
-	$formSetup->newItem('DOLICAR_MYPARAM6')->setAsSecureKey()->enabled = 0; // disabled
-
-	// Setup conf DOLICAR_MYPARAM7
-	$formSetup->newItem('DOLICAR_MYPARAM7')->setAsProduct();
-	*/
-
-	$setupnotempty = count($formSetup->items);
-}
-
 
 $dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
 
@@ -237,7 +180,7 @@ $form = new Form($db);
 $help_url = '';
 $page_name = $langs->transnoentities('DolicarSetup');
 
-llxHeader('', $langs->trans($page_name), $help_url);
+saturne_header(0, '', $langs->trans($page_name), $help_url);
 
 // Subheader
 $linkback = '<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
@@ -245,7 +188,7 @@ $linkback = '<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/module
 print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 
 // Configuration header
-$head = dolicarAdminPrepareHead();
+$head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'registrationcertificate', $langs->trans($page_name), -1, "dolicar@dolicar");
 
 print load_fiche_titre($langs->transnoentities("ImmatriculationAPIConfig"), '', '');
