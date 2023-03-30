@@ -33,6 +33,8 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
@@ -57,6 +59,7 @@ $lineid              = GETPOST('lineid', 'int');
 // Initialize technical objects
 $object      = new RegistrationCertificateFr($db);
 $product     = new Product($db);
+$productLot  = new Productlot($db);
 $category    = new Categorie($db);
 $extrafields = new ExtraFields($db);
 
@@ -139,6 +142,122 @@ if (empty($reshook)) {
 		$brand_name = get_vehicle_brand($productId);
 	}
 
+	if ($action == 'getRegistrationCertificateData') {
+		$apiUrl = 'http://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
+
+		$username = $conf->global->DOLICAR_IMMATRICULATION_API_USERNAME;
+		$registrationNumber = GETPOST('registrationNumber');
+
+		if (dol_strlen($username) > 0) {
+			if ((preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', $registrationNumber) || preg_match('/^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/', $registrationNumber))) {
+				// Setup request to send json via POST
+
+				$xmlData = @file_get_contents( $apiUrl . '?RegistrationNumber=' . $registrationNumber ."&username=" . $username);
+
+				if (empty($xmlData)) {
+					$usernameConfigUrl = DOL_URL_ROOT . '/custom/dolicar/admin/registrationcertificate.php';
+					setEventMessage($langs->trans('BadAPIUsername', $usernameConfigUrl), 'errors');
+				} else {
+					$xml = simplexml_load_string($xmlData);
+					$strJson = $xml->vehicleJson;
+					$registrationCertificateObject = json_decode($strJson);
+					setEventMessages($langs->trans("LicencePlateInformationsCharged"), null, 'mesgs');
+				}
+			} else {
+				setEventMessage($langs->trans('BadLicencePlateFormat'), 'errors');
+			}
+		} else {
+			setEventMessage($langs->trans('BadAPIUsername'), 'errors');
+		}
+
+
+
+		if (is_object($registrationCertificateObject)) {
+
+			//Product Creation
+			$productRef = $registrationCertificateObject->CarMake->CurrentTextValue . ' ' . $registrationCertificateObject->CarModel->CurrentTextValue . ' ' . $registrationCertificateObject->ExtendedData->version;
+			$sanitizedProductRef = dol_sanitizeFileName(dol_string_nospecial(trim($productRef)));
+			$result = $product->fetch('', $sanitizedProductRef);
+
+			if ($result <= 0) {
+				$product->ref = $productRef;
+				$product->label = $productRef;
+				$productId = $product->create($user);
+
+				if ($productId > 0) {
+					$category->fetch(0, $registrationCertificateObject->CarMake->CurrentTextValue);
+					$product->setCategories(array($category->id, $conf->global->DOLICAR_CAR_BRANDS_TAG));
+				}
+			}
+
+			$productLotLabel = $registrationCertificateObject->ExtendedData->numSerieMoteur;
+			$resultProductlot = $productLot->fetch(0,$product->id ,$productLotLabel);
+
+			if ($resultProductlot <= 0) {
+				$productLot->batch = $productLotLabel;
+				$productLot->fk_product = $product->id;
+				$productLot->create($user);
+			}
+
+			$_POST['fk_product'] = $product->id;
+			$_POST['fk_lot'] = $productLot->id;
+			$_POST['a_registration_number'] = $registrationNumber;
+
+			$registrationDateArray = str_split($registrationCertificateObject->ExtendedData->datePremiereMiseCirculation, 2);
+			$formattedRegistrationDate = $registrationDateArray[0] . '/' . $registrationDateArray[1] . '/' . $registrationDateArray[2] . $registrationDateArray[3];
+
+			$_POST['b_first_registration_date'] = $formattedRegistrationDate;
+			$_POST['b_first_registration_dateday'] = $registrationDateArray[0];
+			$_POST['b_first_registration_datemonth'] = $registrationDateArray[1];
+			$_POST['b_first_registration_dateyear'] = $registrationDateArray[2] . $registrationDateArray[3];
+			$_POST['c1_owner_name'] = '';
+			$_POST['c3_registration_address'] = '';
+			$_POST['c4a_vehicle_owner'] = '';
+			$_POST['c41_second_owner_number'] = '';
+			$_POST['c41_second_owner_name'] = '';
+			$_POST['d1_vehicle_brand'] = $registrationCertificateObject->CarMake->CurrentTextValue;
+			$_POST['d2_vehicle_type']  = $registrationCertificateObject->ExtendedData->typeVehicule;
+			$_POST['d21_vehicle_cnit'] = $registrationCertificateObject->ExtendedData->CNIT;
+			$_POST['d3_vehicle_model'] = $registrationCertificateObject->ExtendedData->libelleModele;
+			$_POST['e_vehicle_serial_number'] = $registrationCertificateObject->ExtendedData->numSerieMoteur;
+			$_POST['f1_technical_ptac'] = '';
+			$_POST['f2_ptac'] = '';
+			$_POST['f3_ptra'] = '';
+			$_POST['g_vehicle_weight'] = '';
+			$_POST['g1_vehicle_empty_weight'] = '';
+			$_POST['h_validity_period'] = '';
+			$_POST['i_vehicle_registration_date'] = $registrationCertificateObject->RegistrationDate;
+			$_POST['j_vehicle_category'] = '';
+			$_POST['j1_national_type'] = $registrationCertificateObject->ExtendedData->genre;
+			$_POST['j2_european_bodywork'] = '';
+			$_POST['j3_national_bodywork'] = '';
+			$_POST['k_type_approval_number'] = '';
+			$_POST['p1_cylinder_capacity'] = $registrationCertificateObject->ExtendedData->EngineCC;
+			$_POST['p2_maximum_net_power'] = '';
+			$_POST['p3_fuel_type'] = $registrationCertificateObject->FuelType->CurrentTextValue;
+			$_POST['p6_national_administrative_power'] = $registrationCertificateObject->ExtendedData->puissance;
+			$_POST['q_power_to_weight_ratio'] = '';
+			$_POST['s1_seating_capacity'] = $registrationCertificateObject->ExtendedData->nbPlace;
+			$_POST['s2_standing_capacity'] = '';
+			$_POST['u1_stationary_noise_level'] = '';
+			$_POST['u2_motor_speed'] = '';
+			$_POST['v7_co2_emission'] = $registrationCertificateObject->ExtendedData->Co2;
+			$_POST['v9_environmental_category'] = '';
+			$_POST['x1_first_technical_inspection_date'] = '';
+			$_POST['y1_regional_tax'] = '';
+			$_POST['y2_professional_tax'] = '';
+			$_POST['y3_ecological_tax'] = '';
+			$_POST['y4_management_tax'] = '';
+			$_POST['y5_forwarding_expenses_tax'] = '';
+			$_POST['y6_total_price_vehicle_registration'] = '';
+			$_POST['z1_specific_details'] = '';
+			$_POST['z2_specific_details'] = '';
+			$_POST['z3_specific_details'] = '';
+			$_POST['z4_specific_details'] = '';
+		}
+		$action = 'create';
+	}
+
 	$triggermodname = 'DOLICAR_REGISTRATIONCERTIFICATEFR_MODIFY'; // Name of trigger action code to execute when we modify record
 
 	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
@@ -170,9 +289,6 @@ if (empty($reshook)) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 }
 
-
-
-
 /*
  * View
  *
@@ -194,7 +310,29 @@ if ($action == 'create') {
 		exit;
 	}
 
-	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("RegistrationCertificateFr")), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("NewRegistrationCertificateFr"), '', 'object_'.$object->picto);
+
+	print '<hr>';
+	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="getRegistrationCertificateData">';
+	print '<input type="hidden" name="action" value="getRegistrationCertificateData">';
+	print '<table class="border centpercent tableforfieldcreate">';
+	print '<tr>';
+	print '<td class="titlefieldcreate">';
+	print $langs->trans('FindLicencePlateInRepertory');
+	print '</td>';
+	print '<td class="valuefieldcreate">';
+	print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber">';
+	print '</td>';
+	print '</tr>';
+	print '<tr>';
+	print '</tr>';
+	print '</table>';
+	print '<div class="center">';
+	print '<input type="submit" class="button butAction" value="'. $langs->trans('Search') .'">';
+	print '</div>';
+	print '</form>';
+	print '<hr>';
+	print '<br>';
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="registrationcertificatefr_create">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';

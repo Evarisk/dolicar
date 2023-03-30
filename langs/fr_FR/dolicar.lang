@@ -136,7 +136,14 @@ LinkedProductBatch = Numéro de lot/série lié
 RegistrationCertificateMetadata = Données complémentaires de la carte grise
 RegistrationCertificatesFrMin = cartes grises
 TheRegistrationcertificatefr = la carte grise
-
+FindLicencePlateInRepertory = Rechercher une plaque d'immatriculation
+RegistrationCertificateFields = Champs de la carte grise
+RegistrationCertificateFieldsConfig = Configuration des champs de la carte grise
+ImmatriculationAPIConfig = Configuration de l'API immatriculationapi.com
+APIUsername = Nom de l'utilisateur API
+BadLicencePlateFormat = La plaque d'immatriculation n'est pas au bon format. Veuillez utiliser l'un des formats suivants : <br><b> XX-111-XX <br>  XX111XX </b>
+BadAPIUsername = Nom d'utilisateur pour l'API invalide. Vous pouvez configurer le nom d'utilisateur pour la connexion à l'API à l'adresse suivante : <a href="%s" target="_blank">Configuration du nom d'utilisateur API</a>
+LicencePlateInformationsCharged = Les informations de la carte grise ont bien été récupérées
 
 #
 # Other

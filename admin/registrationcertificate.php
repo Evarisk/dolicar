@@ -222,7 +222,11 @@ if ($action == 'updateMask') {
 	}
 }
 
-
+if ($action == 'setAPIUsername') {
+	$APIUsername = GETPOST('APIUsername');
+	dolibarr_set_const($db, 'DOLICAR_IMMATRICULATION_API_USERNAME', $APIUsername,'chaine',1,'','current');
+	setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
+}
 
 /*
  * View
@@ -244,7 +248,33 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 $head = dolicarAdminPrepareHead();
 print dol_get_fiche_head($head, 'registrationcertificate', $langs->trans($page_name), -1, "dolicar@dolicar");
 
-print load_fiche_titre($langs->transnoentities("RegistrationCertificateFields"), '', '');
+print load_fiche_titre($langs->transnoentities("ImmatriculationAPIConfig"), '', '');
+
+print '<div class="div-table-responsive-no-min">';
+print '<form id="APIUsername">';
+print '<input hidden name="action" value="setAPIUsername">';
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities("Parameters") . '</td>';
+print '<td class="center">' . $langs->transnoentities("Value") . '</td>';
+print '<td class="center">' . $langs->transnoentities("Action") . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '<td>' . $langs->transnoentities('APIUsername') . '</td>';
+print '<td class="center">';
+print '<input name="APIUsername" value="'. $conf->global->DOLICAR_IMMATRICULATION_API_USERNAME .'">';
+print '</td>';
+print '<td class="center">';
+print '<input type="submit" class="button" value="'. $langs->transnoentities('Save').'">';
+print '</td>';
+print '</tr>';
+
+print '</table>';
+print '</form>';
+print '</div>';
+
+print load_fiche_titre($langs->transnoentities("RegistrationCertificateFieldsConfig"), '', '');
 
 print '<div class="div-table-responsive-no-min">';
 print '<table class="noborder centpercent">';

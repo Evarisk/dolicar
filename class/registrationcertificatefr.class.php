@@ -112,7 +112,7 @@ class RegistrationCertificateFr extends CommonObject
 		'status' => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>70, 'notnull'=>1, 'visible'=>0, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Brouillon', '1'=>'Validé', '9'=>'Annulé')),
 		'ref_ext' => array('type'=>'varchar(128)', 'label'=>'RefExt', 'enabled'=>'1', 'position'=>20, 'notnull'=>0, 'visible'=>0,),
 		'a_registration_number' => array('type'=>'varchar(128)', 'label'=>'RegistrationNumber', 'enabled'=>'1', 'position'=>11, 'notnull'=>1, 'visible'=>1,),
-		'b_first_registration_date' => array('type'=>'datetime', 'label'=>'FirstRegistrationDate', 'enabled'=>'1', 'position'=>90, 'notnull'=>0, 'visible'=>3,),
+		'b_first_registration_date' => array('type'=>'date', 'label'=>'FirstRegistrationDate', 'enabled'=>'1', 'position'=>90, 'notnull'=>0, 'visible'=>3,),
 		'c1_owner_fullname' => array('type'=>'varchar(255)', 'label'=>'OwnerFullName', 'enabled'=>'1', 'position'=>100, 'notnull'=>0, 'visible'=>3,),
 		'c3_registration_address' => array('type'=>'text', 'label'=>'RegistrationAddress', 'enabled'=>'1', 'position'=>110, 'notnull'=>0, 'visible'=>3,),
 		'c4a_vehicle_owner' => array('type'=>'boolean', 'label'=>'VehicleOwner', 'enabled'=>'1', 'position'=>120, 'notnull'=>0, 'visible'=>3,),
