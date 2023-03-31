@@ -39,8 +39,20 @@ if (is_object($registrationCertificateObject)) {
 		$productId = $product->create($user);
 
 		if ($productId > 0) {
-			$category->fetch(0, $registrationCertificateObject->CarMake->CurrentTextValue);
-			$product->setCategories(array($category->id, $conf->global->DOLICAR_CAR_BRANDS_TAG));
+			$resultCategory = $category->fetch(0, $registrationCertificateObject->CarMake->CurrentTextValue);
+
+			if ($category <= 0) {
+				$category->label       = $registrationCertificateObject->CarMake->CurrentTextValue;
+				$category->description = $registrationCertificateObject->CarMake->CurrentTextValue;
+				$category->visible     = 1;
+				$category->type        = 'product';
+				$category->fk_parent   = $conf->global->DOLICAR_CAR_BRANDS_TAG;
+				$categoryID            = $category->create($user);
+			} else {
+				$categoryID = $category->id;
+			}
+
+			$product->setCategories(array($categoryID, $conf->global->DOLICAR_CAR_BRANDS_TAG));
 		} else {
 			$error++;
 		}
