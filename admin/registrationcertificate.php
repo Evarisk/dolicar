@@ -196,6 +196,7 @@ print load_fiche_titre($langs->transnoentities("ImmatriculationAPIConfig"), '', 
 print '<div class="div-table-responsive-no-min">';
 print '<form id="APIUsername">';
 print '<input hidden name="action" value="setAPIUsername">';
+print '<input hidden name="token" value="'. newToken() .'">';
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->transnoentities("Parameters") . '</td>';
