@@ -4,6 +4,7 @@ $apiUrl = 'http://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
 
 $username = $conf->global->DOLICAR_IMMATRICULATION_API_USERNAME;
 $registrationNumber = GETPOST('registrationNumber');
+$registrationNumber = strtoupper($registrationNumber);
 
 if (dol_strlen($username) > 0) {
 	if ((preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', $registrationNumber) || preg_match('/^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/', $registrationNumber))) {

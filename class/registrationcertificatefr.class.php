@@ -314,7 +314,18 @@ class RegistrationCertificateFr extends CommonObject
 	public function create(User $user, $notrigger = false)
 	{
 		global $conf, $langs;
-		$this->ref = $this->a_registration_number;
+		$registrationNumber = $this->a_registration_number;
+		$registrationNumber = strtoupper($registrationNumber);
+
+		if (preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', $registrationNumber)) {
+			$registrationNumberLetters = preg_split('/[0-9]{3}/',$registrationNumber);
+			$registrationNumberNumbers = preg_split('/[A-Z]{2}/',$registrationNumber);
+
+			$registrationNumberFormatted = $registrationNumberLetters[0] . '-' . $registrationNumberNumbers[1] . '-' . $registrationNumberLetters[1];
+			$registrationNumber = $registrationNumberFormatted;
+		}
+		$this->a_registration_number = $registrationNumber;
+		$this->ref = $registrationNumber;
 		$this->status = 1;
 		if (empty($this->fk_lot) || $this->fk_lot == -1) {
 			$lot_id = createDefaultLot($this->fk_product);
