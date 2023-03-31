@@ -33,6 +33,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/invoice.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
 
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
@@ -113,6 +114,10 @@ if (!empty($fromtype)) {
 			$objectLinked = new Societe($db);
 			$prehead = 'societe_prepare_head';
 			break;
+		case 'project' :
+			$objectLinked = new Project($db);
+			$prehead = 'project_prepare_head';
+			break;
 	}
 	$objectLinked->fetch($fromid);
 	$head = $prehead($objectLinked);
@@ -140,6 +145,9 @@ if(!empty($fromtype)) {
 			break;
 		case 'thirdparty':
 			$search['fk_soc'] = $fromid;
+			break;
+		case 'project':
+			$search['fk_project'] = $fromid;
 			break;
 	}
 }

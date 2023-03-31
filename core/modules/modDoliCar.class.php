@@ -142,6 +142,7 @@ class modDoliCar extends DolibarrModules
 		$this->tabs[] = array('data' => 'productlot:+registrationcertificatefr:' . $picto . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot');
 		$this->tabs[] = array('data' => 'thirdparty:+registrationcertificatefr:' . $picto . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty');
 		$this->tabs[] = array('data' => 'product:+registrationcertificatefr:' . $picto . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product');
+		$this->tabs[] = array('data' => 'project:+registrationcertificatefr:' . $picto . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project');
 
 		// Dictionaries
 		$this->dictionaries = array(
