@@ -755,5 +755,49 @@ class ActionsDoliCar
 		}
 	}
 
-	/* Add here any other hooked methods... */
+	/**
+	 * Execute action completeTabsHead
+	 *
+	 * @param   array           $parameters     Array of parameters
+	 * @param   CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param   string          $action         'add', 'update', 'view'
+	 * @param   Hookmanager     $hookmanager    hookmanager
+	 * @return  int                             <0 if KO,
+	 *                                          =0 if OK but we want to process standard actions too,
+	 *                                          >0 if OK and we want to replace standard actions.
+	 */
+	public function quickCreationAction(&$parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs, $user, $conf;
+
+		if ($parameters['currentcontext'] == 'dolicar_quickcreation') {
+			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+			if (isModEnabled('productbatch')) {
+				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+			}
+			if (isModEnabled('categorie')) {
+				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+			}
+
+			$object = new RegistrationCertificateFr($this->db);
+			if (isModEnabled('product')) {
+				$product = new Product($this->db);
+			}
+			if (isModEnabled('productbatch')) {
+				$productLot = new Productlot($this->db);
+			}
+			if (isModEnabled('categorie')) {
+				$category = new Categorie($this->db);
+			}
+
+			$createRegistrationCertificate = 1;
+			require_once __DIR__ . '/../core/tpl/dolicar_registrationcertificatefr_immatriculation_api_fetch_action.tpl.php';
+
+			if (dol_strlen($backtopage) > 0){
+				$this->resprints = $backtopage;
+			}
+
+			return 1;
+		}
+	}
 }

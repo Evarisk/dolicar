@@ -60,6 +60,10 @@ if (is_object($registrationCertificateObject)) {
 	}
 
 	if ($createRegistrationCertificate > 0) {
+
+		$projectID = $parameters['projectID'];
+		$thirdpartyID = $parameters['thirdpartyID'];
+
 		$object->fk_product = $product->id;
 		$object->fk_lot = $productLot->id;
 		$object->fk_soc = $thirdpartyID;

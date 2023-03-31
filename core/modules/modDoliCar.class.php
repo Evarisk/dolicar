@@ -85,7 +85,8 @@ class modDoliCar extends DolibarrModules
 				'propalcard',
 				'ordercard',
 				'productlotcard',
-				'registrationcertificatefrcard'
+				'registrationcertificatefrcard',
+				'dolicar_quickcreation'
 			),
 			'moduleforexternal' => 0,
 		);
