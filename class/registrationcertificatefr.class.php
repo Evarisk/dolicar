@@ -157,7 +157,7 @@ class RegistrationCertificateFr extends CommonObject
 		'z2_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails2', 'enabled'=>'1', 'position'=>510, 'notnull'=>0, 'visible'=>3,),
 		'z3_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails3', 'enabled'=>'1', 'position'=>520, 'notnull'=>0, 'visible'=>3,),
 		'z4_specific_details' => array('type'=>'text', 'label'=>'SpecificDetails4', 'enabled'=>'1', 'position'=>530, 'notnull'=>0, 'visible'=>3,),
-		'fk_product' => array('type'=>'integer:Product:product/class/product.class.php:1', 'label'=>'LinkedProduct', 'enabled'=>'1', 'position'=>13, 'notnull'=>0, 'visible'=>3, 'css'=>'maxwidth500'),
+		'fk_product' => array('type'=>'integer:Product:product/class/product.class.php:1', 'label'=>'LinkedProduct', 'enabled'=>'1', 'position'=>13, 'notnull'=>0, 'visible'=>1, 'css'=>'maxwidth500'),
 		'fk_project' => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'enabled'=>'1', 'position'=>16, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
 		'fk_lot' => array('type'=>'integer:Productlot:product/stock/class/productlot.class.php:1', 'label'=>'DolicarBatch', 'enabled'=>'1', 'position'=>15, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
 	);
