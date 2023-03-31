@@ -136,6 +136,7 @@ if (is_object($registrationCertificateObject)) {
 		$object->z2_specific_details = '';
 		$object->z3_specific_details = '';
 		$object->z4_specific_details = '';
+		$object->json = json_encode($registrationCertificateObject);
 
 		$registrationCertificateId = $object->create($user);
 
@@ -199,6 +200,7 @@ if (is_object($registrationCertificateObject)) {
 		$_POST['z2_specific_details'] = '';
 		$_POST['z3_specific_details'] = '';
 		$_POST['z4_specific_details'] = '';
+		$_POST['json'] = json_encode($registrationCertificateObject);
 
 		$action = 'create';
 	}

@@ -160,6 +160,7 @@ class RegistrationCertificateFr extends CommonObject
 		'fk_product' => array('type'=>'integer:Product:product/class/product.class.php:1', 'label'=>'LinkedProduct', 'enabled'=>'1', 'position'=>13, 'notnull'=>0, 'visible'=>1, 'css'=>'maxwidth500'),
 		'fk_project' => array('type'=>'integer:Project:projet/class/project.class.php:1', 'label'=>'Project', 'enabled'=>'1', 'position'=>16, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
 		'fk_lot' => array('type'=>'integer:Productlot:product/stock/class/productlot.class.php:1', 'label'=>'DolicarBatch', 'enabled'=>'1', 'position'=>15, 'notnull'=>-1, 'visible'=>-1, 'index'=>1, 'css'=>'maxwidth500', 'validate'=>'1',),
+		'json' => array('type'=>'text', 'label'=>'JSON', 'enabled'=>'1', 'position'=>15, 'notnull'=>-1, 'visible'=>3, 'index'=>1, 'css'=>'maxwidth500'),
 	);
 	// BEGIN MODULEBUILDER PROPERTIES
 	public $rowid;
@@ -222,6 +223,7 @@ class RegistrationCertificateFr extends CommonObject
 	public $z4_specific_details;
 	public $fk_project;
 	public $fk_lot;
+	public $json;
 	// END MODULEBUILDER PROPERTIES
 
 

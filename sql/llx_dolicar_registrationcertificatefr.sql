@@ -75,6 +75,7 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
 	z4_specific_details text,
     fk_product integer NOT NULL,
 	fk_project integer, 
-	fk_lot integer
+	fk_lot integer,
+	json longtext
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;

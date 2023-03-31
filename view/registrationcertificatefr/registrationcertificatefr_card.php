@@ -289,7 +289,6 @@ if ($action == 'create') {
 			$fieldName = 'field_' . strtolower($registrationCertificateCode);
 			$confName = 'DOLICAR_' . $registrationCertificateCode . '_VISIBLE';
 			if ($conf->global->$confName < 1) {
-
 				?>
 				<script>
 					$('.' + <?php echo json_encode($fieldName); ?>).hide()
@@ -300,6 +299,11 @@ if ($action == 'create') {
 			}
 		}
 	}
+	?>
+	<script>
+		$('.' + <?php echo json_encode('field_json'); ?>).hide()
+	</script>
+	<?php
 
 	print '</form>';
 
