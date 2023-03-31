@@ -57,11 +57,6 @@ function dolicar_admin_prepare_head()
 	$head[$h][2] = 'registrationcertificate';
 	$h++;
 
-	$head[$h][0] = dol_buildpath("/dolicar/admin/quickcreation.php", 1);
-	$head[$h][1] = $langs->trans("QuickCreation");
-	$head[$h][2] = 'quickcreation';
-	$h++;
-
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
 	//$this->tabs = array(
