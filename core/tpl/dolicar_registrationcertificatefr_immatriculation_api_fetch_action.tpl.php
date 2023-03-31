@@ -86,7 +86,9 @@ if (is_object($registrationCertificateObject)) {
 		$registrationDateArray = str_split($registrationCertificateObject->ExtendedData->datePremiereMiseCirculation, 2);
 		$formattedRegistrationDate = $registrationDateArray[0] . '/' . $registrationDateArray[1] . '/' . $registrationDateArray[2] . $registrationDateArray[3];
 
-		$object->b_first_registration_date = $formattedRegistrationDate;
+		$sqlDate = dol_mktime(12, 0, 0, $registrationDateArray[1], $registrationDateArray[0], $registrationDateArray[2] . $registrationDateArray[3]); // for date without hour, we use gmt
+
+		$object->b_first_registration_date = $sqlDate;
 		$object->b_first_registration_dateday = $registrationDateArray[0];
 		$object->b_first_registration_datemonth = $registrationDateArray[1];
 		$object->b_first_registration_dateyear = $registrationDateArray[2] . $registrationDateArray[3];
