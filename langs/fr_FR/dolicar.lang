@@ -34,6 +34,7 @@ DOLICAR_MYPARAM1Tooltip = My param 1 tooltip
 DOLICAR_MYPARAM2=My param 2
 DOLICAR_MYPARAM2Tooltip=My param 2 tooltip
 DolicarConfig = Configuration du module
+EnableDolicar = Activer Dolicar
 
 #
 # About page
