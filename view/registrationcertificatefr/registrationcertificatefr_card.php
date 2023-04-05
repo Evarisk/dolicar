@@ -369,6 +369,12 @@ if (($id || $ref) && $action == 'edit') {
 	// Other attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_edit.tpl.php';
 
+	?>
+	<script>
+		$('.' + <?php echo json_encode('field_json'); ?>).hide()
+	</script>
+	<?php
+
 	print '</table>';
 
 	print dol_get_fiche_end();
@@ -428,6 +434,12 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_view.tpl.php';
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
+
+	?>
+	<script>
+		$('.' + <?php echo json_encode('field_json'); ?>).hide()
+	</script>
+	<?php
 
 	print '</table>';
 	print '</div>';

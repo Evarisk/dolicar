@@ -79,63 +79,6 @@ function dolicar_generate_random_id($car = 16)
 	return $string;
 }
 
-
-// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
-/**
- *  Return a HTML select list of a dictionary
- *
- *  @param  string	$htmlname          	Name of select zone
- *  @param	string	$dictionarytable	Dictionary table
- *  @param	string	$keyfield			Field for key
- *  @param	string	$labelfield			Label field
- *  @param	string	$selected			Selected value
- *  @param  int		$useempty          	1=Add an empty value in list, 2=Add an empty value in list only if there is more than 2 entries.
- *  @param  string  $moreattrib         More attributes on HTML select tag
- * 	@return	void
- */
-function dolicar_select_dictionary($htmlname, $dictionarytable, $keyfield = 'code', $labelfield = 'label', $selected = '', $useempty = 0, $moreattrib = '')
-{
-	// phpcs:enable
-	global $langs, $db;
-
-	$langs->load("admin");
-
-	$sql  = "SELECT rowid, " . $keyfield . ", " . $labelfield;
-	$sql .= " FROM " . MAIN_DB_PREFIX . $dictionarytable;
-	$sql .= " ORDER BY " . $labelfield;
-
-	$result = $db->query($sql);
-	if ($result) {
-		$num = $db->num_rows($result);
-		$i   = 0;
-		if ($num) {
-			$output = '<select id="select' . $htmlname . '" class="flat selectdictionary" name="' . $htmlname . '"' . ($moreattrib ? ' ' . $moreattrib : '') . '>';
-			if ($useempty == 1 || ($useempty == 2 && $num > 1)) {
-				$output .= '<option value="-1">&nbsp;</option>';
-			}
-
-			while ($i < $num) {
-				$obj = $db->fetch_object($result);
-				if ($selected == $obj->rowid || $selected == $langs->transnoentities($obj->$keyfield)) {
-					$output .= '<option value="' . $langs->transnoentities($obj->$keyfield) . '" selected>';
-				} else {
-					$output .= '<option value="' . $langs->transnoentities($obj->$keyfield) . '">';
-				}
-				$output .= $langs->transnoentities($obj->$labelfield);
-				$output .= '</option>';
-				$i++;
-			}
-			$output .= "</select>";
-		} else {
-			$output = $langs->trans("DictionaryEmpty");
-		}
-
-		return $output;
-	} else {
-		dol_print_error($db);
-	}
-}
-
 function get_vehicle_brand($productId) {
 	global $conf, $db;
 

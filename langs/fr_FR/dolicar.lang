@@ -72,6 +72,7 @@ DigiriskListingRisksPhotoStandardModel = Renvoie le numéro sous la forme RLPn o
 
 # Data - Donnée
 RegistrationCertificateFr = Carte grise
+Registrationcertificatefr = Carte grise
 RegistrationCertificate = Carte grise
 NewRegistrationCertificateFr = Nouvelle carte grise
 ModifyRegistrationCertificateFr = Modifier la carte grise
