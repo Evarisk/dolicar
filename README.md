@@ -1,21 +1,24 @@
-# DOLICAR FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
+# Dolicar sur [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
 ## Informations
 
-Version du module: 1.0.0
+- Numéro du module : 436380
+- Version :  1.0.0
+- Dernière mise à jour : 05/04/2023
+- Éditeur : [Evarisk](https://www.evarisk.com)
+- Compatibilité : Dolibarr 16.0.0 - 16.0.5
+- Thème : eldy
+- Licence : GPLv3
+- Disponible sur : Windows - MacOS - Linux
 
-Dernière mise à jour: 14/06/2022
+## Liens
 
-Prérequis:
-* Dolibarr min version 14.0.0
-* Dolibarr max version 15.0.2
-
-Thème: Eldy Menu
-
-Editeur/Licence: [Eoxia](https://www.eoxia.com) / GPL-v3
-
-Assitance: [Forum www.dolibarr.fr](https://www.dolibarr.fr) / Par mail à contact@eoxia.com
-Assitance: [Forum www.dolibarr.fr](https://www.dolibarr.fr) / Par mail à contact@eoxia.com
+- Support & Assistance : [Forum www.dolibarr.fr](https://www.dolibarr.fr) / Par mail à technique@evarisk.com
+- Demo : [Demo Dolicar](https://www.demodoli.digirisk.com) - ID: demo - Password: demo
+- Documentation : [Wiki Dolicar](https://wiki.dolibarr.org/index.php/Module_Dolicar)
+- Projet GitHub : [Projet Dolicar](https://github.com/Eoxia/Dolicar/projects?query=is%3Aopen)
+- D'autres modules développés par Evarisk disponibles sur [Dolistore.com](https://www.dolistore.com)
+  ités
 
 ## Fonctionnalités
 
