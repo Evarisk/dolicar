@@ -122,6 +122,8 @@ class ActionsDoliCar
 					$productlot->fetch($facture->array_options['options_linked_lot']);
 				}
 
+				$mileageWithSeparator = price($facture->array_options['options_mileage'], 0,"",1, 0);
+
 				?>
 				<script>
 					jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
@@ -136,6 +138,7 @@ class ActionsDoliCar
 				if (GETPOST('action') != 'edit_extras') {
 					?>
 					<script>
+						jQuery('.facture_extras_mileage').html(<?php echo json_encode($mileageWithSeparator); ?>);
 						jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 						jQuery('.facture_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.facture_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
@@ -194,6 +197,8 @@ class ActionsDoliCar
 					$productlot->fetch($propal->array_options['options_linked_lot']);
 				}
 
+				$mileageWithSeparator = price($propal->array_options['options_mileage'], 0,"",1, 0);
+
 				?>
 				<script>
 					jQuery('#extrafield_lines_area_create').find('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
@@ -208,6 +213,7 @@ class ActionsDoliCar
 				if (GETPOST('action') != 'edit_extras') {
 					?>
 					<script>
+						jQuery('.propal_extras_mileage').html(<?php echo json_encode($mileageWithSeparator); ?>);
 						jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 						jQuery('.propal_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.propal_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
@@ -264,6 +270,9 @@ class ActionsDoliCar
 				if ($commande->array_options['options_linked_lot'] > 0) {
 					$productlot->fetch($commande->array_options['options_linked_lot']);
 				}
+
+				$mileageWithSeparator = price($commande->array_options['options_mileage'], 0,"",1, 0);
+
 				?>
 				<script>
 					jQuery('#extrafield_lines_area_create').find('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
@@ -278,6 +287,7 @@ class ActionsDoliCar
                 if (GETPOST('action') != 'edit_extras') {
 					?>
 					<script>
+						jQuery('.commande_extras_mileage').html(<?php echo json_encode($mileageWithSeparator); ?>);
 						jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 						jQuery('.commande_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.commande_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
