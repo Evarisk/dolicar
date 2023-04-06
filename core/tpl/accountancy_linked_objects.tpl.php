@@ -50,7 +50,7 @@ if (!empty($objectsLinkedList)) {
 							$outputline .= '<tr>';
 
 							$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
-							$outputline .= '<td>'. $facture->getNomUrl() .'</td>';
+							$outputline .= '<td>'. $facture->getNomUrl(1) .'</td>';
 							$outputline .= '<td>'.  $facture->array_options['options_mileage'] .'</td>';
 							$outputline .= '<td>'.  dol_print_date($facture->date_creation, 'dayhour') .'</td>';
 							$outputline .= '</tr>';
@@ -79,7 +79,7 @@ if (!empty($objectsLinkedList)) {
 							$outputline .= '<tr>';
 
 							$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
-							$outputline .= '<td>'. $propal->getNomUrl() .'</td>';
+							$outputline .= '<td>'. $propal->getNomUrl(1) .'</td>';
 							$outputline .= '<td>'.  $propal->array_options['options_mileage'] .'</td>';
 							$outputline .= '<td>'.  dol_print_date($propal->date_creation, 'dayhour') .'</td>';
 							$outputline .= '</tr>';
@@ -108,7 +108,7 @@ if (!empty($objectsLinkedList)) {
 							$outputline .= '<tr>';
 
 							$outputline .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
-							$outputline .= '<td>'. $commande->getNomUrl() .'</td>';
+							$outputline .= '<td>'. $commande->getNomUrl(1) .'</td>';
 							$outputline .= '<td>'.  $commande->array_options['options_mileage'] .'</td>';
 							$outputline .= '<td>'.  dol_print_date($commande->date_creation, 'dayhour') .'</td>';
 							$outputline .= '</tr>';
