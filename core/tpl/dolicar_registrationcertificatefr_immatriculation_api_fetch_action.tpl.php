@@ -6,6 +6,17 @@ $username = $conf->global->DOLICAR_IMMATRICULATION_API_USERNAME;
 $registrationNumber = GETPOST('registrationNumber');
 $registrationNumber = strtoupper($registrationNumber);
 
+$existingRegistrationCertificate = $object->fetchAll('','',0,0,['customsql' => ' ref = "' . $registrationNumber . '"']);
+
+if (is_array($existingRegistrationCertificate) && !empty($existingRegistrationCertificate)) {
+	$existingRegistrationCertificateObject = array_shift($existingRegistrationCertificate);
+	$existingRegistrationCertificateId = $existingRegistrationCertificateObject->id;
+
+	setEventMessages($langs->trans("LicencePlateWasAlreadyExisting"), null, 'mesgs');
+	header('Location: ' . dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $existingRegistrationCertificateId);
+	exit;
+}
+
 if (dol_strlen($username) > 0) {
 	if ((preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', $registrationNumber) || preg_match('/^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/', $registrationNumber))) {
 		// Setup request to send json via POST
