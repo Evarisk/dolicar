@@ -30,7 +30,9 @@ if (dol_strlen($username) > 0) {
 		$action = $createRegistrationCertificate ? '' : 'create';
 	}
 } else {
-	setEventMessage($langs->trans('BadAPIUsername'), 'errors');
+	$usernameConfigUrl = DOL_URL_ROOT . '/custom/dolicar/admin/registrationcertificate.php';
+
+	setEventMessage($langs->trans('BadAPIUsername', $usernameConfigUrl), 'errors');
 	$error++;
 	$action = $createRegistrationCertificate ? '' : 'create';
 }
