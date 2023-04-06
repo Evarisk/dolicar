@@ -123,7 +123,6 @@ if (empty($reshook)) {
 		}
 	}
 
-
 	if ($subaction == 'getProductBrand') {
 		$data = json_decode(file_get_contents('php://input'), true);
 
@@ -149,30 +148,12 @@ if (empty($reshook)) {
 	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
 	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
 
-	// Actions when linking object each other
-	include DOL_DOCUMENT_ROOT.'/core/actions_dellink.inc.php';
-
-	// Actions when printing a doc from card
-	include DOL_DOCUMENT_ROOT.'/core/actions_printing.inc.php';
-
-	// Action to move up and down lines of object
-	//include DOL_DOCUMENT_ROOT.'/core/actions_lineupdown.inc.php';
-
-	// Action to build doc
-	include DOL_DOCUMENT_ROOT.'/core/actions_builddoc.inc.php';
-
 	if ($action == 'set_thirdparty' && $permissiontoadd) {
 		$object->setValueFrom('fk_soc', GETPOST('fk_soc', 'int'), '', '', 'date', '', $user, $triggermodname);
 	}
 	if ($action == 'classin' && $permissiontoadd) {
 		$object->setProject(GETPOST('projectid', 'int'));
 	}
-
-	// Actions to send emails
-	$triggersendname = 'DOLICAR_REGISTRATIONCERTIFICATEFR_SENTBYMAIL';
-	$autocopy = 'MAIN_MAIL_AUTOCOPY_REGISTRATIONCERTIFICATEFR_TO';
-	$trackid = 'registrationcertificatefr'.$object->id;
-	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 }
 
 /*
@@ -447,51 +428,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	print dol_get_fiche_end();
 
-	/*
-	 * Lines
-	 */
-
-	if (!empty($object->table_element_line)) {
-		// Show object lines
-		$result = $object->getLinesArray();
-
-		print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline') ? '' : '#line_'.GETPOST('lineid', 'int')).'" method="POST">
-		<input type="hidden" name="token" value="' . newToken().'">
-		<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline').'">
-		<input type="hidden" name="mode" value="">
-		<input type="hidden" name="page_y" value="">
-		<input type="hidden" name="id" value="' . $object->id.'">
-		';
-
-		if (!empty($conf->use_javascript_ajax) && $object->status == 0) {
-			include DOL_DOCUMENT_ROOT.'/core/tpl/ajaxrow.tpl.php';
-		}
-
-		print '<div class="div-table-responsive-no-min">';
-
-		if (!empty($object->lines)) {
-			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1);
-		}
-
-		// Form to add new line
-		if ($object->status == 0 && $permissiontoadd && $action != 'selectlines') {
-			if ($action != 'editline') {
-				// Add products/services form
-
-				$parameters = array();
-				$reshook = $hookmanager->executeHooks('formAddObjectLine', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
-				if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-				if (empty($reshook))
-					$object->formAddObjectLine(1, $mysoc, $soc);
-			}
-		}
-
-		print '</div>';
-
-		print "</form>\n";
-	}
-
-
 	// Buttons for actions
 
 	if ($action != 'presend' && $action != 'editline') {
@@ -504,33 +440,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		if (empty($reshook)) {
 			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd);
-
-			/*
-			if ($permissiontoadd) {
-				if ($object->status == $object::STATUS_ENABLED) {
-					print dolGetButtonAction($langs->trans('Disable'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=disable&token='.newToken(), '', $permissiontoadd);
-				} else {
-					print dolGetButtonAction($langs->trans('Enable'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=enable&token='.newToken(), '', $permissiontoadd);
-				}
-			}
-			if ($permissiontoadd) {
-				if ($object->status == $object::STATUS_VALIDATED) {
-					print dolGetButtonAction($langs->trans('Cancel'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=close&token='.newToken(), '', $permissiontoadd);
-				} else {
-					print dolGetButtonAction($langs->trans('Re-Open'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&action=reopen&token='.newToken(), '', $permissiontoadd);
-				}
-			}
-			*/
-
-			// Delete (need delete permission, or if draft, just need create/modify permission)
 		}
 		print '</div>'."\n";
-	}
-
-
-	// Select mail models is same action as presend
-	if (GETPOST('modelselected')) {
-		$action = 'presend';
 	}
 }
 
