@@ -55,13 +55,13 @@ class modDoliCar extends DolibarrModules
 		$this->rights_class = 'dolicar';
 		$this->family = "";
 		$this->module_position = '';
-		$this->familyinfo = array('Eoxia' => array('position' => '01', 'label' => $langs->trans("Eoxia")));
+		$this->familyinfo = array('Evarisk' => array('position' => '01', 'label' => $langs->trans("Evarisk")));
 		$this->name = preg_replace('/^mod/i', '', get_class($this));
 		$this->description = $langs->trans("DoliCarDescription");
 		$this->descriptionlong = $langs->trans("DoliCarDescription");
-		$this->editor_name = 'Eoxia';
-		$this->editor_url = 'https://www.eoxia.com';
-		$this->version = '0.0.1';
+		$this->editor_name = 'Evarisk';
+		$this->editor_url = 'https://www.evarisk.com';
+		$this->version = '1.0.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'dolicar256px@dolicar';
 
@@ -118,6 +118,7 @@ class modDoliCar extends DolibarrModules
 
 		$i = 0;
 		$this->const = array(
+			// CONST REGISTRATION CERTIFICATE
 			$i++ => array('DOLICAR_DEFAULT_PROJECT', 'integer', 0, '', 0, 'current'),
 			$i++ => array('DOLICAR_DEFAULT_WAREHOUSE', 'integer', 0, '', 0, 'current'),
 			$i++ => array('DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'),
@@ -128,6 +129,12 @@ class modDoliCar extends DolibarrModules
 			$i++ => array('DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS', 'integer', 1, '', 0, 'current'),
 			$i++ => array('DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS', 'integer', 1, '', 0, 'current'),
 			$i++ => array('DOLICAR_A_REGISTRATION_NUMBER_VISIBLE', 'integer', 1, '', 0, 'current'),
+
+			// CONST MODULE
+			$i++ => ['DOLICAR_VERSION','chaine', $this->version, '', 0, 'current'],
+			$i++ => ['DOLICAR_DB_VERSION', 'chaine', $this->version, '', 0, 'current'],
+			$i++ => ['DOLICAR_SHOW_PATCH_NOTE', 'integer', 1, '', 0, 'current'],
+
 		);
 
 		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -403,6 +410,9 @@ class modDoliCar extends DolibarrModules
 			setEventMessages('', $this->errors, 'errors');
 			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 		}
+
+		dolibarr_set_const($this->db, 'DOLICAR_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($this->db, 'DOLICAR_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
 		//$result = $this->_load_tables('/install/mysql/tables/', 'dolicar');
 		$result = $this->_load_tables('/dolicar/sql/');

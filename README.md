@@ -4,7 +4,7 @@
 
 - Numéro du module : 436380
 - Version :  1.0.0
-- Dernière mise à jour : 05/04/2023
+- Dernière mise à jour : 06/04/2023
 - Éditeur : [Evarisk](https://www.evarisk.com)
 - Compatibilité : Dolibarr 16.0.0 - 16.0.5
 - Thème : eldy
