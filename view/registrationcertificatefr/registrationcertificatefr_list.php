@@ -402,6 +402,10 @@ foreach ($search as $key => $val) {
 if ($optioncss != '') {
 	$param .= '&optioncss='.urlencode($optioncss);
 }
+if ($fromtype && $fromid) {
+	$param .= '&fromtype=' . $fromtype . '&fromid=' . $fromid;
+}
+
 // Add $param from extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_param.tpl.php';
 // Add $param from hooks
@@ -538,7 +542,6 @@ print '</tr>'."\n";
 // Fields title label
 // --------------------------------------------------------------------
 print '<tr class="liste_titre">';
-$extraparams = ($fromtype && $fromid) ? '&fromtype=' . $fromtype . '&fromid=' . $fromid : '';
 foreach ($object->fields as $key => $val) {
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
@@ -551,7 +554,7 @@ foreach ($object->fields as $key => $val) {
 		$cssforfield .= ($cssforfield ? ' ' : '').'right';
 	}
 	if (!empty($arrayfields['t.'.$key]['checked'])) {
-		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param . $extraparams, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 	}
 }
 // Extra fields
