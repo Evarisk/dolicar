@@ -119,7 +119,6 @@ function registrationcertificatefr_prepare_head(CommonObject $object): array
 
 function get_registration_certificate_fields() {
 	$registrationCertificateFields = [
-		'A_REGISTRATION_NUMBER'               => 'RegistrationNumber',
 		'B_FIRST_REGISTRATION_DATE'           => 'FirstRegistrationDate',
 		'C1_OWNER_FULLNAME'                   => 'OwnerFullName',
 		'C3_REGISTRATION_ADDRESS'             => 'RegistrationAddress',
