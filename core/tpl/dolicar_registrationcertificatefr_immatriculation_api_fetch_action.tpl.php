@@ -6,15 +6,17 @@ $username = $conf->global->DOLICAR_IMMATRICULATION_API_USERNAME;
 $registrationNumber = GETPOST('registrationNumber');
 $registrationNumber = strtoupper($registrationNumber);
 
-$existingRegistrationCertificate = $object->fetchAll('','',0,0,['customsql' => ' ref = "' . $registrationNumber . '"']);
+if (dol_strlen($registrationNumber) > 0) {
+	$existingRegistrationCertificate = $object->fetchAll('', '', 0, 0, ['customsql' => ' ref = "' . $registrationNumber . '"']);
 
-if (is_array($existingRegistrationCertificate) && !empty($existingRegistrationCertificate)) {
-	$existingRegistrationCertificateObject = array_shift($existingRegistrationCertificate);
-	$existingRegistrationCertificateId = $existingRegistrationCertificateObject->id;
+	if (is_array($existingRegistrationCertificate) && !empty($existingRegistrationCertificate)) {
+		$existingRegistrationCertificateObject = array_shift($existingRegistrationCertificate);
+		$existingRegistrationCertificateId = $existingRegistrationCertificateObject->id;
 
-	setEventMessages($langs->trans("LicencePlateWasAlreadyExisting"), null, 'mesgs');
-	header('Location: ' . dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $existingRegistrationCertificateId);
-	exit;
+		setEventMessages($langs->trans("LicencePlateWasAlreadyExisting"), null, 'mesgs');
+		header('Location: ' . dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $existingRegistrationCertificateId);
+		exit;
+	}
 }
 
 if (dol_strlen($username) > 0) {
