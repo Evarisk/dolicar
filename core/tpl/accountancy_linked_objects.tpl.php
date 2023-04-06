@@ -13,7 +13,7 @@ $propaldet = new PropaleLigne($db);
 $commande = new Commande($db);
 $commandedet = new OrderLine($db);
 
-$RC_list = $registration_certificate->fetchAll('', '','','',$fromProductLot ? ['fk_lot'=> GETPOST('id')] : []);
+$RC_list = $registration_certificate->fetchAll('', '','','',$fromProductLot ? ['fk_lot'=> GETPOST('id')] : ['rowid' => GETPOST('id')]);
 $linked_rc_ids = array();
 $linked_facture_ids = array();
 if (!empty($RC_list)) {
@@ -22,7 +22,7 @@ if (!empty($RC_list)) {
 		$objectsLinkedList[$rc->id] = $rc->getObjectsLinked();
 	}
 }
-$pictopath = dol_buildpath('/dolicar/img/dolicar.png', 1);
+$pictopath = dol_buildpath('/dolicar/img/dolicar_color.png', 1);
 $pictoDoliCar = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
 
 $outputline = '<table><tr class="titre"><td class="nobordernopadding valignmiddle col-title"><div class="titre inline-block">'. $pictoDoliCar . $langs->transnoentities('ObjectsLinked') .'</div></td></tr></table>';
