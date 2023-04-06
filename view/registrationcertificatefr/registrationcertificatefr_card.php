@@ -117,13 +117,14 @@ if (empty($reshook)) {
 
 	if (empty($backtopage) || ($cancel && empty($id))) {
 		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
-			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
+			if (empty($id) && (($action != 'add' && $action != 'create' && $action != 'getRegistrationCertificateData') || $cancel)) {
 				$backtopage = $backurlforlist;
 			} else {
 				$backtopage = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__' . '&a_registration_number=' . GETPOST('a_registration_number'));
 			}
 		}
 	}
+
 
 	if ($subaction == 'getProductBrand') {
 		$data = json_decode(file_get_contents('php://input'), true);
@@ -134,7 +135,8 @@ if (empty($reshook)) {
 	}
 
 	if ($action == 'add') {
-		if ((!preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', GETPOST('registrationNumber')) && !preg_match('/^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/', GETPOST('registrationNumber')))) {
+		$registrationNumber = strtoupper(GETPOST('a_registration_number'));
+		if ((!preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', $registrationNumber) && !preg_match('/^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/', $registrationNumber))) {
 			setEventMessage($langs->trans('BadLicencePlateFormat'), 'errors');
 			$action = 'create';
 		}
