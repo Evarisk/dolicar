@@ -133,6 +133,13 @@ if (empty($reshook)) {
 		$brand_name = get_vehicle_brand($productId);
 	}
 
+	if ($action == 'add') {
+		if ((!preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', GETPOST('registrationNumber')) && !preg_match('/^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/', GETPOST('registrationNumber')))) {
+			setEventMessage($langs->trans('BadLicencePlateFormat'), 'errors');
+			$action = 'create';
+		}
+	}
+
 	if ($action == 'getRegistrationCertificateData') {
 		require_once __DIR__ . '/../../core/tpl/dolicar_registrationcertificatefr_immatriculation_api_fetch_action.tpl.php';
 	}

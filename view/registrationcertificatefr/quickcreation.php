@@ -114,12 +114,12 @@ if (empty($reshook)) {
 		exit;
 	}
 	require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_quickcreation_actions.tpl.php';
+
 }
 
 /*
  * View
  */
-
 
 $title    = $langs->trans('QuickCreation');
 $help_url = 'FR:Module_EasyCRM';
@@ -138,8 +138,7 @@ if ($backtopage) {
 	print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
 }
 
-//ajouter le code carte grise
-
+//Ajouter le code carte grise
 print load_fiche_titre($langs->trans("QuickRegistrationCertificateCreation"), '', 'object_'.$object->picto);
 
 print '<hr>';
@@ -149,7 +148,7 @@ print '<td class="titlefieldcreate fieldrequired">';
 print $langs->trans('LicencePlate');
 print '</td>';
 print '<td class="valuefieldcreate">';
-print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber">';
+print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber" value="'. GETPOST('registrationNumber') .'">';
 print '</td>';
 print '</tr>';
 print '<tr>';

@@ -14,7 +14,10 @@ if (dol_strlen($username) > 0) {
 
 		if (empty($xmlData)) {
 			$usernameConfigUrl = DOL_URL_ROOT . '/custom/dolicar/admin/registrationcertificate.php';
-			setEventMessage($langs->trans('BadAPIUsername', $usernameConfigUrl), 'errors');
+
+			setEventMessage($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $usernameConfigUrl), 'errors');
+			$error++;
+			$action = $createRegistrationCertificate ? '' : 'create';
 		} else {
 			$xml = simplexml_load_string($xmlData);
 			$strJson = $xml->vehicleJson;
@@ -23,9 +26,13 @@ if (dol_strlen($username) > 0) {
 		}
 	} else {
 		setEventMessage($langs->trans('BadLicencePlateFormat'), 'errors');
+		$error++;
+		$action = $createRegistrationCertificate ? '' : 'create';
 	}
 } else {
 	setEventMessage($langs->trans('BadAPIUsername'), 'errors');
+	$error++;
+	$action = $createRegistrationCertificate ? '' : 'create';
 }
 
 if (is_object($registrationCertificateObject)) {

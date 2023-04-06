@@ -667,8 +667,9 @@ class ActionsDoliCar
 			if (dol_strlen($backtopage) > 0){
 				$this->resprints = $backtopage;
 			}
-
-			return 1;
+			if (!$error) {
+				return 1;
+			}
 		}
 	}
 }
