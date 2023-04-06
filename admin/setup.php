@@ -177,7 +177,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 
 // Configuration header
 $head = dolicar_admin_prepare_head();
-print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, "dolicar@dolicar");
+print dol_get_fiche_head($head, 'settings', $langs->trans($page_name), -1, "dolicar_color@dolicar");
 
 // Configuration header
 print '<div style="text-indent: 3em"><br>' . '<i class="fas fa-2x fa-calendar-alt" style="padding: 10px"></i>   ' . $langs->trans("AgendaModuleRequired") . '<br></div>';

@@ -76,7 +76,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 
 // Configuration header
 $head = dolicar_admin_prepare_head();
-print dol_get_fiche_head($head, 'about', $langs->trans($page_name), 0, 'dolicar@dolicar');
+print dol_get_fiche_head($head, 'about', $langs->trans($page_name), 0, 'dolicar_color@dolicar');
 
 require_once __DIR__ . '/../core/modules/modDoliCar.class.php';
 $tmpmodule = new modDoliCar($db);

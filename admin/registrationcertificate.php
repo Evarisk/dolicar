@@ -191,7 +191,7 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 
 // Configuration header
 $head = dolicar_admin_prepare_head();
-print dol_get_fiche_head($head, 'registrationcertificate', $langs->trans($page_name), -1, "dolicar@dolicar");
+print dol_get_fiche_head($head, 'registrationcertificate', $langs->trans($page_name), -1, "dolicar_color@dolicar");
 
 print load_fiche_titre($langs->transnoentities("ImmatriculationAPIConfig"), '', '');
 
