@@ -197,3 +197,5 @@ HowToSetupIHM =  Pour plus de fonctionnalités sur l'affichage de Dolibarr (Conf
 ConfigIHM = Configuration de l'affichage
 DolicarSetup = Réglages de Dolicar
 Settings = Réglages
+LinkedObjects = Objets liés
+NoLinkedObjectsToPrint = Pas d'objets liés à afficher

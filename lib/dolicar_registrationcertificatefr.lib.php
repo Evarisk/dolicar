@@ -110,6 +110,11 @@ function registrationcertificatefr_prepare_head(CommonObject $object): array
 		$h++;
 	}
 
+	$head[$h][0] = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_linkedobjects.php', 1) . '?id=' . $object->id;
+	$head[$h][1] = '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans('LinkedObjects');
+	$head[$h][2] = 'linkedobjects';
+	$h++;
+
 	complete_head_from_modules($conf, $langs, $object, $head, $h, $objectType . '@dolicar');
 
 	complete_head_from_modules($conf, $langs, $object, $head, $h, $objectType . '@dolicar', 'remove');
