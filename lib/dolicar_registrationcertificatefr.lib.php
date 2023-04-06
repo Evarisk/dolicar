@@ -45,6 +45,11 @@ function registrationcertificatefr_prepare_head(CommonObject $object): array
 	$head[$h][2] = 'card';
 	$h++;
 
+	$head[$h][0] = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_linkedobjects.php', 1) . '?id=' . $object->id;
+	$head[$h][1] = '<i class="fas fa-link pictofixedwidth"></i>' . $langs->trans('LinkedObjects');
+	$head[$h][2] = 'linkedobjects';
+	$h++;
+
 	if ($user->rights->dolicar->$objectType->read) {
 		if (isset($object->fields['note_public']) || isset($object->fields['note_private'])) {
 			$nbNote = 0;
@@ -109,11 +114,6 @@ function registrationcertificatefr_prepare_head(CommonObject $object): array
 		$head[$h][2] = 'agenda';
 		$h++;
 	}
-
-	$head[$h][0] = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_linkedobjects.php', 1) . '?id=' . $object->id;
-	$head[$h][1] = '<i class="fas fa-link pictofixedwidth"></i>' . $langs->trans('LinkedObjects');
-	$head[$h][2] = 'linkedobjects';
-	$h++;
 
 	complete_head_from_modules($conf, $langs, $object, $head, $h, $objectType . '@dolicar');
 
