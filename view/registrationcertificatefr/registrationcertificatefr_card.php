@@ -89,22 +89,11 @@ if (empty($action) && empty($id) && empty($ref)) {
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once.
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = 0;
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->rights->dolicar->registrationcertificatefr->read;
-	$permissiontoadd = $user->rights->dolicar->registrationcertificatefr->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = $user->rights->dolicar->registrationcertificatefr->delete;
-	$permissionnote = $user->rights->dolicar->registrationcertificatefr->write; // Used by the include of actions_setnotes.inc.php
-	$permissiondellink = $user->rights->dolicar->registrationcertificatefr->write; // Used by the include of actions_dellink.inc.php
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd = 1; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = 1;
-	$permissionnote = 1;
-	$permissiondellink = 1;
-}
+$permissiontoread = $user->rights->dolicar->registrationcertificatefr->read;
+$permissiontoadd = $user->rights->dolicar->registrationcertificatefr->write;
+$permissiontodelete = $user->rights->dolicar->registrationcertificatefr->delete;
+$permissionnote = $user->rights->dolicar->registrationcertificatefr->write;
+$permissiondellink = $user->rights->dolicar->registrationcertificatefr->write;
 
 // Security check - Protection if external user
 saturne_check_access($permissiontoread);

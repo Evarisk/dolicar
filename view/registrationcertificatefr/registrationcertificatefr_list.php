@@ -182,18 +182,11 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
-// There is several ways to check permission.
-// Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = 0;
-if ($enablepermissioncheck) {
-	$permissiontoread = $user->rights->dolicar->registrationcertificatefr->read;
-	$permissiontoadd = $user->rights->dolicar->registrationcertificatefr->write;
-	$permissiontodelete = $user->rights->dolicar->registrationcertificatefr->delete;
-} else {
-	$permissiontoread = 1;
-	$permissiontoadd = 1;
-	$permissiontodelete = 1;
-}
+$permissiontoread = $user->rights->dolicar->registrationcertificatefr->read;
+$permissiontoadd = $user->rights->dolicar->registrationcertificatefr->write;
+$permissiontodelete = $user->rights->dolicar->registrationcertificatefr->delete;
+$permissionnote = $user->rights->dolicar->registrationcertificatefr->write;
+$permissiondellink = $user->rights->dolicar->registrationcertificatefr->write;
 
 // Security check - Protection if external user
 saturne_check_access($permissiontoread);
