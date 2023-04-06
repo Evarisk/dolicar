@@ -85,11 +85,9 @@ if (empty($action) && empty($id) && empty($ref)) {
 // Load object
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once.
 
-$permissiontoread = $user->rights->dolicar->registrationcertificatefr->read;
-$permissiontoadd = $user->rights->dolicar->registrationcertificatefr->write;
+$permissiontoread   = $user->rights->dolicar->registrationcertificatefr->read;
+$permissiontoadd    = $user->rights->dolicar->registrationcertificatefr->write;
 $permissiontodelete = $user->rights->dolicar->registrationcertificatefr->delete;
-$permissionnote = $user->rights->dolicar->registrationcertificatefr->write;
-$permissiondellink = $user->rights->dolicar->registrationcertificatefr->write;
 
 // Security check - Protection if external user
 saturne_check_access($permissiontoread);
