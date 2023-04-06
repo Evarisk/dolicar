@@ -92,7 +92,7 @@ window.dolicar.registrationcertificate.actualizeProductlot = function( event ) {
 
 	let querySeparator =  window.saturne.toolbox.getQuerySeparator(document.URL)
 
-	window.saturne.loader.display($('.lot-container'));
+	window.saturne.loader.display($('.lot-content')); 
 
 	$.ajax({
 		url: document.URL + querySeparator + 'action=' + action + '&fk_product=' + productId + '&token='+token,
