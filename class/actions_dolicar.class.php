@@ -489,9 +489,6 @@ class ActionsDoliCar
 
 				$('#d1_vehicle_brand').attr('value',<?php echo json_encode($brand_name); ?>)
 				$('#d1_vehicle_brand').prop("readonly", true)
-
-				//set statut & statut buy to 0 in "+" button of creation form
-				$('.field_fk_product').find('.butActionNew').attr('href', $('.field_fk_product').find('.butActionNew').attr('href') + '&statut=0&statut_buy=0')
 			</script>
 			<?php
 		}

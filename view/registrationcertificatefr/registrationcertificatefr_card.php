@@ -254,7 +254,7 @@ if ($action == 'create') {
 	$productPost = GETPOST('fk_product') ?: 0;
 	print '<tr><td class="">' . $langs->trans('LinkedProduct') . '</td><td>';
 	$form->select_produits($productPost, 'fk_product', '', 0, 1, -1, 2, '', '', '', '', 'SelectProductsOrServices', 0, 'maxwidth500 widthcentpercentminusxx', 1);
-	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/card.php?action=create&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('NewProduct') . '"></span></a>';
+	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/card.php?action=create&statut=0&statut_buy=0&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('NewProduct') . '"></span></a>';
 	print '</td></tr>';
 
 	//Fk_lot
@@ -346,7 +346,7 @@ if (($id || $ref) && $action == 'edit') {
 	$productPost = GETPOST('fk_product') ?: $object->fk_product ;
 	print '<tr><td class="">' . $langs->trans('LinkedProduct') . '</td><td>';
 	$form->select_produits($productPost, 'fk_product', '', 0, 1, -1, 2, '', '', '', '', 'SelectProductsOrServices', 0, 'maxwidth500 widthcentpercentminusxx', 1);
-	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/card.php?action=create&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProduct') . '"></span></a>';
+	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/card.php?action=create&statut=0&statut_buy=0&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProduct') . '"></span></a>';
 	print '</td></tr>';
 
 	//Fk_lot
