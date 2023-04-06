@@ -237,7 +237,7 @@ if (is_array($registrationCertificateFields) && !empty($registrationCertificateF
 		print ajax_constantonoff('DOLICAR_' . $registrationCertificateCode . '_VISIBLE');
 		print '</td>';
 		print '<td class="center">';
-		print $form->textwithpicto('', $langs->transnoentities('Show' . $registrationCertificateField . 'Help'));
+		print $form->textwithpicto('', $langs->transnoentities('ShowRegistrationCertificateFieldHelp'));
 		print '</td>';
 		print '</tr>';
 	}

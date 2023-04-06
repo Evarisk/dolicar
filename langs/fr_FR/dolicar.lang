@@ -157,7 +157,7 @@ QuickTaskCreations       = ajouts rapides de tâche
 QuickEventCreations      = ajouts rapides d'événements
 QuickRegistrationCertificateCreation = Ajout rapide de carte grise
 LicencePlate = Plaque d'immatriculation
-
+ShowRegistrationCertificateFieldHelp = Afficher/Cacher ce champ sur la page de création de la carte grise
 
 #
 # Other
