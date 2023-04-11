@@ -37,12 +37,13 @@ function createDefaultLot($product_id)
 	$productlot->batch = dolicar_generate_random_id();
 
 	$lot_id = $productlot->create($user);
+
 	if ($lot_id > 0) {
 		$product = new Product($db);
 		$product->fetch($product_id);
 		$product->correct_stock_batch(
 			$user,
-			$conf->global->DOLICAR_DEFAULT_WAREHOUSE,
+			$conf->global->DOLICAR_DEFAULT_WAREHOUSE_ID,
 			1,
 			0,
 			$langs->trans('ClientVehicle'), // label movement
@@ -54,6 +55,7 @@ function createDefaultLot($product_id)
 			'dolicar_registrationcertificate',
 			0
 		);
+
 		return $lot_id;
 	} else {
 		return 0;

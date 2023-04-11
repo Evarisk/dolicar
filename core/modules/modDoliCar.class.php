@@ -120,7 +120,7 @@ class modDoliCar extends DolibarrModules
 		$this->const = array(
 			// CONST REGISTRATION CERTIFICATE
 			$i++ => array('DOLICAR_DEFAULT_PROJECT', 'integer', 0, '', 0, 'current'),
-			$i++ => array('DOLICAR_DEFAULT_WAREHOUSE', 'integer', 0, '', 0, 'current'),
+			$i++ => array('DOLICAR_DEFAULT_WAREHOUSE_ID', 'integer', 0, '', 0, 'current'),
 			$i++ => array('DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'),
 			$i++ => array('DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'),
 			$i++ => array('DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'),
@@ -308,7 +308,7 @@ class modDoliCar extends DolibarrModules
 			'url'      => '/dolicar/view/registrationcertificatefr/quickcreation.php', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'langs'    => 'dolicar@dolicar',
 			'position' => 1000 + $r,
-			'enabled'  => '$conf->dolicar->enabled', // Define condition to show or hide menu entry. Use '$conf->easycrm->enabled' if entry must be visible if module is enabled.
+			'enabled'  => '$conf->easycrm->enabled', // Define condition to show or hide menu entry. Use '$conf->easycrm->enabled' if entry must be visible if module is enabled.
 			'perms'    => '$user->rights->dolicar->read', // Use 'perms'=>'$user->rights->easycrm->myobject->read' if you want your menu with a permission rules
 			'target'   => '',
 			'user'     => 0, // 0=Menu for internal users, 1=external users, 2=both
@@ -635,6 +635,7 @@ class modDoliCar extends DolibarrModules
 		if ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 0) {
 			$product->ref = $langs->transnoentities('DefaultVehicle');
 			$product->label = $langs->transnoentities('DefaultVehicle');
+			$product->status_batch = 1;
 			$defaultVehicle = $product->create($user);
 
 			if ($defaultVehicle > 0) {
@@ -651,6 +652,12 @@ class modDoliCar extends DolibarrModules
 			$product->fetch($conf->global->DOLICAR_DEFAULT_VEHICLE);
 			$tag->fetch($conf->global->DOLICAR_CAR_DEFAULT_BRAND_TAG);
 			$tag->add_type($product, 'product');
+			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 2, 'integer', 0, '', $conf->entity);
+		} elseif ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 2) {
+			$product->fetch($conf->global->DOLICAR_DEFAULT_VEHICLE);
+			$product->status_batch = 1;
+			$product->update($product->id, $user);
+			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 3, 'integer', 0, '', $conf->entity);
 		}
 		return $this->_init($sql, $options);
 	}

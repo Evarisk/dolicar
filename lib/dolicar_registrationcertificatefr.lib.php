@@ -172,3 +172,21 @@ function get_registration_certificate_fields() {
 	];
 	return $registrationCertificateFields;
 }
+
+function normalize_registration_number($registrationNumber)
+{
+	if (dol_strlen($registrationNumber) < 1) {
+		return 0;
+	}
+
+	if (preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', $registrationNumber)) {
+		$registrationNumberLetters = preg_split('/[0-9]{3}/',$registrationNumber);
+		$registrationNumberNumbers = preg_split('/[A-Z]{2}/',$registrationNumber);
+
+		$registrationNumberFormatted = $registrationNumberLetters[0] . '-' . $registrationNumberNumbers[1] . '-' . $registrationNumberLetters[1];
+		return $registrationNumberFormatted;
+	} else {
+		return $registrationNumber;
+	}
+}
+

@@ -7,6 +7,7 @@ $registrationNumber = GETPOST('registrationNumber');
 $registrationNumber = strtoupper($registrationNumber);
 
 if (dol_strlen($registrationNumber) > 0) {
+	$registrationNumber = normalize_registration_number($registrationNumber);
 	$existingRegistrationCertificate = $object->fetchAll('', '', 0, 0, ['customsql' => ' ref = "' . $registrationNumber . '"']);
 
 	if (is_array($existingRegistrationCertificate) && !empty($existingRegistrationCertificate)) {
@@ -88,6 +89,22 @@ if (is_object($registrationCertificateObject)) {
 		$productLot->batch = $productLotLabel;
 		$productLot->fk_product = $product->id;
 		$resultProductLotCreation = $productLot->create($user);
+		$productLot->fetch($resultProductLotCreation);
+		$product->fetch($product->id);
+		$product->correct_stock_batch(
+			$user,
+			$conf->global->DOLICAR_DEFAULT_WAREHOUSE_ID,
+			1,
+			0,
+			$langs->trans('ClientVehicle'), // label movement
+			0,
+			'',
+			'',
+			$productLot->batch,
+			'',
+			'dolicar_registrationcertificate',
+			0
+		);
 
 		if ($resultProductLotCreation <= 0) {
 			$error++;
