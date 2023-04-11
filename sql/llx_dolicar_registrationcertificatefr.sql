@@ -73,7 +73,7 @@ CREATE TABLE llx_dolicar_registrationcertificatefr(
 	z2_specific_details text, 
 	z3_specific_details text, 
 	z4_specific_details text,
-    fk_product integer NOT NULL,
+    fk_product integer,
 	fk_project integer, 
 	fk_lot integer,
 	json longtext

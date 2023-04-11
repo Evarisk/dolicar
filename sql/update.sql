@@ -8,4 +8,5 @@ ALTER TABLE `llx_dolicar_registrationcertificatefr` CHANGE `c41_ownerNumber` `c4
 ALTER TABLE `llx_dolicar_registrationcertificatefr` CHANGE `f1_techincal_ptac` `f1_technical_ptac` integer;
 ALTER TABLE `llx_dolicar_registrationcertificatefr` CHANGE `j_vehicleCategory` `j_vehicle_category` varchar(128);
 ALTER TABLE `llx_dolicar_registrationcertificatefr` CHANGE `s1_seatingCapacity` `s1_seating_capacity` integer;
+ALTER TABLE `llx_dolicar_registrationcertificatefr` CHANGE `fk_product` `fk_product` integer;
 ALTER TABLE `llx_dolicar_registrationcertificatefr` ADD `json` longtext AFTER `z4_specific_details`;
