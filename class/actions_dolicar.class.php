@@ -392,13 +392,17 @@ class ActionsDoliCar
 			if ( GETPOST('action') == 'add') {
 
 				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+				require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 				require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 
+				$product = new Product($this->db);
 				$registrationcertificatefr = new RegistrationCertificateFr($this->db);
 				$registrationcertificatefr->fetch(GETPOST('options_registrationcertificatefr'));
 
+				$product->fetch($registrationcertificatefr->fk_product);
+
 				$_POST['options_registration_number'] = $registrationcertificatefr->a_registration_number;
-				$_POST['options_vehicle_model'] = $registrationcertificatefr->d3_vehicle_model;
+				$_POST['options_vehicle_model'] = $product->label;
 				$_POST['options_linked_product'] = $registrationcertificatefr->fk_product;
 				$_POST['options_linked_lot'] = $registrationcertificatefr->fk_lot;
 			}
