@@ -123,6 +123,7 @@ class ActionsDoliCar
 				}
 
 				$mileageWithSeparator = price($facture->array_options['options_mileage'], 0,"",1, 0);
+				$firstRegistrationDateFormatted = dol_print_date($facture->array_options['options_first_registration_date'], 'day');
 
 				?>
 				<script>
@@ -142,6 +143,7 @@ class ActionsDoliCar
 						jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 						jQuery('.facture_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.facture_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
+						jQuery('.facture_extras_first_registration_date').not('.valuefieldlinecreate').html(<?php echo json_encode($firstRegistrationDateFormatted) ?>)
 					</script>
 					<?php
 				}
@@ -154,6 +156,8 @@ class ActionsDoliCar
 						jQuery('.facturedet_extras_registration_number').hide()
 						jQuery('.facturedet_extras_linked_product').hide()
 						jQuery('.facturedet_extras_linked_lot').hide()
+						jQuery('.facturedet_extras_first_registration_date').hide()
+						jQuery('.facturedet_extras_VIN_number').hide()
 					</script>
 				<?php
 				endif;
@@ -164,6 +168,8 @@ class ActionsDoliCar
 					jQuery('.facture_extras_registration_number').hide()
 					jQuery('.facture_extras_linked_product').hide()
 					jQuery('.facture_extras_linked_lot').hide()
+					jQuery('.facture_extras_first_registration_date').hide()
+					jQuery('.facture_extras_VIN_number').hide()
 				</script>
 				<?php
 			}
@@ -198,6 +204,7 @@ class ActionsDoliCar
 				}
 
 				$mileageWithSeparator = price($propal->array_options['options_mileage'], 0,"",1, 0);
+				$firstRegistrationDateFormatted = dol_print_date($propal->array_options['options_first_registration_date'], 'day');
 
 				?>
 				<script>
@@ -217,6 +224,7 @@ class ActionsDoliCar
 						jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 						jQuery('.propal_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.propal_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
+						jQuery('.propal_extras_first_registration_date').not('.valuefieldlinecreate').html(<?php echo json_encode($firstRegistrationDateFormatted) ?>)
 					</script>
 					<?php
 				}
@@ -229,6 +237,8 @@ class ActionsDoliCar
 						jQuery('.propaldet_extras_registration_number').hide()
 						jQuery('.propaldet_extras_linked_product').hide()
 						jQuery('.propaldet_extras_linked_lot').hide()
+						jQuery('.propaldet_extras_first_registration_date').hide()
+						jQuery('.propaldet_extras_VIN_number').hide()
 
 					</script>
 				<?php
@@ -240,6 +250,8 @@ class ActionsDoliCar
 					jQuery('.propal_extras_registration_number').hide()
 					jQuery('.propal_extras_linked_product').hide()
 					jQuery('.propal_extras_linked_lot').hide()
+					jQuery('.propal_extras_first_registration_date').hide()
+					jQuery('.propal_extras_VIN_number').hide()
 				</script>
 				<?php
 			}
@@ -272,6 +284,7 @@ class ActionsDoliCar
 				}
 
 				$mileageWithSeparator = price($commande->array_options['options_mileage'], 0,"",1, 0);
+				$firstRegistrationDateFormatted = dol_print_date($commande->array_options['options_first_registration_date'], 'day');
 
 				?>
 				<script>
@@ -291,6 +304,7 @@ class ActionsDoliCar
 						jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 						jQuery('.commande_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.commande_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
+						jQuery('.commande_extras_first_registration_date').not('.valuefieldlinecreate').html(<?php echo json_encode($firstRegistrationDateFormatted) ?>)
 					</script>
 					<?php
 				}
@@ -303,6 +317,8 @@ class ActionsDoliCar
 						jQuery('.commandedet_extras_registration_number').hide()
 						jQuery('.commandedet_extras_linked_product').hide()
 						jQuery('.commandedet_extras_linked_lot').hide()
+						jQuery('.commandedet_extras_first_registration_date').hide()
+						jQuery('.commandedet_extras_VIN_number').hide()
 					</script>
 					<?php
 				endif;
@@ -313,6 +329,8 @@ class ActionsDoliCar
 					jQuery('.commande_extras_registration_number').hide()
 					jQuery('.commande_extras_linked_product').hide()
 					jQuery('.commande_extras_linked_lot').hide()
+					jQuery('.commande_extras_first_registration_date').hide()
+					jQuery('.commande_extras_VIN_number').hide()
 				</script>
 				<?php
 			}
@@ -405,6 +423,8 @@ class ActionsDoliCar
 				$_POST['options_vehicle_model'] = $product->label;
 				$_POST['options_linked_product'] = $registrationcertificatefr->fk_product;
 				$_POST['options_linked_lot'] = $registrationcertificatefr->fk_lot;
+				$_POST['options_first_registration_date'] = $registrationcertificatefr->b_first_registration_date;
+				$_POST['options_VIN_number'] = $registrationcertificatefr->e_vehicle_serial_number;
 			}
 
 			if (GETPOST('action') == 'addline') {
@@ -426,6 +446,8 @@ class ActionsDoliCar
 				$_POST['options_vehicle_model'] = $object->array_options['options_vehicle_model'];
 				$_POST['options_mileage'] = $object->array_options['options_mileage'];
 				$_POST['options_linked_lot'] = $object->array_options['options_linked_lot'];
+				$_POST['options_first_registration_date'] = $object->array_options['options_first_registration_date'];
+				$_POST['options_VIN_number'] = $object->array_options['options_VIN_number'];
 			}
 
 			if (GETPOST('action') == 'update_extras') {

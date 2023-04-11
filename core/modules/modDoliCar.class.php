@@ -451,6 +451,8 @@ class modDoliCar extends DolibarrModules
 		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facture', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
 		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'facture', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'facture', 0, 0, '', '', 1, '', 1);
 
 		// Facturedet extrafields
 		// Update
@@ -464,6 +466,8 @@ class modDoliCar extends DolibarrModules
 		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
 		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
 
 		// Propal extrafields
 		// Update
@@ -477,6 +481,8 @@ class modDoliCar extends DolibarrModules
 		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propal', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
 		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'propal', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'propal', 0, 0, '', '', 1, '', 1);
 
 		// Propaldet extrafields
 		// Update
@@ -490,6 +496,8 @@ class modDoliCar extends DolibarrModules
 		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
 		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
 
 		// Commande extrafields
 		// Update
@@ -503,6 +511,8 @@ class modDoliCar extends DolibarrModules
 		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commande', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
 		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commande', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commande', 0, 0, '', '', 1, '', 1);
 
 		// Commandedet extrafields
 		// Update
@@ -516,6 +526,8 @@ class modDoliCar extends DolibarrModules
 		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
 		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
+		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
 
 		// Permissions
 		$this->remove($options);
