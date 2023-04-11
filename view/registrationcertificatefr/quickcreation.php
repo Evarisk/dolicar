@@ -114,7 +114,6 @@ if (empty($reshook)) {
 		exit;
 	}
 	require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_quickcreation_actions.tpl.php';
-
 }
 
 /*
@@ -157,11 +156,17 @@ print '</table>';
 print '<hr>';
 print '<br>';
 
-require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_thirdparty_quickcreation.tpl.php';
+if ($conf->global->DOLICAR_THIRDPARTY_QUICK_CREATION) {
+	require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_thirdparty_quickcreation.tpl.php';
+}
 
-require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_contact_quickcreation.tpl.php';
+if ($conf->global->DOLICAR_CONTACT_QUICK_CREATION) {
+	require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_contact_quickcreation.tpl.php';
+}
 
-require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_project_quickcreation.tpl.php';
+if ($conf->global->DOLICAR_PROJECT_QUICK_CREATION) {
+	require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_project_quickcreation.tpl.php';
+}
 
 print $form->buttonsSaveCancel('Create');
 

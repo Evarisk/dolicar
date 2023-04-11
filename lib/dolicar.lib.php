@@ -40,6 +40,11 @@ function dolicar_admin_prepare_head()
 	$head[$h][2] = 'registrationcertificate';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/dolicar/admin/quickcreation.php", 1);
+	$head[$h][1] = '<i class="fas fa-plus pictofixedwidth"></i>' . $langs->trans("QuickCreation");
+	$head[$h][2] = 'quickcreation';
+	$h++;
+
 	$head[$h][0] = dol_buildpath("/dolicar/admin/setup.php", 1);
 	$head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans("ModuleSettings");
 	$head[$h][2] = 'settings';
