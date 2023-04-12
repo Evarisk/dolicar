@@ -698,26 +698,28 @@ class ActionsDoliCar
 			$createRegistrationCertificate = 1;
 			require_once __DIR__ . '/../core/tpl/dolicar_registrationcertificatefr_immatriculation_api_fetch_action.tpl.php';
 
-			if ($conf->global->DOLICAR_AUTOMATIC_CONTACT_CREATION > 0 && empty($conf->global->DOLICAR_CONTACT_QUICK_CREATION) && empty($parameters['$contactID'])) {
+			if ($conf->global->DOLICAR_AUTOMATIC_CONTACT_CREATION > 0 && empty($parameters['$contactID'])) {
 				require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 				require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
 
-				$thirdparty = new Societe($this->db);
-				$contact    = new Contact($this->db);
+				if (isModEnabled('societe')) {
+					$thirdparty = new Societe($this->db);
+					$contact    = new Contact($this->db);
 
-				$thirdpartyID = $parameters['thirdpartyID'];
+					$thirdpartyID = $parameters['thirdpartyID'];
 
-				$thirdparty->fetch($thirdpartyID);
+					$thirdparty->fetch($thirdpartyID);
 
-				$contact->socid     = !empty($thirdpartyID) ? $thirdpartyID : '';
-				$contact->lastname  = $thirdparty->name;
-				$contact->email     = $thirdparty->email;
-				$contact->phone_pro = $thirdparty->phone;
+					$contact->socid     = !empty($thirdpartyID) ? $thirdpartyID : '';
+					$contact->lastname  = $thirdparty->name;
+					$contact->email     = $thirdparty->email;
+					$contact->phone_pro = $thirdparty->phone;
 
-				$contactID = $contact->create($user);
-				if ($contactID < 0) {
-					setEventMessages($contact->error, $contact->errors, 'errors');
-					$error++;
+					$contactID = $contact->create($user);
+					if ($contactID < 0) {
+						setEventMessages($contact->error, $contact->errors, 'errors');
+						$error++;
+					}
 				}
 			}
 			if (dol_strlen($backtopage) > 0){
