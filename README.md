@@ -46,4 +46,3 @@ git clone https://github.com/Eoxia/dolicar.git
 ## Licenses
 
 Ce module est publié sous licence GPLv3.
-
