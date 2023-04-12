@@ -335,7 +335,7 @@ class RegistrationCertificateFr extends CommonObject
 			$this->d1_vehicle_brand = $langs->trans('DefaultBrand');
 		}
 
-			$resultcreate = $this->createCommon($user, $notrigger);
+		$resultcreate = $this->createCommon($user, $notrigger);
 
 		return $resultcreate;
 	}
