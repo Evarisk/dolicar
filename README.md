@@ -4,7 +4,7 @@
 
 - Numéro du module : 436380
 - Version :  1.0.0
-- Dernière mise à jour : 06/04/2023
+- Dernière mise à jour : 12/04/2023
 - Éditeur : [Evarisk](https://www.evarisk.com)
 - Compatibilité : Dolibarr 16.0.0 - 16.0.5
 - Thème : eldy
@@ -15,8 +15,8 @@
 
 - Support & Assistance : [Forum www.dolibarr.fr](https://www.dolibarr.fr) / Par mail à technique@evarisk.com
 - Demo : [Demo Dolicar](https://www.demodoli.digirisk.com) - ID: demo - Password: demo
-- Documentation : [Wiki Dolicar](https://wiki.dolibarr.org/index.php/Module_Dolicar)
-- Projet GitHub : [Projet Dolicar](https://github.com/Eoxia/Dolicar/projects?query=is%3Aopen)
+- Documentation : [Wiki DoliCar](https://wiki.dolibarr.org/index.php/Module_Dolicar)
+- Projet GitHub : [Projet DoliCar](https://github.com/Eoxia/Dolicar/projects?query=is%3Aopen)
 - D'autres modules développés par Evarisk disponibles sur [Dolistore.com](https://www.dolistore.com)
   ités
 
