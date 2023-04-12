@@ -664,6 +664,8 @@ class modDoliCar extends DolibarrModules
 			$product->fetch($conf->global->DOLICAR_DEFAULT_VEHICLE);
 			$tag->fetch($conf->global->DOLICAR_CAR_DEFAULT_BRAND_TAG);
 			$tag->add_type($product, 'product');
+			$product->status_batch = 1;
+			$product->update($product->id, $user);
 			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 2, 'integer', 0, '', $conf->entity);
 		} elseif ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 2) {
 			$product->fetch($conf->global->DOLICAR_DEFAULT_VEHICLE);
