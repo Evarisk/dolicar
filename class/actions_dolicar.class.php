@@ -660,13 +660,20 @@ class ActionsDoliCar
 		}
 	}
 
-	public function extendSheetLinkableObjectsList($linkableObjectTypes) {
+	/**
+	 * Execute action extendSheetLinkableObjectsList
+	 *
+	 * @param   array           $linkableObjectTypes     Array of linkable objects
+	 * @return  int                                      1
+	 */
+	public function extendSheetLinkableObjectsList(array $linkableObjectTypes): int {
 		require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 		require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
 
 		$registrationCertificate = new RegistrationCertificateFr($this->db);
 		$linkableObjectTypes['dolicar_regcertfr'] = [
 			'langs'      => 'RegistrationCertificate',
+			'langfile'   => 'dolicar@dolicar',
 			'picto'      => $registrationCertificate->picto,
 			'className'  => 'registrationCertificateFr',
 			'post_name'  => 'fk_registrationcertificatefr',
@@ -679,6 +686,7 @@ class ActionsDoliCar
 		$this->results = $linkableObjectTypes;
 		return 1;
 	}
+
 	/**
 	 * Execute action completeTabsHead
 	 *
