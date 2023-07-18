@@ -161,7 +161,9 @@ LicencePlate = Plaque d'immatriculation
 ShowRegistrationCertificateFieldHelp = Afficher/Cacher ce champ sur la page de création de la carte grise
 LicencePlateWasAlreadyExisting = La plaque d'immatriculation existe déjà, vous avez été redirigé(e) sur sa page.
 VINNumber = Numéro VIN
-
+AddRegistrationCertificate = Créer carte grise
+LinkDolicar_regcertfr = Activer le lien avec les cartes grises
+LinkDolicar_regcertfrDescription = Permet la liaison entre les cartes grises et les modèles de contrôle
 
 #
 # Other
