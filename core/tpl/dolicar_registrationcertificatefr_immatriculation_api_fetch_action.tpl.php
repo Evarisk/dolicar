@@ -21,27 +21,21 @@ if (dol_strlen($registrationNumber) > 0) {
 }
 
 if (dol_strlen($username) > 0) {
-	if ((preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', $registrationNumber) || preg_match('/^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/', $registrationNumber))) {
-		// Setup request to send json via POST
+	// Setup request to send json via POST
 
-		$xmlData = @file_get_contents( $apiUrl . '?RegistrationNumber=' . $registrationNumber ."&username=" . $username);
+	$xmlData = @file_get_contents( $apiUrl . '?RegistrationNumber=' . $registrationNumber ."&username=" . $username);
 
-		if (empty($xmlData)) {
-			$usernameConfigUrl = DOL_URL_ROOT . '/custom/dolicar/admin/registrationcertificate.php';
+	if (empty($xmlData)) {
+		$usernameConfigUrl = DOL_URL_ROOT . '/custom/dolicar/admin/registrationcertificate.php';
 
-			setEventMessage($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $usernameConfigUrl), 'errors');
-			$error++;
-			$action = $createRegistrationCertificate ? '' : 'create';
-		} else {
-			$xml = simplexml_load_string($xmlData);
-			$strJson = $xml->vehicleJson;
-			$registrationCertificateObject = json_decode($strJson);
-			setEventMessages($langs->trans("LicencePlateInformationsCharged"), null, 'mesgs');
-		}
-	} else {
-		setEventMessage($langs->trans('BadLicencePlateFormat'), 'errors');
+		setEventMessage($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $usernameConfigUrl), 'errors');
 		$error++;
 		$action = $createRegistrationCertificate ? '' : 'create';
+	} else {
+		$xml = simplexml_load_string($xmlData);
+		$strJson = $xml->vehicleJson;
+		$registrationCertificateObject = json_decode($strJson);
+		setEventMessages($langs->trans("LicencePlateInformationsCharged"), null, 'mesgs');
 	}
 } else {
 	$usernameConfigUrl = DOL_URL_ROOT . '/custom/dolicar/admin/registrationcertificate.php';
