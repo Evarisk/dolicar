@@ -704,6 +704,7 @@ class ActionsDoliCar
 
 		if ($parameters['currentcontext'] == 'dolicar_quickcreation') {
 			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+			require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
 			if (isModEnabled('productbatch')) {
 				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 			}
