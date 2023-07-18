@@ -660,6 +660,25 @@ class ActionsDoliCar
 		}
 	}
 
+	public function extendSheetLinkableObjectsList($linkableObjectTypes) {
+		require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+		require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
+
+		$registrationCertificate = new RegistrationCertificateFr($this->db);
+		$linkableObjectTypes['dolicar_regcertfr'] = [
+			'langs'      => 'RegistrationCertificate',
+			'picto'      => $registrationCertificate->picto,
+			'className'  => 'registrationCertificateFr',
+			'post_name'  => 'fk_registrationcertificatefr',
+			'link_name'  => 'dolicar_regcertfr',
+			'name_field' => 'ref',
+			'create_url' => 'custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php',
+			'class_path' => 'custom/dolicar/class/registrationcertificatefr.class.php',
+		];
+
+		$this->results = $linkableObjectTypes;
+		return 1;
+	}
 	/**
 	 * Execute action completeTabsHead
 	 *
