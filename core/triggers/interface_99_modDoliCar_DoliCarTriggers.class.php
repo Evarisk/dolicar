@@ -51,7 +51,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
 		$this->family = "demo";
 		$this->description = "DoliCar triggers.";
 		// 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.0.0';
+		$this->version = '1.1.0';
 		$this->picto = 'dolicar@dolicar';
 	}
 
