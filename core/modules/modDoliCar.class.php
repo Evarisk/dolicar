@@ -61,7 +61,7 @@ class modDoliCar extends DolibarrModules
 		$this->descriptionlong = $langs->trans("DoliCarDescription");
 		$this->editor_name = 'Evarisk';
 		$this->editor_url = 'https://www.evarisk.com';
-		$this->version = '1.0.0';
+		$this->version = '1.1.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'dolicar_color@dolicar';
 
@@ -86,7 +86,9 @@ class modDoliCar extends DolibarrModules
 				'ordercard',
 				'productlotcard',
 				'registrationcertificatefrcard',
-				'dolicar_quickcreation'
+				'dolicar_quickcreation',
+				'get_sheet_linkable_objects',
+
 			),
 			'moduleforexternal' => 0,
 		);

@@ -133,10 +133,6 @@ if (empty($reshook)) {
 
 	if ($action == 'add') {
 		$registrationNumber = strtoupper(GETPOST('a_registration_number'));
-		if ((!preg_match('/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/', $registrationNumber) && !preg_match('/^[A-Z]{2}-[0-9]{3}-[A-Z]{2}$/', $registrationNumber))) {
-			setEventMessage($langs->trans('BadLicencePlateFormat'), 'errors');
-			$action = 'create';
-		}
 	}
 
 	if ($action == 'getRegistrationCertificateData') {

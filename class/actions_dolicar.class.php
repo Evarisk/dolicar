@@ -661,6 +661,33 @@ class ActionsDoliCar
 	}
 
 	/**
+	 * Execute action extendSheetLinkableObjectsList
+	 *
+	 * @param   array           $linkableObjectTypes     Array of linkable objects
+	 * @return  int                                      1
+	 */
+	public function extendSheetLinkableObjectsList(array $linkableObjectTypes): int {
+		require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+		require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
+
+		$registrationCertificate = new RegistrationCertificateFr($this->db);
+		$linkableObjectTypes['dolicar_regcertfr'] = [
+			'langs'      => 'RegistrationCertificate',
+			'langfile'   => 'dolicar@dolicar',
+			'picto'      => $registrationCertificate->picto,
+			'className'  => 'registrationCertificateFr',
+			'post_name'  => 'fk_registrationcertificatefr',
+			'link_name'  => 'dolicar_regcertfr',
+			'name_field' => 'ref',
+			'create_url' => 'custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php',
+			'class_path' => 'custom/dolicar/class/registrationcertificatefr.class.php',
+		];
+
+		$this->results = $linkableObjectTypes;
+		return 1;
+	}
+
+	/**
 	 * Execute action completeTabsHead
 	 *
 	 * @param   array           $parameters     Array of parameters
@@ -677,6 +704,7 @@ class ActionsDoliCar
 
 		if ($parameters['currentcontext'] == 'dolicar_quickcreation') {
 			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+			require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
 			if (isModEnabled('productbatch')) {
 				require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 			}
