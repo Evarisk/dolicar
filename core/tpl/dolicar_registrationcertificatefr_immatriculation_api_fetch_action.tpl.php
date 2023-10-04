@@ -1,5 +1,13 @@
 <?php
 
+if ($conf->global->DOLICAR_API_REMAINING_REQUESTS_COUNTER <= 0) {
+    setEventMessage($langs->trans('ZeroApiRequestsRemaining'), 'errors');
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
+    exit;
+} else if ($conf->global->DOLICAR_API_REMAINING_REQUESTS_COUNTER <= 100) {
+    setEventMessage($langs->trans('LessThanHundredApiRequestsRemaining'), 'warning');
+}
+
 $apiUrl = 'http://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
 
 $username = $conf->global->DOLICAR_IMMATRICULATION_API_USERNAME;
@@ -35,7 +43,9 @@ if (dol_strlen($username) > 0) {
 		$xml = simplexml_load_string($xmlData);
 		$strJson = $xml->vehicleJson;
 		$registrationCertificateObject = json_decode($strJson);
-		setEventMessages($langs->trans("LicencePlateInformationsCharged"), null, 'mesgs');
+        dolibarr_set_const($this->db, 'DOLICAR_API_REMAINING_REQUESTS_COUNTER', $conf->global->DOLICAR_API_REMAINING_REQUESTS_COUNTER - 1, 'integer', 0, '', $conf->entity);
+        setEventMessages($langs->trans("LicencePlateInformationsCharged"), null, 'mesgs');
+        setEventMessages($langs->trans("RemainingRequests", $conf->global->DOLICAR_API_REMAINING_REQUESTS_COUNTER), null, 'mesgs');
 	}
 } else {
 	$usernameConfigUrl = DOL_URL_ROOT . '/custom/dolicar/admin/registrationcertificate.php';

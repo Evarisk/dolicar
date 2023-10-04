@@ -139,6 +139,7 @@ if (empty($reshook)) {
 		require_once __DIR__ . '/../../core/tpl/dolicar_registrationcertificatefr_immatriculation_api_fetch_action.tpl.php';
 	}
 
+
 	$triggermodname = 'DOLICAR_REGISTRATIONCERTIFICATEFR_MODIFY'; // Name of trigger action code to execute when we modify record
 
 	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
@@ -177,14 +178,15 @@ if ($action == 'create') {
 
 	print '<hr>';
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="getRegistrationCertificateData">';
-	print '<input type="hidden" name="action" value="getRegistrationCertificateData">';
+    print '<input type="hidden" name="action" value="getRegistrationCertificateData">';
+    print '<input type="hidden" name="token" value="'. newToken() .'">';
 	print '<table class="border centpercent tableforfieldcreate">';
 	print '<tr>';
 	print '<td class="titlefieldcreate">';
 	print $langs->trans('FindLicencePlateInRepertory');
 	print '</td>';
 	print '<td class="valuefieldcreate">';
-	print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber">';
+	print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber" value="'. GETPOST('a_registration_number') .'">';
 	print '</td>';
 	print '</tr>';
 	print '<tr>';

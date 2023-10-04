@@ -76,6 +76,24 @@ print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
 // Configuration header
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'registrationcertificate', $langs->trans($page_name), -1, "dolicar_color@dolicar");
+
+print load_fiche_titre($langs->transnoentities("ImmatriculationAPIConfig"), '', '');
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities("Parameters") . '</td>';
+print '<td class="center">' . $langs->transnoentities("Value") . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '<td>' . $langs->transnoentities('RemainingRequests') . '</td>';
+print '<td class="center">';
+print '<b>' . ($conf->global->DOLICAR_API_REMAINING_REQUESTS_COUNTER ?? 0) . '</b>';
+print '</td>';
+print '</tr>';
+
+print '</table>';
+
 print load_fiche_titre($langs->transnoentities("RegistrationCertificateFieldsConfig"), '', '');
 
 print '<div class="div-table-responsive-no-min">';
