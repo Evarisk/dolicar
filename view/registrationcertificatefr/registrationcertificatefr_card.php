@@ -241,10 +241,17 @@ if ($action == 'create') {
 	print '</td><td class="lot-container">';
 	print '<span class="lot-content">';
 
-	dol_strlen(GETPOST('fk_product')) > 0 ? $product->fetch(GETPOST('fk_product')) : 0;
+    $productLots = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, $productPost > 0 ? ['customsql' => ' fk_product = ' . $productPost] : []);
+    $productLotsData  = [];
+    if (is_array($productLots) && !empty($productLots)) {
+        foreach ($productLots as $productLotSingle) {
+            $productLotsData[$productLotSingle->id] = $productLotSingle->batch;
+        }
+    }
 
-	print dolicar_select_product_lots($productPost, $productLotPost, 'fk_lot', 1, '', '', 0, 'maxwidth500 widthcentpercentminusxx', false, 0, array(), false, '', 'fk_lot');
-	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
+    print $form::selectarray('productLotId', $productLotsData, '', $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
+
+    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
 	print '</span>';
 	print '</td></tr>';
 
@@ -333,9 +340,15 @@ if (($id || $ref) && $action == 'edit') {
 	print '</td><td class="lot-container">';
 	print '<span class="lot-content">';
 
-	dol_strlen(GETPOST('fk_product')) > 0 ? $product->fetch(GETPOST('fk_product')) : 0;
+    $productLots = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, $productPost > 0 ? ['customsql' => ' fk_product = ' . $productPost] : []);
+    $productLotsData  = [];
+    if (is_array($productLots) && !empty($productLots)) {
+        foreach ($productLots as $productLotSingle) {
+            $productLotsData[$productLotSingle->id] = $productLotSingle->batch;
+        }
+    }
 
-	print dolicar_select_product_lots($productPost, $productLotPost, 'fk_lot', 1, '', '', 0, 'maxwidth500 widthcentpercentminusxx', false, 0, array(), false, '', 'fk_lot');
+    print $form::selectarray('productLotId', $productLotsData, $productLotPost, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
 	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
 	print '</span>';
 	print '</td></tr>';
