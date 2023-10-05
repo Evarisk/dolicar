@@ -703,7 +703,7 @@ class ActionsDoliCar
 	 */
 	public function quickCreationAction(&$parameters, &$object, &$action, $hookmanager)
 	{
-		global $langs, $user, $conf;
+		global $db, $langs, $user, $conf;
 
 		if ($parameters['currentcontext'] == 'dolicar_quickcreation') {
 			require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
