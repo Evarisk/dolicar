@@ -556,12 +556,12 @@ class ActionsDoliCar
 
 		$ret = 0;
 		dol_syslog(get_class($this).'::executeHooks action='.$action);
-
 		if (
 		(in_array('ordercard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_ORDERCARD))
-		|| (in_array('propalcard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_PROPALCARD))
+        || (in_array('propalcard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_PROPALCARD))
 		|| (in_array('invoicecard', explode(':', $parameters['context'])) && empty($conf->global->DOLICAR_HIDE_ADDRESS_ON_INVOICECARD))
-		) {
+        || (in_array('paiementcard', explode(':', $parameters['context'])))
+        ) {
             if ($object->array_options['options_registrationcertificatefr'] > 0) {
                 require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
                 require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';

@@ -84,6 +84,7 @@ class modDoliCar extends DolibarrModules
 				'invoicecard',
 				'propalcard',
 				'ordercard',
+                'paiementcard',
 				'productlotcard',
 				'registrationcertificatefrcard',
 				'dolicar_quickcreation',
