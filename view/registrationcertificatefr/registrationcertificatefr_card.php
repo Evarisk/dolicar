@@ -44,7 +44,7 @@ require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 global $conf, $langs, $user, $db, $hookmanager;
 
 // Load translation files required by the page
-saturne_load_langs(['other']);
+saturne_load_langs(['other', 'propal', 'interventions']);
 
 // Get parameters
 $id                  = GETPOST('id', 'int');
@@ -437,7 +437,17 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		}
 
 		if (empty($reshook)) {
-			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd);
+            $displayButton = $onPhone ? '<i class="fas fa-edit fa-2x"></i>' : '<i class="fas fa-edit"></i>' . ' ' . $langs->trans('Modify');
+            print dolGetButtonAction($displayButton, '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd);
+
+            $displayButton = $onPhone ? '<i class="fas fa-file-signature fa-2x"></i>' : '<i class="fas fa-file-signature"></i>' . ' ' . $langs->trans('NewPropal');
+            print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('/comm/propal/card.php?action=create&socid=' . $object->fk_soc . '&options_registrationcertificatefr=' . $object->id, 3), '', $permissiontoadd);
+
+            $displayButton = $onPhone ? '<i class="fas fa-file-invoice-dollar fa-2x"></i>' : '<i class="fas fa-file-invoice-dollar"></i>' . ' ' . $langs->trans('NewInvoice');
+            print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('/compta/facture/card.php?action=create&socid=' . $object->fk_soc . '&options_registrationcertificatefr=' . $object->id, 3), '', $permissiontoadd);
+
+            $displayButton = $onPhone ? '<i class="fas fa-ambulance fa-2x"></i>' : '<i class="fas fa-ambulance"></i>' . ' ' . $langs->trans('NewIntervention');
+            print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('/fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
 		}
 		print '</div>'."\n";
 	}
