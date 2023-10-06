@@ -1090,84 +1090,22 @@ class RegistrationCertificateFr extends CommonObject
 	 * @return string HTML string with
 	 * @throws Exception
 	 */
-	public function select_registrationcertificate_list($selected = '', $htmlname = 'options_registrationcertificatefr', $filter = '', $showempty = '1', $forcecombo = 0, $events = array(), $outputmode = 0, $limit = 0, $morecss = 'minwidth100', $moreparam = 0, $multiple = false, $noroot = 0, $contextpage = '', $multientitymanagedoff = true)
+	public function selectRegistrationCertificateList($selected = '', $htmlname = 'options_registrationcertificatefr', $filter = [], $showempty = '1', $forcecombo = 0, $events = array(), $outputmode = 0, $limit = 0, $morecss = 'minwidth100 maxwidth300', $moreparam = 0, $multiple = false, $noroot = 0, $contextpage = '', $multientitymanagedoff = true)
 	{
-		global $conf, $langs;
+        global $form;
 
-		require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+        $product = new Product($this->db);
 
-		$productlot = new Productlot($this->db);
+        $objectList = saturne_fetch_all_object_type('registrationcertificatefr', '', '', $limit, 0, $filter);
+        $registrationCertificatesData  = [];
+        if (is_array($objectList) && !empty($objectList)) {
+            foreach ($objectList as $registrationCertificate) {
+                $product->fetch($registrationCertificate->fk_product);
+                $registrationCertificatesData[$registrationCertificate->id] = $registrationCertificate->ref . ' - ' . $product->label;
+            }
+        }
 
-		$out      = '';
-		$outarray = array();
-
-		$selected = array($selected);
-
-		// Clean $filter that may contains sql conditions so sql code
-		if (function_exists('testSqlAndScriptInject')) {
-			if (testSqlAndScriptInject($filter, 3) > 0) {
-				$filter = '';
-			}
-		}
-		// On recherche les societies
-		$sql  = "SELECT *";
-		$sql .= " FROM " . MAIN_DB_PREFIX . "dolicar_registrationcertificatefr as s";
-
-		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1 && $multientitymanagedoff == false) $sql .= ' WHERE s.entity IN (' . getEntity($this->element) . ')';
-		else $sql                                                                        .= ' WHERE s.entity = ' . $conf->entity;
-
-		if ($filter) $sql .= " AND (" . $filter . ")";
-
-		$sql .= $this->db->order("rowid", "ASC");
-		$sql .= $this->db->plimit($limit, 0);
-
-		// Build output string
-		dol_syslog(get_class($this) . "::select_registrationcertificate_list", LOG_DEBUG);
-		$resql = $this->db->query($sql);
-		$num = '';
-		if ($resql) {
-			if ( ! $forcecombo) {
-				include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
-				$out .= ajax_combobox($htmlname, $events, 0);
-			}
-
-			// Construct $out and $outarray
-			$out .= '<select id="' . $htmlname . '" class="flat' . ($morecss ? ' ' . $morecss : '') . '"' . ($moreparam ? ' ' . $moreparam : '') . ' name="' . $htmlname . ($multiple ? '[]' : '') . '" ' . ($multiple ? 'multiple' : '') . '>' . "\n";
-			$num                  = $this->db->num_rows($resql);
-			$i                    = 0;
-
-			$textifempty          = (($showempty && ! is_numeric($showempty)) ? $langs->trans($showempty) : '');
-			if ($showempty) $out .= '<option value="-1">' . $textifempty . '</option>' . "\n";
-
-			if ($num) {
-				while ($i < $num) {
-					$obj   = $this->db->fetch_object($resql);
-					$productlot->fetch($obj->fk_lot);
-
-					$label =  $obj->ref . ' - ' . $productlot->batch;
-
-					if (empty($outputmode)) {
-						if (in_array($obj->rowid, $selected)) {
-							$out .= '<option value="' . $obj->rowid . '" selected>' . $label . '</option>';
-						} else {
-							$out .= '<option value="' . $obj->rowid . '">' . $label . '</option>';
-						}
-					} else {
-						array_push($outarray, array('key' => $obj->rowid, 'value' => $label, 'label' => $label));
-					}
-
-					$i++;
-					if (($i % 10) == 0) $out .= "\n";
-				}
-			}
-			$out .= '</select>' . "\n";
-		} else {
-			dol_print_error($this->db);
-		}
-
-		$this->result = array('nbofregistrationcertificate' => $num);
-
-		return $out;
+        return $form::selectarray($htmlname, $registrationCertificatesData, $selected, $showempty, 0, 0, '', 0, 0, 0, '', $morecss);
 	}
 
 	/**
