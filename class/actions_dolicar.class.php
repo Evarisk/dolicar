@@ -94,7 +94,18 @@ class ActionsDoliCar
 		global $db, $conf, $langs;
 
 		/* print_r($parameters); print_r($object); echo "action: " . $action; */
-		if ($parameters['currentcontext'] == 'invoicecard') {
+        $picto = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"') . ' ';
+
+        if (in_array($parameters['currentcontext'], ['invoicecard', 'propalcard', 'ordercard'])) {
+            ?>
+            <script>
+                jQuery('.field_options_registrationcertificatefr').find('.titlefieldcreate').first().prepend(<?php echo json_encode($picto); ?>)
+                jQuery('.field_options_mileage').find('.titlefieldcreate').first().prepend(<?php echo json_encode($picto); ?>)
+            </script>
+            <?php
+        }
+
+        if ($parameters['currentcontext'] == 'invoicecard') {
 
 			if ((GETPOST('action') == '' || empty(GETPOST('action')) || GETPOST('action') == 'addline' || GETPOST('action') == 'update_extras' || GETPOST('action') != 'create') && (GETPOST('facid') > 0 || GETPOST('id') > 0)) {
 
@@ -127,7 +138,7 @@ class ActionsDoliCar
 
 				?>
 				<script>
-					jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
+                    jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').empty()
 					jQuery('#extrafield_lines_area_create').find('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').append(<?php echo json_encode($outputline) ; ?>)
 					jQuery('#extrafield_lines_area_create').hide()
 					jQuery('#extrafield_lines_area_edit').hide()
@@ -135,6 +146,16 @@ class ActionsDoliCar
 					//Add getNomUrl
 					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 				</script>
+<!--                Add pictos-->
+                <script>
+                    jQuery('.facture_extras_mileage').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.facture_extras_vehicle_model').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.facture_extras_registrationcertificatefr').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.facture_extras_registration_number').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.facture_extras_linked_product').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.facture_extras_linked_lot').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.facture_extras_first_registration_date').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                </script>
 				<?php
 				if (GETPOST('action') != 'edit_extras') {
 					?>
@@ -216,6 +237,15 @@ class ActionsDoliCar
 					//Add getNomUrl
 					jQuery('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 				</script>
+                <script>
+                    jQuery('.propal_extras_mileage').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.propal_extras_vehicle_model').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.propal_extras_registrationcertificatefr').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.propal_extras_registration_number').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.propal_extras_linked_product').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.propal_extras_linked_lot').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.propal_extras_first_registration_date').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                </script>
 				<?php
 				if (GETPOST('action') != 'edit_extras') {
 					?>
@@ -296,6 +326,15 @@ class ActionsDoliCar
 					//Add getNomUrl
 					jQuery('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
 				</script>
+                <script>
+                    jQuery('.commande_extras_mileage').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.commande_extras_vehicle_model').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.commande_extras_registrationcertificatefr').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.commande_extras_registration_number').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.commande_extras_linked_product').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.commande_extras_linked_lot').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                    jQuery('.commande_extras_first_registration_date').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
+                </script>
 				<?php
                 if (GETPOST('action') != 'edit_extras') {
 					?>
