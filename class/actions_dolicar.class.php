@@ -97,9 +97,9 @@ class ActionsDoliCar
         $picto = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"') . ' ';
 
         if (in_array($parameters['currentcontext'], ['invoicecard', 'propalcard', 'ordercard'])) {
-            $registration_certificate = new RegistrationCertificateFr($db);
+            $registrationCertificate = new RegistrationCertificateFr($db);
 
-            $outputline =  $registration_certificate->selectRegistrationCertificateList(GETPOST('options_registrationcertificatefr'));
+            $outputline =  $registrationCertificate->selectRegistrationCertificateList(GETPOST('options_registrationcertificatefr'), 'options_registrationcertificatefr', GETPOST('socid') > 0 ? ['customsql' => 'fk_soc = ' . GETPOST('socid')] : []);
             $addButton = '&nbsp;<a href="'. dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create', 1) .'">';
             $addButton .= '<span class="fa fa-plus-circle valignmiddle paddingleft" title="'.$langs->trans("AddRegistrationCertificate").'"></span></a>';
 
@@ -125,11 +125,11 @@ class ActionsDoliCar
 				$facture = new Facture($db);
 				$facture->fetch(GETPOST('facid') ?: GETPOST('id'));
 				$facture->fetch_optionals();
-				$registration_certificate_id = $facture->array_options['options_registrationcertificatefr'];
-				$registration_certificate = new RegistrationCertificateFr($db);
-				$registration_certificate->fetch($registration_certificate_id);
+				$registrationCertificate_id = $facture->array_options['options_registrationcertificatefr'];
+				$registrationCertificate = new RegistrationCertificateFr($db);
+				$registrationCertificate->fetch($registrationCertificate_id);
 
-				$outputline =  $registration_certificate->selectRegistrationCertificateList($registration_certificate_id);
+				$outputline =  $registrationCertificate->selectRegistrationCertificateList($registrationCertificate_id);
 
 				$product = new Product($db);
 				$productlot = new Productlot($db);
@@ -154,7 +154,7 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+					jQuery('.facturedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registrationCertificate->getNomUrl(1)) ?>)
 				</script>
 <!--                Add pictos-->
                 <script>
@@ -171,7 +171,7 @@ class ActionsDoliCar
 					?>
 					<script>
 						jQuery('.facture_extras_mileage').html(<?php echo json_encode($mileageWithSeparator); ?>);
-						jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+						jQuery('.facture_extras_registrationcertificatefr').html(<?php echo json_encode($registrationCertificate->getNomUrl(1)) ?>)
 						jQuery('.facture_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.facture_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
 						jQuery('.facture_extras_first_registration_date').not('.valuefieldlinecreate').html(<?php echo json_encode($firstRegistrationDateFormatted) ?>)
@@ -217,11 +217,11 @@ class ActionsDoliCar
 				$propal = new Propal($db);
 				$propal->fetch(GETPOST('facid') ?: GETPOST('id'));
 				$propal->fetch_optionals();
-				$registration_certificate_id = $propal->array_options['options_registrationcertificatefr'];
-				$registration_certificate = new RegistrationCertificateFr($db);
-				$registration_certificate->fetch($registration_certificate_id);
+				$registrationCertificate_id = $propal->array_options['options_registrationcertificatefr'];
+				$registrationCertificate = new RegistrationCertificateFr($db);
+				$registrationCertificate->fetch($registrationCertificate_id);
 
-				$outputline =  $registration_certificate->selectRegistrationCertificateList($registration_certificate_id);
+				$outputline =  $registrationCertificate->selectRegistrationCertificateList($registrationCertificate_id);
 
 				$product = new Product($db);
 				$productlot = new Productlot($db);
@@ -247,7 +247,7 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+					jQuery('.propaldet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registrationCertificate->getNomUrl(1)) ?>)
 				</script>
                 <script>
                     jQuery('.propal_extras_mileage').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
@@ -263,7 +263,7 @@ class ActionsDoliCar
 					?>
 					<script>
 						jQuery('.propal_extras_mileage').html(<?php echo json_encode($mileageWithSeparator); ?>);
-						jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+						jQuery('.propal_extras_registrationcertificatefr').html(<?php echo json_encode($registrationCertificate->getNomUrl(1)) ?>)
 						jQuery('.propal_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.propal_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
 						jQuery('.propal_extras_first_registration_date').not('.valuefieldlinecreate').html(<?php echo json_encode($firstRegistrationDateFormatted) ?>)
@@ -308,11 +308,11 @@ class ActionsDoliCar
 				$commande = new Commande($db);
 				$commande->fetch(GETPOST('facid') ?: GETPOST('id'));
 				$commande->fetch_optionals();
-				$registration_certificate_id = $commande->array_options['options_registrationcertificatefr'];
-				$registration_certificate = new RegistrationCertificateFr($db);
-				$registration_certificate->fetch($registration_certificate_id);
+				$registrationCertificate_id = $commande->array_options['options_registrationcertificatefr'];
+				$registrationCertificate = new RegistrationCertificateFr($db);
+				$registrationCertificate->fetch($registrationCertificate_id);
 
-				$outputline =  $registration_certificate->selectRegistrationCertificateList($registration_certificate_id);
+				$outputline =  $registrationCertificate->selectRegistrationCertificateList($registrationCertificate_id);
 
 				$product = new Product($db);
 				$productlot = new Productlot($db);
@@ -338,7 +338,7 @@ class ActionsDoliCar
 					jQuery('#extrafield_lines_area_edit').hide()
 
 					//Add getNomUrl
-					jQuery('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+					jQuery('.commandedet_extras_registrationcertificatefr').not('.valuefieldlinecreate').html(<?php echo json_encode($registrationCertificate->getNomUrl(1)) ?>)
 				</script>
                 <script>
                     jQuery('.commande_extras_mileage').closest('tr').find('.titlefield td').first().prepend(<?php echo json_encode($picto); ?>)
@@ -354,7 +354,7 @@ class ActionsDoliCar
 					?>
 					<script>
 						jQuery('.commande_extras_mileage').html(<?php echo json_encode($mileageWithSeparator); ?>);
-						jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registration_certificate->getNomUrl(1)) ?>)
+						jQuery('.commande_extras_registrationcertificatefr').html(<?php echo json_encode($registrationCertificate->getNomUrl(1)) ?>)
 						jQuery('.commande_extras_linked_product').not('.valuefieldlinecreate').html(<?php echo json_encode($product->getNomUrl(1)) ?>)
 						jQuery('.commande_extras_linked_lot').not('.valuefieldlinecreate').html(<?php echo json_encode($productlot->getNomUrl(1)) ?>)
 						jQuery('.commande_extras_first_registration_date').not('.valuefieldlinecreate').html(<?php echo json_encode($firstRegistrationDateFormatted) ?>)
@@ -395,8 +395,8 @@ class ActionsDoliCar
 			//Filter products selector with product with "Vehicle" category
 			require_once __DIR__ . '/../../../categories/class/categorie.class.php';
 			$category = new Categorie($db);
-			$registration_certificate = new RegistrationCertificateFr($db);
-			GETPOST('id') > 0 ? $registration_certificate->fetch(GETPOST('id')) : '';
+			$registrationCertificate = new RegistrationCertificateFr($db);
+			GETPOST('id') > 0 ? $registrationCertificate->fetch(GETPOST('id')) : '';
 
 			$category->fetch($conf->global->DOLICAR_VEHICLE_TAG);
 			$objects_in_categ = $category->getObjectsInCateg('product');
@@ -407,7 +407,7 @@ class ActionsDoliCar
 				}
 			}
 
-			$brand_name = get_vehicle_brand(GETPOST('fk_product')?:$registration_certificate->fk_product);
+			$brand_name = get_vehicle_brand(GETPOST('fk_product')?:$registrationCertificate->fk_product);
 
 			?>
 			<script>
@@ -802,12 +802,13 @@ class ActionsDoliCar
 					$contactID = $contact->create($user);
 					if ($contactID < 0) {
 						setEventMessages($contact->error, $contact->errors, 'errors');
-						$error++;
+                        $error++;
 					}
 				}
 			}
 			if (dol_strlen($backtopage) > 0){
 				$this->resprints = $backtopage;
+                return 1;
 			}
 			if (!$error) {
 				return 1;
