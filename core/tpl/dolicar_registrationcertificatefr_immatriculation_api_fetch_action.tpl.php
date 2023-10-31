@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../../core/lib/admin.lib.php';
+// In order to avoid product creation error
+$conf->global->BARCODE_PRODUCT_ADDON_NUM = 0;
 
 if ($conf->global->DOLICAR_API_REMAINING_REQUESTS_COUNTER <= 0) {
     setEventMessage($langs->trans('ZeroApiRequestsRemaining'), 'errors');
