@@ -133,6 +133,7 @@ class modDoliCar extends DolibarrModules
 			$i++ => array('DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS', 'integer', 1, '', 0, 'current'),
             $i++ => array('DOLICAR_A_REGISTRATION_NUMBER_VISIBLE', 'integer', 1, '', 0, 'current'),
             $i++ => array('DOLICAR_API_REMAINING_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'),
+            $i++ => array('DOLICAR_API_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'),
 
 			// CONST MODULE
 			$i++ => ['DOLICAR_VERSION','chaine', $this->version, '', 0, 'current'],

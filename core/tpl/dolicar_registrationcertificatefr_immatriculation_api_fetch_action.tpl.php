@@ -45,6 +45,7 @@ if (dol_strlen($username) > 0) {
 		$strJson = $xml->vehicleJson;
 		$registrationCertificateObject = json_decode($strJson);
         dolibarr_set_const($db, 'DOLICAR_API_REMAINING_REQUESTS_COUNTER', $conf->global->DOLICAR_API_REMAINING_REQUESTS_COUNTER - 1, 'integer', 0, '', $conf->entity);
+        dolibarr_set_const($db, 'DOLICAR_API_REQUESTS_COUNTER', $conf->global->DOLICAR_API_REQUESTS_COUNTER + 1, 'integer', 0, '', $conf->entity);
         setEventMessages($langs->trans("LicencePlateInformationsCharged"), null, 'mesgs');
         setEventMessages($langs->trans("RemainingRequests", $conf->global->DOLICAR_API_REMAINING_REQUESTS_COUNTER), null, 'mesgs');
 	}
