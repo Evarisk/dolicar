@@ -68,6 +68,7 @@ if (is_object($registrationCertificateObject)) {
 	if ($result <= 0) {
 		$product->ref = $productRef;
 		$product->label = $productRef;
+        $product->status_batch = 1;
 		$productId = $product->create($user);
 
 		if ($productId > 0) {
