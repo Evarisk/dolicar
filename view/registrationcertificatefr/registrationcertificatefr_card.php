@@ -249,7 +249,7 @@ if ($action == 'create') {
         }
     }
 
-    print $form::selectarray('productLotId', $productLotsData, '', $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
+    print $form::selectarray('fk_lot', $productLotsData, $productLotPost, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
 
     print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
 	print '</span>';
@@ -348,7 +348,7 @@ if (($id || $ref) && $action == 'edit') {
         }
     }
 
-    print $form::selectarray('productLotId', $productLotsData, $productLotPost, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
+    print $form::selectarray('fk_lot', $productLotsData, $productLotPost, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
 	print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
 	print '</span>';
 	print '</td></tr>';
