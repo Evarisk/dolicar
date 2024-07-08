@@ -169,6 +169,20 @@ if (isModEnabled('digiquali')) {
         'enabled'  => 1,
         'position' => 200
     ];
+
+    $arrayfields['t.last_control'] = [
+        'label'    => 'LastControl',
+        'checked'  => 1,
+        'enabled'  => 1,
+        'position' => 210
+    ];
+
+    $arrayfields['t.control_verdict'] = [
+        'label'    => 'Verdict',
+        'checked'  => 1,
+        'enabled'  => 1,
+        'position' => 220
+    ];
 }
 foreach ($object->fields as $key => $val) {
 	// If $val['visible']==0, then we never show the field
@@ -491,7 +505,9 @@ $selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfi
 $selectedfields .= (count($arrayofmassactions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
 
 if (isModEnabled('digiquali')) {
-    $object->fields['controls'] = $arrayfields['t.controls'];
+    $object->fields['controls']        = $arrayfields['t.controls'];
+    $object->fields['last_control']    = $arrayfields['t.last_control'];
+    $object->fields['control_verdict'] = $arrayfields['t.control_verdict'];
 }
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
@@ -529,7 +545,7 @@ foreach ($object->fields as $key => $val) {
 			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formadmin.class.php';
 			$formadmin = new FormAdmin($db);
 			print $formadmin->select_language($search[$key], 'search_lang', 0, null, 1, 0, 0, 'minwidth150 maxwidth200', 2);
-        } elseif ($key == 'controls' && isModEnabled('digiquali')) {
+        } elseif ($key == 'controls' || $key == 'last_control' || $key == 'control_verdict' && isModEnabled('digiquali')) {
             continue;
 		} else {
 			print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
@@ -568,7 +584,7 @@ foreach ($object->fields as $key => $val) {
 	}
 	if (!empty($arrayfields['t.'.$key]['checked'])) {
         $disableSortField = 0;
-        if ($key == 'controls' && isModEnabled('digiquali')) {
+        if ($key == 'controls' || $key == 'last_control' || $key == 'control_verdict' && isModEnabled('digiquali')) {
             $disableSortField = 1;
         }
 		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''), $disableSortField)."\n";
@@ -631,16 +647,26 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 		}
 		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
 
+        $object->fetchObjectLinked($object->fk_lot,'productbatch', '', 'digiquali_control');
 		if (!empty($arrayfields['t.'.$key]['checked'])) {
 			print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
 			if ($key == 'status') {
 				print $object->getLibStatut(5);
             } elseif ($key == 'controls' && isModEnabled('digiquali')) {
-                $object->fetchObjectLinked($object->fk_lot,'productbatch', '', 'digiquali_control');
                 if (is_array($object->linkedObjects['digiquali_control']) && !empty($object->linkedObjects['digiquali_control'])) {
                     foreach ($object->linkedObjects['digiquali_control'] as $control) {
                         print $control->getNomUrl(1) . '<br>';
                     }
+                }
+            } elseif ($key == 'last_control' && isModEnabled('digiquali')) {
+                if (is_array($object->linkedObjects['digiquali_control']) && !empty($object->linkedObjects['digiquali_control'])) {
+                    $control = end($object->linkedObjects['digiquali_control']);
+                    print dol_print_date($control->control_date, 'day');
+                }
+            } elseif ($key == 'control_verdict' && isModEnabled('digiquali')) {
+                if (is_array($object->linkedObjects['digiquali_control']) && !empty($object->linkedObjects['digiquali_control'])) {
+                    $control = end($object->linkedObjects['digiquali_control']);
+                    print $control->fields['verdict']['arrayofkeyval'][(!empty($control->verdict)) ?: 3];
                 }
             } elseif ($key == 'rowid') {
 				print $object->showOutputField($val, $key, $object->id, '');
