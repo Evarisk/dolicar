@@ -164,6 +164,20 @@ ZeroApiRequestsRemaining = Vous n'avez plus de jetons de recherche de plaque d'i
 LessThanHundredApiRequestsRemaining = Il vous reste moins de 100 jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
 RemainingRequests = Jetons de recherche de plaque d'immatriculation restants : %s
 
+
+
+# Public interface - Interface publique
+PublicVehicleLogBook          = Carnet de bord publique du véhicule
+StartDateAndHour              = Date et heure de départ
+EndDateAndHour                = Date et heure de retour
+Driver                        = Conducteur
+StartingMileage               = Kilométrage de départ
+ArrivalMileage                = Kilométrage d'arrivé
+ObjectAddPublicVehicleLogBook = Nouveau enregistrement dans le carnet de bord publique du véhicule %s immatriculé %s
+SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
+
+
+
 #
 # Other
 #

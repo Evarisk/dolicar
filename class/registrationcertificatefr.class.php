@@ -440,21 +440,22 @@ class RegistrationCertificateFr extends CommonObject
 		}
 	}
 
-	/**
-	 * Load object in memory from the database
-	 *
-	 * @param int    $id   Id object
-	 * @param string $ref  Ref
-	 * @return int         <0 if KO, 0 if not found, >0 if OK
-	 */
-	public function fetch($id, $ref = null)
-	{
-		$result = $this->fetchCommon($id, $ref);
-		if ($result > 0 && !empty($this->table_element_line)) {
-			$this->fetchLines();
-		}
-		return $result;
-	}
+    /**
+     * Load object in memory from the database
+     *
+     * @param  int|string  $id        ID object
+     * @param  string|null $ref       Ref
+     * @param  string      $morewhere More SQL filters (' AND ...')
+     * @return int                    0 < if KO, 0 if not found, > 0 if OK
+     */
+    public function fetch($id, string $ref = null, string $morewhere = ''): int
+    {
+        $result = $this->fetchCommon($id, $ref, $morewhere);
+        if ($result > 0 && !empty($this->table_element_line)) {
+            $this->fetchLines();
+        }
+        return $result;
+    }
 
 	/**
 	 * Load object lines in memory from the database

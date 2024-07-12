@@ -534,6 +534,9 @@ class modDoliCar extends DolibarrModules
 		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
 
+		$extrafields->addExtraField('starting_mileage', 'StartingMileage', 'int', 1000, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
+		$extrafields->addExtraField('arrival_mileage', 'ArrivalMileage', 'int', 1010, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
+
 		// Permissions
 		$this->remove($options);
 
