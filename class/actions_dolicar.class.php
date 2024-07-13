@@ -740,7 +740,7 @@ class ActionsDoliCar
 		];
 
 		$this->results = $linkableObjectTypes;
-		return 1;
+		return 0;
 	}
 
 	/**
