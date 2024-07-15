@@ -59,6 +59,7 @@ $isModEnabledDigiquali       = isModEnabled('digiquali');
 // Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
 // Load Saturne libraries
 if ($publicInterfaceUseSignatory) {
@@ -118,7 +119,8 @@ if ($id > 0) {
     $id = $registrationCertificateFR->fk_lot;
 }
 $productLot->fetch($id);
-$lastActionComm = $actionComm->getActions(0, $id,'productlot', ' AND code = "AC_' . strtoupper($productLot->element) . '_ADD_Public_Vehicle_Log_Book"', 'id','DESC', 1);
+$lastActionComm           = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NOT NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
+$lastUnfinishedActionComm = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NOT NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
 if (is_array($lastActionComm) && !empty($lastActionComm)) {
     $lastArrivalMileage = $lastActionComm[0]->array_options['options_arrival_mileage'];
 }
@@ -150,24 +152,34 @@ if (empty($resHook)) {
     }
 
     if ($action == 'add') {
-        $actionComm->elementtype = $productLot->element;
-        $actionComm->type_code   = 'AC_PUBLIC';
-        $actionComm->code        = 'AC_' . strtoupper($productLot->element) . '_ADD_Public_Vehicle_Log_Book';
-        $actionComm->datep       = dol_stringtotime(GETPOST('start_date_and_hour'));
-        $actionComm->datef       = dol_stringtotime(GETPOST('end_date_and_hour'));
-        $actionComm->fk_element  = $productLot->id;
-        $actionComm->userownerid = $user->id;
-        $actionComm->percentage  = -1;
+        if (empty($lastActionComm)) {
+            $actionComm->elementtype = $productLot->element;
+            $actionComm->type_code   = 'AC_PUBLIC';
+            $actionComm->code        = 'AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK';
+            $actionComm->datep       = dol_stringtotime(GETPOST('start_date_and_hour'));
+            $actionComm->datef       = dol_stringtotime(GETPOST('end_date_and_hour'));
+            $actionComm->fk_element  = $productLot->id;
+            $actionComm->userownerid = $user->id;
+            $actionComm->percentage  = -1;
 
-        // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user
-        $actionComm->note_private  = (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . '<br>' : $langs->transnoentities('NoData'));
-        $actionComm->note_private .= $langs->transnoentities('Driver') . ' : ' . GETPOST('driver') . '<br>';
-        $actionComm->note_private .= $langs->transnoentities('Comment') . ' : ' . GETPOST('comment', 'restricthtml');
-        $actionComm->label         = $langs->transnoentities('ObjectAddPublicVehicleLogBook', $productLot->batch, $registrationCertificateFR->a_registration_number);
+            // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user
+            $actionComm->note_private  = (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . '<br>' : $langs->transnoentities('NoData'));
+            $actionComm->note_private .= $langs->transnoentities('Driver') . ' : ' . GETPOST('driver') . '<br>';
+            $actionComm->note_private .= $langs->transnoentities('StartComment') . ' : ' . GETPOST('start_comment', 'restricthtml');
+            $actionComm->label         = $langs->transnoentities('ObjectAddPublicVehicleLogBook', $productLot->batch, $registrationCertificateFR->a_registration_number);
 
-        $extraFields->setOptionalsFromPost([], $actionComm);
+            $extraFields->setOptionalsFromPost([], $actionComm);
 
-        $actionCommID = $actionComm->create($user);
+            $actionCommID = $actionComm->create($user);
+        } else {
+            $lastActionComm[0]->datef         = dol_stringtotime(GETPOST('end_date_and_hour'));
+            $lastActionComm[0]->note_private .= $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml');
+
+            $extraFields->setOptionalsFromPost([], $lastActionComm[0]);
+
+            $lastActionComm[0]->update($user);
+        }
+
         if ($publicInterfaceUseSignatory) {
             $signatory->status    = SaturneSignature::STATUS_SIGNED;
             $signatory->role      = $langs->transnoentities('Driver');
@@ -216,14 +228,13 @@ if ($backToPage) {
                         <i class="fas fa-sm fa-chevron-left"></i>
                         <?php echo $langs->trans('Back'); ?>
                     </a></div>
-                    <div class="information-title wpeo-gridlayout grid-2">
+                    <div class="information-title">
                         <?php echo $langs->trans('PublicVehicleLogBook'); ?>
                         <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
                             echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 70, 70, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl);
                         endif; ?>
                     </div>
                 </div>
-
                 <div class="header-objet">
                     <div class="objet-container">
                         <div class="objet-info">
@@ -247,46 +258,55 @@ if ($backToPage) {
                 </div>
             </div>
 
-            <!-- Start/end date and hour -->
-            <div class="wpeo-gridlayout grid-2">
-                <label for=start_date_and_hour">
-                    <?php echo $langs->trans('StartDateAndHour'); ?>
-                    <input type="datetime-local" name="start_date_and_hour" id="start_date_and_hour" required>
-                </label>
-                <label for=end_date_and_hour">
-                    <?php echo $langs->trans('EndDateAndHour'); ?>
-                    <input type="datetime-local" name="end_date_and_hour" id="end_date_and_hour" required>
-                </label>
-            </div>
-
             <!-- Driver -->
             <label for="driver">
                 <input type="text" id="driver" name="driver" placeholder="<?php echo $langs->trans('Driver'); ?>" required>
             </label>
 
-            <!-- Starting/Arrival mileage -->
             <div class="wpeo-gridlayout grid-2">
-                <label for="starting_mileage">
-                    <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->trans('StartingMileage'); ?>" value="<?php echo dol_escape_htmltag($lastArrivalMileage ?? ''); ?>" required>
-                </label>
-                <label for="arrival_mileage">
-                    <input type="number" id="arrival_mileage" name="options_arrival_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->trans('ArrivalMileage'); ?>" required>
-                </label>
-            </div>
-
-            <!-- Comment -->
-            <label for="comment">
-                <textarea name="comment" id="comment" rows="3" placeholder="<?php echo $langs->trans('Comment'); ?>"></textarea>
-            </label>
-
-            <?php if ($publicInterfaceUseSignatory) : ?>
-                <div class="public-card__content signature">
-                    <div class="signature-element">
-                        <canvas class="canvas-container editable canvas-signature"></canvas>
-                        <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
-                    </div>
+                <!-- Start date and hour/mileage/comment/signature -->
+                <div>
+                    <label for=start_date_and_hour">
+                        <?php echo $langs->trans('StartDateAndHour'); ?>
+                        <input type="datetime-local" name="start_date_and_hour" id="start_date_and_hour" value="<?php echo dol_print_date($lastActionComm[0]->datep, '%Y-%m-%dT%H:%M:%S'); ?>" required <?php echo $lastActionComm[0]->datep ? 'disabled' : ''; ?>>
+                    </label>
+                    <label for="starting_mileage">
+                        <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->trans('StartingMileage'); ?>" value="<?php echo $lastArrivalMileage ?? $lastActionComm[0]->array_options['options_starting_mileage']; ?>" required <?php echo $lastActionComm[0]->array_options['options_starting_mileage'] ? 'disabled' : ''; ?>>
+                    </label>
+                    <label for="start_comment">
+                        <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->trans('StartComment'); ?>"></textarea>
+                    </label>
+                    <?php if ($publicInterfaceUseSignatory) : ?>
+                        <div class="public-card__content signature">
+                            <div class="signature-element">
+                                <canvas class="canvas-container editable canvas-signature"></canvas>
+                                <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
+                <!-- End date and hour/mileage/comment/signature -->
+                <div>
+                    <label for=end_date_and_hour">
+                        <?php echo $langs->trans('EndDateAndHour'); ?>
+                        <input type="datetime-local" name="end_date_and_hour" id="end_date_and_hour">
+                    </label>
+                    <label for="arrival_mileage">
+                        <input type="number" id="arrival_mileage" name="options_arrival_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->trans('ArrivalMileage'); ?>">
+                    </label>
+                    <label for="end_comment">
+                        <textarea name="end_comment" id="end_comment" rows="3" placeholder="<?php echo $langs->trans('EndComment'); ?>"></textarea>
+                    </label>
+                    <?php if ($publicInterfaceUseSignatory) : ?>
+                        <div class="public-card__content signature">
+                            <div class="signature-element">
+                                <canvas class="canvas-container editable canvas-signature"></canvas>
+                                <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <div class="public-card__footer">
                 <button type="submit" class="wpeo-button no-load public-vehicle-log-book-validate <?php echo $publicInterfaceUseSignatory ? 'button-grey button-disable' : 'button-blue'; ?>"><i class="fas fa-save pictofixedwidth"></i><?php echo $langs->trans('Save'); ?></button>

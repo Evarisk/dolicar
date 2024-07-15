@@ -168,11 +168,13 @@ RemainingRequests = Jetons de recherche de plaque d'immatriculation restants : %
 
 # Public interface - Interface publique
 PublicVehicleLogBook          = Carnet de bord publique du véhicule
-StartDateAndHour              = Date et heure de départ
-EndDateAndHour                = Date et heure de retour
 Driver                        = Conducteur
+StartDateAndHour              = Date et heure de départ
 StartingMileage               = Kilométrage de départ
+StartComment                  = Commentaire de départ
+EndDateAndHour                = Date et heure de retour
 ArrivalMileage                = Kilométrage d'arrivé
+EndComment                    = Commentaire d'arrivé
 ObjectAddPublicVehicleLogBook = Nouveau enregistrement dans le carnet de bord publique du véhicule %s immatriculé %s
 SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
 
