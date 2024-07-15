@@ -45,6 +45,11 @@ function dolicar_admin_prepare_head()
 	$head[$h][2] = 'quickcreation';
 	$h++;
 
+    $head[$h][0] = dol_buildpath('dolicar/admin/publicinterface.php', 1);
+    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-globe pictofixedwidth"></i>' . $langs->trans('PublicInterface') : '<i class="fas fa-globe"></i>';
+    $head[$h][2] = 'publicinterface';
+    $h++;
+
 	$head[$h][0] = dol_buildpath("/dolicar/admin/setup.php", 1);
 	$head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans("ModuleSettings");
 	$head[$h][2] = 'settings';
