@@ -119,11 +119,19 @@ if ($id > 0) {
     $id = $registrationCertificateFR->fk_lot;
 }
 $productLot->fetch($id);
-$lastActionComm           = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NOT NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
-$lastUnfinishedActionComm = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NOT NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
+
+$lastActionComm = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NOT NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
 if (is_array($lastActionComm) && !empty($lastActionComm)) {
     $lastArrivalMileage = $lastActionComm[0]->array_options['options_arrival_mileage'];
 }
+$lastUnfinishedActionComm = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
+if (is_array($lastUnfinishedActionComm) && !empty($lastUnfinishedActionComm)) {
+    $lastUnfinishedActionCommJSON = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'], true);
+    if ($publicInterfaceUseSignatory) {
+        $signatory->fetch('', '', ' AND object_type = "actiocomm" AND fk_object = ' . $lastUnfinishedActionComm[0]->id);
+    }
+}
+
 $user->fetch(getDolGlobalInt('DOLICAR_PUBLIC_INTERFACE_USER'));
 if ($isModEnabledDigiquali) {
     $controls = saturne_fetch_all_object_type('Control', 'DESC', 't.control_date', 1, 0, ['customsql' => 't.rowid = ee.fk_target AND t.status = ' . Control::STATUS_LOCKED], 'AND', false, true, false, ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ee.sourcetype = "productbatch" AND ee.fk_source = ' . $id . ' AND ee.targettype = "digiquali_control" AND ee.fk_target = t.rowid');
@@ -152,7 +160,7 @@ if (empty($resHook)) {
     }
 
     if ($action == 'add') {
-        if (empty($lastActionComm)) {
+        if (empty($lastUnfinishedActionComm)) {
             $actionComm->elementtype = $productLot->element;
             $actionComm->type_code   = 'AC_PUBLIC';
             $actionComm->code        = 'AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK';
@@ -165,25 +173,29 @@ if (empty($resHook)) {
             // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user
             $actionComm->note_private  = (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . '<br>' : $langs->transnoentities('NoData'));
             $actionComm->note_private .= $langs->transnoentities('Driver') . ' : ' . GETPOST('driver') . '<br>';
-            $actionComm->note_private .= $langs->transnoentities('StartComment') . ' : ' . GETPOST('start_comment', 'restricthtml');
+            $actionComm->note_private .= GETPOSTISSET('start_comment') && !empty(GETPOST('start_comment', 'restricthtml')) ? $langs->transnoentities('StartComment') . ' : ' . GETPOST('start_comment', 'restricthtml') . '<br>' : '';
+            $actionComm->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
             $actionComm->label         = $langs->transnoentities('ObjectAddPublicVehicleLogBook', $productLot->batch, $registrationCertificateFR->a_registration_number);
+
+            $actionComm->array_options['json'] = json_encode(['driver' => GETPOST('driver'), 'start_comment' => GETPOST('start_comment', 'restricthtml'), 'end_comment' => GETPOST('end_comment', 'restricthtml')]);
 
             $extraFields->setOptionalsFromPost([], $actionComm);
 
             $actionCommID = $actionComm->create($user);
         } else {
-            $lastActionComm[0]->datef         = dol_stringtotime(GETPOST('end_date_and_hour'));
-            $lastActionComm[0]->note_private .= $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml');
+            $lastUnfinishedActionComm[0]->datef         = dol_stringtotime(GETPOST('end_date_and_hour'));
+            $lastUnfinishedActionComm[0]->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? '<br>' . $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
 
-            $extraFields->setOptionalsFromPost([], $lastActionComm[0]);
+            $lastUnfinishedActionComm[0]->array_options['options_arrival_mileage'] = GETPOST('options_arrival_mileage');
+            $lastUnfinishedActionComm[0]->updateExtraField('arrival_mileage');
 
-            $lastActionComm[0]->update($user);
+            $lastUnfinishedActionComm[0]->update($user);
         }
 
-        if ($publicInterfaceUseSignatory) {
+        if ($publicInterfaceUseSignatory && (isset($actionCommID) || isset($lastUnfinishedActionComm[0]))) {
             $signatory->status    = SaturneSignature::STATUS_SIGNED;
             $signatory->role      = $langs->transnoentities('Driver');
-            $signatory->firstname = GETPOST('driver');
+            $signatory->firstname = $lastUnfinishedActionCommJSON['driver'] ?? GETPOST('driver');
 
             $signatory->signature_date = dol_now();
             $signatory->signature      = GETPOST('signature');
@@ -191,7 +203,7 @@ if (empty($resHook)) {
             $signatory->element_type = 'user';
             $signatory->element_id   = 0;
             $signatory->object_type  = 'actiocomm';
-            $signatory->fk_object    = $actionCommID;
+            $signatory->fk_object    = $actionCommID ?? (isset($lastUnfinishedActionComm[0]) ? $lastUnfinishedActionComm[0]->id : null);
             $signatory->module_name  = 'dolicar';
 
             $signatory->create($user);
@@ -260,7 +272,7 @@ if ($backToPage) {
 
             <!-- Driver -->
             <label for="driver">
-                <input type="text" id="driver" name="driver" placeholder="<?php echo $langs->trans('Driver'); ?>" required>
+                <input type="text" id="driver" name="driver" placeholder="<?php echo $langs->trans('Driver'); ?>" value="<?php echo $lastUnfinishedActionCommJSON['driver'] ?? ''; ?>" required <?php echo isset($lastUnfinishedActionCommJSON['driver']) ? 'disabled' : ''; ?>>
             </label>
 
             <div class="wpeo-gridlayout grid-2">
@@ -268,19 +280,25 @@ if ($backToPage) {
                 <div>
                     <label for=start_date_and_hour">
                         <?php echo $langs->trans('StartDateAndHour'); ?>
-                        <input type="datetime-local" name="start_date_and_hour" id="start_date_and_hour" value="<?php echo dol_print_date($lastActionComm[0]->datep, '%Y-%m-%dT%H:%M:%S'); ?>" required <?php echo $lastActionComm[0]->datep ? 'disabled' : ''; ?>>
+                        <input type="datetime-local" name="start_date_and_hour" id="start_date_and_hour" value="<?php echo dol_print_date($lastUnfinishedActionComm[0]->datep, '%Y-%m-%dT%H:%M:%S'); ?>" required <?php echo $lastUnfinishedActionComm[0]->datep ? 'disabled' : ''; ?>>
                     </label>
                     <label for="starting_mileage">
-                        <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->trans('StartingMileage'); ?>" value="<?php echo $lastArrivalMileage ?? $lastActionComm[0]->array_options['options_starting_mileage']; ?>" required <?php echo $lastActionComm[0]->array_options['options_starting_mileage'] ? 'disabled' : ''; ?>>
+                        <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->trans('StartingMileage'); ?>" value="<?php echo $lastArrivalMileage ?? $lastUnfinishedActionComm[0]->array_options['options_starting_mileage']; ?>" required <?php echo $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ? 'disabled' : ''; ?>>
                     </label>
                     <label for="start_comment">
-                        <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->trans('StartComment'); ?>"></textarea>
+                        <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->trans('StartComment'); ?>" <?php echo isset($lastUnfinishedActionCommJSON['start_comment']) ? 'disabled' : ''; ?>><?php echo $lastUnfinishedActionCommJSON['start_comment'] ?? ''; ?></textarea>
                     </label>
                     <?php if ($publicInterfaceUseSignatory) : ?>
                         <div class="public-card__content signature">
                             <div class="signature-element">
-                                <canvas class="canvas-container editable canvas-signature"></canvas>
-                                <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
+                                <?php if (empty($signatory->signature)) : ?>
+                                    <canvas class="canvas-container editable canvas-signature"></canvas>
+                                    <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
+                                <?php else : ?>
+                                    <div class="canvas-container">
+                                        <img src='<?php echo $signatory->signature ?>' alt="">
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -289,10 +307,10 @@ if ($backToPage) {
                 <div>
                     <label for=end_date_and_hour">
                         <?php echo $langs->trans('EndDateAndHour'); ?>
-                        <input type="datetime-local" name="end_date_and_hour" id="end_date_and_hour">
+                        <input type="datetime-local" name="end_date_and_hour" id="end_date_and_hour" <?php echo isset($lastUnfinishedActionComm[0]) ? 'required' : ''; ?>>
                     </label>
                     <label for="arrival_mileage">
-                        <input type="number" id="arrival_mileage" name="options_arrival_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->trans('ArrivalMileage'); ?>">
+                        <input type="number" id="arrival_mileage" name="options_arrival_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" max="<?php echo ($lastArrivalMileage ?? 0) + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>" placeholder="<?php echo $langs->trans('ArrivalMileage'); ?>" <?php echo isset($lastUnfinishedActionComm[0]) ? 'required' : ''; ?>>
                     </label>
                     <label for="end_comment">
                         <textarea name="end_comment" id="end_comment" rows="3" placeholder="<?php echo $langs->trans('EndComment'); ?>"></textarea>
