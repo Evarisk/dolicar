@@ -89,7 +89,7 @@ class modDoliCar extends DolibarrModules
 				'registrationcertificatefrcard',
 				'dolicar_quickcreation',
 				'get_sheet_linkable_objects',
-
+                'main'
 			),
 			'moduleforexternal' => 0,
 		);
