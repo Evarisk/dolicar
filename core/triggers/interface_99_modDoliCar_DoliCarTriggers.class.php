@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022 SuperAdmin <test@test.fr>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,136 +18,115 @@
 /**
  * \file    core/triggers/interface_99_modDoliCar_DoliCarTriggers.class.php
  * \ingroup dolicar
- * \brief   Example trigger.
- *
- * Put detailed description here.
- *
- * \remarks You can create other triggers by copying this one.
- * - File name should be either:
- *      - interface_99_modDoliCar_MyTrigger.class.php
- *      - interface_99_all_MyTrigger.class.php
- * - The file must stay in core/triggers
- * - The class name must be InterfaceMytrigger
- */
+ * \brief   DoliCar trigger
+*/
 
-require_once DOL_DOCUMENT_ROOT.'/core/triggers/dolibarrtriggers.class.php';
-
+// Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/triggers/dolibarrtriggers.class.php';
 
 /**
- *  Class of triggers for DoliCar module
+ * Class of triggers for DoliCar module
  */
 class InterfaceDoliCarTriggers extends DolibarrTriggers
 {
-	/**
-	 * Constructor
-	 *
-	 * @param DoliDB $db Database handler
-	 */
-	public function __construct($db)
-	{
-		$this->db = $db;
+    /**
+     * @var DoliDB Database handler
+     */
+    protected $db;
 
-		$this->name = preg_replace('/^Interface/i', '', get_class($this));
-		$this->family = "demo";
-		$this->description = "DoliCar triggers.";
-		// 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.1.1';
-		$this->picto = 'dolicar@dolicar';
-	}
+    /**
+     * Constructor
+     *
+     * @param DoliDB $db Database handler
+     */
+    public function __construct(DoliDB $db)
+    {
+        $this->db = $db;
 
-	/**
-	 * Trigger name
-	 *
-	 * @return string Name of trigger file
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
+        $this->name        = preg_replace('/^Interface/i', '', get_class($this));
+        $this->family      = "demo";
+        $this->description = 'DoliCar triggers.';
+        $this->version     = '1.1.1';
+        $this->picto       = 'dolicar@dolicar';
+    }
 
-	/**
-	 * Trigger description
-	 *
-	 * @return string Description of trigger file
-	 */
-	public function getDesc()
-	{
-		return $this->description;
-	}
+    /**
+     * Trigger name
+     *
+     * @return string Name of trigger file
+     */
+    public function getName(): string
+    {
+        return parent::getName();
+    }
 
+    /**
+     * Trigger description
+     *
+     * @return string Description of trigger file
+     */
+    public function getDesc(): string
+    {
+        return parent::getDesc();
+    }
 
-	/**
-	 * Function called when a Dolibarrr business event is done.
-	 * All functions "runTrigger" are triggered if file
-	 * is inside directory core/triggers
-	 *
-	 * @param string 		$action 	Event action code
-	 * @param CommonObject 	$object 	Object
-	 * @param User 			$user 		Object user
-	 * @param Translate 	$langs 		Object langs
-	 * @param Conf 			$conf 		Object conf
-	 * @return int              		<0 if KO, 0 if no triggered ran, >0 if OK
-	 */
-	public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
-	{
-		if (!isModEnabled('dolicar')) {
-			return 0; // If module is not enabled, we do nothing
-		}
+    /**
+     * Function called when a Dolibarr business event is done
+     * All functions "runTrigger" are triggered if file
+     * is inside directory core/triggers
+     *
+     * @param  string       $action Event action code
+     * @param  CommonObject $object Object
+     * @param  User         $user   Object user
+     * @param  Translate    $langs  Object langs
+     * @param  Conf         $conf   Object conf
+     * @return int                  0 < if KO, 0 if no triggered ran, >0 if OK
+     * @throws Exception
+     */
+    public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf): int
+    {
+        if (!isModEnabled('dolicar')) {
+            return 0; // If module is not enabled, we do nothing
+        }
 
-		// Data and type of action are stored into $object and $action
-		dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . '. id=' . $object->id);
+        // Data and type of action are stored into $object and $action
+        dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . '. id=' . $object->id);
 
-		require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
-		$now = dol_now();
-		$actioncomm = new ActionComm($this->db);
+        require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+        $now        = dol_now();
+        $actionComm = new ActionComm($this->db);
 
-		$actioncomm->elementtype = $object->element . '@dolicar';
-		$actioncomm->type_code   = 'AC_OTH_AUTO';
-		$actioncomm->datep       = $now;
-		$actioncomm->fk_element  = $object->id;
-		$actioncomm->userownerid = $user->id;
-		$actioncomm->percentage  = -1;
+        $actionComm->elementtype = $object->element . '@dolicar';
+        $actionComm->type_code   = 'AC_OTH_AUTO';
+        $actionComm->datep       = $now;
+        $actionComm->fk_element  = $object->id;
+        $actionComm->userownerid = $user->id;
+        $actionComm->percentage  = -1;
 
-		switch ($action) {
-			case 'DOLICAR_PRODUCTLOT_MILEAGE_MODIFY':
-				$actioncomm->elementtype = 'productlot';
-				$actioncomm->code        = 'AC_DOLICAR_PRODUCTLOT_MILEAGE_MODIFY';
-				$actioncomm->label       = $langs->trans('ProductLotMileageModifyTrigger');
-				$actioncomm->note_private = $object->array_options['options_mileage'];
-				$actioncomm->create($user);
-				break;
-			case 'REGISTRATIONCERTIFICATEFR_CREATE' :
-				$actioncomm->code = 'AC_' . strtoupper($object->element) . '_CREATE';
-				$actioncomm->label = $langs->trans('ObjectCreateTrigger', $langs->transnoentities(ucfirst($object->element)));
-				$actioncomm->create($user);
-				break;
+        switch ($action) {
+            case 'REGISTRATIONCERTIFICATEFR_CREATE' :
+                $actionComm->code  = 'AC_' . strtoupper($object->element) . '_CREATE';
+                $actionComm->label = $langs->trans('ObjectCreateTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
+                $actionComm->create($user);
+                break;
 
-			case 'REGISTRATIONCERTIFICATEFR_MODIFY' :
-				$actioncomm->code = 'AC_' . strtoupper($object->element) . '_MODIFY';
-				$actioncomm->label = $langs->trans('ObjectModifyTrigger', $langs->transnoentities(ucfirst($object->element)));
-				$actioncomm->create($user);
-				break;
+            case 'REGISTRATIONCERTIFICATEFR_MODIFY' :
+                $actionComm->code  = 'AC_' . strtoupper($object->element) . '_MODIFY';
+                $actionComm->label = $langs->trans('ObjectModifyTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
+                $actionComm->create($user);
+                break;
 
-			case 'REGISTRATIONCERTIFICATEFR_DELETE' :
-				$actioncomm->code = 'AC_ ' . strtoupper($object->element) . '_DELETE';
-				$actioncomm->label = $langs->trans('ObjectDeleteTrigger', $langs->transnoentities(ucfirst($object->element)));
-				$actioncomm->create($user);
-				break;
-			default:
-				dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
-				break;
-		}
-		return 0;
+            case 'REGISTRATIONCERTIFICATEFR_DELETE' :
+                $actionComm->code  = 'AC_ ' . strtoupper($object->element) . '_DELETE';
+                $actionComm->label = $langs->trans('ObjectDeleteTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
+                $actionComm->create($user);
+                break;
 
-		// Or you can execute some code here
-		switch ($action) {
+            default:
+                dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+                break;
+        }
 
-
-			default:
-				dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-				break;
-		}
-
-		return 0;
-	}
+        return 0;
+    }
 }
