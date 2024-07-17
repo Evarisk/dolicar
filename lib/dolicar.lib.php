@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022 SuperAdmin <test@test.fr>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 /**
  * \file    dolicar/lib/dolicar.lib.php
  * \ingroup dolicar
- * \brief   Library files with common functions for DoliCar
+ * \brief   Library files with common functions for Admin conf
  */
 
 /**
@@ -26,24 +26,27 @@
  *
  * @return array
  */
-function dolicar_admin_prepare_head()
+function dolicar_admin_prepare_head(): array
 {
-	global $langs, $conf;
+    // Global variables definitions
+    global $langs, $conf;
 
-	$langs->load("dolicar@dolicar");
+    // Load translation files required by the page
+    saturne_load_langs();
 
-	$h = 0;
-	$head = array();
+    // Initialize values
+    $h    = 0;
+    $head = [];
 
-	$head[$h][0] = dol_buildpath("/dolicar/admin/registrationcertificate.php", 1);
-	$head[$h][1] = '<i class="fas fa-car pictofixedwidth"></i>' . $langs->trans("RegistrationCertificate");
-	$head[$h][2] = 'registrationcertificate';
-	$h++;
+    $head[$h][0] = dol_buildpath('dolicar/admin/registrationcertificate.php', 1);
+    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-car pictofixedwidth"></i>' . $langs->trans('RegistrationCertificate') : '<i class="fas fa-car"></i>';
+    $head[$h][2] = 'registrationcertificate';
+    $h++;
 
-	$head[$h][0] = dol_buildpath("/dolicar/admin/quickcreation.php", 1);
-	$head[$h][1] = '<i class="fas fa-plus pictofixedwidth"></i>' . $langs->trans("QuickCreation");
-	$head[$h][2] = 'quickcreation';
-	$h++;
+    $head[$h][0] = dol_buildpath('dolicar/admin/quickcreation.php', 1);
+    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-plus pictofixedwidth"></i>' . $langs->trans('QuickCreation') : '<i class="fas fa-plus"></i>';
+    $head[$h][2] = 'quickcreation';
+    $h++;
 
     $head[$h][0] = dol_buildpath('dolicar/admin/publicinterface.php', 1);
     $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-globe pictofixedwidth"></i>' . $langs->trans('PublicInterface') : '<i class="fas fa-globe"></i>';
@@ -55,19 +58,19 @@ function dolicar_admin_prepare_head()
     $head[$h][2] = 'pwa';
     $h++;
 
-	$head[$h][0] = dol_buildpath("/dolicar/admin/setup.php", 1);
-	$head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans("ModuleSettings");
-	$head[$h][2] = 'settings';
-	$h++;
+    $head[$h][0] = dol_buildpath('dolicar/admin/setup.php', 1);
+    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans('ModuleSettings') : '<i class="fas fa-cog"></i>';
+    $head[$h][2] = 'settings';
+    $h++;
 
-	$head[$h][0] = dol_buildpath("/dolicar/admin/about.php", 1);
-	$head[$h][1] = '<i class="fab fa-readme pictofixedwidth"></i>' . $langs->trans("About");
-	$head[$h][2] = 'about';
-	$h++;
+    $head[$h][0] = dol_buildpath('saturne/admin/about.php', 1) . '?module_name=DoliCar';
+    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fab fa-readme pictofixedwidth"></i>' . $langs->trans('About') : '<i class="fab fa-readme"></i>';
+    $head[$h][2] = 'about';
+    $h++;
 
-	complete_head_from_modules($conf, $langs, null, $head, $h, 'dolicar@dolicar');
+    complete_head_from_modules($conf, $langs, null, $head, $h, 'dolicar@dolicar');
 
-	complete_head_from_modules($conf, $langs, null, $head, $h, 'dolicar@dolicar', 'remove');
+    complete_head_from_modules($conf, $langs, null, $head, $h, 'dolicar@dolicar', 'remove');
 
-	return $head;
+    return $head;
 }
