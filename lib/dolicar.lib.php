@@ -39,14 +39,16 @@ function dolicar_admin_prepare_head(): array
     $head = [];
 
     $head[$h][0] = dol_buildpath('dolicar/admin/registrationcertificate.php', 1);
-    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-car pictofixedwidth"></i>' . $langs->trans('RegistrationCertificate') : '<i class="fas fa-car"></i>';
+    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-car pictofixedwidth"></i>' . $langs->trans('RegistrationCertificateFr') : '<i class="fas fa-car"></i>';
     $head[$h][2] = 'registrationcertificate';
     $h++;
 
-    $head[$h][0] = dol_buildpath('dolicar/admin/quickcreation.php', 1);
-    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-plus pictofixedwidth"></i>' . $langs->trans('QuickCreation') : '<i class="fas fa-plus"></i>';
-    $head[$h][2] = 'quickcreation';
-    $h++;
+    if (isModEnabled('easycrm')) {
+        $head[$h][0] = dol_buildpath('dolicar/admin/quickcreation.php', 1);
+        $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-plus pictofixedwidth"></i>' . $langs->trans('QuickCreation') : '<i class="fas fa-plus"></i>';
+        $head[$h][2] = 'quickcreation';
+        $h++;
+    }
 
     $head[$h][0] = dol_buildpath('dolicar/admin/publicinterface.php', 1);
     $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-globe pictofixedwidth"></i>' . $langs->trans('PublicInterface') : '<i class="fas fa-globe"></i>';

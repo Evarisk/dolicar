@@ -30,17 +30,17 @@ if (file_exists('../dolicar.main.inc.php')) {
     die('Include of dolicar main fails');
 }
 
-// Global variables definitions
-global $conf, $db, $langs, $user;
-
 // Load DoliCar libraries
 require_once __DIR__ . '/../lib/dolicar.lib.php';
+
+// Global variables definitions
+global $conf, $db, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs();
 
 // Security check - Protection if external user
-$permissionToRead = $user->rights->dolicar->adminpage->read;
+$permissionToRead = $user->rights->dolicar->adminpage->read && isModEnabled('easycrm');
 saturne_check_access($permissionToRead);
 
 /*
