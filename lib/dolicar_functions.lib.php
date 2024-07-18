@@ -27,7 +27,7 @@
  * @param  int $productID    Product ID
  * @return int $productLotID 0 < if KO, Product lot ID created
  */
-function createDefaultProductLot(int $productID): int
+function create_default_product_lot(int $productID): int
 {
     // Global variables definitions
     global $db, $langs, $user;
@@ -59,7 +59,7 @@ function createDefaultProductLot(int $productID): int
  * @param  int    $productID Product ID
  * @return string $brandName Brand name
  */
-function getVehicleBrand(int $productID): string
+function get_vehicle_brand(int $productID): string
 {
     // Global variables definitions
     global $db;

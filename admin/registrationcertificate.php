@@ -33,13 +33,16 @@ if (file_exists('../dolicar.main.inc.php')) {
 // Load DoliCar libraries
 require_once __DIR__ . '/../lib/dolicar.lib.php';
 require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
+require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $user;
 
-
 // Load translation files required by the page
 saturne_load_langs();
+
+// Initialize technical objects
+$object = new RegistrationCertificateFr($db);
 
 // Initialize view objects
 $form = new Form($db);
@@ -92,16 +95,17 @@ print '<td class="center">' . $langs->transnoentities('Status') . '</td>';
 print '<td class="center">' . $langs->transnoentities('ShortInfo') . '</td>';
 print '</tr>';
 
-$registrationCertificateFields = getRegistrationCertificateFields();
-foreach ($registrationCertificateFields as $registrationCertificateCode => $registrationCertificateField) {
-    print '<tr class="oddeven"><td>' . $langs->transnoentities('Display') . ' ' . $langs->transnoentities($registrationCertificateField) . '</td>';
-    print '<td class="center">';
-    print ajax_constantonoff('DOLICAR_' . $registrationCertificateCode . '_VISIBLE');
-    print '</td>';
-    print '<td class="center">';
-    print $form->textwithpicto('', $langs->transnoentities('ShowRegistrationCertificateFieldHelp'));
-    print '</td>';
-    print '</tr>';
+foreach ($object->fields as $registrationCertificateCode => $registrationCertificateField) {
+    if ($registrationCertificateField['config'] == 1) {
+        print '<tr class="oddeven"><td>' . $langs->transnoentities('Display') . ' ' . $langs->transnoentities($registrationCertificateField['label']) . '</td>';
+        print '<td class="center">';
+        print ajax_constantonoff('DOLICAR_' . dol_strtoupper($registrationCertificateCode) . '_VISIBLE');
+        print '</td>';
+        print '<td class="center">';
+        print $form->textwithpicto('', $langs->transnoentities('ShowRegistrationCertificateFieldHelp'));
+        print '</td>';
+        print '</tr>';
+    }
 }
 
 print '</table>';
