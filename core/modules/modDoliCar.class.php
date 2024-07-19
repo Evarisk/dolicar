@@ -1,8 +1,5 @@
 <?php
-/* Copyright (C) 2004-2018  Laurent Destailleur     <eldy@users.sourceforge.net>
- * Copyright (C) 2018-2019  Nicolas ZABOURI         <info@inovea-conseil.com>
- * Copyright (C) 2019-2020  Frédéric France         <frederic.france@netlogic.fr>
- * Copyright (C) 2022 		Eoxia 					<dev@eoxia.com>
+/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,686 +16,644 @@
  */
 
 /**
- * 	\defgroup   dolicar     Module DoliCar
- *  \brief      DoliCar module descriptor.
+ * \defgroup dolicar Module DoliCar
+ * \brief    DoliCar module descriptor
  *
- *  \file       htdocs/custom/dolicar/core/modules/modDoliCar.class.php
- *  \ingroup    dolicar
- *  \brief      Description and activation file for module DoliCar
+ * \file    core/modules/modDoliCar.class.php
+ * \ingroup dolicar
+ * \brief   Description and activation file for module DoliCar
  */
-include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
+
+// Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/modules/DolibarrModules.class.php';
 
 /**
- *  Description and activation class for module DoliCar
+ * Description and activation class for module DoliCar
  */
 class modDoliCar extends DolibarrModules
 {
-	/**
-	 * Constructor. Define names, constants, directories, boxes, permissions
-	 *
-	 * @param DoliDB $db Database handler
-	 */
-	public function __construct($db)
-	{
-		global $langs, $conf;
+    /**
+     * Constructor. Define names, constants, directories, boxes, permissions
+     *
+     * @param DoliDB $db Database handler
+     */
+    public function __construct($db)
+    {
+        global $conf, $langs;
+        $this->db = $db;
 
-		if (file_exists(__DIR__ . '/../../../saturne/lib/saturne_functions.lib.php')) {
-			require_once __DIR__ . '/../../../saturne/lib/saturne_functions.lib.php';
-			saturne_load_langs(['dolicar@dolicar']);
-		} else {
-			$this->error++;
-			$this->errors[] = $langs->trans('activateModuleDependNotSatisfied', 'DoliCar', 'Saturne');
-		}
+        if (file_exists(__DIR__ . '/../../../saturne/lib/saturne_functions.lib.php')) {
+            require_once __DIR__ . '/../../../saturne/lib/saturne_functions.lib.php';
+            saturne_load_langs(['dolicar@dolicar']);
+        } else {
+            $this->error++;
+            $this->errors[] = $langs->trans('activateModuleDependNotSatisfied', 'DoliCar', 'Saturne');
+        }
 
-		$this->db = $db;
-		$this->numero = 436380; // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve an id number for your module
-		$this->rights_class = 'dolicar';
-		$this->family = "";
-		$this->module_position = '';
-		$this->familyinfo = array('Evarisk' => array('position' => '01', 'label' => $langs->trans("Evarisk")));
-		$this->name = preg_replace('/^mod/i', '', get_class($this));
-		$this->description = $langs->trans("DoliCarDescription");
-		$this->descriptionlong = $langs->trans("DoliCarDescription");
-		$this->editor_name = 'Evarisk';
-		$this->editor_url = 'https://www.evarisk.com';
-		$this->version = '1.1.1';
-		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
-		$this->picto = 'dolicar_color@dolicar';
+        // Id for module (must be unique)
+        $this->numero = 436380;
 
-		$this->module_parts = array(
-			'triggers' => 1,
-			'login' => 0,
-			'substitutions' => 0,
-			'menus' => 0,
-			'tpl' => 0,
-			'barcode' => 0,
-			'models' => 1,
-			'printing' => 0,
-			'theme' => 0,
-			'css' => array(
-			),
-			'js' => array(
-			),
-			'hooks' => array(
-				'productlotcard',
-				'invoicecard',
-				'propalcard',
-				'ordercard',
-                'paiementcard',
-				'productlotcard',
-				'registrationcertificatefrcard',
-				'dolicar_quickcreation',
-				'get_sheet_linkable_objects',
-                'main'
-			),
-			'moduleforexternal' => 0,
-		);
+        // Key text used to identify module (for permissions, menus, etc...)
+        $this->rights_class = 'dolicar';
 
-		// Data directories to create when module is enabled.
-		$this->dirs = array("/dolicar/temp");
+        // Family can be 'base' (core modules), 'crm', 'financial', 'hr', 'projects', 'products', 'ecm', 'technic' (transverse modules), 'interface' (link with external tools), 'other', '...'
+        // It is used to group modules by family in module setup page
+        $this->family = '';
 
-		// Config pages. Put here list of php page, stored into dolicar/admin directory, to use to setup module.
-		$this->config_page_url = array("setup.php@dolicar");
+        // Module position in the family on 2 digits ('01', '10', '20', ...)
+        $this->module_position = '';
 
-		// Dependencies
-		// A condition to hide module
-		$this->hidden = false;
-		// List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
-		$this->depends = array('modProduct', 'modProductBatch', 'modFacture', 'modPropale', 'modCommande', 'modCategorie', 'modSaturne', 'modProjet');
-		$this->requiredby = array(); // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
-		$this->conflictwith = array(); // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
+        // Gives the possibility for the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)
+        $this->familyinfo = ['Evarisk' => ['position' => '01', 'label' => $langs->trans('Evarisk')]];
+        // Module label (no space allowed), used if translation string 'ModuleDoliCarName' not found (DoliCar is name of module)
+        $this->name = preg_replace('/^mod/i', '', get_class($this));
 
-		// The language file dedicated to your module
-		$this->langfiles = array("dolicar@dolicar");
+        // Module description, used if translation string 'ModuleDoliCarDesc' not found (DoliCar is name of module)
+        $this->description = $langs->trans('DoliCarDescription');
+        // Used only if file README.md and README-LL.md not found
+        $this->descriptionlong = $langs->trans('DoliCarDescription');
 
-		// Prerequisites
-		$this->phpmin = array(5, 6); // Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(11, -3); // Minimum version of Dolibarr required by module
+        // Author
+        $this->editor_name = 'Evarisk';
+        $this->editor_url  = 'https://www.evarisk.com';
 
-		// Messages at activation
-		$this->warnings_activation = array(); // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
-		$this->warnings_activation_ext = array(); // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
+        // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
+        $this->version = '1.1.1';
 
-		$i = 0;
-		$this->const = array(
-			// CONST REGISTRATION CERTIFICATE
-			$i++ => array('DOLICAR_DEFAULT_PROJECT', 'integer', 0, '', 0, 'current'),
-			$i++ => array('DOLICAR_DEFAULT_WAREHOUSE_ID', 'integer', 0, '', 0, 'current'),
-			$i++ => array('DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'),
-			$i++ => array('DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'),
-			$i++ => array('DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'),
-			$i++ => array('DOLICAR_VEHICLE_TAG', 'integer', 0, '', 0, 'current'),
-			$i++ => array('DOLICAR_MENU_DEFAULT_VEHICLE_UPDATED', 'integer', 0, '', 0, 'current'),
-			$i++ => array('DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS', 'integer', 1, '', 0, 'current'),
-			$i++ => array('DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS', 'integer', 1, '', 0, 'current'),
-            $i++ => array('DOLICAR_A_REGISTRATION_NUMBER_VISIBLE', 'integer', 1, '', 0, 'current'),
-            $i++ => array('DOLICAR_API_REMAINING_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'),
-            $i++ => array('DOLICAR_API_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'),
+        // Url to the file with your last numberversion of this module
+        //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
+
+        // Key used in llx_const table to save module status enabled/disabled (where DoliCar is value of property name of module in uppercase)
+        $this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
+
+        // Name of image file used for this module
+        // If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
+        // If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
+        // To use a supported fa-xxx css style of font awesome, use this->picto='xxx'
+        $this->picto = 'dolicar_color@dolicar';
+
+        $this->module_parts = [
+            // Set this to 1 if module has its own trigger directory (core/triggers)
+            'triggers' => 1,
+            // Set this to 1 if module has its own login method file (core/login)
+            'login' => 0,
+            // Set this to 1 if module has its own substitution function file (core/substitutions)
+            'substitutions' => 0,
+            // Set this to 1 if module has its own menus handler directory (core/menus)
+            'menus' => 0,
+            // Set this to 1 if module overwrite template dir (core/tpl)
+            'tpl' => 0,
+            // Set this to 1 if module has its own barcode directory (core/modules/barcode)
+            'barcode' => 0,
+            // Set this to 1 if module has its own models' directory (core/modules/xxx)
+            'models' => 1,
+            // Set this to 1 if module has its own printing directory (core/modules/printing)
+            'printing' => 0,
+            // Set this to 1 if module has its own theme directory (theme)
+            'theme' => 0,
+            // Set this to relative path of css file if module has its own css file
+            'css' => [],
+            // Set this to relative path of js file if module must load a js on all pages
+            'js' => [],
+            // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
+            'hooks' => [
+                'data' => [
+                    'productlotcard',
+                    'invoicecard',
+                    'propalcard',
+                    'ordercard',
+                    'paiementcard',
+                    'productlotcard',
+                    'registrationcertificatefrcard',
+                    'dolicar_quickcreation',
+                    'get_sheet_linkable_objects',
+                ]
+            ],
+            // Set this to 1 if features of module are opened to external users
+            'moduleforexternal' => 0,
+        ];
+
+        // Data directories to create when module is enabled
+        // Example: this->dirs = array("/dolicar/temp","/dolicar/subdir");
+        $this->dirs = ['/dolicar/temp'];
+
+        // Config pages. Put here list of php page, stored into dolicar/admin directory, to use to set up module
+        $this->config_page_url = ['setup.php@dolicar'];
+
+        // Dependencies
+        // A condition to hide module
+        $this->hidden = false;
+
+        // List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
+        $this->depends      = ['modProduct', 'modProductBatch', 'modFacture', 'modPropale', 'modCommande', 'modCategorie', 'modSaturne', 'modProjet'];
+        $this->requiredby   = []; // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
+        $this->conflictwith = []; // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
+
+        // The language file dedicated to your module
+        $this->langfiles = ['dolicar@dolicar'];
+
+        // Prerequisites
+        $this->phpmin                = [7, 4]; // Minimum version of PHP required by module
+        $this->need_dolibarr_version = [16, 0]; // Minimum version of Dolibarr required by module
+
+        // Messages at activation
+        $this->warnings_activation     = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
+        $this->warnings_activation_ext = []; // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
+
+        // Constants
+        // List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
+        // Example: $this->const=array(1 => array('DoliSIRH_MYNEWCONST1', 'chaine', 'myvalue', 'This is a constant to add', 1),
+        //                             2 => array('DoliSIRH_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
+        // );
+        $i = 0;
+        $this->const = [
+            // CONST REGISTRATION CERTIFICATE
+            $i++ => ['DOLICAR_DEFAULT_WAREHOUSE_ID', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLE_TAG', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS', 'integer', 1, '', 0, 'current'],
+            $i++ => ['DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS', 'integer', 1, '', 0, 'current'],
+            $i++ => ['DOLICAR_API_REMAINING_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_API_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'],
 
             // CONST PUBLIC INTERFACE
             $i++ => array('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 'integer', 1000, '', 0, 'current'),
 
-			// CONST MODULE
-			$i++ => ['DOLICAR_VERSION','chaine', $this->version, '', 0, 'current'],
-			$i++ => ['DOLICAR_DB_VERSION', 'chaine', $this->version, '', 0, 'current'],
-			$i++ => ['DOLICAR_SHOW_PATCH_NOTE', 'integer', 1, '', 0, 'current'],
+            // CONST MODULE
+            $i++ => ['DOLICAR_VERSION','chaine', $this->version, '', 0, 'current'],
+            $i++ => ['DOLICAR_DB_VERSION', 'chaine', $this->version, '', 0, 'current'],
+            $i   => ['DOLICAR_SHOW_PATCH_NOTE', 'integer', 1, '', 0, 'current'],
+        ];
 
-		);
+        if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
+            $conf->dolicar = new stdClass();
+            $conf->dolicar->enabled = 0;
+        }
 
-		if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
-			$conf->dolicar = new stdClass();
-			$conf->dolicar->enabled = 0;
-		}
+        // Array to add new pages in new tabs
+        // Example:
+        // $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@dolicar:$user->rights->othermodule->read:/dolicar/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key
+        // $this->tabs[] = array('data'=>'objecttype:-tabname:NU:conditiontoremove');
+        $this->tabs   = [];
+        $pictoPath    = dol_buildpath('custom/dolicar/img/dolicar_color.png', 1);
+        $pictoModule  = img_picto('', $pictoPath, '', 1, 0, 0, '', 'pictoModule');
+        $this->tabs[] = ['data' => 'productlot:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot'];
+        $this->tabs[] = ['data' => 'thirdparty:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty'];
+        $this->tabs[] = ['data' => 'product:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product'];
+        $this->tabs[] = ['data' => 'project:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project'];
 
-		// Array to add new pages in new tabs
-		$this->tabs = array();
-		$pictopath    = dol_buildpath('/custom/dolicar/img/dolicar_color.png', 1);
-		$picto        = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
-		$this->tabs[] = array('data' => 'productlot:+registrationcertificatefr:' . $picto . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot');
-		$this->tabs[] = array('data' => 'thirdparty:+registrationcertificatefr:' . $picto . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty');
-		$this->tabs[] = array('data' => 'product:+registrationcertificatefr:' . $picto . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product');
-		$this->tabs[] = array('data' => 'project:+registrationcertificatefr:' . $picto . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project');
+        // Dictionaries
+        $this->dictionaries = [];
 
-		// Dictionaries
-		$this->dictionaries = array(
-			'langs' => 'dolicar@dolicar',
-			// List of tables we want to see into dictonnary editor
-			'tabname' => array(
-				MAIN_DB_PREFIX . "c_car_brands",
-			),
-			// Label of tables
-			'tablib' => array(
-				"CarBrands"
-			),
-			// Request to select fields
-			'tabsql' => array(
-				'SELECT f.rowid as rowid, f.ref, f.label, f.description, f.active FROM ' . MAIN_DB_PREFIX . 'c_car_brands as f',
-			),
-			// Sort order
-			'tabsqlsort' => array(
-				"label ASC"
-			),
-			// List of fields (result of select to show dictionary)
-			'tabfield' => array(
-				"ref,label,description"
-			),
-			// List of fields (list of fields to edit a record)
-			'tabfieldvalue' => array(
-				"ref,label,description"
-			),
-			// List of fields (list of fields for insert)
-			'tabfieldinsert' => array(
-				"ref,label,description"
-			),
-			// Name of columns with primary key (try to always name it 'rowid')
-			'tabrowid' => array(
-				"rowid"
-			),
-			// Condition to show each dictionary
-			'tabcond' => array(
-				$conf->dolicar->enabled
-			)
-		);
+        // Boxes/Widgets
+        // Add here list of php file(s) stored in dolicar/core/boxes that contains a class to show a widget
+        $this->boxes = [];
 
-		// Boxes/Widgets
-		// Add here list of php file(s) stored in dolicar/core/boxes that contains a class to show a widget.
-		$this->boxes = array(
-		);
+        // Cronjobs (List of cron jobs entries to add when module is enabled)
+        // unit_frequency must be 60 for minute, 3600 for hour, 86400 for day, 604800 for week
+        $this->cronjobs = [];
 
-		// Cronjobs (List of cron jobs entries to add when module is enabled)
-		// unit_frequency must be 60 for minute, 3600 for hour, 86400 for day, 604800 for week
-		$this->cronjobs = array(
-		);
+        // Permissions provided by this module
+        $this->rights = [];
+        $r = 0;
 
-		// Permissions provided by this module
-		$this->rights = array();
-		$r = 0;
-		// Add here entries to declare new permissions
-		/* BEGIN MODULEBUILDER PERMISSIONS */
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
-		$this->rights[$r][1] = $langs->trans('LireModule', 'DoliCar');
-		$this->rights[$r][4] = 'lire';
-		$this->rights[$r][5] = 1;
-		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
-		$this->rights[$r][1] = $langs->trans('ReadModule', 'DoliCar');
-		$this->rights[$r][4] = 'read';
-		$this->rights[$r][5] = 1;
-		$r++;
+        /* DOLICAR PERMISSIONS */
+        $this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1); // Permission id (must not be already used)
+        $this->rights[$r][1] = $langs->trans('LireModule', 'DoliCar');    // Permission label
+        $this->rights[$r][4] = 'lire';                                               // In php code, permission will be checked by test if ($user->rights->dolicar->level1->level2)
+        $r++;
 
-		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->transnoentities('ReadObject', $langs->trans('RegistrationCertificatesFrMin')); // Permission label
-		$this->rights[$r][4] = 'registrationcertificatefr';
-		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->write)
-		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->transnoentities('CreateObject', $langs->trans('RegistrationCertificatesFrMin')); // Permission label
-		$this->rights[$r][4] = 'registrationcertificatefr';
-		$this->rights[$r][5] = 'write'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->write)
-		$r++;
-		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->transnoentities('DeleteObject', $langs->trans('RegistrationCertificatesFrMin')); // Permission label
-		$this->rights[$r][4] = 'registrationcertificatefr';
-		$this->rights[$r][5] = 'delete'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->delete)
-		$r++;
+        $this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
+        $this->rights[$r][1] = $langs->trans('ReadModule', 'DoliCar');
+        $this->rights[$r][4] = 'read';
+        $r++;
 
-		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1); // Permission id (must not be already used)
-		$this->rights[$r][1] = $langs->transnoentities('ReadAdminPage', 'DoliCar');
-		$this->rights[$r][4] = 'adminpage';
-		$this->rights[$r][5] = 'read'; // In php code, permission will be checked by test if ($user->rights->dolicar->registrationcertificatefr->delete)
-		$r++;
+        /* REGISTRATIONCERTIFICATEFR PERMISSIONS */
+        $this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
+        $this->rights[$r][1] = $langs->transnoentities('ReadObjects', $langs->trans('RegistrationCertificatesFrMin'));
+        $this->rights[$r][4] = 'registrationcertificatefr';
+        $this->rights[$r][5] = 'read';
+        $r++;
+        $this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
+        $this->rights[$r][1] = $langs->transnoentities('CreateObjects', $langs->trans('RegistrationCertificatesFrMin'));
+        $this->rights[$r][4] = 'registrationcertificatefr';
+        $this->rights[$r][5] = 'write';
+        $r++;
+        $this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
+        $this->rights[$r][1] = $langs->transnoentities('DeleteObjects', $langs->trans('RegistrationCertificatesFrMin'));
+        $this->rights[$r][4] = 'registrationcertificatefr';
+        $this->rights[$r][5] = 'delete';
+        $r++;
+        $this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
+        $this->rights[$r][1] = $langs->transnoentities('ReadAdminPage', 'DoliCar');
+        $this->rights[$r][4] = 'adminpage';
+        $this->rights[$r][5] = 'read';
 
-		$langs->load("dolicar@dolicar");
+        // Main menu entries to add
+        $this->menu = [];
+        $r = 0;
 
-		// Main menu entries to add
-		$this->menu = array();
-		$r = 0;
-		// Add here entries to declare new menus
-		/* BEGIN MODULEBUILDER TOPMENU */
-		$this->menu[$r++] = array(
-			'fk_menu'=>'', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'top', // This is a Top menu entry
-			'titre'=>'DoliCar',
-			'prefix'   => '<i class="fas fa-home pictofixedwidth"></i>',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'',
-			'url'=>'/dolicar/dolicarindex.php',
-			'langs'=>'dolicar@dolicar', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000 + $r,
-			'enabled'=>'$conf->dolicar->enabled', // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled.
-			'perms' => '$user->rights->dolicar->lire',
-			'target'=>'',
-			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
-		);
-		$this->menu[$r++] = array(
-			'fk_menu'=>'fk_mainmenu=dolicar', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'=>'left', // This is a Top menu entry
-			'titre'=> $langs->trans('Dashboard'),
-			'prefix'   => '<i class="fas fa-home pictofixedwidth"></i>',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'',
-			'url'=>'/dolicar/dolicarindex.php',
-			'langs'=>'dolicar@dolicar', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position'=>1000 + $r,
-			'enabled'=>'$conf->dolicar->enabled', // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled.
-			'perms' => '$user->rights->dolicar->lire',
-			'target'=>'',
-			'user'=>2, // 0=Menu for internal users, 1=external users, 2=both
-		);
-        $this->menu[$r++]=array(
-            // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-            'fk_menu'=>'fk_mainmenu=dolicar',
-            // This is a Left menu entry
-            'type'=>'left',
-            'titre' => $langs->trans('ListRegistrationCertificateFr'),
-			'prefix'   => '<i class="fas fa-car pictofixedwidth"></i>',
-			'mainmenu'=>'dolicar',
-            'leftmenu'=>'dolicar_registrationcertificatefr',
-            'url'=>'/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php',
-            // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-            'langs'=>'dolicar@dolicar',
-            'position'=>1000+$r,
-            // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-            'enabled'=>'$conf->dolicar->enabled',
-            // Use 'perms'=>'$user->rights->dolicar->level1->level2' if you want your menu with a permission rules
-            'perms'=>'1',
-            'target'=>'',
-            // 0=Menu for internal users, 1=external users, 2=both
-            'user'=>2,
-        );
-		$this->menu[$r++] = [
-			'fk_menu'  => 'fk_mainmenu=dolicar', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'     => 'left', // This is a Top menu entry
-			'titre'    => $langs->transnoentities('QuickCreation'),
-			'prefix'   => '<i class="fas fa-plus-circle pictofixedwidth"></i>',
-			'mainmenu' => 'dolicar',
-			'leftmenu' => 'quickcreation',
-			'url'      => '/dolicar/view/registrationcertificatefr/quickcreation.php', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'langs'    => 'dolicar@dolicar',
-			'position' => 1000 + $r,
-			'enabled'  => '$conf->easycrm->enabled', // Define condition to show or hide menu entry. Use '$conf->easycrm->enabled' if entry must be visible if module is enabled.
-			'perms'    => '$user->rights->dolicar->read', // Use 'perms'=>'$user->rights->easycrm->myobject->read' if you want your menu with a permission rules
-			'target'   => '',
-			'user'     => 0, // 0=Menu for internal users, 1=external users, 2=both
-		];
-		$this->menu[$r++]=array(
-			'fk_menu' => 'fk_mainmenu=dolicar',
-			'type' => 'left',
-			'titre' => $langs->trans('ThirdParty'),
-			'prefix'   => '<i class="fas fa-building paddingright pictofixedwidth" style=" color: #6c6aa8;"></i>',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_companies',
-			'url'=>'/societe/index.php?mainmenu=companies',
-			'langs'=>'dolicar@dolicar',
-			'position'=>1050+$r,
-			'enabled'=>'$conf->dolicar->enabled',
-			'perms'=>'1',
-			'target'=>'',
-			'user'=>2
-		);
-		$this->menu[$r++]=array(
-			'fk_menu' => 'fk_mainmenu=dolicar',
-			'type' => 'left',
-			'titre' => $langs->trans('Propale'),
-			'prefix'   => '<i class="fas fa-file-signature infobox-propal paddingright pictofixedwidth"></i>',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_propales',
-			'url'=>'/comm/propal/index.php?mainmenu=commercial&leftmenu=propals',
-			'langs'=>'dolicar@dolicar',
-			'position'=>1050+$r,
-			'enabled'=>'$conf->dolicar->enabled',
-			'perms'=>'1',
-			'target'=>'',
-			'user'=>2
-		);
-		$this->menu[$r++]=array(
-			'fk_menu' => 'fk_mainmenu=dolicar',
-			'type' => 'left',
-			'titre' => $langs->trans('Invoice'),
-			'prefix'   => '<i class="fas fa-file-invoice-dollar infobox-commande paddingright pictofixedwidth"></i>',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_invoices',
-			'url'=>'/compta/facture/index.php?mainmenu=billing&leftmenu=customers_bills',
-			'langs'=>'dolicar@dolicar',
-			'position'=>1050+$r,
-			'enabled'=>'$conf->dolicar->enabled',
-			'perms'=>'1',
-			'target'=>'',
-			'user'=>2
-		);
-		$this->menu[$r++]=array(
-			'fk_menu' => 'fk_mainmenu=dolicar',
-			'type' => 'left',
-			'titre' => $langs->trans('Order'),
-			'prefix'   => '<i class="fas fa-file-invoice infobox-commande paddingright pictofixedwidth"></i>',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_orders',
-			'url'=>'/commande/index.php?mainmenu=commercial&leftmenu=orders',
-			'langs'=>'dolicar@dolicar',
-			'position'=>1050+$r,
-			'enabled'=>'$conf->dolicar->enabled',
-			'perms'=>'1',
-			'target'=>'',
-			'user'=>2
-		);
-		$this->menu[$r++]=array(
-			'fk_menu' => 'fk_mainmenu=dolicar',
-			'type' => 'left',
-			'titre' => $langs->trans('Product'),
-			'prefix'   => '<i class="fas fa-cube pictofixedwidth" style="color : #a69944"></i>',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_products',
-			'url'=>'/product/index.php?mainmenu=products',
-			'langs'=>'dolicar@dolicar',
-			'position'=>1050+$r,
-			'enabled'=>'$conf->dolicar->enabled',
-			'perms'=>'1',
-			'target'=>'',
-			'user'=>2
-		);
-		$this->menu[$r++]=array(
-			'fk_menu' => 'fk_mainmenu=dolicar',
-			'type' => 'left',
-			'titre' => $langs->trans('Lot'),
-			'prefix'   => '<i class="fas fa-barcode paddingright pictofixedwidth"></i>',
-			'mainmenu'=>'dolicar',
-			'leftmenu'=>'dolicar_lot',
-			'url'=>'/product/index.php?mainmenu=products',
-			'langs'=>'dolicar@dolicar',
-			'position'=>1050+$r,
-			'enabled'=>'$conf->dolicar->enabled',
-			'perms'=>'1',
-			'target'=>'',
-			'user'=>2
-		);
-		/* END MODULEBUILDER LEFTMENU REGISTRATIONCERTIFICATEFR */
-	}
+        // Add here entries to declare new menus
+        // DOLICAR MENU
+        $this->menu[$r++] = [
+            'fk_menu'  => '',                                           // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+            'type'     => 'top',                                        // This is a Top menu entry
+            'titre'    => 'DoliCar',
+            'prefix'   => '<i class="fas fa-home pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => '',
+            'url'      => '/dolicar/dolicarindex.php',
+            'langs'    => 'dolicar@dolicar',                             // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',                     // Define condition to show or hide menu entry. Use '$conf->dolicar->enabled' if entry must be visible if module is enabled.
+            'perms'    => '$user->rights->dolicar->lire',
+            'target'   => '',
+            'user'     => 0                                              // 0=Menu for internal users, 1=external users, 2=both
+        ];
 
-	/**
-	 *  Function called when module is enabled.
-	 *  The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database.
-	 *  It also creates data directories
-	 *
-	 *  @param      string  $options    Options when enabling module ('', 'noboxes')
-	 *  @return     int             	1 if OK, 0 if KO
-	 */
-	public function init($options = '')
-	{
-		global $conf, $langs, $user;
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('Dashboard'),
+            'prefix'   => '<i class="fas fa-home pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => '',
+            'url'      => '/dolicar/dolicarindex.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->lire',
+            'target'   => '',
+            'user'     => 0
+        ];
 
-		$langs->load('dolicar@dolicar');
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('ListRegistrationcertificatefr'),
+            'prefix'   => '<i class="fas fa-car pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'registrationcertificatefr',
+            'url'      => '/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->registrationcertificatefr->read',
+            'target'   => '',
+            'user'     => 0,
+        ];
 
-		if ($this->error > 0) {
-			setEventMessages('', $this->errors, 'errors');
-			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
-		}
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('QuickCreation'),
+            'prefix'   => '<i class="fas fa-plus-circle pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'quickcreation',
+            'url'      => '/dolicar/view/registrationcertificatefr/quickcreation.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->easycrm->enabled',
+            'perms'    => '$user->rights->dolicar->read',
+            'target'   => '',
+            'user'     => 0
+        ];
 
-		dolibarr_set_const($this->db, 'DOLICAR_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($this->db, 'DOLICAR_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('ThirdParty'),
+            'prefix'   => '<i class="fas fa-building pictofixedwidth" style=" color: #6c6aa8;"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'thirdparty',
+            'url'      => '/societe/index.php?mainmenu=companies&leftmenu=thirdparties',
+            'langs'    => 'companies',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->societe->lire',
+            'target'   => '',
+            'user'     => 0
+        ];
 
-		//$result = $this->_load_tables('/install/mysql/tables/', 'dolicar');
-		$result = $this->_load_tables('/dolicar/sql/');
-		if ($result < 0) {
-			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
-		}
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('Proposal'),
+            'prefix'   => '<i class="fas fa-file-signature infobox-propal pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'propal',
+            'url'      => '/comm/propal/index.php?mainmenu=commercial&leftmenu=propals',
+            'langs'    => 'propal',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->propale->lire',
+            'target'   => '',
+            'user'     => 0
+        ];
 
-		// Create extrafields during init
-		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-		$extrafields = new ExtraFields($this->db);
-		$extrafields->addExtraField('registrationcertificate_metada', $langs->transnoentities("RegistrationCertificateMetadata"), 'text', 1080, '', 'product_lot', 0, 0, '', '', 1, '', 1);
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('Invoice'),
+            'prefix'   => '<i class="fas fa-file-invoice-dollar infobox-commande pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'invoice',
+            'url'      => '/compta/facture/index.php?mainmenu=billing&leftmenu=customers_bills',
+            'langs'    => 'bills',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->propale->lire',
+            'target'   => '',
+            'user'     => 2
+        ];
 
-		// // Facture extrafields
-		// Update
-		$extrafields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'facture', 0, 0, 1040, '', 1,'', 1);
-		$extrafields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'facture', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('Order'),
+            'prefix'   => '<i class="fas fa-file-invoice infobox-commande pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'order',
+            'url'      => '/commande/index.php?mainmenu=commercial&leftmenu=orders',
+            'langs'    => 'orders',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->commande->lire',
+            'target'   => '',
+            'user'     => 0
+        ];
 
-		// Add
-		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'facture', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'facture', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facture', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'facture', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'facture', 0, 0, '', '', 1, '', 1);
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('Product'),
+            'prefix'   => '<i class="fas fa-cube pictofixedwidth" style="color : #a69944"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'product',
+            'url'      => '/product/index.php?mainmenu=products&leftmenu=product&type=0',
+            'langs'    => 'products',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->produit->lire',
+            'target'   => '',
+            'user'     => 0
+        ];
 
-		// Facturedet extrafields
-		// Update
-		$extrafields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'facturedet', 0, 0, 1040, '', 1,'', 1);
-		$extrafields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'facturedet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('Batch'),
+            'prefix'   => '<i class="fas fa-barcode pictofixedwidth" style=" color: #a69944;"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'produtlot',
+            'url'      => '/product/stock/productlot_list.php?mainmenu=products',
+            'langs'    => 'productbatch',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->produit->lire && $user->rights->stock->lire',
+            'target'   => '',
+            'user'     => 0
+        ];
+    }
 
-		// Add
-		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'facturedet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
+    /**
+     * Function called when module is enabled
+     * The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database
+     * It also creates data directories
+     *
+     * @param  string     $options Options when enabling module ('', 'noboxes')
+     * @return int                 1 if OK, 0 if KO
+     * @throws Exception
+     */
+    public function init($options = ''): int
+    {
+        global $conf, $langs, $user;
 
-		// Propal extrafields
-		// Update
-		$extrafields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'propal', 0, 0, 1040, '', 1,'', 1);
-		$extrafields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'propal', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
+        // Permissions
+        $this->remove($options);
 
-		// Add
-		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'propal', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'propal', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propal', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'propal', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'propal', 0, 0, '', '', 1, '', 1);
+        $sql = [];
 
-		// Propaldet extrafields
-		// Update
-		$extrafields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'propaldet', 0, 0, 1040, '', 1,'', 1);
-		$extrafields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'propaldet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
+        $result = $this->_load_tables('/dolicar/sql/');
+        if ($result < 0) {
+            return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
+        }
 
-		// Add
-		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'propaldet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
+        dolibarr_set_const($this->db, 'DOLICAR_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
+        dolibarr_set_const($this->db, 'DOLICAR_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
-		// Commande extrafields
-		// Update
-		$extrafields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'commande', 0, 0, 1040, '', 1,'', 1);
-		$extrafields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'commande', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
+        // Create extrafields during init
+        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+        $extraFields = new ExtraFields($this->db);
 
-		// Add
-		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'commande', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'commande', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commande', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commande', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commande', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('registrationcertificate_metada', $langs->transnoentities("RegistrationCertificateMetadata"), 'text', 1080, '', 'product_lot', 0, 0, '', '', 1, '', 1);
 
-		// Commandedet extrafields
-		// Update
-		$extrafields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'commandedet', 0, 0, 1040, '', 1,'', 1);
-		$extrafields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'commandedet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
+        // // Facture extrafields
+        // Update
+        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'facture', 0, 0, 1040, '', 1,'', 1);
+        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'facture', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
 
-		// Add
-		$extrafields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-		$extrafields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'commandedet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
-		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
+        // Add
+        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'facture', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'facture', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facture', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'facture', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'facture', 0, 0, '', '', 1, '', 1);
 
-		$extrafields->addExtraField('starting_mileage', 'StartingMileage', 'int', 1000, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
+        // Facturedet extrafields
+        // Update
+        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'facturedet', 0, 0, 1040, '', 1,'', 1);
+        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'facturedet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
+
+        // Add
+        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'facturedet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
+
+        // Propal extrafields
+        // Update
+        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'propal', 0, 0, 1040, '', 1,'', 1);
+        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'propal', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
+
+        // Add
+        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'propal', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'propal', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propal', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'propal', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'propal', 0, 0, '', '', 1, '', 1);
+
+        $extrafields->addExtraField('starting_mileage', 'StartingMileage', 'int', 1000, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
 		$extrafields->addExtraField('arrival_mileage', 'ArrivalMileage', 'int', 1010, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
 		$extrafields->addExtraField('json', 'JSON', 'text', 1020, '', 'actioncomm', 0, 0, '', '', 1, '', 0, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
 
-		// Permissions
-		$this->remove($options);
+        // Propaldet extrafields
+        // Update
+        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'propaldet', 0, 0, 1040, '', 1,'', 1);
+        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'propaldet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
 
-		$sql = array();
+        // Add
+        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'propaldet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
 
-		require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
-		$warehouse = new Entrepot($this->db);
+        // Commande extrafields
+        // Update
+        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'commande', 0, 0, 1040, '', 1,'', 1);
+        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'commande', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
 
-		//Warehouse
-		if ($conf->global->DOLICAR_DEFAULT_WAREHOUSE_ID <= 0) {
-			$warehouse->ref = $langs->trans('DolicarWarehouse');
-			$warehouse->label = $langs->trans('DolicarWarehouse');
-			$warehouse_id = $warehouse->create($user);
-			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE_ID', $warehouse_id, 'integer', 0, '', $conf->entity);
-		}
+        // Add
+        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'commande', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'commande', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commande', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commande', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commande', 0, 0, '', '', 1, '', 1);
 
-		if ($conf->global->DOLICAR_DEFAULT_WAREHOUSE_STATUS_UPDATED == 0) {
-			$warehouse->fetch($conf->global->DOLICAR_DEFAULT_WAREHOUSE_ID);
-			$warehouse->statut = 1;
-			$warehouseUpdated = $warehouse->update($warehouse->id, $user);
-			if ($warehouseUpdated > 0) {
-				dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE_STATUS_UPDATED', 1, 'integer', 0, '', $conf->entity);
-			}
-		}
+        // Commandedet extrafields
+        // Update
+        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'commandedet', 0, 0, 1040, '', 1,'', 1);
+        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'commandedet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
 
-		//Categorie
-		require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-		$tag = new Categorie($this->db);
+        // Add
+        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
+        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'commandedet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
+        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
+        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
 
-		if ($conf->global->DOLICAR_TAGS_SET == 0) {
+        // Warehouse
+        if (getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID') <= 0) {
+            require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
 
-			$tag->label = $langs->transnoentities('Vehicle');
-			$tag->type = 'product';
-			$vehicleTag = $tag->create($user);
+            $wareHouse = new Entrepot($this->db);
 
-			if ($vehicleTag > 0) {
-				$tag->label = $langs->transnoentities('Car');
-				$tag->type = 'product';
-				$tag->fk_parent = $vehicleTag;
-				$tag->create($user);
+            $wareHouse->ref    = $langs->transnoentities('DoliCarWarehouse');
+            $wareHouse->label  = $langs->transnoentities('DoliCarWarehouse');
+            $wareHouse->statut = Entrepot::STATUS_OPEN_ALL;
 
-				$tag->label = $langs->transnoentities('Truck');
-				$tag->type = 'product';
-				$tag->fk_parent = $vehicleTag;
-				$tag->create($user);
+            $wareHouseID = $wareHouse->create($user);
 
-				$tag->label = $langs->transnoentities('Bicycle');
-				$tag->type = 'product';
-				$tag->fk_parent = $vehicleTag;
-				$tag->create($user);
+            dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE_ID', $wareHouseID, 'integer', 0, '', $conf->entity);
+        }
 
-				$tag->label = $langs->transnoentities('CommercialVehicle');
-				$tag->type = 'product';
-				$tag->fk_parent = $vehicleTag;
-				$tag->create($user);
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+        $category = new Categorie($this->db);
 
-				dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $vehicleTag, 'integer', 0, '', $conf->entity);
+        // Categorie
+        if (getDolGlobalInt('DOLICAR_TAGS_SET') == 0) {
+            $category->label = $langs->transnoentities('Vehicle');
+            $category->type  = 'product';
+            $vehicleTagID    = $category->create($user);
 
-			}
-			dolibarr_set_const($this->db, 'CATEGORIE_RECURSIV_ADD', 1, 'integer', 0, '', $conf->entity);
-			dolibarr_set_const($this->db, 'DOLICAR_TAGS_SET', 1, 'integer', 0, '', $conf->entity);
-		}
-		if ($conf->global->CATEGORIE_RECURSIV_ADD == 0) {
-			dolibarr_set_const($this->db, 'CATEGORIE_RECURSIV_ADD', 1, 'integer', 0, '', $conf->entity);
-		}
+            if ($vehicleTagID > 0) {
+                $category->label     = $langs->transnoentities('Car');
+                $category->fk_parent = $vehicleTagID;
+                $category->create($user);
 
-		if ($conf->global->DOLICAR_VEHICLE_TAG == 0) {
-			$tag->rechercher(0, $langs->transnoentities('Car'), 'product');
-			if ($tag->id > 0) {
-				dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $tag->id, 'integer', 0, '', $conf->entity);
-			}
-		}
+                $category->label     = $langs->transnoentities('Truck');
+                $category->fk_parent = $vehicleTagID;
+                $category->create($user);
 
-		//Car brands tag
-		if ($conf->global->DOLICAR_CAR_BRANDS_TAG_SET == 0) {
+                $category->label     = $langs->transnoentities('Bicycle');
+                $category->fk_parent = $vehicleTagID;
+                $category->create($user);
 
-			$tag->label = $langs->transnoentities('Brands');
-			$tag->type = 'product';
-			$brandTag = $tag->create($user);
+                $category->label     = $langs->transnoentities('CommercialVehicle');
+                $category->fk_parent = $vehicleTagID;
+                $category->create($user);
 
-			if ($brandTag > 0) {
+                dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_TAG', $vehicleTagID, 'integer', 0, '', $conf->entity);
+            }
 
-				$filename = DOL_DOCUMENT_ROOT . '/custom/dolicar/core/car_brands.txt';
-				$file = fopen( $filename, "r" );
-				if ($file) {
-					while (($line = fgets($file)) !== false) {
-						$tag->label = $langs->transnoentities($line);
-						$tag->type = 'product';
-						$tag->fk_parent = $brandTag;
-						$tag->create($user);
-					}
-					fclose($file);
-				}
+            dolibarr_set_const($this->db, 'DOLICAR_TAGS_SET', 1, 'integer', 0, '', $conf->entity);
+        }
 
-				$tag->label = $langs->transnoentities('DefaultBrand');
-				$tag->type = 'product';
-				$tag->fk_parent = $brandTag;
-				$defaultBrandTag = $tag->create($user);
+        // Car brands tag
+        if (getDolGlobalInt('DOLICAR_CAR_BRANDS_TAG_SET') == 0) {
+            $category->label = $langs->transnoentities('Brands');
+            $category->type  = 'product';
+            $brandTagID      = $category->create($user);
 
-				dolibarr_set_const($this->db, 'DOLICAR_CAR_DEFAULT_BRAND_TAG', $defaultBrandTag, 'integer', 0, '', $conf->entity);
-				dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG', $brandTag, 'integer', 0, '', $conf->entity);
-				dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG_SET', 1, 'integer', 0, '', $conf->entity);
-			}
-		} elseif ($conf->global->DOLICAR_CAR_BRANDS_TAG_SET == 1 && $conf->global->DOLICAR_CAR_DEFAULT_BRAND_TAG == 0) {
-			$tag->label = $langs->transnoentities('DefaultBrand');
-			$tag->type = 'product';
-			$tag->fk_parent = $conf->global->DOLICAR_CAR_BRANDS_TAG;
-			$defaultBrandTag = $tag->create($user);
-			dolibarr_set_const($this->db, 'DOLICAR_CAR_DEFAULT_BRAND_TAG', $defaultBrandTag, 'integer', 0, '', $conf->entity);
-		}
+            if ($brandTagID > 0) {
+                $filename = DOL_DOCUMENT_ROOT . '/custom/dolicar/core/car_brands.txt';
+                $file     = fopen($filename, 'r');
+                if ($file) {
+                    while (($line = fgets($file)) !== false) {
+                        $category->label     = $langs->transnoentities($line);
+                        $category->fk_parent = $brandTagID;
+                        $category->create($user);
+                    }
+                    fclose($file);
+                }
 
-		// Default product
-		require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-		$product = new Product($this->db);
+                $category->label     = $langs->transnoentities('DefaultBrand');
+                $category->fk_parent = $brandTagID;
+                $defaultBrandTagID   = $category->create($user);
 
-		if ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 0) {
-			$product->ref = $langs->transnoentities('DefaultVehicle');
-			$product->label = $langs->transnoentities('DefaultVehicle');
-			$product->status_batch = 1;
-			$defaultVehicle = $product->create($user);
+                dolibarr_set_const($this->db, 'DOLICAR_CAR_DEFAULT_BRAND_TAG', $defaultBrandTagID, 'integer', 0, '', $conf->entity);
+                dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG', $brandTagID, 'integer', 0, '', $conf->entity);
+                dolibarr_set_const($this->db, 'DOLICAR_CAR_BRANDS_TAG_SET', 1, 'integer', 0, '', $conf->entity);
+            }
+        }
 
-			if ($defaultVehicle > 0) {
-				dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE', $defaultVehicle, 'integer', 0, '', $conf->entity);
-				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+        // Default product
+        require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+        $product = new Product($this->db);
 
-				$tag->fetch($conf->global->DOLICAR_VEHICLE_TAG);
-				$tag->add_type($product, 'product');
-				$tag->fetch($conf->global->DOLICAR_CAR_DEFAULT_BRAND_TAG);
-				$tag->add_type($product, 'product');
-			}
-			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
-		} elseif ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 1) {
-			$product->fetch($conf->global->DOLICAR_DEFAULT_VEHICLE);
-			$tag->fetch($conf->global->DOLICAR_CAR_DEFAULT_BRAND_TAG);
-			$tag->add_type($product, 'product');
-			$product->status_batch = 1;
-			$product->update($product->id, $user);
-			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 2, 'integer', 0, '', $conf->entity);
-		} elseif ($conf->global->DOLICAR_DEFAULT_VEHICLE_SET == 2) {
-			$product->fetch($conf->global->DOLICAR_DEFAULT_VEHICLE);
-			$product->status_batch = 1;
-			$product->update($product->id, $user);
-			dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 3, 'integer', 0, '', $conf->entity);
-		}
-		return $this->_init($sql, $options);
-	}
+        if (getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE_SET') == 0) {
+            $product->ref          = $langs->transnoentities('DefaultVehicle');
+            $product->label        = $langs->transnoentities('DefaultVehicle');
+            $product->status_batch = 1;
+            $defaultVehicleID      = $product->create($user);
 
-	/**
-	 *  Function called when module is disabled.
-	 *  Remove from database constants, boxes and permissions from Dolibarr database.
-	 *  Data directories are not deleted
-	 *
-	 *  @param      string	$options    Options when enabling module ('', 'noboxes')
-	 *  @return     int                 1 if OK, 0 if KO
-	 */
-	public function remove($options = '')
-	{
-		$sql = array();
-		return $this->_remove($sql, $options);
-	}
+            if ($defaultVehicleID > 0) {
+                dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE', $defaultVehicleID, 'integer', 0, '', $conf->entity);
+
+                $category->fetch(getDolGlobalInt('DOLICAR_VEHICLE_TAG'));
+                $category->add_type($product, 'product');
+                $category->fetch(getDolGlobalInt('DOLICAR_CAR_DEFAULT_BRAND_TAG'));
+                $category->add_type($product, 'product');
+            }
+            dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
+        }
+
+        return $this->_init($sql, $options);
+    }
+
+    /**
+     * Function called when module is disabled
+     * Remove from database constants, boxes and permissions from Dolibarr database
+     * Data directories are not deleted
+     *
+     * @param  string $options Options when enabling module ('', 'noboxes')
+     * @return int             1 if OK, 0 if KO
+     */
+    public function remove($options = ''): int
+    {
+        $sql = [];
+        return $this->_remove($sql, $options);
+    }
 }
