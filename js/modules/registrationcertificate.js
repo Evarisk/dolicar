@@ -59,12 +59,7 @@ window.dolicar.registrationcertificate.init = function() {
  * @return {void}
  */
 window.dolicar.registrationcertificate.event = function() {
-  $(document).on('change', '#fk_product', window.dolicar.registrationcertificate.actualizeBrand);
-  $(document).on('change', '#fk_product', window.dolicar.registrationcertificate.actualizeProductlot);
-  $(document).ready(() => {
-    $(document).find('.field_fk_soc .butActionNew').attr('target', '_blank');
-    $(document).find('.field_fk_project .butActionNew').attr('target', '_blank');
-  });
+  $(document).on('change', '#fk_product', window.dolicar.registrationcertificate.reloadFields);
 };
 
   $('#public-vehicle-log-book-form').on('submit', function(event) {
@@ -85,69 +80,31 @@ window.dolicar.registrationcertificate.event = function() {
 
 
 /**
- * Actualize brand input
+ * Reload product lot selector and vehicle brand
  *
  * @since   0.0.2
  * @version 1.2.0
  *
  * @return {void}
  */
-window.dolicar.registrationcertificate.actualizeBrand = function() {
+window.dolicar.registrationcertificate.reloadFields = function() {
   let token          = window.saturne.toolbox.getToken();
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  let productID      = $(this).val();
 
-  const form     = document.getElementById('registrationcertificatefr_create') ? document.getElementById('registrationcertificatefr_create') : document.getElementById('registrationcertificatefr_edit');
-  const formData = new FormData(form);
-  let productId  = formData.get('fk_product');
+  window.saturne.loader.display($('.field_fk_lot'));
+  window.saturne.loader.display($('.field_d1_vehicle_brand'));
 
   $.ajax({
-    url: document.URL + querySeparator + 'subaction=getProductBrand&token='+token,
-    data: JSON.stringify({
-      productId: productId,
-    }),
+    url: document.URL + querySeparator + '&fk_product=' + productID + '&token=' + token,
     type: 'POST',
     processData: false,
     contentType: false,
     success: function (resp) {
-      let vehicleBrand = $('#d1_vehicle_brand');
-      vehicleBrand.attr('value', $(resp).find('.car-brand').val());
-      vehicleBrand.prop("readonly", true);
+      $('.field_fk_lot').replaceWith($(resp).find('.field_fk_lot'));
+      $('.field_d1_vehicle_brand').replaceWith($(resp).find('.field_d1_vehicle_brand'));
     },
-  });
-};
-
-/**
- * Actualize product lot selector
- *
- * @since   0.0.2
- * @version 1.2.0
- *
- * @return {void}
- */
-window.dolicar.registrationcertificate.actualizeProductlot = function() {
-  let token          = window.saturne.toolbox.getToken();
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-
-  const form     = document.getElementById('registrationcertificatefr_create') ? document.getElementById('registrationcertificatefr_create') : document.getElementById('registrationcertificatefr_edit');
-  const formData = new FormData(form);
-  let productId  = formData.get('fk_product');
-  let action     = formData.get('action');
-
-  if (action === 'update') {
-    action = 'edit';
-  }
-
-  window.saturne.loader.display($('.lot-content'));
-
-  $.ajax({
-    url: document.URL + querySeparator + 'action=' + action + '&fk_product=' + productId + '&token='+token,
-    type: "POST",
-    processData: false,
-    contentType: false,
-    success: function ( resp ) {
-      $('.lot-container').html($(resp).find('.lot-content'));
-      $('.wpeo-loader').removeClass('wpeo-loader');
-    },
+    error: function() {}
   });
 };
 
