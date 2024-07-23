@@ -243,7 +243,9 @@ if ($backToPage) {
                     <div class="information-title">
                         <?php echo $langs->trans('PublicVehicleLogBook'); ?>
                         <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
-                            echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 70, 70, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl);
+                            $verdictColor = $lastControl->verdict == 1 ? 'green' : ($lastControl->verdict == 2 ? 'red' : 'grey');
+                            print dol_strlen($lastControl->verdict) > 0 ? '<div class="wpeo-button button-' . $verdictColor . '">' . $lastControl->fields['verdict']['arrayofkeyval'][(!empty($lastControl->verdict)) ? $lastControl->verdict : 3] . '</div>' : 'N/A';
+                            echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 120, 120, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl, '', 0, 0);
                         endif; ?>
                     </div>
                 </div>
@@ -288,6 +290,16 @@ if ($backToPage) {
                     <label for="start_comment">
                         <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->trans('StartComment'); ?>" <?php echo isset($lastUnfinishedActionCommJSON['start_comment']) ? 'disabled' : ''; ?>><?php echo $lastUnfinishedActionCommJSON['start_comment'] ?? ''; ?></textarea>
                     </label>
+                    <input hidden multiple id="upload-image" type="file" name="userfile[]" capture="environment" accept="image/*">
+                    <label class="linked-medias project" for="upload-image">
+                        <div class="linked-medias-list">
+                            <div class="wpeo-button button-square-50">
+                                <input type="hidden" class="modal-options" data-photo-class="project"/>
+                                <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
+                            </div>
+                            <?php print saturne_show_medias_linked('easycrm', $conf->easycrm->multidir_output[$conf->entity] . '/project/tmp/0/project_photos', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, 'project/tmp/0/project_photos', $project, '', 0); ?>
+                        </div>
+                    </label>
                     <?php if ($publicInterfaceUseSignatory) : ?>
                         <div class="public-card__content signature">
                             <div class="signature-element">
@@ -314,6 +326,16 @@ if ($backToPage) {
                     </label>
                     <label for="end_comment">
                         <textarea name="end_comment" id="end_comment" rows="3" placeholder="<?php echo $langs->trans('EndComment'); ?>"></textarea>
+                    </label>
+                    <input hidden multiple id="upload-image" type="file" name="userfile[]" capture="environment" accept="image/*">
+                    <label class="linked-medias project" for="upload-image">
+                        <div class="linked-medias-list">
+                            <div class="wpeo-button button-square-50">
+                                <input type="hidden" class="modal-options" data-photo-class="project"/>
+                                <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
+                            </div>
+                            <?php print saturne_show_medias_linked('easycrm', $conf->easycrm->multidir_output[$conf->entity] . '/project/tmp/0/project_photos', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, 'project/tmp/0/project_photos', $project, '', 0); ?>
+                        </div>
                     </label>
                     <?php if ($publicInterfaceUseSignatory) : ?>
                         <div class="public-card__content signature">
