@@ -240,13 +240,31 @@ if ($backToPage) {
                         <i class="fas fa-sm fa-chevron-left"></i>
                         <?php echo $langs->trans('Back'); ?>
                     </a></div>
-                    <div class="information-title">
-                        <?php echo $langs->trans('PublicVehicleLogBook'); ?>
-                        <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
-                            $verdictColor = $lastControl->verdict == 1 ? 'green' : ($lastControl->verdict == 2 ? 'red' : 'grey');
-                            print dol_strlen($lastControl->verdict) > 0 ? '<div class="wpeo-button button-' . $verdictColor . '">' . $lastControl->fields['verdict']['arrayofkeyval'][(!empty($lastControl->verdict)) ? $lastControl->verdict : 3] . '</div>' : 'N/A';
-                            echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 120, 120, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl, '', 0, 0);
-                        endif; ?>
+                    <div class="wpeo-gridlayout grid-4">
+                        <div>
+                            <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
+                                echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 120, 120, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl, '', 0, 0);
+                            endif; ?>
+                        </div>
+                        <div class="gridw-3">
+                            <div class="information-title"><?php echo $langs->trans('PublicVehicleLogBook'); ?></div>
+                            <div class="information-last-control">
+                                <div class="control-title">
+                                    <i class="fas fa-clipboard-check"></i>
+                                    <a href=""><?php echo 'FC2407-0003'; // @TODO: ref du contrôle avec le lien. ?></a>
+                                </div>
+                                <div class="control-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <?php echo '12/07/2024'; // @TODO: Date du dernier contrôle. ?>
+                                </div>
+                                <div class="control-status">
+                                    <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
+                                        $verdictColor = $lastControl->verdict == 1 ? 'green' : ($lastControl->verdict == 2 ? 'red' : 'grey');
+                                        print dol_strlen($lastControl->verdict) > 0 ? '<div class="control-result result-' . $verdictColor . '">' . $lastControl->fields['verdict']['arrayofkeyval'][(!empty($lastControl->verdict)) ? $lastControl->verdict : 3] . '</div>' : 'N/A';
+                                    endif; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="header-objet">
