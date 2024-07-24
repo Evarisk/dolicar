@@ -127,6 +127,7 @@ if (is_array($lastActionComm) && !empty($lastActionComm)) {
 $lastUnfinishedActionComm = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
 if (is_array($lastUnfinishedActionComm) && !empty($lastUnfinishedActionComm)) {
     $lastUnfinishedActionCommJSON = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'], true);
+    $lastArrivalMileage           = $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'];
     if ($publicInterfaceUseSignatory) {
         $signatory->fetch('', '', ' AND object_type = "actiocomm" AND fk_object = ' . $lastUnfinishedActionComm[0]->id);
     }
@@ -233,7 +234,7 @@ if ($backToPage) {
 
 <div class="public-card__container" data-public-interface="true">
     <?php if (getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) : ?>
-        <?php if ($id > 0) : ?>
+        <?php if ($id > 0 && $registrationCertificateFR->id > 0) : ?>
             <div class="public-card__header wpeo-gridlayout grid-2">
                 <div class="header-information">
                     <div><a href="<?php echo $backToPage; ?>" class="information-back">
@@ -248,22 +249,16 @@ if ($backToPage) {
                         </div>
                         <div class="gridw-3">
                             <div class="information-title"><?php echo $langs->trans('PublicVehicleLogBook'); ?></div>
-                            <div class="information-last-control">
-                                <div class="control-title">
-                                    <i class="fas fa-clipboard-check"></i>
-                                    <a href=""><?php echo 'FC2407-0003'; // @TODO: ref du contrôle avec le lien. ?></a>
+                            <?php if ($isModEnabledDigiquali && !empty($lastControl)) : ?>
+                                <div class="information-last-control">
+                                    <div class="control-title"><?php echo $lastControl->getNomUrl(1, 'nolink'); ?></div>
+                                    <div class="control-date"><?php echo '<i class="fas fa-calendar-alt pictofixedwidth"></i>' . dol_print_date($lastControl->control_date, 'day'); ?></div>
+                                    <div class="control-status">
+                                        <?php $verdictColor = $lastControl->verdict == 1 ? 'green' : ($lastControl->verdict == 2 ? 'red' : 'grey');
+                                        print dol_strlen($lastControl->verdict) > 0 ? '<div class="control-result result-' . $verdictColor . '">' . $lastControl->fields['verdict']['arrayofkeyval'][(!empty($lastControl->verdict)) ? $lastControl->verdict : 3] . '</div>' : 'N/A'; ?>
+                                    </div>
                                 </div>
-                                <div class="control-date">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <?php echo '12/07/2024'; // @TODO: Date du dernier contrôle. ?>
-                                </div>
-                                <div class="control-status">
-                                    <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
-                                        $verdictColor = $lastControl->verdict == 1 ? 'green' : ($lastControl->verdict == 2 ? 'red' : 'grey');
-                                        print dol_strlen($lastControl->verdict) > 0 ? '<div class="control-result result-' . $verdictColor . '">' . $lastControl->fields['verdict']['arrayofkeyval'][(!empty($lastControl->verdict)) ? $lastControl->verdict : 3] . '</div>' : 'N/A';
-                                    endif; ?>
-                                </div>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -383,6 +378,9 @@ if ($backToPage) {
                 <div class="header-information">
                     <div class="information-title"><?php echo $langs->trans('PublicVehicleLogBook'); ?></div>
                 </div>
+                <?php if (empty($registrationCertificateFR->id) && dol_strlen($registrationNumber) > 0) : ?>
+                    <div><?php echo $langs->trans('LicencePlateNotFoundInDB'); ?></div>
+                <?php endif; ?>
             </div>
 
             <!-- Driver -->
