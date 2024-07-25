@@ -242,7 +242,7 @@ if ($backToPage) {
                         <?php echo $langs->trans('Back'); ?>
                     </a></div>
                     <div class="wpeo-gridlayout grid-4">
-                        <div>
+                        <div class="information-control-image">
                             <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
                                 echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 120, 120, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl, '', 0, 0);
                             endif; ?>
@@ -379,7 +379,13 @@ if ($backToPage) {
                     <div class="information-title"><?php echo $langs->trans('PublicVehicleLogBook'); ?></div>
                 </div>
                 <?php if (empty($registrationCertificateFR->id) && dol_strlen($registrationNumber) > 0) : ?>
-                    <div><?php echo $langs->trans('LicencePlateNotFoundInDB'); ?></div>
+                    <div class="wpeo-notice notice-error">
+                        <div class="notice-content">
+                            <div class="notice-title">Plaque introuvable</div>
+                            <div class="notice-subtitle"><?php echo $langs->trans('LicencePlateNotFoundInDB'); ?></div>
+                        </div>
+                        <div class="notice-close"><i class="fas fa-times"></i></div>
+                    </div>
                 <?php endif; ?>
             </div>
 
