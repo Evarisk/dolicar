@@ -85,6 +85,7 @@ $id                 = GETPOST('id', 'int');
 $registrationNumber = GETPOST('registration_number');
 $entity             = GETPOST('entity');
 $action             = GETPOST('action', 'aZ09');
+$subaction          = GETPOST('subaction', 'aZ09');
 $backToPage         = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
@@ -160,6 +161,19 @@ if (empty($resHook)) {
         exit;
     }
 
+    if ($subaction == 'add_img') {
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        $encodedImage = explode(',', $data['img'])[1];
+        $decodedImage = base64_decode($encodedImage);
+        $uploadDir    = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/0/action_photos/';
+        if (!dol_is_dir($uploadDir)) {
+            dol_mkdir($uploadDir);
+        }
+        file_put_contents($uploadDir . dol_print_date(dol_now(), 'dayhourlog') . '_img.jpg', $decodedImage);
+        exit;
+    }
+
     if ($action == 'add') {
         if (empty($lastUnfinishedActionComm)) {
             $actionComm->elementtype = $productLot->element;
@@ -223,7 +237,7 @@ $moreCSS = ['/dolicar/css/pico.min.css'];
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
 
-saturne_header(0, '', $title,  '', '', 0, 0, $moreJS, $moreCSS, '', 'page-public-card page-signature');
+saturne_header(1, '', $title,  '', '', 0, 0, $moreJS, $moreCSS, '', 'page-public-card page-signature');
 
 print '<form id="public-vehicle-log-book-form' . ($id > 0 ? '' : '-pwa') . '" method="POST" action="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '&entity=' . $entity . '">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -303,14 +317,14 @@ if ($backToPage) {
                     <label for="start_comment">
                         <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->trans('StartComment'); ?>" <?php echo isset($lastUnfinishedActionCommJSON['start_comment']) ? 'disabled' : ''; ?>><?php echo $lastUnfinishedActionCommJSON['start_comment'] ?? ''; ?></textarea>
                     </label>
-                    <input hidden multiple id="upload-image" type="file" name="userfile[]" capture="environment" accept="image/*">
-                    <label class="linked-medias project" for="upload-image">
+                    <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-default" type="file" name="userfile[]" capture="environment" accept="image/*">
+                    <label class="linked-medias action" for="fast-upload-photo-default">
                         <div class="linked-medias-list">
                             <div class="wpeo-button button-square-50">
-                                <input type="hidden" class="modal-options" data-photo-class="project"/>
+                                <input type="hidden" class="fast-upload-options" />
                                 <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
                             </div>
-                            <?php print saturne_show_medias_linked('easycrm', $conf->easycrm->multidir_output[$conf->entity] . '/project/tmp/0/project_photos', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, 'project/tmp/0/project_photos', $project, '', 0); ?>
+                            <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/0/action_photos/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, '/action/tmp/0/action_photos/', $actionComm, '', 0); ?>
                         </div>
                     </label>
                     <?php if ($publicInterfaceUseSignatory) : ?>
@@ -340,14 +354,14 @@ if ($backToPage) {
                     <label for="end_comment">
                         <textarea name="end_comment" id="end_comment" rows="3" placeholder="<?php echo $langs->trans('EndComment'); ?>"></textarea>
                     </label>
-                    <input hidden multiple id="upload-image" type="file" name="userfile[]" capture="environment" accept="image/*">
-                    <label class="linked-medias project" for="upload-image">
+                    <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-default" type="file" name="userfile[]" capture="environment" accept="image/*">
+                    <label class="linked-medias agenda" for="fast-upload-photo-default">
                         <div class="linked-medias-list">
                             <div class="wpeo-button button-square-50">
-                                <input type="hidden" class="modal-options" data-photo-class="project"/>
+                                <input type="hidden" class="fast-upload-options" />
                                 <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
                             </div>
-                            <?php print saturne_show_medias_linked('easycrm', $conf->easycrm->multidir_output[$conf->entity] . '/project/tmp/0/project_photos', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, 'project/tmp/0/project_photos', $project, '', 0); ?>
+                            <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/0/action_photos/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, '/action/tmp/0/action_photos/', $actionComm, '', 0); ?>
                         </div>
                     </label>
                     <?php if ($publicInterfaceUseSignatory) : ?>
