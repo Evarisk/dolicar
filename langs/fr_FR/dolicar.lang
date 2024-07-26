@@ -41,6 +41,7 @@ DoliCarAboutPage = DoliCar about page
 #
 
 # Public interface - Interface publique
+OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
 MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
 MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
 

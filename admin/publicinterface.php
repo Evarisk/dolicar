@@ -81,6 +81,10 @@ print load_fiche_titre($title, $linkBack, 'title_setup');
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'publicinterface', $title, -1, 'dolicar_color@dolicar');
 
+$publicInterfaceUrl = dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?entity=' . $conf->entity, 3);
+print '<a class="marginrightonly" href="' . $publicInterfaceUrl . '" target="_blank">' . img_picto('', 'url', 'class="pictofixedwidth"') . $langs->trans('PublicInterfaceObject', $langs->transnoentities('OfPublicVehicleLogBook')) . '</a>';
+print showValueWithClipboardCPButton($publicInterfaceUrl, 0, 'none');
+
 print load_fiche_titre($langs->trans('Config'), '', '');
 
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" name="public_interface_config">';
@@ -91,7 +95,7 @@ print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('Parameters') . '</td>';
 print '<td>' . $langs->trans('Description') . '</td>';
-print '<td class="center">' . $langs->trans('Value') . '</td>';
+print '<td>' . $langs->trans('Value') . '</td>';
 print '</tr>';
 
 // Public Interface UseSignatoryUse signatory
@@ -100,7 +104,7 @@ print $langs->transnoentities('PublicInterfaceUseSignatory', dol_strtolower($lan
 print '</td><td>';
 print $langs->transnoentities('PublicInterfaceUseSignatoryDescription');
 print '</td>';
-print '<td class="center">';
+print '<td>';
 print ajax_constantonoff('DOLICAR_PUBLIC_INTERFACE_USE_SIGNATORY');
 print '</td></tr>';
 
@@ -109,8 +113,8 @@ print $langs->transnoentities('PublicInterfaceUser');
 print '</td><td>';
 print $langs->transnoentities('PublicInterfaceUserDescription');
 print '</td>';
-print '<td class="center minwidth400 maxwidth500">';
-print img_picto($langs->trans('User'), 'user', 'class="pictofixedwidth"') . $form->select_dolusers(getDolGlobalInt('DOLICAR_PUBLIC_INTERFACE_USER'), 'public_interface_user_id', 1, null, 0, '', '', '0', 0, 0, '', 0, '','minwidth400 maxwidth500');
+print '<td class="minwidth400">';
+print img_picto($langs->trans('User'), 'user', 'class="pictofixedwidth"') . $form->select_dolusers(getDolGlobalInt('DOLICAR_PUBLIC_INTERFACE_USER'), 'public_interface_user_id', 1, null, 0, '', '', '0', 0, 0, '', 0, '','minwidth100 maxwidth300');
 print '</td></tr>';
 
 print '<tr class="oddeven"><td>';
@@ -118,8 +122,8 @@ print $langs->transnoentities('MaxArrivalMileage');
 print '</td><td>';
 print $langs->transnoentities('MaxArrivalMileageDescription');
 print '</td>';
-print '<td class="center">';
-print '<input type="number" name="max_arrival_mileage" min="0" value="' . getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000) . '"></td>';
+print '<td>';
+print img_picto('', 'fontawesome_fa-sort-numeric-up-alt', 'class="pictofixedwidth"') . '<input type="number" name="max_arrival_mileage" min="0" value="' . getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000) . '"></td>';
 print '</td></tr>';
 
 print '</table>';
