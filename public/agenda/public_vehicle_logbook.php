@@ -166,12 +166,12 @@ if (empty($resHook)) {
 
         $encodedImage = explode(',', $data['img'])[1];
         $decodedImage = base64_decode($encodedImage);
-        $uploadDir    = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/0/action_photos/';
+        $uploadDir    = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/' . $data['objectSubdir'] . '/';
         if (!dol_is_dir($uploadDir)) {
             dol_mkdir($uploadDir);
         }
         file_put_contents($uploadDir . dol_print_date(dol_now(), 'dayhourlog') . '_img.jpg', $decodedImage);
-        exit;
+        $subaction = '';
     }
 
     if ($action == 'add') {
@@ -190,13 +190,20 @@ if (empty($resHook)) {
             $actionComm->note_private .= $langs->transnoentities('Driver') . ' : ' . GETPOST('driver') . '<br>';
             $actionComm->note_private .= GETPOSTISSET('start_comment') && !empty(GETPOST('start_comment', 'restricthtml')) ? $langs->transnoentities('StartComment') . ' : ' . GETPOST('start_comment', 'restricthtml') . '<br>' : '';
             $actionComm->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
-            $actionComm->label         = $langs->transnoentities('ObjectAddPublicVehicleLogBook', $productLot->batch, $registrationCertificateFR->a_registration_number);
+            $actionComm->label         = $langs->transnoentities('ObjectAddPublicVehicleLogBook', $registrationCertificateFR->a_registration_number, $productLot->batch);
 
             $actionComm->array_options['json'] = json_encode(['driver' => GETPOST('driver'), 'start_comment' => GETPOST('start_comment', 'restricthtml'), 'end_comment' => GETPOST('end_comment', 'restricthtml')]);
 
             $extraFields->setOptionalsFromPost([], $actionComm);
 
             $actionCommID = $actionComm->create($user);
+
+            $pathToObjectImg         = $conf->agenda->multidir_output[$conf->entity] . '/' . $actionCommID;
+            $pathToTmpStartActionImg = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/start_action/';
+            $pathToTmpEndActionImg   = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/end_action/';
+            $startImgList            = dol_dir_list($pathToTmpStartActionImg, 'files');
+            $endImgList              = dol_dir_list($pathToTmpEndActionImg, 'files');
+            $imgList                 = array_merge($startImgList, $endImgList);
         } else {
             $lastUnfinishedActionComm[0]->datef         = dol_stringtotime(GETPOST('end_date_and_hour'));
             $lastUnfinishedActionComm[0]->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? '<br>' . $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
@@ -205,6 +212,22 @@ if (empty($resHook)) {
             $lastUnfinishedActionComm[0]->updateExtraField('arrival_mileage');
 
             $lastUnfinishedActionComm[0]->update($user);
+
+            $pathToObjectImg       = $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id;
+            $pathToTmpEndActionImg = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/end_action/';
+            $imgList               = dol_dir_list($pathToTmpEndActionImg, 'files');
+        }
+
+        if (!empty($imgList)) {
+            foreach ($imgList as $img) {
+                if (!dol_is_dir($pathToObjectImg)) {
+                    dol_mkdir($pathToObjectImg);
+                }
+
+                $fullPath = $pathToObjectImg . '/' . $img['name'];
+                dol_copy($img['fullname'], $fullPath);
+                unlink($img['fullname']);
+            }
         }
 
         if ($publicInterfaceUseSignatory && (isset($actionCommID) || isset($lastUnfinishedActionComm[0]))) {
@@ -307,30 +330,32 @@ if ($backToPage) {
             <div class="wpeo-gridlayout grid-2">
                 <!-- Start date and hour/mileage/comment/signature -->
                 <div>
-                    <label for=start_date_and_hour">
-                        <?php echo $langs->trans('StartDateAndHour'); ?>
+                    <label for="start_date_and_hour">
+                        <?php echo $langs->transnoentities('StartDateAndHour'); ?>
                         <input type="datetime-local" name="start_date_and_hour" id="start_date_and_hour" value="<?php echo dol_print_date($lastUnfinishedActionComm[0]->datep, '%Y-%m-%dT%H:%M:%S'); ?>" required <?php echo $lastUnfinishedActionComm[0]->datep ? 'disabled' : ''; ?>>
                     </label>
                     <label for="starting_mileage">
-                        <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->trans('StartingMileage'); ?>" value="<?php echo $lastArrivalMileage ?? $lastUnfinishedActionComm[0]->array_options['options_starting_mileage']; ?>" required <?php echo $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ? 'disabled' : ''; ?>>
+                        <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->transnoentities('StartingMileage'); ?>" value="<?php echo $lastArrivalMileage ?? $lastUnfinishedActionComm[0]->array_options['options_starting_mileage']; ?>" required <?php echo $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ? 'disabled' : ''; ?>>
                     </label>
                     <label for="start_comment">
-                        <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->trans('StartComment'); ?>" <?php echo isset($lastUnfinishedActionCommJSON['start_comment']) ? 'disabled' : ''; ?>><?php echo $lastUnfinishedActionCommJSON['start_comment'] ?? ''; ?></textarea>
+                        <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->transnoentities('StartComment'); ?>" <?php echo isset($lastUnfinishedActionCommJSON['start_comment']) ? 'disabled' : ''; ?>><?php echo $lastUnfinishedActionCommJSON['start_comment'] ?? ''; ?></textarea>
                     </label>
-                    <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-default" type="file" name="userfile[]" capture="environment" accept="image/*">
-                    <label class="linked-medias action" for="fast-upload-photo-default">
-                        <div class="linked-medias-list">
+                    <div class="linked-medias-list linked-medias start_action">
+                        <?php if (!isset($lastUnfinishedActionComm[0])) : ?>
                             <div class="wpeo-button button-square-50">
-                                <input type="hidden" class="fast-upload-options" />
-                                <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
+                                <label for="fast-upload-photo-start_action">
+                                    <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-start_action" type="file" name="userfile[]" capture="environment" accept="image/*">
+                                    <input type="hidden" class="fast-upload-options" data-from-subtype="start_action" data-from-subdir="start_action" />
+                                    <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
+                                </label>
                             </div>
-                            <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/0/action_photos/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, '/action/tmp/0/action_photos/', $actionComm, '', 0); ?>
-                        </div>
-                    </label>
+                        <?php endif; ?>
+                        <?php print saturne_show_medias_linked(!isset($lastUnfinishedActionComm[0]) ? 'dolicar' : 'agenda', !isset($lastUnfinishedActionComm[0]) ? $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/start_action/' : $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id, 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, !isset($lastUnfinishedActionComm[0]) ? '/action/tmp/start_action/' : '/' . $lastUnfinishedActionComm[0]->id, !isset($lastUnfinishedActionComm[0]) ? $actionComm : $lastUnfinishedActionComm[0], '', 0, isset($lastUnfinishedActionComm[0]) ? 0 : 1); ?>
+                    </div>
                     <?php if ($publicInterfaceUseSignatory) : ?>
                         <div class="public-card__content signature">
                             <div class="signature-element">
-                                <?php if (empty($signatory->signature)) : ?>
+                                <?php if (empty($signatory->signature) && !isset($lastUnfinishedActionComm[0])) : ?>
                                     <canvas class="canvas-container editable canvas-signature"></canvas>
                                     <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
                                 <?php else : ?>
@@ -344,27 +369,27 @@ if ($backToPage) {
                 </div>
                 <!-- End date and hour/mileage/comment/signature -->
                 <div>
-                    <label for=end_date_and_hour">
+                    <label for="end_date_and_hour">
                         <?php echo $langs->trans('EndDateAndHour'); ?>
                         <input type="datetime-local" name="end_date_and_hour" id="end_date_and_hour" <?php echo isset($lastUnfinishedActionComm[0]) ? 'required' : ''; ?>>
                     </label>
                     <label for="arrival_mileage">
-                        <input type="number" id="arrival_mileage" name="options_arrival_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" max="<?php echo ($lastArrivalMileage ?? 0) + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>" placeholder="<?php echo $langs->trans('ArrivalMileage'); ?>" <?php echo isset($lastUnfinishedActionComm[0]) ? 'required' : ''; ?>>
+                        <input type="number" id="arrival_mileage" name="options_arrival_mileage" min="<?php echo isset($lastArrivalMileage) ? $lastArrivalMileage + 1 : 0; ?>" max="<?php echo ($lastArrivalMileage ?? 0) + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>" placeholder="<?php echo $langs->transnoentities('ArrivalMileage'); ?>" <?php echo isset($lastUnfinishedActionComm[0]) ? 'required' : ''; ?>>
                     </label>
                     <label for="end_comment">
-                        <textarea name="end_comment" id="end_comment" rows="3" placeholder="<?php echo $langs->trans('EndComment'); ?>"></textarea>
+                        <textarea name="end_comment" id="end_comment" rows="3" placeholder="<?php echo $langs->transnoentities('EndComment'); ?>"></textarea>
                     </label>
-                    <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-default" type="file" name="userfile[]" capture="environment" accept="image/*">
-                    <label class="linked-medias agenda" for="fast-upload-photo-default">
-                        <div class="linked-medias-list">
-                            <div class="wpeo-button button-square-50">
-                                <input type="hidden" class="fast-upload-options" />
+                    <div class="linked-medias-list linked-medias end_action">
+                        <div class="wpeo-button button-square-50">
+                            <label for="fast-upload-photo-end_action">
+                                <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-end_action" type="file" name="userfile[]" capture="environment" accept="image/*">
+                                <input type="hidden" class="fast-upload-options" data-from-subtype="end_action" data-from-subdir="end_action" />
                                 <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
-                            </div>
-                            <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/0/action_photos/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, '/action/tmp/0/action_photos/', $actionComm, '', 0); ?>
+                            </label>
                         </div>
-                    </label>
-                    <?php if ($publicInterfaceUseSignatory) : ?>
+                        <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/end_action/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, '/action/tmp/end_action/', $actionComm, '', 0); ?>
+                    </div>
+                    <?php if ($publicInterfaceUseSignatory && isset($lastUnfinishedActionComm[0])) : ?>
                         <div class="public-card__content signature">
                             <div class="signature-element">
                                 <canvas class="canvas-container editable canvas-signature"></canvas>
@@ -386,7 +411,7 @@ if ($backToPage) {
                 'confirmationTitle' => 'SavedPublicVehicleLogBook',
                 'buttonParams'      => ['CloseModal' => 'button-blue public-vehicle-log-book-confirmation-close']
             ];
-            require_once __DIR__ . '/../../../saturne/core/tpl/utils/confirmation_view.tpl.php'; ?>
+            require __DIR__ . '/../../../saturne/core/tpl/utils/confirmation_view.tpl.php'; ?>
         <?php else : ?>
             <div class="public-card__header">
                 <div class="header-information">
@@ -413,7 +438,7 @@ if ($backToPage) {
             </div>
         <?php endif;
     else :
-        print '<div class="center">' . $langs->trans('PublicInterfaceForbidden', dol_strtolower($langs->transnoentities('PublicVehicleLogBook'))) . '</div>';
+        print '<div class="center">' . $langs->trans('PublicInterfaceForbidden', $langs->transnoentities('OfPublicVehicleLogBook')) . '</div>';
     endif; ?>
 </div>
 <?php print '</form>';

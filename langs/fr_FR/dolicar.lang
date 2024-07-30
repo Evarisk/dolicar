@@ -170,7 +170,7 @@ StartComment                  = Commentaire de départ
 EndDateAndHour                = Date et heure de retour
 ArrivalMileage                = Kilométrage d'arrivé
 EndComment                    = Commentaire d'arrivé
-ObjectAddPublicVehicleLogBook = Nouveau enregistrement dans le carnet de bord publique du véhicule %s immatriculé %s
+ObjectAddPublicVehicleLogBook = Suivi Km : %s - VIN : %s
 SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
 LicencePlateNotFoundInDB      = La plaque d'immatriculation est introuvable dans la base de données des cartes grises
 

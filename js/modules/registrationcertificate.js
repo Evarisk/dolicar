@@ -147,9 +147,9 @@ window.dolicar.registrationcertificate.createPublicVehicleLogBook = function() {
     contentType: false,
     data: formData,
     success: function() {
-      $('.card__confirmation').css('display', 'flex');
+      $('.public-vehicle-log-book-confirmation-close').closest('.card__confirmation').css('display', 'flex');
       $('.public-vehicle-log-book-confirmation-close').on('click', function() {
-        $('.card__confirmation').css('display', 'none');
+        $('.public-vehicle-log-book-confirmation-close').closest('.card__confirmation').css('display', 'none');
         window.location.reload();
       });
     },

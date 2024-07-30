@@ -100,7 +100,7 @@ print '</tr>';
 
 // Public Interface UseSignatoryUse signatory
 print '<tr class="oddeven"><td>';
-print $langs->transnoentities('PublicInterfaceUseSignatory', dol_strtolower($langs->transnoentities('PublicVehicleLogBook')));
+print $langs->transnoentities('Signature');
 print '</td><td>';
 print $langs->transnoentities('PublicInterfaceUseSignatoryDescription');
 print '</td>';
