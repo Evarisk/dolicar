@@ -89,7 +89,7 @@ class modDoliCar extends DolibarrModules
 				'registrationcertificatefrcard',
 				'dolicar_quickcreation',
 				'get_sheet_linkable_objects',
-
+                'main'
 			),
 			'moduleforexternal' => 0,
 		);
@@ -134,6 +134,9 @@ class modDoliCar extends DolibarrModules
             $i++ => array('DOLICAR_A_REGISTRATION_NUMBER_VISIBLE', 'integer', 1, '', 0, 'current'),
             $i++ => array('DOLICAR_API_REMAINING_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'),
             $i++ => array('DOLICAR_API_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'),
+
+            // CONST PUBLIC INTERFACE
+            $i++ => array('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 'integer', 1000, '', 0, 'current'),
 
 			// CONST MODULE
 			$i++ => ['DOLICAR_VERSION','chaine', $this->version, '', 0, 'current'],
@@ -533,6 +536,10 @@ class modDoliCar extends DolibarrModules
 		$extrafields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
 		$extrafields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
 		$extrafields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
+
+		$extrafields->addExtraField('starting_mileage', 'StartingMileage', 'int', 1000, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
+		$extrafields->addExtraField('arrival_mileage', 'ArrivalMileage', 'int', 1010, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
+		$extrafields->addExtraField('json', 'JSON', 'text', 1020, '', 'actioncomm', 0, 0, '', '', 1, '', 0, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
 
 		// Permissions
 		$this->remove($options);

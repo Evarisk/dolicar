@@ -1,4 +1,4 @@
-# Copyright (C) 2022 SuperAdmin <test@test.fr>
+# Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,20 +14,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #
-# Generic
+# DoliCar
 #
 
-# Module label 'ModuleDoliCarName'
-ModuleDoliCarName = DoliCar
-# Module description 'ModuleDoliCarDesc'
-ModuleDoliCarDesc = Gestion et réparations d'un parc automobile
+ModuleDoliCarName  = DoliCar
+ModuleDoliCarDesc  = Gestion et réparations d'un parc automobile
 DoliCarDescription = Gestion et réparations d'un parc automobile
 
 #
 # Admin page
 #
 DoliCarSetup = DoliCar setup
-Settings = Settings
 DoliCarSetupPage = DoliCar setup page
 DolicarConfig = Configuration du module
 EnableDolicar = Veuillez activer le module DoliCar pour accéder cette page
@@ -40,15 +37,13 @@ DoliCarAbout = About DoliCar
 DoliCarAboutPage = DoliCar about page
 
 #
-# Sample page
+# Config page - Page d'administration
 #
-MyPageName = My page name
 
-#
-# Sample widget
-#
-MyWidget = My widget
-MyWidgetDescription = My widget description
+# Public interface - Interface publique
+OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
+MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
+MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
 
 
 #
@@ -163,6 +158,23 @@ LinkDolicar_regcertfrDescription = Permet la liaison entre les cartes grises et 
 ZeroApiRequestsRemaining = Vous n'avez plus de jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
 LessThanHundredApiRequestsRemaining = Il vous reste moins de 100 jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
 RemainingRequests = Jetons de recherche de plaque d'immatriculation restants : %s
+
+
+
+# Public interface - Interface publique
+PublicVehicleLogBook          = Carnet de bord publique du véhicule
+Driver                        = Conducteur
+StartDateAndHour              = Date et heure de départ
+StartingMileage               = Kilométrage de départ
+StartComment                  = Commentaire de départ
+EndDateAndHour                = Date et heure de retour
+ArrivalMileage                = Kilométrage d'arrivé
+EndComment                    = Commentaire d'arrivé
+ObjectAddPublicVehicleLogBook = Suivi Km : %s - VIN : %s
+SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
+LicencePlateNotFoundInDB      = La plaque d'immatriculation est introuvable dans la base de données des cartes grises
+
+
 
 #
 # Other
