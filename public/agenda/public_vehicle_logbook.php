@@ -350,7 +350,7 @@ if ($backToPage) {
                                 </label>
                             </div>
                         <?php endif; ?>
-                        <?php print saturne_show_medias_linked(!isset($lastUnfinishedActionComm[0]) ? 'dolicar' : 'agenda', !isset($lastUnfinishedActionComm[0]) ? $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/start_action/' : $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id, 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, !isset($lastUnfinishedActionComm[0]) ? '/action/tmp/start_action/' : '/' . $lastUnfinishedActionComm[0]->id, !isset($lastUnfinishedActionComm[0]) ? $actionComm : $lastUnfinishedActionComm[0], '', 0, isset($lastUnfinishedActionComm[0]) ? 0 : 1); ?>
+                        <?php print saturne_show_medias_linked(!isset($lastUnfinishedActionComm[0]) ? 'dolicar' : 'agenda', !isset($lastUnfinishedActionComm[0]) ? $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/start_action/' : $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id, 'small', '', 0, 0, 0, 50, 50, 0, 0, 1, !isset($lastUnfinishedActionComm[0]) ? '/action/tmp/start_action/' : '/' . $lastUnfinishedActionComm[0]->id, !isset($lastUnfinishedActionComm[0]) ? $actionComm : $lastUnfinishedActionComm[0], '', 0, isset($lastUnfinishedActionComm[0]) ? 0 : 1); ?>
                     </div>
                     <?php if ($publicInterfaceUseSignatory) : ?>
                         <div class="public-card__content signature">
@@ -387,7 +387,7 @@ if ($backToPage) {
                                 <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
                             </label>
                         </div>
-                        <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/end_action/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 0, '/action/tmp/end_action/', $actionComm, '', 0); ?>
+                        <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/end_action/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 1, '/action/tmp/end_action/', $actionComm, '', 0); ?>
                     </div>
                     <?php if ($publicInterfaceUseSignatory && isset($lastUnfinishedActionComm[0])) : ?>
                         <div class="public-card__content signature">
