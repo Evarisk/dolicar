@@ -60,8 +60,6 @@ window.dolicar.registrationcertificate.init = function() {
  */
 window.dolicar.registrationcertificate.event = function() {
   $(document).on('change', '#fk_product', window.dolicar.registrationcertificate.reloadFields);
-};
-
   $('#public-vehicle-log-book-form').on('submit', function(event) {
     event.preventDefault();
     if (!$(this).find('.public-vehicle-log-book-validate').hasClass('button-disable')) {
@@ -77,7 +75,6 @@ window.dolicar.registrationcertificate.event = function() {
     window.saturne.toolbox.removeAddButtonClass('public-vehicle-log-book-validate', 'button-blue', 'button-grey button-disable');
   });
 };
-
 
 /**
  * Reload product lot selector and vehicle brand
