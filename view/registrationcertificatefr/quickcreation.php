@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2023-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,37 +16,37 @@
  */
 
 /**
- *  \file       view/quickcreation.php
- *  \ingroup    dolicar
- *  \brief      Page to quick creation project/task
+ * \file    view/quickcreation.php
+ * \ingroup dolicar
+ * \brief   Page to quick creation registrationcertificatefr/thirdparty/contact/project/task
  */
 
-// Load EasyCRM environment
+// Load DoliCar environment
 if (file_exists('../dolicar.main.inc.php')) {
-	require_once __DIR__ . '/../dolicar.main.inc.php';
+    require_once __DIR__ . '/../dolicar.main.inc.php';
 } elseif (file_exists('../../dolicar.main.inc.php')) {
-	require_once __DIR__ . '/../../dolicar.main.inc.php';
+    require_once __DIR__ . '/../../dolicar.main.inc.php';
 } else {
-	die('Include of dolicar main fails');
+    die('Include of dolicar main fails');
 }
 
-// Libraries
+// Load Dolibarr libraries
 if (isModEnabled('project')) {
-	require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
-
-	require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-	require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
 }
 if (isModEnabled('societe')) {
-	require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 }
 if (isModEnabled('fckeditor')) {
-	require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
+    require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
 }
 if (isModEnabled('categorie')) {
-	require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 }
 
+// Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 
 // Global variables definitions
@@ -65,24 +65,24 @@ $backtopage  = GETPOST('backtopage', 'alpha');
 $object = new RegistrationCertificateFr($db);
 
 if (isModEnabled('project')) {
-	$project = new Project($db);
-	$task = new Task($db);
+    $project = new Project($db);
+    $task    = new Task($db);
 }
 if (isModEnabled('categorie')) {
-	$category = new Categorie($db);
+    $category = new Categorie($db);
 }
 if (isModEnabled('societe')) {
-	$thirdparty = new Societe($db);
-	$contact    = new Contact($db);
+    $thirdparty = new Societe($db);
+    $contact    = new Contact($db);
 }
 
 // Initialize view objects
 $form = new Form($db);
 if (isModEnabled('project')) {
-	$formproject = new FormProjets($db);
+    $formproject = new FormProjets($db);
 }
 if (isModEnabled('societe')) {
-	$formcompany = new FormCompany($db);
+    $formcompany = new FormCompany($db);
 }
 
 $hookmanager->initHooks(['dolicar_quickcreation']); // Note that conf->hooks_modules contains array
@@ -90,29 +90,29 @@ $hookmanager->initHooks(['dolicar_quickcreation']); // Note that conf->hooks_mod
 $date_start = dol_mktime(0, 0, 0, GETPOST('projectstartmonth', 'int'), GETPOST('projectstartday', 'int'), GETPOST('projectstartyear', 'int'));
 
 // Security check - Protection if external user
-$permissiontoread          = $user->rights->dolicar->read && isModEnabled('easycrm');
+$permissionToRead          = $user->rights->dolicar->read && isModEnabled('easycrm');
 $permissiontoaddproject    = $user->rights->projet->creer;
 $permissiontoaddthirdparty = $user->rights->societe->creer;
 $permissiontoaddcontact    = $user->rights->societe->contact->creer;
-saturne_check_access($permissiontoread);
+saturne_check_access($permissionToRead);
 
 /*
  * Actions
  */
 
 $parameters = [];
-$reshook = $hookmanager->executeHooks('doActions', $parameters, $project, $action); // Note that $action and $project may have been modified by some hooks
-if ($reshook < 0) {
-	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $project, $action); // Note that $action and $project may have been modified by some hooks
+if ($resHook < 0) {
+    setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if (empty($reshook)) {
+if (empty($resHook)) {
 	$error = 0;
 
-	if ($cancel) {
-		header('Location: ' . dol_buildpath('/dolicar/dolicarindex.php', 1));
-		exit;
-	}
+    if ($cancel) {
+        header('Location: ' . dol_buildpath('dolicar/dolicarindex.php', 1));
+        exit;
+    }
     if ($action == 'add') {
 
         if (!$error) {
@@ -283,25 +283,24 @@ if (empty($reshook)) {
  * View
  */
 
-$title    = $langs->trans('QuickCreation');
-$help_url = 'FR:Module_EasyCRM';
+$title   = $langs->trans('QuickCreation');
+$helpUrl = 'FR:Module_DoliCar';
 
-saturne_header(0, '', $title, $help_url);
+saturne_header(0, '', $title, $helpUrl);
 
 if (empty($permissiontoaddthirdparty) && empty($permissiontoaddcontact) && empty($permissiontoaddproject)) {
-	accessforbidden($langs->trans('NotEnoughPermissions'), 0);
-	exit;
+    accessforbidden($langs->trans('NotEnoughPermissions'), 0);
+    exit;
 }
 
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="add">';
 if ($backtopage) {
-	print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
+    print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
 }
 
-//Ajouter le code carte grise
-print load_fiche_titre($langs->trans("QuickRegistrationCertificateCreation"), '', 'object_'.$object->picto);
+print load_fiche_titre($langs->trans('QuickRegistrationCertificateCreation'), '', 'object_' . $object->picto);
 
 print '<hr>';
 print '<table class="border centpercent tableforfieldcreate">';
@@ -311,24 +310,21 @@ print $langs->trans('LicencePlate');
 print '</td>';
 print '<td class="valuefieldcreate">';
 print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber" value="'. GETPOST('registrationNumber') .'">';
-print '</td>';
-print '</tr>';
-print '<tr>';
-print '</tr>';
+print '</td></tr>';
 print '</table>';
-print '<hr>';
 print '<br>';
+print '<hr>';
 
-if ($conf->global->DOLICAR_THIRDPARTY_QUICK_CREATION) {
-	require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_thirdparty_quickcreation.tpl.php';
+if (getDolGlobalInt('DOLICAR_THIRDPARTY_QUICK_CREATION')) {
+    require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_thirdparty_quickcreation.tpl.php';
 }
 
-if ($conf->global->DOLICAR_CONTACT_QUICK_CREATION) {
-	require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_contact_quickcreation.tpl.php';
+if (getDolGlobalInt('DOLICAR_CONTACT_QUICK_CREATION')) {
+    require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_contact_quickcreation.tpl.php';
 }
 
-if ($conf->global->DOLICAR_PROJECT_QUICK_CREATION) {
-	require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_project_quickcreation.tpl.php';
+if (getDolGlobalInt('DOLICAR_PROJECT_QUICK_CREATION')) {
+    require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_project_quickcreation.tpl.php';
 }
 
 print $form->buttonsSaveCancel('Create');

@@ -1,4 +1,4 @@
--- Copyright (C) ---Put here your own copyright and developer email---
+-- Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -13,19 +13,12 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-
--- BEGIN MODULEBUILDER INDEXES
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_rowid (rowid);
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_ref (ref);
-ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_soc (fk_soc);
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_status (status);
-ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_project (fk_project);
+ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_product (fk_product);
 ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_lot (fk_lot);
-ALTER TABLE llx_dolicar_registrationcertificatefr ADD UNIQUE uk_registrationcertificate_ref (ref, entity);
-
--- END MODULEBUILDER INDEXES
-
---ALTER TABLE llx_dolicar_registrationcertificatefr ADD UNIQUE INDEX uk_dolicar_registrationcertificatefr_fieldxy(fieldx, fieldy);
-
---ALTER TABLE llx_dolicar_registrationcertificatefr ADD CONSTRAINT llx_dolicar_registrationcertificatefr_fk_field FOREIGN KEY (fk_field) REFERENCES llx_dolicar_myotherobject(rowid);
-
+ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_soc (fk_soc);
+ALTER TABLE llx_dolicar_registrationcertificatefr ADD INDEX idx_dolicar_registrationcertificatefr_fk_project (fk_project);
+ALTER TABLE llx_dolicar_registrationcertificatefr ADD UNIQUE INDEX uk_registrationcertificate_ref (ref, entity);
+ALTER TABLE llx_dolicar_registrationcertificatefr ADD CONSTRAINT llx_dolicar_registrationcertificatefr_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);

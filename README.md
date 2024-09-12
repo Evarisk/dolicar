@@ -3,8 +3,7 @@
 ## Informations
 
 - Numéro du module : 436380
-- Version :  1.1.1
-- Dernière mise à jour : 15/11/2023
+- Dernière mise à jour : 17/07/2023
 - Éditeur : [Evarisk](https://evarisk.com)
 - Thème : Eldy Menu
 - Licence : GPLv3
@@ -12,9 +11,10 @@
 
 ### Version
 
-- Version : 1.1.1
-- Compatibilité : Dolibarr 16.0.0 - 17.0.2
-- Saturne Framework : 1.1.1
+- Version : 1.2.0
+- PHP : 7.4.33
+- Compatibilité : Dolibarr 16.0.0 - 20.0.0
+- Saturne Framework : 1.5.1
 
 ## Liens
 
@@ -50,3 +50,4 @@ Gérez la facturation de vos prestations de réparation et de maintenance de vé
 git clone https://github.com/Evarisk/dolicar.git
 git clone https://github.com/Evarisk/saturne.git
 ```
+- Activer le module dans la liste des Modules/Applications installés
