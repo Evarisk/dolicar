@@ -425,6 +425,7 @@ class RegistrationCertificateFr extends SaturneObject
      *
      * @return array array of linked objects
      */
+    public function getLinkedObjects(): array
     {
         $linkedObjects = [];
         $objectTypes   = ['propal', 'commande', 'facture'];
@@ -432,7 +433,6 @@ class RegistrationCertificateFr extends SaturneObject
             $linkedObject = $this->getLinkedObject($objectType);
             if (is_array($linkedObject) && !empty($linkedObject)) {
                 $linkedObjects[] = $linkedObject;
-    public function getLinkedObjects(): array
             }
         }
 

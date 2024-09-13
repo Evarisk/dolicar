@@ -179,7 +179,8 @@ class modDoliCar extends DolibarrModules
             $i++ => ['DOLICAR_API_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'],
 
             // CONST PUBLIC INTERFACE
-            $i++ => array('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 'integer', 1000, '', 0, 'current'),
+            $i++ => ['DOLICAR_PUBLIC_INTERFACE_USE_SIGNATORY', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 'integer', 1000, '', 0, 'current'],
 
             // CONST MODULE
             $i++ => ['DOLICAR_VERSION','chaine', $this->version, '', 0, 'current'],

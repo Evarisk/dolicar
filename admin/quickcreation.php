@@ -34,7 +34,7 @@ if (file_exists('../dolicar.main.inc.php')) {
 require_once __DIR__ . '/../lib/dolicar.lib.php';
 
 // Global variables definitions
-global $conf, $db, $langs, $user;
+global $conf, $db, $langs, $moduleNameLowerCase, $user;
 
 // Load translation files required by the page
 saturne_load_langs();
@@ -54,50 +54,36 @@ saturne_header(0, '', $title, $helpUrl);
 
 // Subheader
 $linkBack = '<a href="'. DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1' . '">' . $langs->trans('BackToModuleList') . '</a>';
-
 print load_fiche_titre($title, $linkBack, 'title_setup');
 
 // Configuration header
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'quickcreation', $title, -1, 'dolicar_color@dolicar');
 
-print load_fiche_titre($langs->transnoentities('Config'), '', '');
+$constArray[$moduleNameLowerCase] = [
+    'AutomaticContactCreation' => [
+        'name'        => 'AutomaticContactCreation',
+        'description' => 'AutomaticContactCreationDescription',
+        'code'        => 'DOLICAR_AUTOMATIC_CONTACT_CREATION'
+    ],
+    'ThirdpartyQuickCreation' => [
+        'name'        => 'ThirdPartyQuickCreation',
+        'description' => 'ThirdPartyQuickCreationDescription',
+        'code'        => 'DOLICAR_THIRDPARTY_QUICK_CREATION'
+    ],
+    'ContactQuickCreation' => [
+        'name'        => 'ContactQuickCreation',
+        'description' => 'ContactQuickCreationDescription',
+        'code'        => 'DOLICAR_CONTACT_QUICK_CREATION'
+    ],
+    'ProjectQuickCreation' => [
+        'name'        => 'ProjectQuickCreation',
+        'description' => 'ProjectQuickCreationDescription',
+        'code'        => 'DOLICAR_PROJECT_QUICK_CREATION'
+    ]
+];
 
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td>' . $langs->transnoentities('Parameters') . '</td>';
-print '<td class="center">' . $langs->transnoentities('Status') . '</td>';
-print '</tr>';
-
-print '<tr class="oddeven">';
-print '<td>' . $langs->transnoentities('AutomaticContactCreation') . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_AUTOMATIC_CONTACT_CREATION');
-print '</td>';
-print '</tr>';
-
-print '<tr class="oddeven">';
-print '<td>' . $langs->transnoentities('ThirdpartyQuickCreation') . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_THIRDPARTY_QUICK_CREATION');
-print '</td>';
-print '</tr>';
-
-print '<tr class="oddeven">';
-print '<td>' . $langs->transnoentities('ContactQuickCreation') . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_CONTACT_QUICK_CREATION');
-print '</td>';
-print '</tr>';
-
-print '<tr class="oddeven">';
-print '<td>' . $langs->transnoentities('ProjectQuickCreation') . '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_PROJECT_QUICK_CREATION');
-print '</td>';
-print '</tr>';
-
-print '</table>';
+require_once __DIR__ . '/../../saturne/core/tpl/admin/object/object_const_view.tpl.php';
 
 // Page end
 print dol_get_fiche_end();

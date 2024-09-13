@@ -30,6 +30,9 @@ if (file_exists('../dolicar.main.inc.php')) {
     die('Include of dolicar main fails');
 }
 
+// Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+
 // Load DoliCar libraries
 require_once __DIR__ . '/../lib/dolicar.lib.php';
 
@@ -40,8 +43,7 @@ global $conf, $db, $hookmanager, $langs, $moduleName, $moduleNameLowerCase, $use
 saturne_load_langs();
 
 // Get parameters
-$action     = GETPOST('action', 'alpha');
-$backtopage = GETPOST('backtopage', 'alpha');
+$action = GETPOST('action', 'alpha');
 
 // Initialize view objects
 $form = new Form($db);
@@ -74,7 +76,7 @@ $helpUrl = 'FR:Module_DoliCar';
 saturne_header(0,'', $title, $helpUrl);
 
 // Subheader
-$linkBack = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
+$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1' . '">' . $langs->trans('BackToModuleList') . '</a>';
 print load_fiche_titre($title, $linkBack, 'title_setup');
 
 // Configuration header
@@ -106,15 +108,6 @@ print $langs->transnoentities('PublicInterfaceUseSignatoryDescription');
 print '</td>';
 print '<td>';
 print ajax_constantonoff('DOLICAR_PUBLIC_INTERFACE_USE_SIGNATORY');
-print '</td></tr>';
-
-print '<tr class="oddeven"><td>';
-print $langs->transnoentities('PublicInterfaceUser');
-print '</td><td>';
-print $langs->transnoentities('PublicInterfaceUserDescription');
-print '</td>';
-print '<td class="minwidth400">';
-print img_picto($langs->trans('User'), 'user', 'class="pictofixedwidth"') . $form->select_dolusers(getDolGlobalInt('DOLICAR_PUBLIC_INTERFACE_USER'), 'public_interface_user_id', 1, null, 0, '', '', '0', 0, 0, '', 0, '','minwidth100 maxwidth300');
 print '</td></tr>';
 
 print '<tr class="oddeven"><td>';

@@ -134,7 +134,6 @@ if (is_array($lastUnfinishedActionComm) && !empty($lastUnfinishedActionComm)) {
     }
 }
 
-$user->fetch(getDolGlobalInt('DOLICAR_PUBLIC_INTERFACE_USER'));
 if ($isModEnabledDigiquali) {
     $controls = saturne_fetch_all_object_type('Control', 'DESC', 't.control_date', 1, 0, ['customsql' => 't.rowid = ee.fk_target AND t.status = ' . Control::STATUS_LOCKED], 'AND', false, true, false, ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ee.sourcetype = "productbatch" AND ee.fk_source = ' . $id . ' AND ee.targettype = "digiquali_control" AND ee.fk_target = t.rowid');
     if (is_array($controls) && !empty($controls)) {
@@ -182,7 +181,7 @@ if (empty($resHook)) {
             $actionComm->datep       = dol_stringtotime(GETPOST('start_date_and_hour'));
             $actionComm->datef       = dol_stringtotime(GETPOST('end_date_and_hour'));
             $actionComm->fk_element  = $productLot->id;
-            $actionComm->userownerid = $user->id;
+            $actionComm->userownerid = 0;
             $actionComm->percentage  = -1;
 
             // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user

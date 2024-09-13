@@ -42,26 +42,32 @@ Bicycle           = Vélo
 # Config page - Page d'administration
 #
 
+# RegistrationCertificateFr - Carte grise
+RegistrationCertificateFieldsConfig     = Configuration des champs de la carte grise
+Display                                 = Afficher
+ShowRegistrationCertificateFieldHelp    = Afficher/cacher ce champ sur la carte grise
+HideObjectDetsDolicarDetails            = Cacher le détail de Dolicar des lignes d'objets
+HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
+
+# QuickCreation - Ajout rapide
+QuickCreation                       = Ajout rapide
+AutomaticContactCreation            = Création automatique de contact à la création du tiers
+AutomaticContactCreationDescription = Cette option permet de créer automatiquement un contact lors de la création d'un tiers
+ThirdPartyQuickCreation             = Création rapide de tiers
+ThirdPartyQuickCreationDescription  = Cette option permet de créer rapidement un tiers
+ContactQuickCreation                = Création rapide de contact
+ContactQuickCreationDescription     = Cette option permet de créer rapidement un contact
+ProjectQuickCreation                = Création rapide de projet
+ProjectQuickCreationDescription     = Cette option permet de créer rapidement un projet
+
 # Public interface - Interface publique
 OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
 MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
 MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
 
-# RegistrationCertificateFr - Carte grise
-ImmatriculationAPIConfig                = Configuration de l'API immatriculationapi.com
-RemainingRequests                       = Jetons de recherche de plaque d'immatriculation restants : %s
-RegistrationCertificateFieldsConfig     = Configuration des champs de la carte grise
-Display                                 = Afficher
-ShowRegistrationCertificateFieldHelp    = Afficher/Cacher ce champ sur la carte grise
-HideObjectDetsDolicarDetails            = Cacher le détail de Dolicar des lignes d'objets
-HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
-
-# QuickCreation - Ajout rapide
-QuickCreation            = Ajout rapide
-AutomaticContactCreation = Création automatique de contact à la création du tiers
-ThirdpartyQuickCreation  = Création rapide de tiers
-ContactQuickCreation     = Création rapide de contact
-ProjectQuickCreation     = Création rapide de projet
+# Setup - Réglages
+ImmatriculationAPIConfig = Configuration de l'API immatriculationapi.com
+RemainingRequests        = Jetons de recherche de plaque d'immatriculation restants : %s
 
 
 

@@ -61,11 +61,21 @@ print load_fiche_titre($title, $linkBack, 'title_setup');
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'settings', $title, -1, 'dolicar_color@dolicar');
 
-// Configuration header
-print '<div style="text-indent: 1em"><i class="fas fa-2x fa-calendar-alt" style="padding: 10px"></i>' . $langs->trans('AgendaModuleRequired') . '</div>';
-print '<div style="text-indent: 1em"><i class="fas fa-2x fa-tools" style="padding: 10px"></i>' . $langs->trans('HowToSetupOtherModules') . '<a href=' . '"../../../admin/modules.php">' . $langs->trans('ConfigMyModules') . '</a></div>';
-print '<div style="text-indent: 1em"><i class="fas fa-2x fa-globe" style="padding: 10px"></i>' . $langs->trans('AvoidLogoProblems') . '<a href="' . $langs->trans('LogoHelpLink') . '">' . $langs->trans('LogoHelpLink') . '</a></div>';
-print '<div style="text-indent: 1em"><i class="fab fa-2x fa-css3-alt" style="padding: 10px"></i>' . $langs->trans('HowToSetupIHM') . '<a href=' . '"../../../admin/ihm.php">' . $langs->trans('ConfigIHM') . '</a></div>';
+print load_fiche_titre($langs->transnoentities('ImmatriculationAPIConfig'), '', '');
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities('Parameters') . '</td>';
+print '<td class="center">' . $langs->transnoentities('Value') . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>';
+print $langs->transnoentities('RemainingRequests');
+print '</td><td class="center">';
+print '<b>' . (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') ?? 0) . '</b>';
+print '</td></tr>';
+
+print '</table>';
 
 // Page end
 print dol_get_fiche_end();
