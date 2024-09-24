@@ -36,7 +36,7 @@ if (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') <= 0) {
     setEventMessages($langs->trans('LessThanHundredApiRequestsRemaining'), [], 'warnings');
 }
 
-$apiUrl             = 'http://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
+$apiUrl             = 'https://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
 $username           = getDolGlobalString('DOLICAR_IMMATRICULATION_API_USERNAME');
 $registrationNumber = GETPOST('registrationNumber');
 $registrationNumber = dol_strtoupper($registrationNumber);
