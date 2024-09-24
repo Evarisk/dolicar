@@ -188,7 +188,7 @@ if ($action == 'create') {
     print '<table class="border centpercent tableforfieldcreate">';
 
     $_POST['fk_product']                           = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
-    $object->fields['d1_vehicle_brand']['default'] = get_vehicle_brand(GETPOST('fk_product'));
+    $object->fields['d1_vehicle_brand']['default'] = get_vehicle_brand(GETPOSTINT('fk_product'));
 
     // Fk_lot
     print'<tr class="field_fk_lot"><td>';
