@@ -16,13 +16,13 @@
  */
 
 /**
- * \file    core/modules/dolicar/mod_registrationcertificatefr_standard.php
+ * \file    core/modules/dolicar/registrationcertificatefr/mod_registrationcertificatefr_standard.php
  * \ingroup dolicar
  * \brief   File of class to manage mod_registrationcertificatefr_standard numbering rules standard
  */
 
 // Load Saturne libraries
-require_once __DIR__ . '/../../../../saturne/core/modules/saturne/modules_saturne.php';
+require_once __DIR__ . '/../../../../../saturne/core/modules/saturne/modules_saturne.php';
 
 /**
  * Class to manage customer order numbering rules standard

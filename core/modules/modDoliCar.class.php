@@ -168,13 +168,13 @@ class modDoliCar extends DolibarrModules
         $i = 0;
         $this->const = [
             // CONST REGISTRATION CERTIFICATE
+            $i++ => ['DOLICAR_REGISTRATIONCERTIFICATEFR_ADDON', 'chaine', 'mod_registrationcertificatefr_standard', '', 0, 'current'],
             $i++ => ['DOLICAR_DEFAULT_WAREHOUSE_ID', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_VEHICLE_TAG', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_HIDE_REGISTRATIONCERTIFICATE_FIELDS', 'integer', 1, '', 0, 'current'],
-            $i++ => ['DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS', 'integer', 1, '', 0, 'current'],
             $i++ => ['DOLICAR_API_REMAINING_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_API_REQUESTS_COUNTER', 'integer', 0, '', 0, 'current'],
 
@@ -449,101 +449,26 @@ class modDoliCar extends DolibarrModules
         require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
         $extraFields = new ExtraFields($this->db);
 
-        $extraFields->addExtraField('registrationcertificate_metada', $langs->transnoentities("RegistrationCertificateMetadata"), 'text', 1080, '', 'product_lot', 0, 0, '', '', 1, '', 1);
+        $extraFieldsArrays = [
+            'registrationcertificatefr' => ['Label' => 'RegistrationCertificateFr', 'type' => 'link',    'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 1030, 'params' => 'a:1:{s:7:"options";a:1:{s:75:"RegistrationCertificateFr:dolicar/class/registrationcertificatefr.class.php";N;}}',                   'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'vehicle_model'             => ['Label' => 'VehicleModel',              'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => 1040, 'params' => '',                                                                                                                                  'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'mileage'                   => ['Label' => 'Mileage',                   'type' => 'int',     'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 1050, 'params' => '',                                                                                                                                  'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'registration_number'       => ['Label' => 'RegistrationNumber',        'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => 1060, 'params' => '',                                                                                                                                  'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'linked_product'            => ['Label' => 'LinkedProduct',             'type' => 'link',    'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 1070, 'params' => 'a:1:{s:7:"options";a:1:{s:93:"Product:product/class/product.class.php:0:(t.entity:=:__ENTITY__) AND (t.fk_product_type:=:0)";N;}}', 'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'linked_lot'                => ['Label' => 'LinkedProductBatch',        'type' => 'link',    'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 1080, 'params' => 'a:1:{s:7:"options";a:1:{s:75:"ProductLot:product/stock/class/productlot.class.php:(t.entity:=:__ENTITY__)";N;}}',                   'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'first_registration_date'   => ['Label' => 'FirstRegistrationDate',     'type' => 'date',    'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 1090, 'params' => '',                                                                                                                                  'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'VIN_number'                => ['Label' => 'VINNumber',                 'type' => 'varchar', 'length' => 128, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => 1100, 'params' => '',                                                                                                                                  'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'starting_mileage'          => ['Label' => 'StartingMileage',           'type' => 'int',     'length' => '',  'elementtype' => ['actioncomm'], 'position' => 1000, 'params' => '', 'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'arrival_mileage'           => ['Label' => 'ArrivalMileage',            'type' => 'int',     'length' => '',  'elementtype' => ['actioncomm'], 'position' => 1010, 'params' => '', 'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
+            'json'                      => ['Label' => 'JSON',                      'type' => 'text',    'length' => '',  'elementtype' => ['actioncomm'], 'position' => 1020, 'params' => '', 'alwayseditable' => 1, 'list' => 0, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"]
+        ];
 
-        // // Facture extrafields
-        // Update
-        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'facture', 0, 0, 1040, '', 1,'', 1);
-        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'facture', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
-
-        // Add
-        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'facture', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'facture', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facture', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'facture', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'facture', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'facture', 0, 0, '', '', 1, '', 1);
-
-        // Facturedet extrafields
-        // Update
-        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'facturedet', 0, 0, 1040, '', 1,'', 1);
-        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'facturedet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
-
-        // Add
-        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'facturedet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'facturedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'facturedet', 0, 0, '', '', 1, '', 1);
-
-        // Propal extrafields
-        // Update
-        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'propal', 0, 0, 1040, '', 1,'', 1);
-        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'propal', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
-
-        // Add
-        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'propal', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'propal', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propal', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'propal', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'propal', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'propal', 0, 0, '', '', 1, '', 1);
-
-        $extrafields->addExtraField('starting_mileage', 'StartingMileage', 'int', 1000, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
-		$extrafields->addExtraField('arrival_mileage', 'ArrivalMileage', 'int', 1010, '', 'actioncomm', 0, 0, '', '', 1, '', 1, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
-		$extrafields->addExtraField('json', 'JSON', 'text', 1020, '', 'actioncomm', 0, 0, '', '', 1, '', 0, '', '', 0, 'dolicar@dolicar', '$conf->dolicar->enabled');
-
-        // Propaldet extrafields
-        // Update
-        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'propaldet', 0, 0, 1040, '', 1,'', 1);
-        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'propaldet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
-
-        // Add
-        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'propaldet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'propaldet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'propaldet', 0, 0, '', '', 1, '', 1);
-
-        // Commande extrafields
-        // Update
-        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'commande', 0, 0, 1040, '', 1,'', 1);
-        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'commande', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
-
-        // Add
-        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'commande', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'commande', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commande', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commande', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commande', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commande', 0, 0, '', '', 1, '', 1);
-
-        // Commandedet extrafields
-        // Update
-        $extraFields->update('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar','255', 'commandedet', 0, 0, 1040, '', 1,'', 1);
-        $extraFields->update('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', '255', 'commandedet', 0, 0, 1070, 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}',1, '', 1);
-
-        // Add
-        $extraFields->addExtraField('registrationcertificatefr', $langs->transnoentities("RegistrationCertificateFr"), 'sellist', 1030, '', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:80:"dolicar_registrationcertificatefr:a_registration_number:rowid::entity = $ENTITY$";N;}}', '', '', 1);
-        $extraFields->addExtraField('vehicle_model', $langs->transnoentities("VehicleModel"), 'varchar', 1040, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('mileage', $langs->transnoentities("Mileage"), 'int', 1050, '', 'commandedet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('registration_number', $langs->transnoentities("RegistrationNumber"), 'varchar', 1060, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('linked_product', $langs->transnoentities("LinkedProduct"), 'sellist', 1070, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:36:"product:ref:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('linked_lot', $langs->transnoentities("LinkedProductBatch"), 'sellist', 1080, '255', 'commandedet', 0, 0, '', 'a:1:{s:7:"options";a:1:{s:42:"product_lot:batch:rowid::entity = $ENTITY$";N;}}', 1, '', 1);
-        $extraFields->addExtraField('first_registration_date', $langs->transnoentities("FirstRegistrationDate"), 'varchar', 1090, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
-        $extraFields->addExtraField('VIN_number', $langs->transnoentities("VINNumber"), 'varchar', 1100, '255', 'commandedet', 0, 0, '', '', 1, '', 1);
+        foreach ($extraFieldsArrays as $key => $extraField) {
+            foreach ($extraField['elementtype'] as $extraFieldElementType) {
+                $extraFields->update($key, $extraField['Label'], $extraField['type'], $extraField['length'], $extraFieldElementType, 0, 0, $this->numero . $extraField['position'], $extraField['params'], '', '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help']), '', '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
+                $extraFields->addExtraField($key, $extraField['Label'], $extraField['type'], $this->numero . $extraField['position'], $extraField['length'], $extraFieldElementType, 0, 0, '', $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], $extraField['help'], '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
+            }
+        }
 
         // Warehouse
         if (getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID') <= 0) {

@@ -63,6 +63,7 @@ class RegistrationCertificateFr extends SaturneObject
      */
     public string $picto = 'fontawesome_fa-car_fas_#d35968';
 
+    public const STATUS_DELETED   = -1;
     public const STATUS_VALIDATED = 1;
     public const STATUS_LOCKED    = 2;
     public const STATUS_ARCHIVED  = 3;
@@ -147,7 +148,7 @@ class RegistrationCertificateFr extends SaturneObject
         'p6_national_administrative_power'    => ['type' => 'integer',      'label' => 'NationalAdministrativePower',   'enabled' => 1, 'position' => 340, 'notnull' => 0, 'visible' => 3, 'config' => 1],
         'q_power_to_weight_ratio'             => ['type' => 'integer',      'label' => 'PowerToWeightRatio',            'enabled' => 1, 'position' => 350, 'notnull' => 0, 'visible' => 3, 'config' => 1],
         's1_seating_capacity'                 => ['type' => 'integer',      'label' => 'SeatingCapacity',               'enabled' => 1, 'position' => 360, 'notnull' => 0, 'visible' => 3, 'config' => 1],
-        's2_standing_capacity'                => ['type' => 'integer',      'label' => 'StationaryCapacity',            'enabled' => 1, 'position' => 370, 'notnull' => 0, 'visible' => 3, 'config' => 1],
+        's2_standing_capacity'                => ['type' => 'integer',      'label' => 'StandingCapacity',              'enabled' => 1, 'position' => 370, 'notnull' => 0, 'visible' => 3, 'config' => 1],
         'u1_stationary_noise_level'           => ['type' => 'integer',      'label' => 'StationaryNoiseLevel',          'enabled' => 1, 'position' => 380, 'notnull' => 0, 'visible' => 3, 'config' => 1],
         'u2_motor_speed'                      => ['type' => 'integer',      'label' => 'MotorSpeed',                    'enabled' => 1, 'position' => 390, 'notnull' => 0, 'visible' => 3, 'config' => 1],
         'v7_co2_emission'                     => ['type' => 'integer',      'label' => 'CO2Emission',                   'enabled' => 1, 'position' => 400, 'notnull' => 0, 'visible' => 3, 'config' => 1],
@@ -281,14 +282,12 @@ class RegistrationCertificateFr extends SaturneObject
      */
     public function __construct(DoliDB $db)
     {
-        global $conf, $langs;
-
         parent::__construct($db, $this->module, $this->element);
 
         foreach ($this->fields as $key => $val) {
             if ($val['config'] == 1) {
                 $confName = 'DOLICAR_' . dol_strtoupper($key) . '_VISIBLE';
-                if ($conf->global->$confName == 0) {
+                if (getDolGlobalInt($confName) == 0) {
                     $this->fields[$key]['visible'] = 0;
                 }
             }
@@ -354,9 +353,11 @@ class RegistrationCertificateFr extends SaturneObject
         if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
             global $langs;
 
+            $this->labelStatus[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
             $this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
             $this->labelStatus[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
 
+            $this->labelStatusShort[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
             $this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
             $this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
         }
@@ -367,6 +368,9 @@ class RegistrationCertificateFr extends SaturneObject
         }
         if ($status == self::STATUS_ARCHIVED) {
             $statusType = 'status8';
+        }
+        if ($status == self::STATUS_DELETED) {
+            $statusType = 'status9';
         }
 
         return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
@@ -385,57 +389,5 @@ class RegistrationCertificateFr extends SaturneObject
     public function setCategories($categories): string
     {
         return '';
-    }
-
-    /**
-     * Get linked object from extrafields on registration certificate
-     *
-     * @param  string    $objectType Object type
-     * @return array|int             Int 0 < if KO, array of records if OK
-     */
-    public function getLinkedObject(string $objectType)
-    {
-        $sql  = 'SELECT *';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . $objectType . '_extrafields as t';
-        $sql .= ' WHERE 1 = 1';
-        $sql .= ' AND registrationcertificatefr = ' . $this->id;
-        $sql .= ' ORDER BY t.mileage DESC';
-
-        $resql = $this->db->query($sql);
-        if ($resql) {
-            $num     = $this->db->num_rows($resql);
-            $i       = 0;
-            $records = [];
-            while ($i < $num) {
-                $obj = $this->db->fetch_object($resql);
-                $records[$objectType][$obj->fk_object] = $obj->fk_object;
-                $i++;
-            }
-            $this->db->free($resql);
-
-            return $records;
-        } else {
-            $this->errors[] = 'Error ' . $this->db->lasterror();
-            return -1;
-        }
-    }
-
-    /**
-     * Get linked objects
-     *
-     * @return array array of linked objects
-     */
-    public function getLinkedObjects(): array
-    {
-        $linkedObjects = [];
-        $objectTypes   = ['propal', 'commande', 'facture'];
-        foreach ($objectTypes as $objectType) {
-            $linkedObject = $this->getLinkedObject($objectType);
-            if (is_array($linkedObject) && !empty($linkedObject)) {
-                $linkedObjects[] = $linkedObject;
-            }
-        }
-
-        return $linkedObjects;
     }
 }

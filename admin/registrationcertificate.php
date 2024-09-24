@@ -36,7 +36,7 @@ require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
 require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 
 // Global variables definitions
-global $conf, $db, $langs, $user;
+global $conf, $db, $moduleName, $moduleNameLowerCase, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs();
@@ -68,6 +68,8 @@ print load_fiche_titre($title, $linkBack, 'title_setup');
 // Configuration header
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'registrationcertificate', $title, -1, 'dolicar_color@dolicar');
+
+require_once __DIR__ . '/../../saturne/core/tpl/admin/object/object_numbering_module_view.tpl.php';
 
 print load_fiche_titre($langs->transnoentities('RegistrationCertificateFieldsConfig'), '', '');
 
