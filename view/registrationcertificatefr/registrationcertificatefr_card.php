@@ -341,14 +341,20 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
             $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-edit pictofixedwidth"></i>' . $langs->trans('Modify') : '<i class="fas fa-edit fa-2x"></i>';
             print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=edit&token=' . newToken(), '', $permissiontoadd);
 
-            $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans('NewPropal') : '<i class="fas fa-file-signature fa-2x"></i>';
-            print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('comm/propal/card.php?action=create&socid=' . $object->fk_soc . '&options_registrationcertificatefr=' . $object->id, 3), '', $permissiontoadd);
+            if (isModEnabled('propal')) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans('NewPropal') : '<i class="fas fa-file-signature fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('comm/propal/card.php?action=create&socid=' . $object->fk_soc . '&options_registrationcertificatefr=' . $object->id, 3), '', $permissiontoadd);
+            }
 
-            $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-file-invoice-dollar"></i>' . ' ' . $langs->trans('NewInvoice') : '<i class="fas fa-file-invoice-dollar fa-2x"></i>';
-            print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('compta/facture/card.php?action=create&socid=' . $object->fk_soc . '&options_registrationcertificatefr=' . $object->id, 3), '', $permissiontoadd);
+            if (isModEnabled('facture')) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-file-invoice-dollar"></i>' . ' ' . $langs->trans('NewInvoice') : '<i class="fas fa-file-invoice-dollar fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('compta/facture/card.php?action=create&socid=' . $object->fk_soc . '&options_registrationcertificatefr=' . $object->id, 3), '', $permissiontoadd);
+            }
 
-            $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-ambulance"></i>' . ' ' . $langs->trans('NewIntervention') : '<i class="fas fa-ambulance fa-2x"></i>';
-            print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
+            if (isModEnabled('fichinter')) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-ambulance"></i>' . ' ' . $langs->trans('NewIntervention') : '<i class="fas fa-ambulance fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
+            }
         }
         print '</div>';
     }
