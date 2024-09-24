@@ -247,7 +247,7 @@ class ActionsDoliCar
      */
     public function quickCreationAction(array $parameters, CommonObject $object, string $action)
     {
-        global $conf, $langs, $user; // $langs mandatory for TPL
+        global $conf, $db, $langs, $user; // $db/$langs mandatory for TPL
 
         if (strpos($parameters['context'], 'dolicar_quickcreation') !== false) {
             if (isModEnabled('productbatch')) {
