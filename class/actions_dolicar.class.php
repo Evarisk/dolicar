@@ -247,33 +247,30 @@ class ActionsDoliCar
      */
     public function quickCreationAction(array $parameters, CommonObject $object, string $action)
     {
-        global $conf, $db, $langs, $user; // $db/$langs mandatory for TPL
+        global $conf, $db, $langs, $user; // $conf/$db/$langs mandatory for TPL
 
         if (strpos($parameters['context'], 'dolicar_quickcreation') !== false) {
-            if (isModEnabled('productbatch')) {
-                require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-            }
-            if (isModEnabled('categorie')) {
-                require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-            }
-
-            require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
-
             if (isModEnabled('product')) {
                 $product = new Product($this->db);
             }
             if (isModEnabled('productbatch')) {
+                require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
                 $productLot = new Productlot($this->db);
             }
             if (isModEnabled('categorie')) {
+                require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
                 $category = new Categorie($this->db);
             }
+
+            require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
+
             $object = new RegistrationCertificateFr($this->db);
 
+            $backtopage                    = '';
             $createRegistrationCertificate = 1;
             require_once __DIR__ . '/../core/tpl/dolicar_registrationcertificatefr_immatriculation_api_fetch_action.tpl.php';
 
-            if ($conf->global->DOLICAR_AUTOMATIC_CONTACT_CREATION > 0 && empty($parameters['$contactID'])) {
+            if (getDolGlobalInt('DOLICAR_AUTOMATIC_CONTACT_CREATION') > 0 && !empty($parameters['thirdpartyID']) && empty($parameters['$contactID'])) {
                 if (isModEnabled('societe')) {
                     require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
                     require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
@@ -285,25 +282,20 @@ class ActionsDoliCar
 
                     $thirdparty->fetch($thirdpartyID);
 
-                    $contact->socid     = !empty($thirdpartyID) ? $thirdpartyID : '';
+                    $contact->socid     = $thirdpartyID;
                     $contact->lastname  = $thirdparty->name;
                     $contact->email     = $thirdparty->email;
                     $contact->phone_pro = $thirdparty->phone;
 
-                    $contactID = $contact->create($user);
-                    if ($contactID < 0) {
-                        setEventMessages($contact->error, $contact->errors, 'errors');
-                        $error++;
-                    }
+                    $contact->create($user);
                 }
             }
+
             if (dol_strlen($backtopage) > 0){
                 $this->resprints = $backtopage;
-                return 1;
-            }
-            if (!$error) {
-                return 1;
             }
         }
+
+        return 0; // or return 1 to replace standard code
     }
 }
