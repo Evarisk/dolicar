@@ -81,7 +81,7 @@ print '<td class="center">' . $langs->transnoentities('ShortInfo') . '</td>';
 print '</tr>';
 
 foreach ($object->fields as $registrationCertificateCode => $registrationCertificateField) {
-    if ($registrationCertificateField['config'] == 1) {
+    if (isset($registrationCertificateField['config']) && $registrationCertificateField['config'] == 1) {
         print '<tr class="oddeven"><td>';
         print $langs->transnoentities('Display') . ' ' . $langs->transnoentities($registrationCertificateField['label']);
         print '</td><td class="center">';

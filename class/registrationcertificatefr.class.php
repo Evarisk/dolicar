@@ -285,7 +285,7 @@ class RegistrationCertificateFr extends SaturneObject
         parent::__construct($db, $this->module, $this->element);
 
         foreach ($this->fields as $key => $val) {
-            if ($val['config'] == 1) {
+            if (isset($val['config']) &&  $val['config'] == 1) {
                 $confName = 'DOLICAR_' . dol_strtoupper($key) . '_VISIBLE';
                 if (getDolGlobalInt($confName) == 0) {
                     $this->fields[$key]['visible'] = 0;

@@ -28,6 +28,9 @@
  * Objects    : $category, $product, $object
  */
 
+// Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+
 if (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') <= 0) {
     setEventMessages($langs->trans('ZeroApiRequestsRemaining'), [], 'errors');
     header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
