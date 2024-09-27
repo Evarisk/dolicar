@@ -434,6 +434,22 @@ class modDoliCar extends DolibarrModules
             'target'   => '',
             'user'     => 0
         ];
+
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('PublicInterface'),
+            'prefix'   => '<i class="fas fa-globe pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'public_interface',
+            'url'      => '/custom/dolicar/public/agenda/public_vehicle_logbook.php?entity=' . $conf->entity,
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled && $conf->global->SATURNE_ENABLE_PUBLIC_INTERFACE',
+            'perms'    => 1,
+            'target'   => '',
+            'user'     => 0
+        ];
     }
 
     /**
