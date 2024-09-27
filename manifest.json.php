@@ -77,8 +77,8 @@ global $conf;
 // Initialize technical objects
 $manifest = new stdClass();
 
-$manifest->short_name = 'DoliCar';
-$manifest->name       = 'DoliCar';
+$manifest->short_name = getDolGlobalString('MAIN_INFO_SOCIETE_NOM') . '-DoliCar';
+$manifest->name       = getDolGlobalString('MAIN_INFO_SOCIETE_NOM') . '-DoliCar';
 $manifest->icons      = [];
 
 $img               = new stdClass();
