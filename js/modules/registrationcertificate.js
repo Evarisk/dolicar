@@ -85,6 +85,9 @@ window.dolicar.registrationcertificate.event = function() {
  * @return {void}
  */
 window.dolicar.registrationcertificate.reloadFields = function() {
+  let form     = document.getElementById('registrationcertificatefr_form');
+  let formData = new FormData(form);
+
   let token          = window.saturne.toolbox.getToken();
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
   let productID      = $(this).val();
@@ -92,8 +95,18 @@ window.dolicar.registrationcertificate.reloadFields = function() {
   window.saturne.loader.display($('.field_fk_lot'));
   window.saturne.loader.display($('.field_d1_vehicle_brand'));
 
+  let actionPost = '';
+  if (!document.URL.match('action=')) {
+    let action     = formData.get('action');
+    if (action === 'add') {
+      actionPost = 'action=create';
+    } else if (action === 'update') {
+      actionPost = 'action=edit';
+    }
+  }
+
   $.ajax({
-    url: document.URL + querySeparator + '&fk_product=' + productID + '&token=' + token,
+    url: document.URL + querySeparator + actionPost + '&fk_product=' + productID + '&token=' + token,
     type: 'POST',
     processData: false,
     contentType: false,

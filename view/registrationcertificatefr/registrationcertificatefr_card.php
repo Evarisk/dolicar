@@ -173,7 +173,7 @@ if ($action == 'create') {
     print '<hr>';
     print '<br>';
 
-    print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="registrationcertificatefr_create">';
+    print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="registrationcertificatefr_form">';
     print '<input type="hidden" name="token" value="'.newToken().'">';
     print '<input type="hidden" name="action" value="add">';
     if ($backtopage) {
@@ -187,7 +187,7 @@ if ($action == 'create') {
 
     print '<table class="border centpercent tableforfieldcreate">';
 
-    $_POST['fk_product']                           = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
+    $object->fields['fk_product']['default']       = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
     $object->fields['d1_vehicle_brand']['default'] = get_vehicle_brand(GETPOSTINT('fk_product'));
 
     // Fk_lot
@@ -195,14 +195,14 @@ if ($action == 'create') {
     print $langs->trans('DolicarBatch');
     print '</td><td>';
     $productLotsData = [];
-    $productLots     = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . GETPOST('fk_product')]);
+    $productLots     = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . GETPOSTINT('fk_product')]);
     if (is_array($productLots) && !empty($productLots)) {
         foreach ($productLots as $productLotSingle) {
             $productLotsData[$productLotSingle->id] = $productLotSingle->batch;
         }
     }
-    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOST('fk_lot'), $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
-    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
+    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOSTINT('fk_lot'), $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
+    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . (GETPOSTISSET('fk_product') && GETPOST('fk_product') > 0 ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
     print '</td></tr>';
 
     // Common attributes
@@ -233,11 +233,10 @@ if ($action == 'create') {
 if (($id || $ref) && $action == 'edit') {
     print load_fiche_titre($langs->trans('Modify' . ucfirst($object->element)), '', 'object_' . $object->picto);
 
-    print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" id="registrationcertificatefr_edit">';
+    print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" id="registrationcertificatefr_form">';
     print '<input type="hidden" name="token" value="' . newToken() . '">';
     print '<input type="hidden" name="action" value="update">';
     print '<input type="hidden" name="id" value="' . $object->id . '">';
-    print '<input hidden class="car-brand" value="' . $brandName . '">';
     if ($backtopage) {
         print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
     }
