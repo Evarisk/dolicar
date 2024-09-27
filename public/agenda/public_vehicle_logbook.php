@@ -126,7 +126,7 @@ if (is_array($lastActionComm) && !empty($lastActionComm)) {
     $lastArrivalMileage = $lastActionComm[0]->array_options['options_arrival_mileage'];
 }
 $lastUnfinishedActionComm = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
-if (is_array($lastUnfinishedActionComm) && !empty($lastUnfinishedActionComm)) {
+if (!empty($lastUnfinishedActionComm) && is_array($lastUnfinishedActionComm)) {
     $lastUnfinishedActionCommJSON = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'], true);
     $lastArrivalMileage           = $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'];
     if ($publicInterfaceUseSignatory) {
@@ -134,7 +134,6 @@ if (is_array($lastUnfinishedActionComm) && !empty($lastUnfinishedActionComm)) {
     }
 }
 
-$user->fetch(getDolGlobalInt('DOLICAR_PUBLIC_INTERFACE_USER'));
 if ($isModEnabledDigiquali) {
     $controls = saturne_fetch_all_object_type('Control', 'DESC', 't.control_date', 1, 0, ['customsql' => 't.rowid = ee.fk_target AND t.status = ' . Control::STATUS_LOCKED], 'AND', false, true, false, ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ee.sourcetype = "productbatch" AND ee.fk_source = ' . $id . ' AND ee.targettype = "digiquali_control" AND ee.fk_target = t.rowid');
     if (is_array($controls) && !empty($controls)) {
@@ -166,7 +165,7 @@ if (empty($resHook)) {
 
         $encodedImage = explode(',', $data['img'])[1];
         $decodedImage = base64_decode($encodedImage);
-        $uploadDir    = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/' . $data['objectSubdir'] . '/';
+        $uploadDir    = $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/' . $data['objectSubdir'] . '/';
         if (!dol_is_dir($uploadDir)) {
             dol_mkdir($uploadDir);
         }
@@ -182,7 +181,7 @@ if (empty($resHook)) {
             $actionComm->datep       = dol_stringtotime(GETPOST('start_date_and_hour'));
             $actionComm->datef       = dol_stringtotime(GETPOST('end_date_and_hour'));
             $actionComm->fk_element  = $productLot->id;
-            $actionComm->userownerid = $user->id;
+            $actionComm->userownerid = 0;
             $actionComm->percentage  = -1;
 
             // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user
@@ -199,8 +198,8 @@ if (empty($resHook)) {
             $actionCommID = $actionComm->create($user);
 
             $pathToObjectImg         = $conf->agenda->multidir_output[$conf->entity] . '/' . $actionCommID;
-            $pathToTmpStartActionImg = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/start_action/';
-            $pathToTmpEndActionImg   = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/end_action/';
+            $pathToTmpStartActionImg = $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/start_action/';
+            $pathToTmpEndActionImg   = $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/end_action/';
             $startImgList            = dol_dir_list($pathToTmpStartActionImg, 'files');
             $endImgList              = dol_dir_list($pathToTmpEndActionImg, 'files');
             $imgList                 = array_merge($startImgList, $endImgList);
@@ -214,7 +213,7 @@ if (empty($resHook)) {
             $lastUnfinishedActionComm[0]->update($user);
 
             $pathToObjectImg       = $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id;
-            $pathToTmpEndActionImg = $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/end_action/';
+            $pathToTmpEndActionImg = $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/end_action/';
             $imgList               = dol_dir_list($pathToTmpEndActionImg, 'files');
         }
 
@@ -281,7 +280,7 @@ if ($backToPage) {
                     <div class="wpeo-gridlayout grid-4">
                         <div class="information-control-image">
                             <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
-                                echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 120, 120, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl, '', 0, 0);
+                                echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 120, 120, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl, 'photo', 0, 0);
                             endif; ?>
                         </div>
                         <div class="gridw-3">
@@ -308,16 +307,16 @@ if ($backToPage) {
                                 <?php echo '<br>' . $registrationCertificateFR->getNomUrl(1, 'nolink'); ?>
                             </div>
                         </div>
-                        <div class="objet-actions file-generation">
-                            <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
-                            <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $objectType . '_specimen_' . $trackID . '.odt'; ?>">
-                            <input type="hidden" class="specimen-path" data-specimen-path="<?php echo $path; ?>">
-                            <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
-                                <div class="wpeo-button button-square-40 button-rounded button-blue auto-download"><i class="fas fa-download"></i></div>
-                            <?php else : ?>
-                                <div class="wpeo-button button-square-40 button-rounded button-grey"><i class="fas fa-download"></i></div>
-                            <?php endif; ?>
-                        </div>
+<!--                        <div class="objet-actions file-generation">-->
+<!--                            --><?php //$path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
+<!--                            <input type="hidden" class="specimen-name" data-specimen-name="--><?php //echo $objectType . '_specimen_' . $trackID . '.odt'; ?><!--">-->
+<!--                            <input type="hidden" class="specimen-path" data-specimen-path="--><?php //echo $path; ?><!--">-->
+<!--                            --><?php //if (GETPOSTISSET('document_type') && $fileExists) : ?>
+<!--                                <div class="wpeo-button button-square-40 button-rounded button-blue auto-download"><i class="fas fa-download"></i></div>-->
+<!--                            --><?php //else : ?>
+<!--                                <div class="wpeo-button button-square-40 button-rounded button-grey"><i class="fas fa-download"></i></div>-->
+<!--                            --><?php //endif; ?>
+<!--                        </div>-->
                     </div>
                 </div>
             </div>
@@ -332,10 +331,10 @@ if ($backToPage) {
                 <div>
                     <label for="start_date_and_hour">
                         <?php echo $langs->transnoentities('StartDateAndHour'); ?>
-                        <input type="datetime-local" name="start_date_and_hour" id="start_date_and_hour" value="<?php echo dol_print_date($lastUnfinishedActionComm[0]->datep, '%Y-%m-%dT%H:%M:%S'); ?>" required <?php echo $lastUnfinishedActionComm[0]->datep ? 'disabled' : ''; ?>>
+                        <input type="datetime-local" name="start_date_and_hour" id="start_date_and_hour" value="<?php echo (isset($lastUnfinishedActionComm[0]->datep) ? dol_print_date($lastUnfinishedActionComm[0]->datep, '%Y-%m-%dT%H:%M:%S') : ''); ?>" required <?php echo isset($lastUnfinishedActionComm[0]->datep) && $lastUnfinishedActionComm[0]->datep ? 'disabled' : ''; ?>>
                     </label>
                     <label for="starting_mileage">
-                        <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->transnoentities('StartingMileage'); ?>" value="<?php echo $lastArrivalMileage ?? $lastUnfinishedActionComm[0]->array_options['options_starting_mileage']; ?>" required <?php echo $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ? 'disabled' : ''; ?>>
+                        <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->transnoentities('StartingMileage'); ?>" value="<?php echo $lastArrivalMileage ?? $lastUnfinishedActionComm[0]->array_options['options_starting_mileage']; ?>" required <?php echo isset($lastUnfinishedActionComm[0]->array_options['options_starting_mileage']) && $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ? 'disabled' : ''; ?>>
                     </label>
                     <label for="start_comment">
                         <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->transnoentities('StartComment'); ?>" <?php echo isset($lastUnfinishedActionCommJSON['start_comment']) ? 'disabled' : ''; ?>><?php echo $lastUnfinishedActionCommJSON['start_comment'] ?? ''; ?></textarea>
@@ -345,12 +344,12 @@ if ($backToPage) {
                             <div class="wpeo-button button-square-50">
                                 <label for="fast-upload-photo-start_action">
                                     <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-start_action" type="file" name="userfile[]" capture="environment" accept="image/*">
-                                    <input type="hidden" class="fast-upload-options" data-from-subtype="start_action" data-from-subdir="start_action" />
+                                    <input type="hidden" class="<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? 'fast-upload-options' : 'modal-options'; ?>" data-from-id="0" data-from-type="actioncomm" data-from-subtype="start_action" data-from-subdir="start_action" />
                                     <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
                                 </label>
                             </div>
                         <?php endif; ?>
-                        <?php print saturne_show_medias_linked(!isset($lastUnfinishedActionComm[0]) ? 'dolicar' : 'agenda', !isset($lastUnfinishedActionComm[0]) ? $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/start_action/' : $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id, 'small', '', 0, 0, 0, 50, 50, 0, 0, 1, !isset($lastUnfinishedActionComm[0]) ? '/action/tmp/start_action/' : '/' . $lastUnfinishedActionComm[0]->id, !isset($lastUnfinishedActionComm[0]) ? $actionComm : $lastUnfinishedActionComm[0], '', 0, isset($lastUnfinishedActionComm[0]) ? 0 : 1); ?>
+                        <?php print saturne_show_medias_linked(!isset($lastUnfinishedActionComm[0]) ? 'dolicar' : 'agenda', !isset($lastUnfinishedActionComm[0]->id) ? $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/start_action/' : $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id, 'small', '', 0, 0, 0, 50, 50, 0, 0, 1, !isset($lastUnfinishedActionComm[0]->id) ? '/actioncomm/tmp/start_action/' : '/' . $lastUnfinishedActionComm[0]->id, !isset($lastUnfinishedActionComm[0]) ? $actionComm : $lastUnfinishedActionComm[0], 'photo', 0, isset($lastUnfinishedActionComm[0]) ? 0 : 1); ?>
                     </div>
                     <?php if ($publicInterfaceUseSignatory) : ?>
                         <div class="public-card__content signature">
@@ -383,11 +382,11 @@ if ($backToPage) {
                         <div class="wpeo-button button-square-50">
                             <label for="fast-upload-photo-end_action">
                                 <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-end_action" type="file" name="userfile[]" capture="environment" accept="image/*">
-                                <input type="hidden" class="fast-upload-options" data-from-subtype="end_action" data-from-subdir="end_action" />
+                                <input type="hidden" class="<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? 'fast-upload-options' : 'modal-options'; ?>" data-from-id="0" data-from-type="actioncomm" data-from-subtype="end_action" data-from-subdir="end_action" />
                                 <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
                             </label>
                         </div>
-                        <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/action/tmp/end_action/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 1, '/action/tmp/end_action/', $actionComm, '', 0); ?>
+                        <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/end_action/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 1, '/actioncomm/tmp/end_action/', $actionComm, 'photo', 0); ?>
                     </div>
                     <?php if ($publicInterfaceUseSignatory && isset($lastUnfinishedActionComm[0])) : ?>
                         <div class="public-card__content signature">

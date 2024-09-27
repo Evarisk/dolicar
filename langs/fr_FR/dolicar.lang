@@ -37,31 +37,36 @@ Bicycle           = Vélo
 
 
 
-
 #
 # Config page - Page d'administration
 #
+
+# RegistrationCertificateFr - Carte grise
+RegistrationCertificateFieldsConfig     = Configuration des champs de la carte grise
+Display                                 = Afficher
+ShowRegistrationCertificateFieldHelp    = Afficher/cacher ce champ sur la carte grise
+HideObjectDetsDolicarDetails            = Cacher le détail de Dolicar des lignes d'objets
+HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
+
+# QuickCreation - Ajout rapide
+QuickCreation                       = Ajout rapide
+AutomaticContactCreation            = Création automatique de contact à la création du tiers
+AutomaticContactCreationDescription = Cette option permet de créer automatiquement un contact lors de la création d'un tiers
+ThirdPartyQuickCreation             = Création rapide de tiers
+ThirdPartyQuickCreationDescription  = Cette option permet de créer rapidement un tiers
+ContactQuickCreation                = Création rapide de contact
+ContactQuickCreationDescription     = Cette option permet de créer rapidement un contact
+ProjectQuickCreation                = Création rapide de projet
+ProjectQuickCreationDescription     = Cette option permet de créer rapidement un projet
 
 # Public interface - Interface publique
 OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
 MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
 MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
 
-# RegistrationCertificateFr - Carte grise
-ImmatriculationAPIConfig                = Configuration de l'API immatriculationapi.com
-RemainingRequests                       = Jetons de recherche de plaque d'immatriculation restants : %s
-RegistrationCertificateFieldsConfig     = Configuration des champs de la carte grise
-Display                                 = Afficher
-ShowRegistrationCertificateFieldHelp    = Afficher/Cacher ce champ sur la carte grise
-HideObjectDetsDolicarDetails            = Cacher le détail de Dolicar des lignes d'objets
-HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
-
-# QuickCreation - Ajout rapide
-QuickCreation            = Ajout rapide
-AutomaticContactCreation = Création automatique de contact à la création du tiers
-ThirdpartyQuickCreation  = Création rapide de tiers
-ContactQuickCreation     = Création rapide de contact
-ProjectQuickCreation     = Création rapide de projet
+# Setup - Réglages
+ImmatriculationAPIConfig = Configuration de l'API immatriculationapi.com
+RemainingRequests        = Jetons de recherche de plaque d'immatriculation restants : %s
 
 
 
@@ -130,17 +135,16 @@ LinkedProduct                 = Produit lié
 DolicarBatch                  = Numéro de châssis
 
 # Extrafields - Attributs supplémentaires
-VINNumber                       = Numéro VIN
-LinkedProductBatch              = Numéro de lot/série lié
-RegistrationCertificateMetadata = Données complémentaires de la carte grise
+VINNumber          = Numéro VIN
+LinkedProductBatch = Numéro de lot/série lié
 
 # API - API
 ZeroApiRequestsRemaining              = Vous n'avez plus de jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
-LessThanHundredApiRequestsRemaining   = Il vous reste moins de 100 jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
+LessThanHundredApiRequestsRemaining   = Il vous reste moins de 10 jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
 LicencePlateWasAlreadyExisting        = La plaque d'immatriculation existe déjà, vous avez été redirigé(e) sur sa page.
-BadAPIUsernameOrBadLicencePlateFormat = Mauvais nom d'utilisateur ou format de plaque d'immatriculation. <br> Vous pouvez configurer le nom d'utilisateur pour la connexion à l'API à l'adresse suivante : <a href="%s" target="_blank">Configuration du nom d'utilisateur API</a> <br> Veuillez utiliser l'un des formats suivants pour la plaque d'immatriculation : <br><b> XX-111-XX <br>  XX111XX </b>
+BadAPIUsernameOrBadLicencePlateFormat = Mauvais nom d'utilisateur ou format de plaque d'immatriculation. <br> Veuillez utiliser l'un des formats suivants pour la plaque d'immatriculation : <br><b> XX-111-XX <br>  XX111XX </b>
 LicencePlateInformationsCharged       = Les informations de la carte grise ont bien été récupérées
-BadAPIUsername                        = Nom d'utilisateur pour l'API invalide. Vous pouvez configurer le nom d'utilisateur pour la connexion à l'API à l'adresse suivante : <a href="%s" target="_blank">Configuration du nom d'utilisateur API</a>
+BadAPIUsername                        = Nom d'utilisateur pour l'API invalide
 
 # QuickCreation - Ajout rapide
 QuickRegistrationCertificateCreation = Ajout rapide de carte grise
@@ -177,12 +181,3 @@ ObjectType             = Type d'objet
 Object                 = Objet
 Mileage                = Kilométrage
 NoLinkedObjectsToPrint = Pas d'objets liés à afficher
-
-
-AgendaModuleRequired   = Pour assurer la traçabilité des actions dans DoliCar, assurez-vous que le module Agenda est bien activé
-HowToSetupOtherModules = Pour plus de fonctionnalités sur DoliCar, vous pouvez activer de nombreux modules (Gestion des fournisseurs, des factures, etc.) sur ce lien :
-ConfigMyModules        = Configuration des modules
-AvoidLogoProblems      = Pour éviter tout problème lié aux logos dans les documents générés, veuillez vous référer à ces conseils de paramétrages :
-LogoHelpLink           = https://wiki.dolibarr.org/index.php?title=Premiers_paramétrages
-HowToSetupIHM          = Pour plus de fonctionnalités sur l'affichage de Dolibarr (Configuration de l'image de fond du Dolibarr, etc), vous pouvez vous rendre sur ce lien :
-ConfigIHM              = Configuration de l'affichage

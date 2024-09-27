@@ -104,6 +104,42 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $actionComm->percentage  = -1;
 
         switch ($action) {
+            case 'PROPAL_CREATE' :
+            case 'ORDER_CREATE' :
+            case 'BILL_CREATE' :
+                if (GETPOSTISSET('options_registrationcertificatefr') && !empty(GETPOST('options_registrationcertificatefr'))) {
+                    require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+                    $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
+
+                    $registrationCertificateFr->add_object_linked($object->element, $object->id);
+                }
+                break;
+
+            case 'PROPAL_MODIFY' :
+            case 'ORDER_MODIFY' :
+            case 'BILL_MODIFY' :
+                if (GETPOSTISSET('options_registrationcertificatefr') && !empty(GETPOST('options_registrationcertificatefr'))) {
+                    require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+                    $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
+
+                    $object->updateObjectLinked(null, '', $registrationCertificateFr->id, $registrationCertificateFr->module . '_' . $registrationCertificateFr->element);
+                }
+                break;
+
+            case 'PROPAL_DELETE' :
+            case 'ORDER_DELETE' :
+            case 'BILL_DELETE' :
+                if (GETPOSTISSET('options_registrationcertificatefr') && !empty(GETPOST('options_registrationcertificatefr'))) {
+                    require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+                    $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
+
+                    $object->deleteObjectLinked(null, '', $registrationCertificateFr->id, $registrationCertificateFr->module . '_' . $registrationCertificateFr->element);
+                }
+                break;
+
             case 'REGISTRATIONCERTIFICATEFR_CREATE' :
                 $actionComm->code  = 'AC_' . strtoupper($object->element) . '_CREATE';
                 $actionComm->label = $langs->trans('ObjectCreateTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
@@ -119,6 +155,12 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
             case 'REGISTRATIONCERTIFICATEFR_DELETE' :
                 $actionComm->code  = 'AC_ ' . strtoupper($object->element) . '_DELETE';
                 $actionComm->label = $langs->trans('ObjectDeleteTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
+                $actionComm->create($user);
+                break;
+
+            case 'REGISTRATIONCERTIFICATEFR_ARCHIVE' :
+                $actionComm->code  = 'AC_' . strtoupper($object->element) . '_ARCHIVE';
+                $actionComm->label = $langs->transnoentities('ObjectArchivedTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
                 $actionComm->create($user);
                 break;
 

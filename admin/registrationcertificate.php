@@ -16,7 +16,7 @@
  */
 
 /**
- * \file    dolicar/admin/setup.php
+ * \file    dolicar/admin/registrationcertificate.php
  * \ingroup dolicar
  * \brief   DoliCar registration certificate config page
  */
@@ -36,7 +36,7 @@ require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
 require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
 
 // Global variables definitions
-global $conf, $db, $langs, $user;
+global $conf, $db, $moduleName, $moduleNameLowerCase, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs();
@@ -69,22 +69,7 @@ print load_fiche_titre($title, $linkBack, 'title_setup');
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'registrationcertificate', $title, -1, 'dolicar_color@dolicar');
 
-print load_fiche_titre($langs->transnoentities('ImmatriculationAPIConfig'), '', '');
-
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td>' . $langs->transnoentities('Parameters') . '</td>';
-print '<td class="center">' . $langs->transnoentities('Value') . '</td>';
-print '</tr>';
-
-print '<tr class="oddeven">';
-print '<td>' . $langs->transnoentities('RemainingRequests') . '</td>';
-print '<td class="center">';
-print '<b>' . (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') ?? 0) . '</b>';
-print '</td>';
-print '</tr>';
-
-print '</table>';
+require_once __DIR__ . '/../../saturne/core/tpl/admin/object/object_numbering_module_view.tpl.php';
 
 print load_fiche_titre($langs->transnoentities('RegistrationCertificateFieldsConfig'), '', '');
 
@@ -96,37 +81,16 @@ print '<td class="center">' . $langs->transnoentities('ShortInfo') . '</td>';
 print '</tr>';
 
 foreach ($object->fields as $registrationCertificateCode => $registrationCertificateField) {
-    if ($registrationCertificateField['config'] == 1) {
-        print '<tr class="oddeven"><td>' . $langs->transnoentities('Display') . ' ' . $langs->transnoentities($registrationCertificateField['label']) . '</td>';
-        print '<td class="center">';
+    if (isset($registrationCertificateField['config']) && $registrationCertificateField['config'] == 1) {
+        print '<tr class="oddeven"><td>';
+        print $langs->transnoentities('Display') . ' ' . $langs->transnoentities($registrationCertificateField['label']);
+        print '</td><td class="center">';
         print ajax_constantonoff('DOLICAR_' . dol_strtoupper($registrationCertificateCode) . '_VISIBLE');
-        print '</td>';
-        print '<td class="center">';
+        print '</td><td class="center">';
         print $form->textwithpicto('', $langs->transnoentities('ShowRegistrationCertificateFieldHelp'));
-        print '</td>';
-        print '</tr>';
+        print '</td></tr>';
     }
 }
-
-print '</table>';
-
-print load_fiche_titre($langs->trans('Config'), '', '');
-
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td>' . $langs->trans('Parameters') . '</td>';
-print '<td>' . $langs->trans('Description') . '</td>';
-print '<td class="center">' . $langs->trans('Status') . '</td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>' . $langs->trans('HideObjectDetsDolicarDetails') . '</td>';
-print '<td>';
-print  $langs->trans('HideObjectDetsDolicarDetailsDescription');
-print '</td>';
-print '<td class="center">';
-print ajax_constantonoff('DOLICAR_HIDE_OBJECT_DET_DOLICAR_DETAILS');
-print '</td>';
-print '</tr>';
 
 print '</table>';
 

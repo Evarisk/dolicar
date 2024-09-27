@@ -27,75 +27,38 @@
  * Variable : $fromProductLot
  */
 
-// Load Dolibarr libraries
-require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
-require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
-require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
-
 // Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 
+$out  = load_fiche_titre($langs->transnoentities('LinkedObjects'), '', 'dolicar_color@dolicar');
+$out .= '<table class="noborder centpercent">';
+$out .= '<tr class="liste_titre">';
+$out .= '<td>' . $langs->trans('ObjectType') . '</td>';
+$out .= '<td>' . $langs->trans('Object') . '</td>';
+$out .= '<td>' . $langs->trans('Mileage') . '</td>';
+$out .= '<td>' . $langs->trans('Date') . '</td>';
+$out .= '</tr>';
+
 $registrationCertificate = new RegistrationCertificateFr($db);
-$propal                  = new Propal($db);
-$commande                = new Commande($db);
-$facture                 = new Facture($db);
-
-$registrationCertificates = $registrationCertificate->fetchAll('', '',0,0, ['customsql' => ($fromProductLot ? 't.fk_lot = ' : 't.rowid = ') . GETPOST('id')]);
-if (is_array($registrationCertificates) && !empty($registrationCertificates)) {
-    foreach ($registrationCertificates as $registrationCertificate) {
-        $objectsLinkedList[$registrationCertificate->id] = $registrationCertificate->getLinkedObjects();
-    }
-
-    $out  = load_fiche_titre($langs->transnoentities('LinkedObjects'), '', 'dolicar_color@dolicar');
-    $out .= '<table class="noborder centpercent">';
-    $out .= '<tr class="liste_titre">';
-    $out .= '<td>' . $langs->trans('ObjectType') . '</td>';
-    $out .= '<td>' . $langs->trans('Object') . '</td>';
-    $out .= '<td>' . $langs->trans('Mileage') . '</td>';
-    $out .= '<td>' . $langs->trans('Date') . '</td>';
-    $out .= '</tr>';
-
-    function renderTableRows($object, $objectIDS, $langs, &$out, $key) {
-        foreach ($objectIDS as $objectID) {
-            $object->fetch($objectID);
-            $object->fetch_optionals();
+$registrationCertificate->fetch(!isset($fromProductLot) ? GETPOST('id') : '', !isset($fromProductLot) ? GETPOST('ref') : '', isset($fromProductLot) ? ' AND t.fk_lot = ' . GETPOST('id') : '');
+$registrationCertificate->fetchObjectLinked(null, '', $registrationCertificate->id, $registrationCertificate->module . '_' . $registrationCertificate->element);
+if (!empty($registrationCertificate->linkedObjects)) {
+    foreach ($registrationCertificate->linkedObjects as $linkedObjectElement => $linkedObjects) {
+        foreach ($linkedObjects as $linkedObject) {
             $out .= '<tr>';
-            $out .= '<td class="nowrap">'. $langs->transnoentities($key) .'</td>';
-            $out .= '<td>'. $object->getNomUrl(1) .'</td>';
-            $out .= '<td>'. $object->array_options['options_mileage'] .'</td>';
-            $out .= '<td>'. dol_print_date($object->date_creation, 'dayhour') .'</td>';
+            $out .= '<td class="nowrap">' . $langs->transnoentities(ucfirst($linkedObjectElement)) . '</td>';
+            $out .= '<td>' . $linkedObject->getNomUrl(1) . '</td>';
+            $out .= '<td>' . $linkedObject->array_options['options_mileage'] . '</td>';
+            $out .= '<td>' . dol_print_date($linkedObject->date_creation, 'dayhour') . '</td>';
             $out .= '</tr>';
         }
     }
-
-    if (!empty($objectsLinkedList)) {
-        foreach ($objectsLinkedList as $subList) {
-            if (!empty($subList)) {
-                foreach ($subList as $key => $objectIDS) {
-                    switch ($key) {
-                        case 'facture':
-                            renderTableRows($facture, $objectIDS, $langs, $out, $key);
-                            break;
-                        case 'propal':
-                            renderTableRows($propal, $objectIDS, $langs, $out, $key);
-                            break;
-                        case 'commande':
-                            renderTableRows($commande, $objectIDS, $langs, $out, $key);
-                            break;
-                    }
-                }
-            } else {
-                $out .= '<tr><td colspan="4">' . $langs->trans('NoLinkedObjectsToPrint') . '</td></tr>';
-            }
-        }
-    } else {
-        $out .= '<tr><td colspan="4">' . $langs->trans('NoLinkedObjectsToPrint') . '</td></tr>';
-    }
-    $out .= '</table>';
-    ?>
-
-    <script>
-        jQuery('.fichecenter').append(<?php echo json_encode($out); ?>);
-    </script>
-    <?php
+} else {
+    $out .= '<tr><td colspan="4">' . $langs->trans('NoLinkedObjectsToPrint') . '</td></tr>';
 }
+
+$out .= '</table>'; ?>
+
+<script>
+    jQuery('.fichecenter').first().append(<?php echo json_encode($out); ?>);
+</script>
