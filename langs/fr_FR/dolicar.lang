@@ -1,4 +1,4 @@
-# Copyright (C) 2022 SuperAdmin <test@test.fr>
+# Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,198 +14,170 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #
-# Generic
+# DoliCar
 #
 
-# Module label 'ModuleDoliCarName'
-ModuleDoliCarName = DoliCar
-# Module description 'ModuleDoliCarDesc'
-ModuleDoliCarDesc = Gestion et réparations d'un parc automobile
+ModuleDoliCarName  = DoliCar
+ModuleDoliCarDesc  = Gestion et réparations d'un parc automobile
 DoliCarDescription = Gestion et réparations d'un parc automobile
 
-#
-# Admin page
-#
-DoliCarSetup = DoliCar setup
-Settings = Settings
-DoliCarSetupPage = DoliCar setup page
-DolicarConfig = Configuration du module
-EnableDolicar = Veuillez activer le module DoliCar pour accéder cette page
+# Init - Initialisation
+DefaultBrand     = Marque par défaut
+DoliCarWarehouse = Entrepôt de DoliCar
+ClientVehicle    = Véhicule client
+DefaultVehicle   = Véhicule par défaut
+
+# Tags - Catégories
+Vehicle           = Véhicule
+Brands            = Marques
+Truck             = Poids lourd
+CommercialVehicle = Utilitaire
+Car               = Voiture
+Bicycle           = Vélo
+
+
 
 #
-# About page
+# Config page - Page d'administration
 #
-About = About
-DoliCarAbout = About DoliCar
-DoliCarAboutPage = DoliCar about page
 
-#
-# Sample page
-#
-MyPageName = My page name
+# RegistrationCertificateFr - Carte grise
+RegistrationCertificateFieldsConfig     = Configuration des champs de la carte grise
+Display                                 = Afficher
+ShowRegistrationCertificateFieldHelp    = Afficher/cacher ce champ sur la carte grise
+HideObjectDetsDolicarDetails            = Cacher le détail de Dolicar des lignes d'objets
+HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
 
-#
-# Sample widget
-#
-MyWidget = My widget
-MyWidgetDescription = My widget description
+# QuickCreation - Ajout rapide
+QuickCreation                       = Ajout rapide
+AutomaticContactCreation            = Création automatique de contact à la création du tiers
+AutomaticContactCreationDescription = Cette option permet de créer automatiquement un contact lors de la création d'un tiers
+ThirdPartyQuickCreation             = Création rapide de tiers
+ThirdPartyQuickCreationDescription  = Cette option permet de créer rapidement un tiers
+ContactQuickCreation                = Création rapide de contact
+ContactQuickCreationDescription     = Cette option permet de créer rapidement un contact
+ProjectQuickCreation                = Création rapide de projet
+ProjectQuickCreationDescription     = Cette option permet de créer rapidement un projet
+
+# Public interface - Interface publique
+OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
+MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
+MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
+
+# Setup - Réglages
+ImmatriculationAPIConfig = Configuration de l'API immatriculationapi.com
+RemainingRequests        = Jetons de recherche de plaque d'immatriculation restants : %s
+
 
 
 #
 # RegistrationCertificateFr - Carte grise
 #
 
-# Right - Droit
-ReadRegistrationCertificateFr = Consulter la carte grise
-CreateRegistrationCertificateFr = Créer/Modifier la carte grise
-DeleteRegistrationCertificateFr = Supprimer la carte grise
-
-# Trigger - Déclencheur
-
-# Mod Numbering - Modèle de numérotation
-DigiriskListingRisksPhotoDocumentNumberingModule = Modèle de numérotation des listing des risques avec photos de Digirisk
-DigiriskListingRisksPhotoStandardModel = Renvoie le numéro sous la forme RLPn où n est un compteur séquentiel sans rupture et sans remise à 0.
-
-
 # Data - Donnée
-RegistrationCertificateFr = Carte grise
-Registrationcertificatefr = Carte grise
-RegistrationCertificate = Carte grise
-NewRegistrationCertificateFr = Nouvelle carte grise
-ModifyRegistrationCertificateFr = Modifier la carte grise
-ListRegistrationCertificateFr = Liste des cartes grises
-RegistrationNumber = Numéro d'immatriculation (A)
-FirstRegistrationDate = Date de la première immatriculation (B)
-OwnerFullName = Nom et prénom du propriétaire (C.1)
-RegistrationAddress = Adresse du propriétaire (C.3)
-VehicleOwner = Propriétaire du véhicule ? (C.4a)
-SecondOwnerNumber = Nombre de propriétaires (C.4.1)
-SecondOwnerName = Nom du second propriétaire (C.4.1)
-VehicleBrand = Marque du véhicule (D.1)
-VehicleType = Type, variante, version du véhicule (D.2)
-VehicleCNIT = Code National d’Identification du Type du véhicule (D.2.1)
-VehicleModel = Modèle du véhicule (D.3)
-VehicleSerialNumber = Numéro de série du véhicule (E)
-TechnicalPTAC = Masse en charge maximale techniquement admissible (en kg) (F.1)
-PTAC = Masse en charge maximale (en kg) (F.2)
-PTRA = Masse en charge maximale de l'ensemble (en kg) (F.3)
-VehicleWeight = Masse du véhicule (en kg) (G)
-VehicleEmptyWeight = Poids à vide (en kg) (G.1)
-ValidityPeriod = Période de validité (H)
-VehicleRegistrationDate = Date de d'immatriculation de la carte grise (I)
-VehicleCategory = Catégorie du véhicule (J)
-NationalType = Genre national (J.1)
-EuropeanBodyWork = Carrosserie - norme européenne (J.2)
-NationalBodyWork = Carrosserie - norme nationnale (J.3)
-TypeApprovalNumber = Numéro de réception par type (K)
-CylinderCapacity = Cylindrée (en cm3) (P.1)
-MaximumNetPower = Puissance nette maximale (en kW) (P.2)
-FuelType = Type de carburant ou source d'énergie (P.3)
-NationalAdministrativePower = Puissance administrative nationale ou «Chevaux fiscaux» (P.6)
-PowerToWeightRatio = Rapport puissance/masse (en kW/kg) (Q)
-SeatingCapacity = Nombre de places assises (S.1)
-StandingCapacity = Nombre de places debout autorisé (S.2)
-StationaryNoiseLevel = Niveau sonore à l’arrêt (en dB) (U.1)
-MotorSpeed = Vitesse de rotation du moteur (en min-1) (U.2)
-CO2Emission = Rejet de CO2 (en g/km) (V.7)
-EnvironmentalCategory = Classe environnementale (V.9)
-FirstTechnicalInspectionDate = Date du premier contrôle technique (X.1)
-RegionalTax = Taxe régionale (Y.1)
-ProfessionalTax = Taxe professionnelle (Y.2)
-EcologicalTax = Taxe écologique (Y.3)
-ManagementTax = Taxe de gestion (Y.4)
-ForwardingExpensesTax = Taxe de frais d'acheminement (Y.5)
+RegistrationCertificateFr       = Carte grise
+Registrationcertificatefr       = Carte grise
+RegistrationCertificatesFrMin   = cartes grises
+TheRegistrationcertificatefr    = la carte grise
+ListRegistrationcertificatefr   = Liste des cartes grises
+NewRegistrationcertificatefr    = Nouvelle carte grise
+ModifyRegistrationcertificatefr = Modifier la carte grise
+FindLicencePlateInRepertory     = Rechercher une plaque d'immatriculation
+
+# Fiels - Champs
+RegistrationNumber            = Numéro d'immatriculation (A)
+FirstRegistrationDate         = Date de la première immatriculation (B)
+OwnerFullName                 = Nom et prénom du propriétaire (C.1)
+RegistrationAddress           = Adresse du propriétaire (C.3)
+VehicleOwner                  = Propriétaire du véhicule ? (C.4a)
+SecondOwnerNumber             = Nombre de propriétaires (C.4.1)
+SecondOwnerName               = Nom du second propriétaire (C.4.1)
+VehicleBrand                  = Marque du véhicule (D.1)
+VehicleType                   = Type, variante, version du véhicule (D.2)
+VehicleCNIT                   = Code National d’Identification du Type du véhicule (D.2.1)
+VehicleModel                  = Modèle du véhicule (D.3)
+VehicleSerialNumber           = Numéro de série du véhicule (E)
+TechnicalPTAC                 = Masse en charge maximale techniquement admissible (en kg) (F.1)
+PTAC                          = Masse en charge maximale (en kg) (F.2)
+PTRA                          = Masse en charge maximale de l'ensemble (en kg) (F.3)
+VehicleWeight                 = Masse du véhicule (en kg) (G)
+VehicleEmptyWeight            = Poids à vide (en kg) (G.1)
+ValidityPeriod                = Période de validité (H)
+VehicleRegistrationDate       = Date de d'immatriculation de la carte grise (I)
+VehicleCategory               = Catégorie du véhicule (J)
+NationalType                  = Genre national (J.1)
+EuropeanBodyWork              = Carrosserie - norme européenne (J.2)
+NationalBodyWork              = Carrosserie - norme nationnale (J.3)
+TypeApprovalNumber            = Numéro de réception par type (K)
+CylinderCapacity              = Cylindrée (en cm3) (P.1)
+MaximumNetPower               = Puissance nette maximale (en kW) (P.2)
+FuelType                      = Type de carburant ou source d'énergie (P.3)
+NationalAdministrativePower   = Puissance administrative nationale ou «Chevaux fiscaux» (P.6)
+PowerToWeightRatio            = Rapport puissance/masse (en kW/kg) (Q)
+SeatingCapacity               = Nombre de places assises (S.1)
+StandingCapacity              = Nombre de places debout autorisé (S.2)
+StationaryNoiseLevel          = Niveau sonore à l’arrêt (en dB) (U.1)
+MotorSpeed                    = Vitesse de rotation du moteur (en min-1) (U.2)
+CO2Emission                   = Rejet de CO2 (en g/km) (V.7)
+EnvironmentalCategory         = Classe environnementale (V.9)
+FirstTechnicalInspectionDate  = Date du premier contrôle technique (X.1)
+RegionalTax                   = Taxe régionale (Y.1)
+ProfessionalTax               = Taxe professionnelle (Y.2)
+EcologicalTax                 = Taxe écologique (Y.3)
+ManagementTax                 = Taxe de gestion (Y.4)
+ForwardingExpensesTax         = Taxe de frais d'acheminement (Y.5)
 TotalPriceVehicleRegistration = Prix total de la carte grise (Y.6)
-SpecificDetails1 = Mentions spécifiques 1 (Z.1)
-SpecificDetails2 = Mentions spécifiques 2 (Z.2)
-SpecificDetails3 = Mentions spécifiques 3 (Z.3)
-SpecificDetails4 = Mentions spécifiques 4 (Z.4)
-RegistrationCertificateFrs = Cartes grises
-ObjectsLinked = Objets liés
-ObjectType = Type d'objet
-Object = Objet
-DefaultBrand = Marque par défaut
-RegistrationCertificateShowFields = Cacher les champs de la carte grise
-RegistrationCertificateShowFieldsDescription = Cette option permet de cacher/afficher une partie des champs de la carte grise
-HideObjectDetsDolicarDetails = Cacher le détail de Dolicar des lignes d'objets
-HideObjectDetsDolicarDetailsDescription = Cette option permet de cacher/afficher le kilométrage, la plaque d'immatriculation et le modèle de véhicule sur les lignes des factures/propales/commandes
-LinkedProduct = Produit lié
+SpecificDetails1              = Mentions spécifiques 1 (Z.1)
+SpecificDetails2              = Mentions spécifiques 2 (Z.2)
+SpecificDetails3              = Mentions spécifiques 3 (Z.3)
+SpecificDetails4              = Mentions spécifiques 4 (Z.4)
+LinkedProduct                 = Produit lié
+DolicarBatch                  = Numéro de châssis
+
+# Extrafields - Attributs supplémentaires
+VINNumber          = Numéro VIN
 LinkedProductBatch = Numéro de lot/série lié
-RegistrationCertificateMetadata = Données complémentaires de la carte grise
-RegistrationCertificatesFrMin = cartes grises
-TheRegistrationcertificatefr = la carte grise
-FindLicencePlateInRepertory = Rechercher une plaque d'immatriculation
-RegistrationCertificateFields = Champs de la carte grise
-RegistrationCertificateFieldsConfig = Configuration des champs de la carte grise
-ImmatriculationAPIConfig = Configuration de l'API immatriculationapi.com
-APIUsername = Nom de l'utilisateur API
-BadLicencePlateFormat = La plaque d'immatriculation n'est pas au bon format. Veuillez utiliser l'un des formats suivants : <br><b> XX-111-XX <br>  XX111XX </b>
-BadAPIUsername = Nom d'utilisateur pour l'API invalide. Vous pouvez configurer le nom d'utilisateur pour la connexion à l'API à l'adresse suivante : <a href="%s" target="_blank">Configuration du nom d'utilisateur API</a>
-BadAPIUsernameOrBadLicencePlateFormat = Mauvais nom d'utilisateur ou format de plaque d'immatriculation. <br> Vous pouvez configurer le nom d'utilisateur pour la connexion à l'API à l'adresse suivante : <a href="%s" target="_blank">Configuration du nom d'utilisateur API</a> <br> Veuillez utiliser l'un des formats suivants pour la plaque d'immatriculation : <br><b> XX-111-XX <br>  XX111XX </b>
-LicencePlateInformationsCharged = Les informations de la carte grise ont bien été récupérées
-QuickCreation = Ajout rapide
-QuickThirdPartyCreation  = Ajout rapide de tiers
-QuickThirdPartyCreations = ajouts rapides de tiers
-QuickProjectCreation     = Ajout rapide d'opportunité ou de projet
-QuickProjectCreations    = ajouts rapides d'opportunité ou de projet
-QuickContactCreation     = Ajout rapide de contact/adresse
-QuickContactCreations    = ajouts rapide de contact/adresse
-QuickTaskCreations       = ajouts rapides de tâche
-QuickEventCreations      = ajouts rapides d'événements
+
+# API - API
+ZeroApiRequestsRemaining              = Vous n'avez plus de jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
+LessThanHundredApiRequestsRemaining   = Il vous reste moins de 10 jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
+LicencePlateWasAlreadyExisting        = La plaque d'immatriculation existe déjà, vous avez été redirigé(e) sur sa page.
+BadAPIUsernameOrBadLicencePlateFormat = Mauvais nom d'utilisateur ou format de plaque d'immatriculation. <br> Veuillez utiliser l'un des formats suivants pour la plaque d'immatriculation : <br><b> XX-111-XX <br>  XX111XX </b>
+LicencePlateInformationsCharged       = Les informations de la carte grise ont bien été récupérées
+BadAPIUsername                        = Nom d'utilisateur pour l'API invalide
+
+# QuickCreation - Ajout rapide
 QuickRegistrationCertificateCreation = Ajout rapide de carte grise
-LicencePlate = Plaque d'immatriculation
-ShowRegistrationCertificateFieldHelp = Afficher/Cacher ce champ sur la page de création de la carte grise
-LicencePlateWasAlreadyExisting = La plaque d'immatriculation existe déjà, vous avez été redirigé(e) sur sa page.
-VINNumber = Numéro VIN
-AddRegistrationCertificate = Créer carte grise
-LinkDolicar_regcertfr = Activer le lien avec les cartes grises
-LinkDolicar_regcertfrDescription = Permet la liaison entre les cartes grises et les modèles de contrôle
-ZeroApiRequestsRemaining = Vous n'avez plus de jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
-LessThanHundredApiRequestsRemaining = Il vous reste moins de 100 jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
-RemainingRequests = Jetons de recherche de plaque d'immatriculation restants : %s
+LicencePlate                         = Plaque d'immatriculation
+
+# DigiQuali
+LinkDolicar_regcertfr            = Activer le lien avec les cartes grises
+LinkDolicar_regcertfrDescription = Permet la liaison entre les cartes grises et les modèles
+
+
+
+# Public interface - Interface publique
+PublicVehicleLogBook          = Carnet de bord publique du véhicule
+Driver                        = Conducteur
+StartDateAndHour              = Date et heure de départ
+StartingMileage               = Kilométrage de départ
+StartComment                  = Commentaire de départ
+EndDateAndHour                = Date et heure de retour
+ArrivalMileage                = Kilométrage d'arrivé
+EndComment                    = Commentaire d'arrivé
+ObjectAddPublicVehicleLogBook = Suivi Km : %s - VIN : %s
+SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
+LicencePlateNotFoundInDB      = La plaque d'immatriculation est introuvable dans la base de données des cartes grises
+
+
 
 #
 # Other
 #
 
 # Data - Donnée
-Settings = Réglages
-Brands = Marques
-DefaultBrand = Marque par défaut
-Vehicle = Véhicule
-Mileage = Kilométrage
-ProductLotMileageModifyTrigger = Modification du kilométrage
-Car = Voiture
-Truck = Poids lourd
-Bicycle = Vélo
-CommercialVehicle = Utilitaire
-DolicarBatch = Numéro de châssis
-DolicarWarehouse = Entrepôt de DoliCar
-ClientVehicle = Véhicule client
-DefaultVehicle = Véhicule par défaut
-facture = Facture
-commande = Commande
-propal = Proposition commerciale
-Propale = Proposition commerciale
-ThirdParty = Tiers
-Invoice = Facture
-Order = Commande
-Product = Produit
-Display = Afficher
-ProductBatch = Numéro de lot/série
-AgendaModuleRequired = Pour assurer la traçabilité des actions dans Dolicar, assurez-vous que le module Agenda est bien activé
-HowToSetupOtherModules = Pour plus de fonctionnalités sur Dolicar, vous pouvez activer de nombreux modules (Gestion des fournisseurs, des factures, etc.) sur ce lien :
-ConfigMyModules = Configuration des modules
-AvoidLogoProblems = Pour éviter tout problème lié aux logos dans les documents générés, veuillez vous référer à ces conseils de paramétrages :
-LogoHelpLink = https://wiki.dolibarr.org/index.php?title=Premiers_paramétrages
-HowToSetupIHM =  Pour plus de fonctionnalités sur l'affichage de Dolibarr (Configuration de l'image de fond du Dolibarr, etc), vous pouvez vous rendre sur ce lien :
-ConfigIHM = Configuration de l'affichage
-DolicarSetup = Réglages de Dolicar
-Settings = Réglages
-LinkedObjects = Objets liés
+LinkedObjects          = Objets liés
+ObjectType             = Type d'objet
+Object                 = Objet
+Mileage                = Kilométrage
 NoLinkedObjectsToPrint = Pas d'objets liés à afficher
-QuickCreationConfiguration = Configuration de l'ajout rapide
-AutomaticContactCreation = Création automatique de contact à la création du tiers
-ThirdpartyQuickCreation = Création rapide de tiers
-ContactQuickCreation = Création rapide de contact
-ProjectQuickCreation = Création rapide de projet

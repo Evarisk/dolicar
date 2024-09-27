@@ -1,107 +1,156 @@
+/* Copyright (C) 2024 EVARISK <technique@evarisk.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Library javascript to enable Browser notifications
+ */
+
 /**
- * Initialise l'objet "registrationcertificate" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ * \file    js/modules/registrationcertificate.js
+ * \ingroup dolicar
+ * \brief   JavaScript Registration Certificate file for module DoliCar
+ */
+
+'use strict';
+
+/**
+ * Init registrationcertificate JS
+ *
+ * @memberof DoliCar_RegistrationCertificate
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.2.0
+ *
+ * @type {Object}
  */
 window.dolicar.registrationcertificate = {};
 
 /**
- * La méthode appelée automatiquement par la bibliothèque EoxiaJS.
+ * RegistrationCertificate init
+ *
+ * @memberof DoliCar_RegistrationCertificate
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.2.0
  *
  * @return {void}
  */
 window.dolicar.registrationcertificate.init = function() {
-	window.dolicar.registrationcertificate.event();
+  window.dolicar.registrationcertificate.event();
 };
 
 /**
- * La méthode contenant tous les événements pour le migration.
+ * RegistrationCertificate event
  *
  * @since   1.0.0
- * @version 9.0.0
+ * @version 1.2.0
  *
  * @return {void}
  */
 window.dolicar.registrationcertificate.event = function() {
-	$( document ).on( 'change', '#fk_product', window.dolicar.registrationcertificate.actualizeBrand );
-	$( document ).on( 'change', '#fk_product', window.dolicar.registrationcertificate.actualizeProductlot );
-	$( document ).ready(() => {
-		$(document).find('.field_fk_soc .butActionNew').attr('target', '_blank')
-		$(document).find('.field_fk_project .butActionNew').attr('target', '_blank')
-	})
+  $(document).on('change', '#fk_product', window.dolicar.registrationcertificate.reloadFields);
+  $('#public-vehicle-log-book-form').on('submit', function(event) {
+    event.preventDefault();
+    if (!$(this).find('.public-vehicle-log-book-validate').hasClass('button-disable')) {
+      window.dolicar.registrationcertificate.createPublicVehicleLogBook();
+    }
+  });
 
-}
+  $(document).on('touchstart mousedown', '.canvas-signature', function () {
+    window.saturne.toolbox.removeAddButtonClass('public-vehicle-log-book-validate', 'button-grey button-disable', 'button-blue');
+  });
 
-
-/**
- * Actualize brand input
- *
- * @since   0.0.2
- * @version 0.0.2
- *
- * @return {void}
- */
-window.dolicar.registrationcertificate.actualizeBrand = function( event ) {
-
-	let token = $('input[name="token"]').val();
-
-	var form = document.getElementById('registrationcertificatefr_create')? document.getElementById('registrationcertificatefr_create') : document.getElementById('registrationcertificatefr_edit')
-	var formData = new FormData(form);
-	let productId = formData.get('fk_product');
-	let querySeparator =  window.saturne.toolbox.getQuerySeparator(document.URL)
-
-	$.ajax({
-		url: document.URL + querySeparator + 'subaction=getProductBrand&token='+token,
-		data: JSON.stringify({
-			productId: productId,
-		}),
-		type: "POST",
-		processData: false,
-		contentType: false,
-		success: function ( resp ) {
-			$('#d1_vehicle_brand').attr('value', $(resp).find('.car-brand').val())
-			$('#d1_vehicle_brand').prop("readonly", true)
-		},
-	});
+  $(document).on('click', '.signature-erase', function () {
+    window.saturne.toolbox.removeAddButtonClass('public-vehicle-log-book-validate', 'button-blue', 'button-grey button-disable');
+  });
 };
 
 /**
- * Actualize productlot selector
+ * Reload product lot selector and vehicle brand
  *
  * @since   0.0.2
- * @version 0.0.2
+ * @version 1.2.0
  *
  * @return {void}
  */
-window.dolicar.registrationcertificate.actualizeProductlot = function( event ) {
+window.dolicar.registrationcertificate.reloadFields = function() {
+  let form     = document.getElementById('registrationcertificatefr_form');
+  let formData = new FormData(form);
 
-	let token = $('input[name="token"]').val();
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  let productID      = $(this).val();
 
-	var form = document.getElementById('registrationcertificatefr_create')? document.getElementById('registrationcertificatefr_create') : document.getElementById('registrationcertificatefr_edit')
-	var formData = new FormData(form);
-	let productId = formData.get('fk_product');
-	let action = formData.get('action');
+  window.saturne.loader.display($('.field_fk_lot'));
+  window.saturne.loader.display($('.field_d1_vehicle_brand'));
 
-	if (action == 'update') {
-		action = 'edit';
-	}
+  let actionPost = '';
+  if (!document.URL.match('action=')) {
+    let action     = formData.get('action');
+    if (action === 'add') {
+      actionPost = 'action=create';
+    } else if (action === 'update') {
+      actionPost = 'action=edit';
+    }
+  }
 
-	let querySeparator =  window.saturne.toolbox.getQuerySeparator(document.URL)
+  $.ajax({
+    url: document.URL + querySeparator + actionPost + '&fk_product=' + productID + '&token=' + token,
+    type: 'POST',
+    processData: false,
+    contentType: false,
+    success: function (resp) {
+      $('.field_fk_lot').replaceWith($(resp).find('.field_fk_lot'));
+      $('.field_d1_vehicle_brand').replaceWith($(resp).find('.field_d1_vehicle_brand'));
+    },
+    error: function() {}
+  });
+};
 
-	window.saturne.loader.display($('.lot-content')); 
+/**
+ * Create public vehicle log book entry
+ *
+ * @memberof DoliCar_RegistrationCertificate
+ *
+ * @since   1.2.0
+ * @version 1.2.0
+ *
+ * @return {void}
+ */
+window.dolicar.registrationcertificate.createPublicVehicleLogBook = function() {
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
-	$.ajax({
-		url: document.URL + querySeparator + 'action=' + action + '&fk_product=' + productId + '&token='+token,
-		type: "POST",
-		processData: false,
-		contentType: false,
-		success: function ( resp ) {
-			$('.lot-container').html($(resp).find('.lot-content'))
-			$('.wpeo-loader').removeClass('wpeo-loader');
-		},
-	});
+  const formData = new FormData($('#public-vehicle-log-book-form')[0]);
+  if (window.saturne.signature.canvas) {
+    const signature = window.saturne.signature.canvas.toDataURL();
+    formData.append('signature', JSON.stringify(signature));
+  }
+
+  $.ajax({
+    url: document.URL + querySeparator + 'action=add&token=' + token,
+    type: 'POST',
+    processData: false,
+    contentType: false,
+    data: formData,
+    success: function() {
+      $('.public-vehicle-log-book-confirmation-close').closest('.card__confirmation').css('display', 'flex');
+      $('.public-vehicle-log-book-confirmation-close').on('click', function() {
+        $('.public-vehicle-log-book-confirmation-close').closest('.card__confirmation').css('display', 'none');
+        window.location.reload();
+      });
+    },
+    error: function() {}
+  });
 };

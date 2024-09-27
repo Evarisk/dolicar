@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,18 @@
  */
 
 /**
- *	\file       dolicarindex.php
- *	\ingroup    dolicar
- *	\brief      Home page of dolicar top menu
+ * \file    dolicarindex.php
+ * \ingroup dolicar
+ * \brief   Home page of dolicar top menu
  */
 
-// Load DoliMeet environment
+// Load DoliCar environment
 if (file_exists('dolicar.main.inc.php')) {
-	require_once __DIR__ . '/dolicar.main.inc.php';
+    require_once __DIR__ . '/dolicar.main.inc.php';
 } elseif (file_exists('../dolicar.main.inc.php')) {
-	require_once __DIR__ . '/../dolicar.main.inc.php';
+    require_once __DIR__ . '/../dolicar.main.inc.php';
 } else {
-	die('Include of dolicar main fails');
+    die('Include of dolicar main fails');
 }
 
 $showDashboard = false;

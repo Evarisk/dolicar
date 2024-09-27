@@ -1,6 +1,5 @@
 <?php
-/* Copyright (C) 2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) ---Put here your own copyright and developer email---
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,103 +16,64 @@
  */
 
 /**
- *   	\file       registrationcertificatefr_card.php
- *		\ingroup    dolicar
- *		\brief      Page to create/edit/view registrationcertificatefr
+ * \file    registrationcertificatefr_linkedobjects.php
+ * \ingroup dolicar
+ * \brief   Page to view registrationcertificatefr linked objects
  */
 
 // Load DoliCar environment
 if (file_exists('../dolicar.main.inc.php')) {
-	require_once __DIR__ . '/../dolicar.main.inc.php';
+    require_once __DIR__ . '/../dolicar.main.inc.php';
 } elseif (file_exists('../../dolicar.main.inc.php')) {
-	require_once __DIR__ . '/../../dolicar.main.inc.php';
+    require_once __DIR__ . '/../../dolicar.main.inc.php';
 } else {
-	die('Include of dolicar main fails');
+    die('Include of dolicar main fails');
 }
 
-require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-
-require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+// Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
+require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 
-global $conf, $langs, $user, $db, $hookmanager;
+// Global variables definitions
+global $db, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs(['other']);
+saturne_load_langs();
 
 // Get parameters
-$id                  = GETPOST('id', 'int');
-$ref                 = GETPOST('ref', 'alpha');
-$action              = GETPOST('action', 'aZ09');
-$subaction           = GETPOST('subaction', 'aZ09');
-$confirm             = GETPOST('confirm', 'alpha');
-$cancel              = GETPOST('cancel', 'aZ09');
-$contextpage         = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'registrationcertificatefrcard'; // To manage different context of search
-$backtopage          = GETPOST('backtopage', 'alpha');
-$backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
-$lineid              = GETPOST('lineid', 'int');
+$id  = GETPOST('id', 'int');
+$ref = GETPOST('ref', 'alpha');
 
 // Initialize technical objects
-$object      = new RegistrationCertificateFr($db);
-$product     = new Product($db);
-$productLot  = new Productlot($db);
-$category    = new Categorie($db);
-$extrafields = new ExtraFields($db);
-
-$diroutputmassaction = $conf->dolicar->dir_output.'/temp/massgeneration/'.$user->id;
-$hookmanager->initHooks(array('registrationcertificatefrcard', 'globalcard')); // Note that conf->hooks_modules contains array
-
-// Fetch optionals attributes and labels
-$extrafields->fetch_name_optionals_label($object->table_element);
-
-$search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
-
-// Initialize array of search criterias
-$search_all = GETPOST("search_all", 'alpha');
-$search = array();
-foreach ($object->fields as $key => $val) {
-	if (GETPOST('search_'.$key, 'alpha')) {
-		$search[$key] = GETPOST('search_'.$key, 'alpha');
-	}
-}
-
-if (empty($action) && empty($id) && empty($ref)) {
-	$action = 'view';
-}
+$object = new RegistrationCertificateFr($db);
 
 // Load object
-include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once.
-
-$permissiontoread   = $user->rights->dolicar->registrationcertificatefr->read;
-$permissiontoadd    = $user->rights->dolicar->registrationcertificatefr->write;
-$permissiontodelete = $user->rights->dolicar->registrationcertificatefr->delete;
+require_once DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once
 
 // Security check - Protection if external user
-saturne_check_access($permissiontoread);
-
-$upload_dir = $conf->dolicar->multidir_output[isset($object->entity) ? $object->entity : 1].'/registrationcertificatefr';
-
-/*
- * Actions
- */
+$permissionToRead = $user->rights->dolicar->registrationcertificatefr->read;
+saturne_check_access($permissionToRead);
 
 /*
  * View
- *
- * Put here all code to build page
  */
 
-$title = $langs->trans("RegistrationCertificateFrLinkedObjects");
-$help_url = '';
-saturne_header( 0, '', $help_url);
+$title   = $langs->trans('LinkedObjects') . ' - ' . $langs->trans(ucfirst($object->element));
+$helpUrl = 'FR:Module_DoliCar';
 
-$res = $object->fetch_optionals();
+saturne_header( 0, '', $title, $helpUrl);
 
-print saturne_get_fiche_head($object, 'linkedobjects', $langs->trans("RegistrationCertificateFr"));
+if ($id > 0 || !empty($ref)) {
+    saturne_get_fiche_head($object, 'linkedobjects', $title);
+    saturne_banner_tab($object);
 
-saturne_banner_tab($object);
+    print '<div class="fichecenter">';
+    require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
+    print '</div>';
 
-require_once __DIR__ . '/../../core/tpl/accountancy_linked_objects.tpl.php';
+    print dol_get_fiche_end();
+}
 
-print $outputline;
+// End of page
+llxFooter();
+$db->close();
