@@ -218,6 +218,7 @@ class RegistrationCertificateFr extends SaturneObject
     public $b_first_registration_date;
     public $c1_owner_fullname;
     public $c3_registration_address;
+    public $c4a_vehicle_owner;
     public $c41_ownerNumber;
     public $c41_second_owner_name;
     public $e_vehicle_serial_number;
@@ -234,7 +235,7 @@ class RegistrationCertificateFr extends SaturneObject
     public $g1_vehicle_empty_weight;
     public $h_validity_period;
     public $i_vehicle_registration_date;
-    public $j_vehicleCategory;
+    public $j_vehicle_category;
     public $j1_national_type;
     public $j2_european_bodywork;
     public $j3_national_bodywork;

@@ -113,7 +113,7 @@ if (is_object($registrationCertificateObject)) {
     }
 
     if ($productId > 0 && $productLotID > 0) {
-        if ($createRegistrationCertificate > 0) {
+        if (isset($createRegistrationCertificate) && $createRegistrationCertificate > 0) {
             $object->fk_product            = $productId;
             $object->fk_lot                = $productLotID;
             $object->fk_soc                = $parameters['thirdpartyID'];

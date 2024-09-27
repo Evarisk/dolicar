@@ -245,9 +245,8 @@ if (empty($resHook)) {
             $parameters['contactID']    = $contactID;
             $parameters['thirdpartyID'] = $thirdpartyID;
 
-            $reshook = $hookmanager->executeHooks('quickCreationAction', $parameters, $project, $action); // Note that $action and $project may have been modified by some hooks
-
-            if ($reshook > 0) {
+            $resHook = $hookmanager->executeHooks('quickCreationAction', $parameters, $project, $action); // Note that $action and $project may have been modified by some hooks
+            if (empty($resHook)) {
                 $backtopage = $hookmanager->resPrint;
             }
 
