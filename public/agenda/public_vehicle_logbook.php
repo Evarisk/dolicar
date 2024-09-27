@@ -254,7 +254,7 @@ if (empty($resHook)) {
 
 $title   = $langs->trans('PublicVehicleLogBook');
 $moreJS  = ['/custom/saturne/js/includes/signature-pad.min.js'];
-$moreCSS = ['/dolicar/css/pico.min.css'];
+$moreCSS = ['/custom/saturne/css/pico.min.css'];
 
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
