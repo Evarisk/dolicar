@@ -130,7 +130,8 @@ class modDoliCar extends DolibarrModules
                     'propallist',
                     'orderlist',
                     'invoicelist',
-                    'main'
+                    'main',
+                    'publiccontrol'
                 ]
             ],
             // Set this to 1 if features of module are opened to external users
@@ -603,6 +604,9 @@ class modDoliCar extends DolibarrModules
         $product = new Product($this->db);
 
         if (getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE_SET') == 0) {
+            // In order to avoid product creation error
+            $conf->global->BARCODE_PRODUCT_ADDON_NUM = 0;
+
             $product->ref          = $langs->transnoentities('DefaultVehicle');
             $product->label        = $langs->transnoentities('DefaultVehicle');
             $product->status_batch = 1;
@@ -615,8 +619,9 @@ class modDoliCar extends DolibarrModules
                 $category->add_type($product, 'product');
                 $category->fetch(getDolGlobalInt('DOLICAR_CAR_DEFAULT_BRAND_TAG'));
                 $category->add_type($product, 'product');
+
+                dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
             }
-            dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
         }
 
         return $this->_init($sql, $options);
