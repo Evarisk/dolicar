@@ -151,15 +151,6 @@ class ActionsDoliCar
      */
     public function formObjectOptions(array $parameters, $object): int
     {
-        global $extrafields, $langs;
-
-        if (preg_match('/propalcard|ordercard|invoicecard/', $parameters['context'])) {
-            $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth paddingright"');
-            $extraFieldsNames = ['registrationcertificatefr', 'vehicle_model', 'mileage', 'registration_number', 'linked_product', 'linked_lot', 'first_registration_date', 'VIN_number'];
-            foreach ($extraFieldsNames as $extraFieldsName) {
-                $extrafields->attributes[$object->element]['label'][$extraFieldsName] = $picto . $langs->transnoentities($extrafields->attributes[$object->element]['label'][$extraFieldsName]);
-            }
-        }
 
         return 0; // or return 1 to replace standard code
     }
@@ -321,6 +312,27 @@ class ActionsDoliCar
             if (dol_strlen($backtopage) > 0){
                 $this->resprints = $backtopage;
             }
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     * Overloading the digiqualiPublicControlTab function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function digiqualiPublicControlTab(array $parameters): int
+    {
+        global $langs;
+
+        if (isModEnabled('digiquali') && $parameters['objectType'] == 'productlot') {
+            $langs->load('dolicar@dolicar');
+
+            print '<a class="tab" href="' . dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?id=' . $parameters['objectId'] . '&entity=' . $parameters['entity'], 1) . '">';
+            print $langs->transnoentities('PublicVehicleLogBook');
+            print '</a>';
         }
 
         return 0; // or return 1 to replace standard code
