@@ -328,11 +328,33 @@ class ActionsDoliCar
         global $langs;
 
         if (isModEnabled('digiquali') && $parameters['objectType'] == 'productlot') {
-            $langs->load('dolicar@dolicar');
+            $linkableElement = $parameters['linkableElements'][$parameters['linkedObject']->element];
+            if (isset($linkableElement['fk_parent'])) {
+                $linkedObjectParentData = [];
+                foreach ($parameters['linkableElements'] as $value) {
+                    if (isset($value['post_name']) && $value['post_name'] === $linkableElement['fk_parent']) {
+                        $linkedObjectParentData = $value;
+                        break;
+                    }
+                }
 
-            print '<a class="tab" href="' . dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?id=' . $parameters['objectId'] . '&entity=' . $parameters['entity'], 1) . '">';
-            print $langs->transnoentities('PublicVehicleLogBook');
-            print '</a>';
+                if (!empty($linkedObjectParentData['class_path'])) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $linkedObjectParentData['class_path'];
+
+                    $parentLinkedObject = new $linkedObjectParentData['className']($this->db);
+
+                    $parentLinkedObject->fetch($parameters['linkedObject']->{$linkableElement['fk_parent']});
+
+                    $categories = $parentLinkedObject->getCategoriesCommon($parentLinkedObject->element);
+                    if (in_array(getDolGlobalInt('DOLICAR_VEHICLE_TAG'), $categories)) {
+                        $langs->load('dolicar@dolicar');
+
+                        print '<a class="tab" href="' . dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?id=' . $parameters['objectId'] . '&entity=' . $parameters['entity'], 1) . '">';
+                        print $langs->transnoentities('PublicVehicleLogBook');
+                        print '</a>';
+                    }
+                }
+            }
         }
 
         return 0; // or return 1 to replace standard code
