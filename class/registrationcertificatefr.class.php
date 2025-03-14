@@ -391,4 +391,70 @@ class RegistrationCertificateFr extends SaturneObject
     {
         return '';
     }
+
+    /**
+     * Load the dashboard
+     *
+     * @param array $regestrationCertifatesFr Array of registration certificates
+     * @return void
+     */
+    public static function load_dashboard(array $regestrationCertifatesFr) {
+        global $langs;
+
+        $registrationCertifateFrStats = ['Ok' => 0, 'Ko' => 0, 'N/A' => 0];
+        foreach ($regestrationCertifatesFr as $registrationCertifateFr) {
+            $registrationCertifateFr->fetchObjectLinked($registrationCertifateFr->id, 'dolicar_regcertfr', null, 'digiquali_control');
+            if (!empty($registrationCertifateFr->linkedObjects['digiquali_control'])) {
+                $controls = $registrationCertifateFr->linkedObjects['digiquali_control'];
+                $controls = array_filter($controls, function ($control) {
+                    return $control->status == Control::STATUS_LOCKED && !empty($control->control_date);
+                });
+                usort($controls, function ($a, $b) {
+                    return $b->control_date - $a->control_date;
+                });
+
+                $latestControl = reset($controls);
+                $nextControl   = (int) round(($latestControl->next_control_date - dol_now('tzuser'))/(3600 * 24));
+                if ($latestControl->verdict == 1 && $nextControl > 0) {
+                    $registrationCertifateFrStats['Ok']++;
+                } else {
+                    $registrationCertifateFrStats['Ko']++;
+                }
+            } else {
+                $registrationCertifateFrStats['N/A']++;
+            }
+        }
+
+        $array = [];
+
+        // Graph Title parameters
+        $array['title'] = $langs->transnoentities('DashboardCarState');
+        $array['name']  = 'DashboardCarState';
+
+        // Graph parameters
+        $array['width']      = '100%';
+        $array['height']     = 400;
+        $array['type']       = 'pie';
+        $array['showlegend'] = 1;
+        $array['dataset']    = 1;
+
+        $array['labels'] = [
+            [
+                'label' => $langs->transnoentities('N/A'),
+                'color' => '#8A8A8A'
+            ],
+            [
+                'label' => $langs->transnoentities('OK'),
+                'color' => '#47E58E'
+            ],
+            [
+                'label' => $langs->transnoentities('KO'),
+                'color' => '#E05353'
+            ]
+        ];
+
+        $array['data'] = [$registrationCertifateFrStats['N/A'], $registrationCertifateFrStats['Ok'], $registrationCertifateFrStats['Ko']];
+
+        return $array;
+    }
 }

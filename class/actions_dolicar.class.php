@@ -231,7 +231,7 @@ class ActionsDoliCar
      * @param  array $linkableObjectTypes  Array of linkable objects
      * @return int                         0 < on error, 0 on success, 1 to replace standard code
      */
-    public function extendSheetLinkableObjectsList(array $linkableObjectTypes): int {
+    public function extendSheetLinkableObjectsList(): int {
         require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
 
         $registrationCertificate = new RegistrationCertificateFr($this->db);

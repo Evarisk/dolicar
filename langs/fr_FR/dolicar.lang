@@ -35,6 +35,13 @@ CommercialVehicle = Utilitaire
 Car               = Voiture
 Bicycle           = Vélo
 
+#
+# Dashboard
+#
+
+DashboardRemainingRequestsRequest         = Jetons de recherche de plaque d'immatriculation
+DashboardNumberOfRegestrationCertifatesFr = Nombre de carte grises
+DashboardCarState                         = Status des véhicules
 
 
 #
