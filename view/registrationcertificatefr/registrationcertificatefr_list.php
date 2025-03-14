@@ -161,7 +161,36 @@ foreach ($object->fields as $key => $val) {
 }
 
 // Definition of array of fields for columns
-$arrayfields = array();
+$arrayfields = [];
+if (isModEnabled('digiquali')) {
+    $arrayfields['t.controls'] = [
+        'label'    => 'Controls',
+        'checked'  => 1,
+        'enabled'  => 1,
+        'position' => 200
+    ];
+
+    $arrayfields['t.control_date'] = [
+        'label'    => 'ControlDate',
+        'checked'  => 1,
+        'enabled'  => 1,
+        'position' => 210
+    ];
+
+    $arrayfields['t.days_remaining_before_next_control'] = [
+        'label'    => 'DaysBeforeNextControl',
+        'checked'  => 1,
+        'enabled'  => 1,
+        'position' => 220
+    ];
+
+    $arrayfields['t.control_verdict'] = [
+        'label'    => 'Verdict',
+        'checked'  => 1,
+        'enabled'  => 1,
+        'position' => 230
+    ];
+}
 foreach ($object->fields as $key => $val) {
 	// If $val['visible']==0, then we never show the field
 	if (!empty($val['visible'])) {
@@ -482,6 +511,13 @@ $varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
 $selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 $selectedfields .= (count($arrayofmassactions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
 
+if (isModEnabled('digiquali')) {
+    $object->fields['controls']                           = $arrayfields['t.controls'];
+    $object->fields['control_date']                       = $arrayfields['t.control_date'];
+    $object->fields['days_remaining_before_next_control'] = $arrayfields['t.days_remaining_before_next_control'];
+    $object->fields['control_verdict']                    = $arrayfields['t.control_verdict'];
+}
+
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwithfilterbefore" : "").'">'."\n";
 
@@ -517,6 +553,8 @@ foreach ($object->fields as $key => $val) {
 			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formadmin.class.php';
 			$formadmin = new FormAdmin($db);
 			print $formadmin->select_language($search[$key], 'search_lang', 0, null, 1, 0, 0, 'minwidth150 maxwidth200', 2);
+        } elseif ($key == 'controls' || $key == 'control_date' || $key == 'control_verdict' || $key == 'days_remaining_before_next_control' && isModEnabled('digiquali')) {
+            continue;
 		} else {
 			print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
 		}
@@ -553,7 +591,11 @@ foreach ($object->fields as $key => $val) {
 		$cssforfield .= ($cssforfield ? ' ' : '').'right';
 	}
 	if (!empty($arrayfields['t.'.$key]['checked'])) {
-		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+        $disableSortField = 0;
+        if ($key == 'controls' || $key == 'control_date' || $key == 'control_verdict' || $key == 'days_remaining_before_next_control' && isModEnabled('digiquali')) {
+            $disableSortField = 1;
+        }
+		print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''), $disableSortField)."\n";
 	}
 }
 // Extra fields
@@ -598,7 +640,7 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 		if (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'center';
-		} elseif ($key == 'status') {
+		} elseif ($key == 'status' || ($key == 'control_verdict' || $key == 'days_remaining_before_next_control' && isModEnabled('digiquali'))) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'center';
 		}
 
@@ -612,12 +654,47 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'right';
 		}
 		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
-
+        if (isModEnabled('digiquali')) {
+            $controls = [];
+            $object->fetchObjectLinked($object->fk_lot,'productbatch', '', 'digiquali_control');
+            if (is_array($object->linkedObjects['digiquali_control']) && !empty($object->linkedObjects['digiquali_control'])) {
+                $countControls = 1;
+                arsort($object->linkedObjects['digiquali_control']);
+                foreach ($object->linkedObjects['digiquali_control'] as $controlID => $control) {
+                    if ($control->status == Control::STATUS_LOCKED) {
+                        if ($countControls <= getDolGlobalInt('MAIN_SIZE_SHORTLIST_LIMIT')) {
+                            $controls[$controlID] = $control;
+                        }
+                        $countControls++;
+                    }
+                }
+            }
+        }
 		if (!empty($arrayfields['t.'.$key]['checked'])) {
 			print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
 			if ($key == 'status') {
 				print $object->getLibStatut(5);
-			} elseif ($key == 'rowid') {
+            } elseif ($key == 'controls' && isModEnabled('digiquali')) {
+                $firstOccurrence = true;
+                foreach ($controls as $control) {
+                    print $control->getNomUrl(1, '', 0, $firstOccurrence ? 'bold' : '') . '<br>';
+                    $firstOccurrence = false;
+                }
+            } elseif ($key == 'control_date' && isModEnabled('digiquali')) {
+                $control = reset($controls);
+                print dol_print_date($control->control_date, 'day');
+            } elseif ($key == 'control_verdict' && isModEnabled('digiquali')) {
+                $control = reset($controls);
+                $verdictColor = $control->verdict == 1 ? 'green' : ($control->verdict == 2 ? 'red' : 'grey');
+                print dol_strlen($control->verdict) > 0 ? '<div class="wpeo-button button-' . $verdictColor . '">' . $control->fields['verdict']['arrayofkeyval'][(!empty($control->verdict)) ? $control->verdict : 3] . '</div>' : 'N/A';
+            } elseif ($key == 'days_remaining_before_next_control' && isModEnabled('digiquali')) {
+                $control = reset($controls);
+                if (dol_strlen($control->next_control_date) > 0) {
+                    $nextControl = floor(($control->next_control_date - dol_now('tzuser'))/(3600 * 24));
+                    $nextControlColor = $nextControl < 0 ? 'red' : ($nextControl <= 30 ? 'orange' : ($nextControl <= 60 ? 'yellow' : 'green'));
+                    print '<div class="wpeo-button button-'. $nextControlColor .'">' . $nextControl . '</div>';
+                }
+            } elseif ($key == 'rowid') {
 				print $object->showOutputField($val, $key, $object->id, '');
 			} else {
 				print $object->showOutputField($val, $key, $object->$key, '');
