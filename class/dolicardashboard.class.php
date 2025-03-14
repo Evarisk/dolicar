@@ -61,7 +61,7 @@ class DolicarDashboard
         $array['dolicar']['widgets']['informations'] = [
             'title'      => $langs->transnoentities('Informations'),
             'picto'      => 'fas fa-car',
-            'label'      => [$langs->transnoentities('Nombre de carte grises'), $langs->transnoentities('DashboardRemainingRequestsRequest')],
+            'label'      => [$langs->transnoentities('DashboardNumberOfRegestrationCertifatesFr'), $langs->transnoentities('DashboardRemainingRequestsRequest')],
             'content'    => [$numberOfRegestrationCertifatesFr, getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER')],
             'widgetName' => 'informations'
         ];

@@ -413,9 +413,15 @@ class RegistrationCertificateFr extends SaturneObject
                     return $b->control_date - $a->control_date;
                 });
 
-                $latestControl = reset($controls);
-                $nextControl   = (int) round(($latestControl->next_control_date - dol_now('tzuser'))/(3600 * 24));
-                if ($latestControl->verdict == 1 && $nextControl > 0) {
+                $latestControl = null;
+                foreach ($controls as $control) {
+                    if ($latestControl === null || $control->control_date > $latestControl->control_date) {
+                        $latestControl = $control;
+                    }
+                }
+
+                $nextControl = (int) round(($latestControl->next_control_date - dol_now('tzuser'))/(3600 * 24));
+                if ($latestControl->verdict == 1 && ($nextControl > 0 || empty($latestControl->next_control_date))) {
                     $registrationCertifateFrStats['Ok']++;
                 } else {
                     $registrationCertifateFrStats['Ko']++;

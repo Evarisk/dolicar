@@ -41,7 +41,7 @@ Bicycle           = Vélo
 
 DashboardRemainingRequestsRequest         = Jetons de recherche de plaque d'immatriculation
 DashboardNumberOfRegestrationCertifatesFr = Nombre de carte grises
-DashboardCarState                         = Status des véhicules
+DashboardCarState                         = Statut des véhicules
 
 
 #
