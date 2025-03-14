@@ -30,6 +30,4 @@ if (file_exists('dolicar.main.inc.php')) {
     die('Include of dolicar main fails');
 }
 
-$showDashboard = false;
-
 require_once __DIR__ . '/../saturne/core/tpl/index/index_view.tpl.php';
