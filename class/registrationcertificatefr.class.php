@@ -313,7 +313,9 @@ class RegistrationCertificateFr extends SaturneObject
         if (empty($this->fk_product) || $this->fk_product == -1) {
             $this->fk_product = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
         }
-        $this->fk_lot = create_default_product_lot($this->fk_product);
+        if (empty($this->fk_lot) || $this->fk_lot == -1) {
+            $this->fk_lot = create_default_product_lot($this->fk_product);
+        }
         if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
             $this->d1_vehicle_brand = $langs->transnoentities('DefaultBrand');
         }
