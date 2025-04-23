@@ -91,7 +91,7 @@ class ActionsDoliCar
      */
     public function doActions(array $parameters, $object, string $action): int
     {
-        global $extrafields, $user;
+        global $conf, $db, $extrafields, $user, $langs; // $conf/$db mandatory for actions_setnotes.inc.php
 
         if (preg_match('/propalcard|ordercard|invoicecard/', $parameters['context'])) {
             $registrationCertificateFr = new RegistrationCertificateFr($this->db);
@@ -126,15 +126,55 @@ class ActionsDoliCar
             }
 
             if ($action == 'update_extras') {
-                if (GETPOST('attribute') == 'registrationcertificatefr' && !empty(GETPOST('options_registrationcertificatefr'))) {
-                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
+                if (GETPOST('attribute') == 'registrationcertificatefr' && !empty(GETPOSTINT('options_registrationcertificatefr'))) {
+                    require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+
+                    $product = new Product($this->db);
+
+                    $registrationCertificateFrId = GETPOSTINT('options_registrationcertificatefr');
+                    $registrationCertificateFr->fetch($registrationCertificateFrId);
+                    $product->fetch($registrationCertificateFr->fk_product);
+
                     $object->array_options['options_registration_number']     = $registrationCertificateFr->a_registration_number;
-                    $object->array_options['options_vehicle_model']           = $registrationCertificateFr->d3_vehicle_model;
+                    $object->array_options['options_vehicle_model']           = $product->label;
                     $object->array_options['options_VIN_number']              = $registrationCertificateFr->e_vehicle_serial_number;
                     $object->array_options['options_first_registration_date'] = dol_print_date($registrationCertificateFr->b_first_registration_date, 'day');
                     $object->array_options['options_linked_product']          = $registrationCertificateFr->fk_product;
                     $object->array_options['options_linked_lot']              = $registrationCertificateFr->fk_lot;
                     $object->update($user);
+
+                    if ($registrationCertificateFrId > 0) {
+                        $object->updateObjectLinked(null, '', $registrationCertificateFr->id, $registrationCertificateFr->table_element);
+                        $registrationCertificateFr->add_object_linked($object->element, $object->id);
+
+                        $_POST['note_public']  = $langs->transnoentities('RegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
+                        $_POST['note_public'] .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
+                        $_POST['note_public'] .= $langs->transnoentities('VINNumber') . ' : ' .  (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
+                        $_POST['note_public'] .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
+                        $_POST['note_public'] .= $langs->transnoentities('Mileage') . ' : ' . ($object->array_options['options_mileage'] > 0 ? price($object->array_options['options_mileage'], 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
+
+                        $action         = 'setnote_public';
+                        $permissionnote = $user->hasRight($object->element, 'creer');
+                        $id             = $object->id;
+                        require_once DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php';
+                    } else {
+                        $object->deleteObjectLinked(null, '', $registrationCertificateFr->id, $registrationCertificateFr->table_element);
+                    }
+                }
+
+                if (GETPOST('attribute') == 'mileage' && !empty(GETPOSTINT('options_mileage'))) {
+                    $mileage = GETPOSTINT('options_mileage');
+
+                    $_POST['note_public']  = $langs->transnoentities('RegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
+                    $_POST['note_public'] .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
+                    $_POST['note_public'] .= $langs->transnoentities('VINNumber') . ' : ' .  (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
+                    $_POST['note_public'] .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
+                    $_POST['note_public'] .= $langs->transnoentities('Mileage') . ' : ' . ($mileage > 0 ? price($mileage, 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
+
+                    $action         = 'setnote_public';
+                    $permissionnote = $user->hasRight($object->element, 'creer');
+                    $id             = $object->id;
+                    require_once DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php';
                 }
             }
         }
@@ -201,35 +241,6 @@ class ActionsDoliCar
         if ((strpos($parameters['context'], 'productlotcard') !== false) && GETPOST('action', 'aZ09') != 'create') {
             $fromProductLot = 1;
             require_once __DIR__ . '/../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
-        }
-
-        return 0; // or return 1 to replace standard code
-    }
-
-    /**
-     * Overloading the beforePDFCreation function : replacing the parent's function with the one below
-     *
-     * @param  array        $parameters Hook metadatas (context, etc...)
-     * @param  CommonObject $object     Current object
-     * @return int                      0 < on error, 0 on success, 1 to replace standard code
-     * @throws Exception
-     */
-    public function beforePDFCreation(array $parameters, $object): int
-    {
-        global $langs;
-
-        if (preg_match('/propalcard|ordercard|invoicecard/', $parameters['context'])) {
-            if ($object->array_options['options_registrationcertificatefr'] > 0) {
-                $registrationCertificateFr = new RegistrationCertificateFr($this->db);
-
-                $registrationCertificateFr->fetch($object->array_options['options_registrationcertificatefr']);
-
-                $object->note_public  = $langs->transnoentities('RegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
-                $object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
-                $object->note_public .= $langs->transnoentities('VINNumber') . ' : ' .  (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
-                $object->note_public .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
-                $object->note_public .= $langs->transnoentities('Mileage') . ' : ' . ($object->array_options['options_mileage'] > 0 ? price($object->array_options['options_mileage'], 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
-            }
         }
 
         return 0; // or return 1 to replace standard code

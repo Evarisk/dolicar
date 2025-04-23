@@ -106,36 +106,20 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
             case 'PROPAL_CREATE' :
             case 'ORDER_CREATE' :
             case 'BILL_CREATE' :
-                if (GETPOSTISSET('options_registrationcertificatefr') && !empty(GETPOST('options_registrationcertificatefr'))) {
+                if (isset($object->array_options['options_registrationcertificatefr']) && $object->array_options['options_registrationcertificatefr'] > 0) {
                     require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
                     $registrationCertificateFr = new RegistrationCertificateFr($this->db);
-                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
+                    $registrationCertificateFr->fetch($object->array_options['options_registrationcertificatefr']);
 
                     $registrationCertificateFr->add_object_linked($object->element, $object->id);
-                }
-                break;
 
-            case 'PROPAL_MODIFY' :
-            case 'ORDER_MODIFY' :
-            case 'BILL_MODIFY' :
-                if (GETPOSTISSET('options_registrationcertificatefr') && !empty(GETPOST('options_registrationcertificatefr'))) {
-                    require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
-                    $registrationCertificateFr = new RegistrationCertificateFr($this->db);
-                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
+                    $object->note_public  = $langs->transnoentities('RegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
+                    $object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
+                    $object->note_public .= $langs->transnoentities('VINNumber') . ' : ' .  (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
+                    $object->note_public .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
+                    $object->note_public .= $langs->transnoentities('Mileage') . ' : ' . ($object->array_options['options_mileage'] > 0 ? price($object->array_options['options_mileage'], 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
 
-                    $object->updateObjectLinked(null, '', $registrationCertificateFr->id, $object->table_element);
-                }
-                break;
-
-            case 'PROPAL_DELETE' :
-            case 'ORDER_DELETE' :
-            case 'BILL_DELETE' :
-                if (GETPOSTISSET('options_registrationcertificatefr') && !empty(GETPOST('options_registrationcertificatefr'))) {
-                    require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
-                    $registrationCertificateFr = new RegistrationCertificateFr($this->db);
-                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
-
-                    $object->deleteObjectLinked(null, '', $registrationCertificateFr->id, $object->table_element);
+                    $object->setValueFrom('note_public', $object->note_public);
                 }
                 break;
         }
