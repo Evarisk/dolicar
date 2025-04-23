@@ -151,6 +151,15 @@ class ActionsDoliCar
      */
     public function formObjectOptions(array $parameters, $object): int
     {
+        global $extrafields, $langs;
+
+        if (preg_match('/propalcard|ordercard|invoicecard/', $parameters['context'])) {
+            $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
+            $extraFieldsNames = ['registrationcertificatefr', 'vehicle_model', 'mileage', 'registration_number', 'linked_product', 'linked_lot', 'first_registration_date', 'VIN_number'];
+            foreach ($extraFieldsNames as $extraFieldsName) {
+                $extrafields->attributes[$object->element]['label'][$extraFieldsName] = $picto . $langs->transnoentities($extrafields->attributes[$object->element]['label'][$extraFieldsName]);
+            }
+        }
 
         return 0; // or return 1 to replace standard code
     }
@@ -167,7 +176,7 @@ class ActionsDoliCar
         global $extrafields, $langs;
 
         if (preg_match('/propallist|orderlist|invoicelist/', $parameters['context'])) {
-            $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth paddingright"');
+            $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
             $extraFieldsNames = ['registrationcertificatefr', 'vehicle_model', 'mileage', 'registration_number', 'linked_product', 'linked_lot', 'first_registration_date', 'VIN_number'];
             foreach ($extraFieldsNames as $extraFieldsName) {
                 $extrafields->attributes[$object->element]['label'][$extraFieldsName] = $picto . $langs->transnoentities($extrafields->attributes[$object->element]['label'][$extraFieldsName]);
@@ -355,6 +364,107 @@ class ActionsDoliCar
                     }
                 }
             }
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     * Overloading the saturneSetVarsFromFetchObj function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @param  object $object    Current object
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturneSetVarsFromFetchObj(array $parameters, object $object): int
+    {
+        global $conf;
+
+        if (strpos($parameters['context'], 'registrationcertificatefrlist') !== false && isModEnabled('digiquali')) {
+            $conf->cache['control']  = null;
+            $conf->cache['controls'] = [];
+            $object->fetchObjectLinked($object->fk_lot, 'productlot', '', 'digiquali_control');
+            if (!is_array($object->linkedObjects['digiquali_control']) || empty($object->linkedObjects['digiquali_control'])) {
+                return 0;
+            }
+
+            $countControls = 0;
+            arsort($object->linkedObjects['digiquali_control']);
+            foreach ($object->linkedObjects['digiquali_control'] as $controlID => $control) {
+                if ($control->status != Control::STATUS_LOCKED) {
+                    continue;
+                }
+
+                if ($countControls < getDolGlobalInt('MAIN_SIZE_SHORTLIST_LIMIT')) {
+                    $conf->cache['controls'][$controlID] = $control;
+                }
+                $countControls++;
+            }
+            $conf->cache['control'] = reset($conf->cache['controls']);
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     * Overloading the saturnePrintFieldListLoopObject function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturnePrintFieldListLoopObject(array $parameters): int
+    {
+        global $conf;
+
+        if (strpos($parameters['context'], 'registrationcertificatefrlist') !== false && isModEnabled('digiquali')) {
+            $out = [];
+
+            if ($parameters['key'] == 'controls') {
+                $firstOccurrence = true;
+                $controls        = $conf->cache['controls'];
+                if (!is_array($controls) || empty($controls)) {
+                    return 0;
+                }
+
+                foreach ($controls as $control) {
+                    $out[$parameters['key']] .= $control->getNomUrl(1, '', 0, $firstOccurrence ? 'bold' : '') . '<br>';
+                    $firstOccurrence = false;
+                }
+            }
+
+            if ($parameters['key'] == 'control_date') {
+                $control = $conf->cache['control'];
+                if ($control == null) {
+                    return 0;
+                }
+
+                $out[$parameters['key']] = dol_print_date($control->control_date, 'day');
+            }
+
+            if ($parameters['key'] == 'days_remaining_before_next_control') {
+                $control = $conf->cache['control'];
+                if ($control == null) {
+                    return 0;
+                }
+
+                if (dol_strlen($control->next_control_date) > 0) {
+                    $nextControl          = floor(($control->next_control_date - dol_now('tzuser'))/(3600 * 24));
+                    $nextControlDateColor = $control->getNextControlDateColor();
+                    $out[$parameters['key']] = '<div class="wpeo-button" style="background-color: ' . $nextControlDateColor .'; border-color: ' . $nextControlDateColor . ' ">' . $nextControl . '</div>';
+                }
+            }
+
+            if ($parameters['key'] == 'control_verdict') {
+                $control = $conf->cache['control'];
+                if ($control == null) {
+                    return 0;
+                }
+
+                $verdictColor            = $control->{$parameters['key']} == 1 ? 'green' : ($control->{$parameters['key']} == 2 ? 'red' : 'grey');
+                $out[$parameters['key']] = '<div class="wpeo-button button-' . $verdictColor . '">' . $control->fields['verdict']['arrayofkeyval'][(!empty($control->{$parameters['key']})) ? $control->{$parameters['key']} : 0] . '</div>';
+            }
+
+            $this->results = $out;
         }
 
         return 0; // or return 1 to replace standard code
