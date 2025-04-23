@@ -480,40 +480,38 @@ class modDoliCar extends DolibarrModules
         dolibarr_set_const($this->db, 'DOLICAR_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
         // Create extrafields during init
-        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-        $extraFields = new ExtraFields($this->db);
+        $commonExtraFieldsValue = ['entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"];
 
         $extraFieldsArrays = [
-            'registrationcertificatefr' => ['Label' => 'RegistrationCertificateFr', 'type' => 'link',    'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 10, 'params' => 'a:1:{s:7:"options";a:1:{s:75:"RegistrationCertificateFr:dolicar/class/registrationcertificatefr.class.php";N;}}',                   'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'vehicle_model'             => ['Label' => 'VehicleModel',              'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => 20, 'params' => '',                                                                                                                                                         'list' => 5, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'mileage'                   => ['Label' => 'Mileage',                   'type' => 'int',     'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 30, 'params' => '',                                                                                                                                  'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'registration_number'       => ['Label' => 'RegistrationNumber',        'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => 40, 'params' => '',                                                                                                                                                         'list' => 5, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'linked_product'            => ['Label' => 'LinkedProduct',             'type' => 'link',    'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 50, 'params' => 'a:1:{s:7:"options";a:1:{s:93:"Product:product/class/product.class.php:0:(t.entity:=:__ENTITY__) AND (t.fk_product_type:=:0)";N;}}',                        'list' => 5, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'linked_lot'                => ['Label' => 'LinkedProductBatch',        'type' => 'link',    'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 60, 'params' => 'a:1:{s:7:"options";a:1:{s:75:"ProductLot:product/stock/class/productlot.class.php:(t.entity = __ENTITY__)";N;}}',                                          'list' => 5, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'first_registration_date'   => ['Label' => 'FirstRegistrationDate',     'type' => 'date',    'length' => '',  'elementtype' => ['propal', 'commande', 'facture'], 'position' => 70, 'params' => '',                                                                                                                                                         'list' => 5, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'VIN_number'                => ['Label' => 'VINNumber',                 'type' => 'varchar', 'length' => 128, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => 80, 'params' => '',                                                                                                                                                         'list' => 5, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'starting_mileage'          => ['Label' => 'StartingMileage',           'type' => 'int',     'length' => '',  'elementtype' => ['actioncomm'], 'position' => 10, 'params' => '', 'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'arrival_mileage'           => ['Label' => 'ArrivalMileage',            'type' => 'int',     'length' => '',  'elementtype' => ['actioncomm'], 'position' => 20, 'params' => '', 'alwayseditable' => 1, 'list' => 1, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"],
-            'json'                      => ['Label' => 'JSON',                      'type' => 'text',    'length' => '',  'elementtype' => ['actioncomm'], 'position' => 30, 'params' => '', 'alwayseditable' => 1, 'list' => 0, 'help' => '', 'entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"]
+            'registration_number'       => ['Label' => 'RegistrationNumber',        'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 10, 'list' => 5],
+            'vehicle_model'             => ['Label' => 'VehicleModel',              'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 20, 'list' => 5],
+            'VIN_number'                => ['Label' => 'VINNumber',                 'type' => 'varchar', 'length' => 128, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 30, 'list' => 5],
+            'first_registration_date'   => ['Label' => 'FirstRegistrationDate',     'type' => 'date',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 40, 'list' => 5],
+            'mileage'                   => ['Label' => 'Mileage',                   'type' => 'int',                      'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 50, 'list' => 1, 'alwayseditable' => 1],
+            'registrationcertificatefr' => ['Label' => 'RegistrationCertificateFr', 'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 60, 'list' => 1, 'alwayseditable' => 1, 'params' => ['RegistrationCertificateFr:dolicar/class/registrationcertificatefr.class.php' => NULL]],
+            'linked_product'            => ['Label' => 'LinkedProduct',             'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 70, 'list' => 5,                        'params' => ['Product:product/class/product.class.php:0:(t.entity:=:__ENTITY__) AND (t.fk_product_type:=:0)' => NULL]],
+            'linked_lot'                => ['Label' => 'LinkedProductBatch',        'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 80, 'list' => 5,                        'params' => ['ProductLot:product/stock/class/productlot.class.php:0:(t.entity:=:__ENTITY__)' => NULL]],
+
+            'starting_mileage' => ['Label' => 'StartingMileage', 'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 10, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
+            'arrival_mileage'  => ['Label' => 'ArrivalMileage',  'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 20, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
+            'json'             => ['Label' => 'JSON',            'type' => 'text', 'elementtype' => ['actioncomm'], 'position' => 30, 'alwayseditable' => 1, 'list' => 0, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"]
         ];
 
-        foreach ($extraFieldsArrays as $key => $extraField) {
-            foreach ($extraField['elementtype'] as $extraFieldElementType) {
-                $extraFields->update($key, $extraField['Label'], $extraField['type'], $extraField['length'], $extraFieldElementType, 0, 0, $this->numero . $extraField['position'], $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help']), '', '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . ($extraFieldElementType != 'actioncomm' ? $extraFieldElementType : 'agenda')  . '")', 0, 0, $extraField['css']);
-                $extraFields->addExtraField($key, $extraField['Label'], $extraField['type'], $this->numero . $extraField['position'], $extraField['length'], $extraFieldElementType, 0, 0, '', $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], $extraField['help'], '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . ($extraFieldElementType != 'actioncomm' ? $extraFieldElementType : 'agenda') . '")', 0, 0, $extraField['css']);
-            }
-        }
+        saturne_manage_extrafields($extraFieldsArrays, $commonExtraFieldsValue);
 
         if (getDolGlobalInt('DOLICAR_EXTRAFIELDS_BACKWARD_COMPATIBILITY') == 0) {
+            require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+            $extraFields = new ExtraFields($this->db);
+
             $extraFieldsArrays = [
-                'registrationcertificatefr' =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
-                'vehicle_model'             =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
-                'mileage'                   =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
                 'registration_number'       =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
-                'linked_product'            =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
-                'linked_lot'                =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
+                'vehicle_model'             =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
+                'VIN_number'                =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
                 'first_registration_date'   =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
-                'VIN_number'                =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']]
+                'mileage'                   =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
+                'registrationcertificatefr' =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
+                'linked_product'            =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']],
+                'linked_lot'                =>  ['elementtype' => ['propaldet', 'commandedet', 'facturedet']]
             ];
 
             foreach ($extraFieldsArrays as $key => $extraField) {

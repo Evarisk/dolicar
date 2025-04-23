@@ -65,21 +65,16 @@ class ActionsDoliCar
     }
 
     /**
-     * Overloading the addHtmlHeader function : replacing the parent's function with the one below
+     * Overloading the hookSetManifest function : replacing the parent's function with the one below
      *
-     * @param  array $parameters Hook metadatas (context, etc...)
+     * @param  array $parameters Hook metadata (context, etc...)
      * @return int               0 < on error, 0 on success, 1 to replace standard code
      */
-    public function addHtmlHeader(array $parameters): int
+    public function hookSetManifest(array $parameters): int
     {
         if (strpos($_SERVER['PHP_SELF'], 'dolicar') !== false) {
-            ?>
-            <script>
-                $('link[rel="manifest"]').remove();
-            </script>
-            <?php
-
-            $this->resprints = '<link rel="manifest" href="' . DOL_URL_ROOT . '/custom/dolicar/manifest.json.php' . '" />';
+            $this->resprints = dol_buildpath('custom/dolicar/manifest.json.php', 1);
+            return 1; // or return 1 to replace standard code
         }
 
         return 0; // or return 1 to replace standard code
@@ -107,7 +102,7 @@ class ActionsDoliCar
 
                     $product = new Product($this->db);
 
-                    $extraFieldsNames = ['vehicle_model', 'registration_number', 'linked_product', 'linked_lot', 'first_registration_date', 'VIN_number'];
+                    $extraFieldsNames = ['registration_number', 'vehicle_model', 'first_registration_date', 'VIN_number', 'linked_product', 'linked_lot'];
                     foreach ($extraFieldsNames as $extraFieldsName) {
                         $extrafields->attributes[$object->element]['list'][$extraFieldsName] = 1;
                     }
@@ -115,24 +110,30 @@ class ActionsDoliCar
                     $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
                     $product->fetch($registrationCertificateFr->fk_product);
 
-                    $_POST['options_vehicle_model']           = $product->label;
-                    $_POST['options_registration_number']     = $registrationCertificateFr->a_registration_number;
-                    $_POST['options_linked_product']          = $registrationCertificateFr->fk_product;
-                    $_POST['options_linked_lot']              = $registrationCertificateFr->fk_lot;
-                    $_POST['options_first_registration_date'] = $registrationCertificateFr->b_first_registration_date;
-                    $_POST['options_VIN_number']              = $registrationCertificateFr->e_vehicle_serial_number;
+                    $_POST['options_registration_number'] = $registrationCertificateFr->a_registration_number;
+                    $_POST['options_vehicle_model']       = $product->label;
+                    $_POST['options_VIN_number']          = $registrationCertificateFr->e_vehicle_serial_number;
+
+                    $bFirstRegistrationDate                        = dol_getdate($registrationCertificateFr->b_first_registration_date);
+                    $_POST['options_first_registration_date']      = $bFirstRegistrationDate['mday'] . '/' . $bFirstRegistrationDate['mon'] . '/' . $bFirstRegistrationDate['year'];
+                    $_POST['options_first_registration_dateday']   = $bFirstRegistrationDate['mday'];
+                    $_POST['options_first_registration_datemonth'] = $bFirstRegistrationDate['mon'];
+                    $_POST['options_first_registration_dateyear']  = $bFirstRegistrationDate['year'];
+
+                    $_POST['options_linked_product'] = $registrationCertificateFr->fk_product;
+                    $_POST['options_linked_lot']     = $registrationCertificateFr->fk_lot;
                 }
             }
 
             if ($action == 'update_extras') {
                 if (GETPOST('attribute') == 'registrationcertificatefr' && !empty(GETPOST('options_registrationcertificatefr'))) {
                     $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
-                    $object->array_options['options_vehicle_model']           = $registrationCertificateFr->d3_vehicle_model;
                     $object->array_options['options_registration_number']     = $registrationCertificateFr->a_registration_number;
+                    $object->array_options['options_vehicle_model']           = $registrationCertificateFr->d3_vehicle_model;
+                    $object->array_options['options_VIN_number']              = $registrationCertificateFr->e_vehicle_serial_number;
+                    $object->array_options['options_first_registration_date'] = dol_print_date($registrationCertificateFr->b_first_registration_date, 'day');
                     $object->array_options['options_linked_product']          = $registrationCertificateFr->fk_product;
                     $object->array_options['options_linked_lot']              = $registrationCertificateFr->fk_lot;
-                    $object->array_options['options_first_registration_date'] = $registrationCertificateFr->b_first_registration_date;
-                    $object->array_options['options_VIN_number']              = $registrationCertificateFr->e_vehicle_serial_number;
                     $object->update($user);
                 }
             }
@@ -155,7 +156,7 @@ class ActionsDoliCar
 
         if (preg_match('/propalcard|ordercard|invoicecard/', $parameters['context'])) {
             $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
-            $extraFieldsNames = ['registrationcertificatefr', 'vehicle_model', 'mileage', 'registration_number', 'linked_product', 'linked_lot', 'first_registration_date', 'VIN_number'];
+            $extraFieldsNames = ['registration_number', 'vehicle_model', 'VIN_number', 'first_registration_date', 'mileage', 'registrationcertificatefr', 'linked_product', 'linked_lot'];
             foreach ($extraFieldsNames as $extraFieldsName) {
                 $extrafields->attributes[$object->element]['label'][$extraFieldsName] = $picto . $langs->transnoentities($extrafields->attributes[$object->element]['label'][$extraFieldsName]);
             }
@@ -177,7 +178,7 @@ class ActionsDoliCar
 
         if (preg_match('/propallist|orderlist|invoicelist/', $parameters['context'])) {
             $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
-            $extraFieldsNames = ['registrationcertificatefr', 'vehicle_model', 'mileage', 'registration_number', 'linked_product', 'linked_lot', 'first_registration_date', 'VIN_number'];
+            $extraFieldsNames = ['registration_number', 'vehicle_model', 'VIN_number', 'first_registration_date', 'mileage', 'registrationcertificatefr', 'linked_product', 'linked_lot'];
             foreach ($extraFieldsNames as $extraFieldsName) {
                 $extrafields->attributes[$object->element]['label'][$extraFieldsName] = $picto . $langs->transnoentities($extrafields->attributes[$object->element]['label'][$extraFieldsName]);
             }
@@ -223,11 +224,11 @@ class ActionsDoliCar
 
                 $registrationCertificateFr->fetch($object->array_options['options_registrationcertificatefr']);
 
-                $object->note_public  = dol_strlen($object->array_options['options_registration_number']) > 0 ? $langs->transnoentities('RegistrationNumber') . ' : ' . $object->array_options['options_registration_number'] . '<br>' : '';
-                $object->note_public .= dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $langs->transnoentities('VehicleModel') . ' : ' . $object->array_options['options_vehicle_model'] . '<br>' : '';
-                $object->note_public .= dol_strlen($object->array_options['options_VIN_number']) > 0 ? $langs->transnoentities('VINNumber') . ' : ' .  $object->array_options['options_VIN_number'] . '<br>' : '';
-                $object->note_public .= $object->array_options['options_first_registration_date'] > 0 ? $langs->transnoentities('FirstRegistrationDate') . ' : ' . dol_print_date($object->array_options['options_first_registration_date'], 'day') . '<br>' : '';
-                $object->note_public .= $object->array_options['options_mileage'] > 0 ? $langs->transnoentities('Mileage') . ' : ' . price($object->array_options['options_mileage'], 0,'',1, 0) . ' ' . $langs->trans('km') . '<br>' : '';
+                $object->note_public  = $langs->transnoentities('RegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
+                $object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
+                $object->note_public .= $langs->transnoentities('VINNumber') . ' : ' .  (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
+                $object->note_public .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
+                $object->note_public .= $langs->transnoentities('Mileage') . ' : ' . ($object->array_options['options_mileage'] > 0 ? price($object->array_options['options_mileage'], 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
             }
         }
 
