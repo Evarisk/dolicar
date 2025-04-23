@@ -86,31 +86,32 @@ if (is_object($registrationCertificateObject)) {
     $product->label        = $productRef;
     $product->status_batch = 1;
 
-    $productId = $product->create($user);
-    if ($productId > 0) {
-        $resultCategory = $category->fetch(0, $registrationCertificateObject->CarMake->CurrentTextValue);
-        if ($category <= 0) {
-            $category->label       = $registrationCertificateObject->CarMake->CurrentTextValue;
-            $category->description = $registrationCertificateObject->CarMake->CurrentTextValue;
-            $category->visible     = 1;
-            $category->type        = 'product';
-            $category->fk_parent   = getDolGlobalInt('DOLICAR_CAR_BRANDS_TAG');
-            $categoryID            = $category->create($user);
-        } else {
-            $categoryID = $category->id;
+    $product->fetch(0, $productRef);
+    $productId = $product->id;
+    if ($productId <= 0) {
+        $productId = $product->create($user);
+
+        if ($productId > 0) {
+            $resultCategory = $category->fetch(0, $registrationCertificateObject->CarMake->CurrentTextValue);
+            if ($category <= 0) {
+                $category->label       = $registrationCertificateObject->CarMake->CurrentTextValue;
+                $category->description = $registrationCertificateObject->CarMake->CurrentTextValue;
+                $category->visible     = 1;
+                $category->type        = 'product';
+                $category->fk_parent   = getDolGlobalInt('DOLICAR_CAR_BRANDS_TAG');
+                $categoryID            = $category->create($user);
+            } else {
+                $categoryID = $category->id;
+            }
+            $product->setCategories([$categoryID, getDolGlobalInt('DOLICAR_CAR_BRANDS_TAG')]);
         }
-        $product->setCategories([$categoryID, getDolGlobalInt('DOLICAR_CAR_BRANDS_TAG')]);
-
-        $productLot->batch      = $registrationCertificateObject->ExtendedData->numSerieMoteur;
-        $productLot->fk_product = $productId;
-
-        $productLotID = $productLot->create($user);
-
-        $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1,0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
-    } else {
-        $productId    = -1;
-        $productLotID = -1;
     }
+
+    $productLot->batch      = $registrationCertificateObject->ExtendedData->numSerieMoteur;
+    $productLot->fk_product = $productId;
+
+    $productLotID = $productLot->create($user);
+    $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1,0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
 
     if ($productId > 0 && $productLotID > 0) {
         if (isset($createRegistrationCertificate) && $createRegistrationCertificate > 0) {
