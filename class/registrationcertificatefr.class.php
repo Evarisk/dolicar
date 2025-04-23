@@ -422,11 +422,16 @@ class RegistrationCertificateFr extends SaturneObject
                     }
                 }
 
-                $nextControl = (int) round(($latestControl->next_control_date - dol_now('tzuser'))/(3600 * 24));
-                if ($latestControl->verdict == 1 && ($nextControl > 0 || empty($latestControl->next_control_date))) {
-                    $registrationCertifateFrStats['Ok']++;
-                } else {
-                    $registrationCertifateFrStats['Ko']++;
+                if (!empty($latestControl)) {
+                    $nextControl = 0;
+                    if (!empty($latestControl->next_control_date)) {
+                        $nextControl = (int) round(($latestControl->next_control_date - dol_now('tzuser')) / (3600 * 24));
+                    }
+                    if ($latestControl->verdict == 1 && ($nextControl > 0 || empty($latestControl->next_control_date))) {
+                        $registrationCertifateFrStats['Ok']++;
+                    } else {
+                        $registrationCertifateFrStats['Ko']++;
+                    }
                 }
             } else {
                 $registrationCertifateFrStats['N/A']++;

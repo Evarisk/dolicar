@@ -463,7 +463,7 @@ class ActionsDoliCar
                 }
 
                 if (dol_strlen($control->next_control_date) > 0) {
-                    $nextControl          = floor(($control->next_control_date - dol_now('tzuser'))/(3600 * 24));
+                    $nextControl          = (int) round(($control->next_control_date - dol_now('tzuser'))/(3600 * 24));
                     $nextControlDateColor = $control->getNextControlDateColor();
                     $out[$parameters['key']] = '<div class="wpeo-button" style="background-color: ' . $nextControlDateColor .'; border-color: ' . $nextControlDateColor . ' ">' . $nextControl . '</div>';
                 }
