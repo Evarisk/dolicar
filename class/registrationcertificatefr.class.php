@@ -405,7 +405,7 @@ class RegistrationCertificateFr extends SaturneObject
 
         $registrationCertifateFrStats = ['Ok' => 0, 'Ko' => 0, 'N/A' => 0];
         foreach ($regestrationCertifatesFr as $registrationCertifateFr) {
-            $registrationCertifateFr->fetchObjectLinked($registrationCertifateFr->id, 'dolicar_regcertfr', null, 'digiquali_control');
+            $registrationCertifateFr->fetchObjectLinked($registrationCertifateFr->id, $registrationCertifateFr->table_element, null, 'digiquali_control');
             if (!empty($registrationCertifateFr->linkedObjects['digiquali_control'])) {
                 $controls = $registrationCertifateFr->linkedObjects['digiquali_control'];
                 $controls = array_filter($controls, function ($control) {

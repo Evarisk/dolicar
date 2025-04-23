@@ -126,7 +126,7 @@ class modDoliCar extends DolibarrModules
                     'productlotcard',
                     'registrationcertificatefrcard',
                     'dolicar_quickcreation',
-                    'get_sheet_linkable_objects',
+                    'saturnegetobjectsmetadata',
                     'propallist',
                     'orderlist',
                     'invoicelist',
@@ -625,19 +625,5 @@ class modDoliCar extends DolibarrModules
         }
 
         return $this->_init($sql, $options);
-    }
-
-    /**
-     * Function called when module is disabled
-     * Remove from database constants, boxes and permissions from Dolibarr database
-     * Data directories are not deleted
-     *
-     * @param  string $options Options when enabling module ('', 'noboxes')
-     * @return int             1 if OK, 0 if KO
-     */
-    public function remove($options = ''): int
-    {
-        $sql = [];
-        return $this->_remove($sql, $options);
     }
 }

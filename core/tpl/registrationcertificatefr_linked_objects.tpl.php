@@ -41,7 +41,7 @@ $out .= '</tr>';
 
 $registrationCertificate = new RegistrationCertificateFr($db);
 $registrationCertificate->fetch(!isset($fromProductLot) ? GETPOST('id') : '', !isset($fromProductLot) ? GETPOST('ref') : '', isset($fromProductLot) ? ' AND t.fk_lot = ' . GETPOST('id') : '');
-$registrationCertificate->fetchObjectLinked(null, '', $registrationCertificate->id, $registrationCertificate->module . '_' . $registrationCertificate->element);
+$registrationCertificate->fetchObjectLinked(null, '', $registrationCertificate->id, $registrationCertificate->table_element);
 if (!empty($registrationCertificate->linkedObjects)) {
     foreach ($registrationCertificate->linkedObjects as $linkedObjectElement => $linkedObjects) {
         foreach ($linkedObjects as $linkedObject) {

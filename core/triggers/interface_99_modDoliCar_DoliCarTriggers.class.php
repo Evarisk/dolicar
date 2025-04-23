@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,30 +44,10 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $this->db = $db;
 
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
-        $this->family      = "demo";
+        $this->family      = 'demo';
         $this->description = 'DoliCar triggers.';
         $this->version     = '1.2.0';
         $this->picto       = 'dolicar@dolicar';
-    }
-
-    /**
-     * Trigger name
-     *
-     * @return string Name of trigger file
-     */
-    public function getName(): string
-    {
-        return parent::getName();
-    }
-
-    /**
-     * Trigger description
-     *
-     * @return string Description of trigger file
-     */
-    public function getDesc(): string
-    {
-        return parent::getDesc();
     }
 
     /**
@@ -93,15 +73,34 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . '. id=' . $object->id);
 
         require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
-        $now        = dol_now();
+
         $actionComm = new ActionComm($this->db);
 
-        $actionComm->elementtype = $object->element . '@dolicar';
+        $triggerType = dol_ucfirst(dol_strtolower(explode('_', $action)[1]));
+
+        $actionComm->code        = 'AC_' . $action;
         $actionComm->type_code   = 'AC_OTH_AUTO';
-        $actionComm->datep       = $now;
         $actionComm->fk_element  = $object->id;
+        $actionComm->elementtype = $object->element . '@' . $object->module;
+        $actionComm->label       = $langs->transnoentities('Object' . $triggerType . 'Trigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
+        $actionComm->datep       = dol_now();
         $actionComm->userownerid = $user->id;
         $actionComm->percentage  = -1;
+
+        if (getDolGlobalInt('DOLICAR_ADVANCED_TRIGGER') && !empty($object->fields)) {
+            $actionComm->note_private = method_exists($object, 'getTriggerDescription') ? $object->getTriggerDescription($object) : '';
+        }
+
+        $objects      = ['REGISTRATIONCERTIFICATEFR'];
+        $triggerTypes = ['CREATE', 'MODIFY', 'DELETE', 'ARCHIVE'];
+
+        $actions = array_merge(
+            array_merge(...array_map(fn($s) => array_map(fn($p) => "{$p}_{$s}", $objects), $triggerTypes)),
+        );
+
+        if (in_array($action, $actions, true)) {
+            $actionComm->create($user);
+        }
 
         switch ($action) {
             case 'PROPAL_CREATE' :
@@ -124,7 +123,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
                     $registrationCertificateFr = new RegistrationCertificateFr($this->db);
                     $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
 
-                    $object->updateObjectLinked(null, '', $registrationCertificateFr->id, $registrationCertificateFr->module . '_' . $registrationCertificateFr->element);
+                    $object->updateObjectLinked(null, '', $registrationCertificateFr->id, $object->table_element);
                 }
                 break;
 
@@ -136,36 +135,8 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
                     $registrationCertificateFr = new RegistrationCertificateFr($this->db);
                     $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
 
-                    $object->deleteObjectLinked(null, '', $registrationCertificateFr->id, $registrationCertificateFr->module . '_' . $registrationCertificateFr->element);
+                    $object->deleteObjectLinked(null, '', $registrationCertificateFr->id, $object->table_element);
                 }
-                break;
-
-            case 'REGISTRATIONCERTIFICATEFR_CREATE' :
-                $actionComm->code  = 'AC_' . strtoupper($object->element) . '_CREATE';
-                $actionComm->label = $langs->trans('ObjectCreateTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
-                $actionComm->create($user);
-                break;
-
-            case 'REGISTRATIONCERTIFICATEFR_MODIFY' :
-                $actionComm->code  = 'AC_' . strtoupper($object->element) . '_MODIFY';
-                $actionComm->label = $langs->trans('ObjectModifyTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
-                $actionComm->create($user);
-                break;
-
-            case 'REGISTRATIONCERTIFICATEFR_DELETE' :
-                $actionComm->code  = 'AC_ ' . strtoupper($object->element) . '_DELETE';
-                $actionComm->label = $langs->trans('ObjectDeleteTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
-                $actionComm->create($user);
-                break;
-
-            case 'REGISTRATIONCERTIFICATEFR_ARCHIVE' :
-                $actionComm->code  = 'AC_' . strtoupper($object->element) . '_ARCHIVE';
-                $actionComm->label = $langs->transnoentities('ObjectArchivedTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
-                $actionComm->create($user);
-                break;
-
-            default:
-                dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
                 break;
         }
 

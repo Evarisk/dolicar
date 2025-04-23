@@ -235,30 +235,33 @@ class ActionsDoliCar
     }
 
     /**
-     * Overloading the extendSheetLinkableObjectsList function : replacing the parent's function with the one below
+     * Overloading the saturneExtendGetObjectsMetadata function : replacing the parent's function with the one below
      *
-     * @param  array $linkableObjectTypes  Array of linkable objects
-     * @return int                         0 < on error, 0 on success, 1 to replace standard code
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
      */
-    public function extendSheetLinkableObjectsList(): int {
-        require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
-
-        $registrationCertificate = new RegistrationCertificateFr($this->db);
-        $linkableObjectTypes['dolicar_regcertfr'] = [
+    public function saturneExtendGetObjectsMetadata(array $parameters): int
+    {
+        $objectsMetadata['dolicar_registrationcertificatefr'] = [
+            'mainmenu'       => 'dolicar',
+            'leftmenu'       => '',
             'langs'          => 'RegistrationCertificateFr',
             'langfile'       => 'dolicar@dolicar',
-            'picto'          => $registrationCertificate->picto,
-            'className'      => 'registrationCertificateFr',
-            'name_field'     => 'ref',
+            'picto'          => 'fontawesome_fa-car_fas_#d35968',
+            'color'          => '#d35968',
+            'class_name'     => 'registrationCertificateFr',
             'post_name'      => 'fk_registrationcertificatefr',
-            'link_name'      => 'dolicar_regcertfr',
+            'link_name'      => 'dolicar_registrationcertificatefr',
             'tab_type'       => 'registrationcertificatefr',
-            'hook_name_list' => 'registrationcertificatefrcard',
+            'table_element'  => 'dolicar_registrationcertificatefr',
+            'name_field'     => 'ref',
             'hook_name_card' => 'registrationcertificatefrlist',
+            'hook_name_list' => 'registrationcertificatefrcard',
             'create_url'     => 'custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
             'class_path'     => 'custom/dolicar/class/registrationcertificatefr.class.php',
+            'lib_path'       => 'custom/dolicar/lib/dolicar_registrationcertificatefr.lib.php'
         ];
-        $this->results = $linkableObjectTypes;
+        $this->results = $objectsMetadata;
 
         return 0; // or return 1 to replace standard code
     }
