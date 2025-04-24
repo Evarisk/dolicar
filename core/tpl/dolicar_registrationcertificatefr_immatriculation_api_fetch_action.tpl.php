@@ -86,11 +86,10 @@ if (is_object($registrationCertificateObject)) {
     $product->label        = $productRef;
     $product->status_batch = 1;
 
-    $product->fetch(0, $productRef);
+    $product->fetch(0, dol_sanitizeFileName(dol_string_nospecial(trim($productRef))));
     $productId = $product->id;
     if ($productId <= 0) {
         $productId = $product->create($user);
-
         if ($productId > 0) {
             $resultCategory = $category->fetch(0, $registrationCertificateObject->CarMake->CurrentTextValue);
             if ($category <= 0) {
