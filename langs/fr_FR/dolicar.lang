@@ -83,6 +83,7 @@ RemainingRequests        = Jetons de recherche de plaque d'immatriculation resta
 
 # Data - Donnée
 RegistrationCertificateFr       = Carte grise
+Registrationcertificatefrs      = Cartes grises
 Registrationcertificatefr       = Carte grise
 RegistrationCertificatesFrMin   = cartes grises
 TheRegistrationcertificatefr    = la carte grise

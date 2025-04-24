@@ -453,7 +453,7 @@ class ActionsDoliCar
                     return 0;
                 }
 
-                $out[$parameters['key']] = dol_print_date($control->control_date, 'day');
+                $out[$parameters['key']] = dol_print_date($control->{$parameters['key']}, 'day');
             }
 
             if ($parameters['key'] == 'days_remaining_before_next_control') {
@@ -469,14 +469,14 @@ class ActionsDoliCar
                 }
             }
 
-            if ($parameters['key'] == 'control_verdict') {
+            if ($parameters['key'] == 'verdict') {
                 $control = $conf->cache['control'];
                 if ($control == null) {
                     return 0;
                 }
 
                 $verdictColor            = $control->{$parameters['key']} == 1 ? 'green' : ($control->{$parameters['key']} == 2 ? 'red' : 'grey');
-                $out[$parameters['key']] = '<div class="wpeo-button button-' . $verdictColor . '">' . $control->fields['verdict']['arrayofkeyval'][(!empty($control->{$parameters['key']})) ? $control->{$parameters['key']} : 0] . '</div>';
+                $out[$parameters['key']] = '<div class="wpeo-button button-' . $verdictColor . '">' . $control->fields[$parameters['key']]['arrayofkeyval'][(!empty($control->{$parameters['key']})) ? $control->{$parameters['key']} : 0] . '</div>';
             }
 
             $this->results = $out;

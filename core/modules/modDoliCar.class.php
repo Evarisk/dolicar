@@ -311,7 +311,7 @@ class modDoliCar extends DolibarrModules
         $this->menu[$r++] = [
             'fk_menu'  => 'fk_mainmenu=dolicar',
             'type'     => 'left',
-            'titre'    => $langs->transnoentities('ListRegistrationcertificatefr'),
+            'titre'    => $langs->transnoentities('Registrationcertificatefrs'),
             'prefix'   => '<i class="fas fa-car pictofixedwidth"></i>',
             'mainmenu' => 'dolicar',
             'leftmenu' => 'registrationcertificatefr',

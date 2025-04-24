@@ -87,6 +87,7 @@ if (isModEnabled('digiquali')) {
         'enabled'       => 1,
         'position'      => 200,
         'visible'       => 2,
+        'css'           => 'minwidth150',
         'disablesearch' => 1,
         'disablesort'   => 1
     ];
@@ -110,7 +111,7 @@ if (isModEnabled('digiquali')) {
         'disablesort'   => 1
     ];
 
-    $object->fields['control_verdict'] = [
+    $object->fields['verdict'] = [
         'label'         => 'Verdict',
         'enabled'       => 1,
         'position'      => 230,
@@ -119,7 +120,7 @@ if (isModEnabled('digiquali')) {
         'disablesearch' => 1,
         'disablesort'   => 1
     ];
-    $excludeFields = ['control_verdict', 'days_remaining_before_next_control', 'control_date', 'controls'];
+    $excludeFields = ['verdict', 'days_remaining_before_next_control', 'control_date', 'controls'];
 }
 
 // Initialize array of search criterias
@@ -239,7 +240,7 @@ if ($mode == 'pwa') {
     $conf->dol_hide_leftmenu = 1;
 }
 
-$title = $langs->trans('ListOf', $langs->transnoentitiesnoconv('RegistrationCertificateFrs'));
+$title = $langs->transnoentities(dol_ucfirst($object->element) . 's');
 saturne_header(0,'', $title, '', '', 0, 0, [], [], '', 'mod-' . $object->module . '-' . $object->element . ' page-list bodyforlist');
 
 if (!empty($fromType)) {
