@@ -25,3 +25,6 @@ ALTER TABLE `llx_dolicar_registrationcertificatefr` CHANGE `j_vehicleCategory` `
 ALTER TABLE `llx_dolicar_registrationcertificatefr` CHANGE `s1_seatingCapacity` `s1_seating_capacity` integer;
 ALTER TABLE `llx_dolicar_registrationcertificatefr` CHANGE `fk_product` `fk_product` integer;
 ALTER TABLE `llx_dolicar_registrationcertificatefr` ADD `json` longtext AFTER `z4_specific_details`;
+
+-- 21.0.0
+UPDATE llx_element_element SET sourcetype = 'dolicar_registrationcertificatefr' WHERE sourcetype = 'dolicar_regcertfr' AND targettype = 'digiquali_control';

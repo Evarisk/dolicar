@@ -83,6 +83,7 @@ RemainingRequests        = Jetons de recherche de plaque d'immatriculation resta
 
 # Data - Donnée
 RegistrationCertificateFr       = Carte grise
+Registrationcertificatefrs      = Cartes grises
 Registrationcertificatefr       = Carte grise
 RegistrationCertificatesFrMin   = cartes grises
 TheRegistrationcertificatefr    = la carte grise
@@ -158,8 +159,8 @@ QuickRegistrationCertificateCreation = Ajout rapide de carte grise
 LicencePlate                         = Plaque d'immatriculation
 
 # DigiQuali
-LinkDolicar_regcertfr            = Activer le lien avec les cartes grises
-LinkDolicar_regcertfrDescription = Permet la liaison entre les cartes grises et les modèles
+LinkDolicar_registrationcertificatefr            = Activer le lien avec les cartes grises
+LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les cartes grises et les modèles
 
 
 
