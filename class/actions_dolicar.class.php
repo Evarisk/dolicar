@@ -365,7 +365,7 @@ class ActionsDoliCar
                 if (!empty($linkedObjectParentData['class_path'])) {
                     require_once DOL_DOCUMENT_ROOT . '/' . $linkedObjectParentData['class_path'];
 
-                    $parentLinkedObject = new $linkedObjectParentData['className']($this->db);
+                    $parentLinkedObject = new $linkedObjectParentData['class_name']($this->db);
 
                     $parentLinkedObject->fetch($parameters['linkedObject']->{$linkableElement['fk_parent']});
 
