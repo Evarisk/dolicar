@@ -398,7 +398,7 @@ class ActionsDoliCar
         if (strpos($parameters['context'], 'registrationcertificatefrlist') !== false && isModEnabled('digiquali')) {
             $conf->cache['control']  = null;
             $conf->cache['controls'] = [];
-            $object->fetchObjectLinked($object->fk_lot, 'productlot', '', 'digiquali_control');
+            $object->fetchObjectLinked(null, '', '', 'digiquali_control');
             if (!is_array($object->linkedObjects['digiquali_control']) || empty($object->linkedObjects['digiquali_control'])) {
                 return 0;
             }
