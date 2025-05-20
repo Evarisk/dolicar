@@ -46,7 +46,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'DoliCar triggers.';
-        $this->version     = '1.2.0';
+        $this->version     = '21.0.0';
         $this->picto       = 'dolicar@dolicar';
     }
 
