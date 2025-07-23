@@ -22,10 +22,13 @@
  */
 
 // Load DoliCar environment
-if (!file_exists('../../dolicar.main.inc.php')) {
+if (file_exists('../dolicar.main.inc.php')) {
+    require_once __DIR__ . '/../dolicar.main.inc.php';
+} elseif (file_exists('../../dolicar.main.inc.php')) {
+    require_once __DIR__ . '/../../dolicar.main.inc.php';
+} else {
     die('Include of dolicar main fails');
 }
-require_once __DIR__ . '/../../dolicar.main.inc.php';
 
 // load dolicar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
