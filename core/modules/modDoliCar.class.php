@@ -334,7 +334,7 @@ class modDoliCar extends DolibarrModules
             'url'      => '/dolicar/view/registrationcertificatefr/quickcreation.php',
             'langs'    => 'dolicar@dolicar',
             'position' => 1000 + $r,
-            'enabled'  => '$conf->easycrm->enabled',
+            'enabled'  => '$conf->reedcrm->enabled',
             'perms'    => '$user->rights->dolicar->read',
             'target'   => '',
             'user'     => 0

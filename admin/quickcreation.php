@@ -40,7 +40,7 @@ global $conf, $db, $langs, $moduleNameLowerCase, $user;
 saturne_load_langs();
 
 // Security check - Protection if external user
-$permissionToRead = $user->rights->dolicar->adminpage->read && isModEnabled('easycrm');
+$permissionToRead = $user->rights->dolicar->adminpage->read && isModEnabled('reedcrm');
 saturne_check_access($permissionToRead);
 
 /*

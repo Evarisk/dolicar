@@ -90,7 +90,7 @@ $hookmanager->initHooks(['dolicar_quickcreation']); // Note that conf->hooks_mod
 $date_start = dol_mktime(0, 0, 0, GETPOST('projectstartmonth', 'int'), GETPOST('projectstartday', 'int'), GETPOST('projectstartyear', 'int'));
 
 // Security check - Protection if external user
-$permissionToRead          = $user->rights->dolicar->read && isModEnabled('easycrm');
+$permissionToRead          = $user->rights->dolicar->read && isModEnabled('reedcrm');
 $permissiontoaddproject    = $user->rights->projet->creer;
 $permissiontoaddthirdparty = $user->rights->societe->creer;
 $permissiontoaddcontact    = $user->rights->societe->contact->creer;
@@ -222,7 +222,7 @@ if (empty($resHook)) {
 
                     $task->fk_project = $projectID;
                     $task->ref        = $defaultref;
-                    $task->label      = (!empty($conf->global->EASYCRM_TASK_LABEL_VALUE) ? $conf->global->EASYCRM_TASK_LABEL_VALUE : $langs->trans('CommercialFollowUp')) . ' - ' . $project->title;
+                    $task->label      = (!empty($conf->global->REEDCRM_TASK_LABEL_VALUE) ? $conf->global->REEDCRM_TASK_LABEL_VALUE : $langs->trans('CommercialFollowUp')) . ' - ' . $project->title;
                     $task->date_c     = dol_now();
 
                     $taskID = $task->create($user);
@@ -315,15 +315,15 @@ print '<br>';
 print '<hr>';
 
 if (getDolGlobalInt('DOLICAR_THIRDPARTY_QUICK_CREATION')) {
-    require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_thirdparty_quickcreation.tpl.php';
+    require_once __DIR__ . '/../../../reedcrm/core/tpl/reedcrm_thirdparty_quickcreation.tpl.php';
 }
 
 if (getDolGlobalInt('DOLICAR_CONTACT_QUICK_CREATION')) {
-    require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_contact_quickcreation.tpl.php';
+    require_once __DIR__ . '/../../../reedcrm/core/tpl/reedcrm_contact_quickcreation.tpl.php';
 }
 
 if (getDolGlobalInt('DOLICAR_PROJECT_QUICK_CREATION')) {
-    require_once __DIR__ . '/../../../easycrm/core/tpl/easycrm_project_quickcreation.tpl.php';
+    require_once __DIR__ . '/../../../reedcrm/core/tpl/reedcrm_project_quickcreation.tpl.php';
 }
 
 print $form->buttonsSaveCancel('Create');
