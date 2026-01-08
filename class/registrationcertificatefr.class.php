@@ -442,6 +442,7 @@ class RegistrationCertificateFr extends SaturneObject
 
         // Graph Title parameters
         $array['title'] = $langs->transnoentities('DashboardCarState');
+        $array['picto'] = 'fontawesome_fa-car_fas_#d35968';
         $array['name']  = 'DashboardCarState';
 
         // Graph parameters
