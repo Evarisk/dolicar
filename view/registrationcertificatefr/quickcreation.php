@@ -326,7 +326,7 @@ if (getDolGlobalInt('DOLICAR_PROJECT_QUICK_CREATION')) {
     require_once __DIR__ . '/../../../reedcrm/core/tpl/reedcrm_project_quickcreation.tpl.php';
 }
 
-print $form->buttonsSaveCancel('Create', '', [], 0, 'wpeo-button');
+print $form->buttonsSaveCancel('Create', 'Cancel', [], 0, 'wpeo-button');
 
 print '</form>';
 
