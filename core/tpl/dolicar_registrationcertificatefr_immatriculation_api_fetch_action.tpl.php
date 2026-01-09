@@ -57,9 +57,9 @@ if (dol_strlen($registrationNumber) > 0) {
 
 if (dol_strlen($username) > 0) {
     // Setup request to send json via POST
-    dol_syslog($apiUrl . '?RegistrationNumber=' . $registrationNumber . '&username=' . $username);
+    dol_syslog($apiUrl . '?RegistrationNumber=' . $registrationNumber . '&username=' . $username, LOG_ERR);
     $xmlData = @file_get_contents( $apiUrl . '?RegistrationNumber=' . $registrationNumber . '&username=' . $username);
-    dol_syslog($xmlData);
+    dol_syslog($xmlData, LOG_ERR);
     if (empty($xmlData)) {
         setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat'), [], 'errors');
         header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
