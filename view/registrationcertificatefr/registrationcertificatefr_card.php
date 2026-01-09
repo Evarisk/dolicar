@@ -167,7 +167,7 @@ if ($action == 'create') {
     print '</tr>';
     print '</table>';
     print '<div class="center">';
-    print '<input type="submit" class="button butAction" value="'. $langs->trans('Search') .'">';
+    print '<input type="submit" class="wpeo-button button butAction" value="'. $langs->trans('Search') .'">';
     print '</div>';
     print '</form>';
     print '<hr>';
