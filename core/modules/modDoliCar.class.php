@@ -203,7 +203,12 @@ class modDoliCar extends DolibarrModules
             // CONST MODULE
             $i++ => ['DOLICAR_VERSION','chaine', $this->version, '', 0, 'current'],
             $i++ => ['DOLICAR_DB_VERSION', 'chaine', $this->version, '', 0, 'current'],
-            $i   => ['DOLICAR_SHOW_PATCH_NOTE', 'integer', 1, '', 0, 'current'],
+            $i++   => ['DOLICAR_SHOW_PATCH_NOTE', 'integer', 1, '', 0, 'current'],
+
+            // CONST API
+            $i++ => ['DOLICAR_APIIMMATRICULATION_API_KEY', 'chaine', '', '', 0, 'current'],
+            $i++ => ['DOLICAR_IMMATRICULATION_API_USERNAME', 'chaine', '', '', 0, 'current'],
+            $i++ => ['DOLICAR_REGISTRATION_CERTIFICATE_API', 'chaine', 'immatriculationapi.com', '', 0, 'current'],
         ];
 
         if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
