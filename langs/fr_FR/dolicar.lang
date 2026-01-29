@@ -72,7 +72,7 @@ MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
 MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
 
 # Setup - Réglages
-ImmatriculationAPIConfig = Configuration de l'API immatriculationapi.com
+ImmatriculationAPIConfig = Configuration de l'API
 RemainingRequests        = Jetons de recherche de plaque d'immatriculation restants : %s
 
 
@@ -189,3 +189,12 @@ ObjectType             = Type d'objet
 Object                 = Objet
 Mileage                = Kilométrage
 NoLinkedObjectsToPrint = Pas d'objets liés à afficher
+
+
+#
+# API
+#
+
+RegistrationCertificateAPI = API la carte grise
+ImmatriculationAPIDefault = API par défaut : immatriculationapi.com
+APIPlaqueImmatriculationDesc = API : apiplaqueimmatriculation.com

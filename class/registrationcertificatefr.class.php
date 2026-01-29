@@ -394,6 +394,86 @@ class RegistrationCertificateFr extends SaturneObject
         return '';
     }
 
+    public function getRegistrationCertificateData($registrationNumber): array
+    {
+        global $conf, $db, $langs, $user;
+
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+        $api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API');
+
+        if (dol_strlen($registrationNumber) > 0) {
+            $registrationNumber = normalize_registration_number($registrationNumber);
+
+            $result = $this->fetch('', $registrationNumber);
+            if ($result > 0) {
+                setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
+                header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
+                exit;
+            }
+        }
+
+        if ($api == 'apiplaqueimmatriculation.com') {
+            $apiKey = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY');
+
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation='. $registrationNumber .'&token='. $apiKey .'&pays=FR',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST'
+            ));
+            $response = curl_exec($curl);
+            curl_close($curl);
+
+            $registrationCertificateObjectJson = json_decode($response);
+
+            if (is_object($registrationCertificateObjectJson->data)) {
+                $registrationCertificateObject = $registrationCertificateObjectJson->data;
+            }
+
+            return ['api' => $api, 'data' => $registrationCertificateObject];
+        }
+
+
+
+        if ($api == 'immatriculationapi.com') {
+            $username = getDolGlobalString('DOLICAR_IMMATRICULATION_API_USERNAME');
+            $apiUrl   = 'https://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
+
+            if (dol_strlen($username) > 0) {
+                dol_syslog($apiUrl . '?RegistrationNumber=' . $registrationNumber . '&username=' . $username, LOG_ERR);
+                $xmlData = @file_get_contents( $apiUrl . '?RegistrationNumber=' . $registrationNumber . '&username=' . $username);
+                dol_syslog($xmlData, LOG_ERR);
+                if (empty($xmlData)) {
+                    setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat'), [], 'errors');
+                    header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
+                    exit;
+                } else {
+                    $xml     = simplexml_load_string($xmlData);
+                    $strJson = $xml->vehicleJson;
+                    $registrationCertificateObject = json_decode($strJson);
+                    dolibarr_set_const($db, 'DOLICAR_API_REMAINING_REQUESTS_COUNTER', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER') - 1, 'integer', 0, '', $conf->entity);
+                    dolibarr_set_const($db, 'DOLICAR_API_REQUESTS_COUNTER', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER') + 1, 'integer', 0, '', $conf->entity);
+                    setEventMessages($langs->trans('LicencePlateInformationsCharged'), []);
+                    setEventMessages($langs->trans('RemainingRequests', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER')), []);
+
+                    return ['api' => $api, 'data' => $registrationCertificateObject];
+                }
+            } else {
+                setEventMessages($langs->trans('BadAPIUsername'), [], 'errors');
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
+                exit;
+            }
+        }
+
+        return [];
+    }
+
     /**
      * Load the dashboard
      *
