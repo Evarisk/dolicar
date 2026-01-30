@@ -420,8 +420,11 @@ class RegistrationCertificateFr extends SaturneObject
             curl_setopt_array($curl, array(
                 CURLOPT_URL => 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation='. $registrationNumber .'&token='. $apiKey .'&pays=FR',
                 CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_USERAGENT => $this->module . '-Agent/' . DOL_VERSION,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
+                CURLOPT_CONNECTTIMEOUT => 5,
                 CURLOPT_TIMEOUT => 0,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
