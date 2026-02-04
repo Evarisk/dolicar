@@ -55,8 +55,8 @@ if ($action == 'update') {
 	$error = 0;
 
 	$apiSelected = GETPOST('DOLICAR_REGISTRATION_CERTIFICATE_API', 'alpha');
+    $apiKey      = GETPOST('DOLICAR_APIIMMATRICULATION_API_KEY', 'alphanohtml');
 
-	// Validate that the API is one of the allowed values
 	$allowed_apis = array('immatriculationapi.com', 'apiplaqueimmatriculation.com');
 
 	if (in_array($apiSelected, $allowed_apis)) {
@@ -67,6 +67,10 @@ if ($action == 'update') {
 		$error++;
 	}
 
+    if (!dolibarr_set_const($db, 'DOLICAR_APIIMMATRICULATION_API_KEY', $apiKey, 'chaine', 0, '', $conf->entity)) {
+        $error++;
+    }
+
 	if (!$error) {
 		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
@@ -76,6 +80,7 @@ if ($action == 'update') {
 }
 
 $current_api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API', 'immatriculationapi.com');
+$current_api_key = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY', '');
 
 /*
  * View
@@ -123,8 +128,17 @@ print '</td><td class="opacitymedium">';
 print $langs->transnoentities('APIPlaqueImmatriculationDesc');
 print '</td></tr>';
 
+$styleApiKeyRow = ($current_api == 'apiplaqueimmatriculation.com') ? '' : ' style="display:none;"';
+print '<tr class="oddeven"' . $styleApiKeyRow . '>';
+print '<td class="nowraponall">';
+print $langs->trans('ApiKey') . ' (apiplaqueimmatriculation.com)';
+print '</td>';
+print '<td class="center">';
+print '<input class="flat minwidth300" type="text" name="DOLICAR_APIIMMATRICULATION_API_KEY" value="' . dol_escape_htmltag($current_api_key) . '">';
+print '</td></tr>';
 
-if ($apiSelected == 'immatriculationapi.com') {
+
+if ($current_api == 'immatriculationapi.com') {
     print '<tr class="oddeven"><td>';
     print $langs->transnoentities('RemainingRequests');
     print '</td><td class="center">';
