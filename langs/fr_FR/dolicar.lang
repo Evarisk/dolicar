@@ -189,6 +189,7 @@ ObjectType             = Type d'objet
 Object                 = Objet
 Mileage                = Kilométrage
 NoLinkedObjectsToPrint = Pas d'objets liés à afficher
+CarBrands              = Marques de véhicules
 
 
 #
@@ -198,3 +199,9 @@ NoLinkedObjectsToPrint = Pas d'objets liés à afficher
 RegistrationCertificateAPI = API la carte grise
 ImmatriculationAPIDefault = API par défaut : immatriculationapi.com
 APIPlaqueImmatriculationDesc = API : apiplaqueimmatriculation.com
+UpdateCarBrandsList    = Mettre à jour la liste
+CarBrandsUpdated       = La liste des marques a été mise à jour
+ErrorUpdateCarBrandsFromApi = Erreur lors de la mise à jour des marques depuis l''API : %s
+ErrorUpdateCarBrandsFromApiBadResponse = Réponse invalide de l''API lors de la mise à jour des marques
+ErrorUpdateCarBrandsFromApiNoData = Aucune donnée de marque trouvée dans la réponse de l''API
+ErrorUpdateCarBrandsFile = Impossible d''écrire le fichier car_brands.txt

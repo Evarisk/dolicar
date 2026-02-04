@@ -480,6 +480,89 @@ class RegistrationCertificateFr extends SaturneObject
     }
 
     /**
+     * Update car brands list file from apiplaqueimmatriculation.com API.
+     *
+     * @return int            >0 if OK, <0 if error
+     */
+    public static function updateCarBrandsFromApi(): int
+    {
+        global $conf, $langs;
+
+        // Endpoint provided in specs (example for brand id 93)
+        $baseUrl = 'https://api.apiplaqueimmatriculation.com/marques';
+
+        // Use configured API key if available, else fallback to demo token
+        $token = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY');
+
+        $url = $baseUrl . '?token=' . urlencode($token);
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_USERAGENT => 'dolicar-Agent/' . DOL_VERSION,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET'
+        ));
+
+        $response = curl_exec($curl);
+        $curlError = curl_error($curl);
+        curl_close($curl);
+
+        if ($response === false || !empty($curlError)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApi', $curlError), [], 'errors');
+            return -1;
+        }
+
+        $json = json_decode($response);
+
+        if (!is_object($json) || empty($json->success) || empty($json->data) || !is_array($json->data)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApiBadResponse'), [], 'errors');
+            return -2;
+        }
+
+        // Extract brand names from API response (nom_marque)
+        $brands = [];
+        foreach ($json->data as $item) {
+            if (is_object($item) && !empty($item->nom_marque)) {
+                $label = trim((string) $item->nom_marque);
+                if ($label !== '') {
+                    $brands[$label] = true; // use associative array to ensure uniqueness
+                }
+            }
+        }
+
+        if (empty($brands)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApiNoData'), [], 'errors');
+            return -3;
+        }
+
+        // Sort brands alphabetically
+        $brandLabels = array_keys($brands);
+        sort($brandLabels, SORT_NATURAL | SORT_FLAG_CASE);
+
+        // Path to car_brands.txt from this class file
+        $carBrandsFile = __DIR__ . '/../core/car_brands.txt';
+
+        $content = implode("\n", $brandLabels) . "\n";
+        $result = @file_put_contents($carBrandsFile, $content, LOCK_EX);
+
+        if ($result === false) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFile'), [], 'errors');
+            return -4;
+        }
+
+        setEventMessages($langs->trans('CarBrandsUpdated'), [], 'mesgs');
+        return 1;
+    }
+
+    /**
      * Load the dashboard
      *
      * @param array $regestrationCertifatesFr Array of registration certificates
