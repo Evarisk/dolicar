@@ -45,8 +45,12 @@ $registrationNumber = dol_strtoupper($registrationNumber);
 $apiData = $object->getRegistrationCertificateData($registrationNumber);
 $registrationCertificateObject = isset($apiData['data']) ? $apiData['data'] : null;
 $api = isset($apiData['api']) ? $apiData['api'] : '';
+$error = isset($apiData['error']) ? $apiData['error'] : '';
 
 if ($api == 'apiplaqueimmatriculation.com') {
+    if ($error) {
+        setEventMessages($error, [], 'errors');
+    }
     if (is_object($registrationCertificateObject)) {
 
         $conf->global->BARCODE_PRODUCT_ADDON_NUM = 0;

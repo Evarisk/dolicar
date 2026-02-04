@@ -437,6 +437,8 @@ class RegistrationCertificateFr extends SaturneObject
 
             if (is_object($registrationCertificateObjectJson->data)) {
                 $registrationCertificateObject = $registrationCertificateObjectJson->data;
+            } else if ($registrationCertificateObjectJson->code_erreur) {
+                return ['api' => $api, 'error' => $registrationCertificateObjectJson->message];
             }
 
             return ['api' => $api, 'data' => $registrationCertificateObject];
