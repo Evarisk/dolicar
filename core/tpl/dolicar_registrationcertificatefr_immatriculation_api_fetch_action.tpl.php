@@ -61,6 +61,8 @@ $error = isset($apiData['error']) ? $apiData['error'] : '';
 
 if ($api == 'apiplaqueimmatriculation.com') {
     if ($error) {
+        $_POST['a_registration_number'] = $registrationNumber;
+        $_POST['e_vehicle_serial_number'] = $vinNumber;
         setEventMessages($error, [], 'errors');
     }
     if (is_object($registrationCertificateObject)) {
@@ -300,7 +302,6 @@ if ($api == 'immatriculationapi.com') {
             }
         }
     }
-
 }
 
 $action = 'create';
