@@ -96,6 +96,9 @@ if ($api == 'apiplaqueimmatriculation.com') {
         $productLot->fk_product = $productId;
 
         $productLotID = $productLot->create($user);
+        if ($productLotID == -1) {
+            $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
+        }
         $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1,0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
 
         if ($productId > 0 && $productLotID > 0) {
@@ -231,6 +234,9 @@ if ($api == 'immatriculationapi.com') {
         $productLot->fk_product = $productId;
 
         $productLotID = $productLot->create($user);
+        if ($productLotID == -1) {
+            $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
+        }
         $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1,0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
 
         if ($productId > 0 && $productLotID > 0) {
