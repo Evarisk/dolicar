@@ -394,7 +394,7 @@ class RegistrationCertificateFr extends SaturneObject
         return '';
     }
 
-    public function getRegistrationCertificateData($registrationNumber): array
+    public function getRegistrationCertificateData($searchValue, $searchType = 'plaque'): array
     {
         global $conf, $db, $langs, $user;
 
@@ -402,23 +402,39 @@ class RegistrationCertificateFr extends SaturneObject
 
         $api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API');
 
-        if (dol_strlen($registrationNumber) > 0) {
-            $registrationNumber = normalize_registration_number($registrationNumber);
-
-            $result = $this->fetch('', $registrationNumber);
-            if ($result > 0) {
-                setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
-                header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
-                exit;
+        if (dol_strlen($searchValue) > 0) {
+            if ($searchType == 'plaque') {
+                $searchValue = normalize_registration_number($searchValue);
+                $result = $this->fetch('', $searchValue);
+                if ($result > 0) {
+                    setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
+                    header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
+                    exit;
+                }
+            } else {
+                $result = $this->fetch('', '', ' AND e_vehicle_serial_number = "' . $db->escape($searchValue) . '"');
+                if ($result > 0) {
+                    setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
+                    header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
+                    exit;
+                }
             }
         }
 
         if ($api == 'apiplaqueimmatriculation.com') {
             $apiKey = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY');
 
+            if ($searchType == 'vin') {
+                $url = 'https://api.apiplaqueimmatriculation.com/vin?vin=' . urlencode($searchValue) . '&token=' . urlencode($apiKey);
+                $httpMethod = 'GET';
+            } else {
+                $url = 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation=' . urlencode($searchValue) . '&token=' . urlencode($apiKey) . '&pays=FR';
+                $httpMethod = 'POST';
+            }
+
             $curl = curl_init();
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation='. $registrationNumber .'&token='. $apiKey .'&pays=FR',
+                CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_SSL_VERIFYPEER => false,
                 CURLOPT_USERAGENT => $this->module . '-Agent/' . DOL_VERSION,
@@ -428,20 +444,24 @@ class RegistrationCertificateFr extends SaturneObject
                 CURLOPT_TIMEOUT => 0,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST'
+                CURLOPT_CUSTOMREQUEST => $httpMethod
             ));
             $response = curl_exec($curl);
             curl_close($curl);
 
+
             $registrationCertificateObjectJson = json_decode($response);
 
-            if (is_object($registrationCertificateObjectJson->data)) {
-                $registrationCertificateObject = $registrationCertificateObjectJson->data;
-            } else if ($registrationCertificateObjectJson->code_erreur) {
-                return ['api' => $api, 'error' => $registrationCertificateObjectJson->message];
+            if (isset($registrationCertificateObjectJson->code_erreur) && $registrationCertificateObjectJson->code_erreur != 200) {
+                return ['api' => $api, 'error' => isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Error'];
             }
 
-            return ['api' => $api, 'data' => $registrationCertificateObject];
+            if (isset($registrationCertificateObjectJson->data) && is_object($registrationCertificateObjectJson->data)) {
+                $registrationCertificateObject = $registrationCertificateObjectJson->data;
+                return ['api' => $api, 'data' => $registrationCertificateObject];
+            }
+
+            return ['api' => $api, 'error' => isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Invalid API response'];
         }
 
 

@@ -40,12 +40,24 @@ if (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') <= 0) {
 }
 
 $registrationNumber = GETPOST('registrationNumber');
+$vinNumber = GETPOST('vinNumber');
 $registrationNumber = dol_strtoupper($registrationNumber);
+$vinNumber = dol_strtoupper($vinNumber);
 
-$apiData = $object->getRegistrationCertificateData($registrationNumber);
+// Use VIN if provided and not empty, otherwise use registration number
+if (!empty($vinNumber)) {
+    $searchValue = $vinNumber;
+    $searchType = 'vin';
+} else {
+    $searchValue = $registrationNumber;
+    $searchType = 'plaque';
+}
+
+$apiData = $object->getRegistrationCertificateData($searchValue, $searchType);
 $registrationCertificateObject = isset($apiData['data']) ? $apiData['data'] : null;
 $api = isset($apiData['api']) ? $apiData['api'] : '';
 $error = isset($apiData['error']) ? $apiData['error'] : '';
+
 
 if ($api == 'apiplaqueimmatriculation.com') {
     if ($error) {
@@ -88,16 +100,19 @@ if ($api == 'apiplaqueimmatriculation.com') {
 
         if ($productId > 0 && $productLotID > 0) {
 
+
             if (isset($createRegistrationCertificate) && $createRegistrationCertificate > 0) {
+
+                $finalRegistrationNumber = isset($registrationCertificateObject->plaque) ? $registrationCertificateObject->plaque : $registrationNumber;
 
                 $object->fk_product            = $productId;
                 $object->fk_lot                = $productLotID;
                 $object->fk_soc                = $parameters['thirdpartyID'];
                 $object->fk_project            = $parameters['projectID'];
-                $object->a_registration_number = $registrationNumber;
+                $object->a_registration_number = $finalRegistrationNumber;
 
                 $registrationDateArray = explode('-', $registrationCertificateObject->date1erCir_fr);
-                $sqlDate               = dol_mktime(12, 0, 0, $registrationDateArray[1], $registrationDateArray[0], $registrationDateArray[2]); // for date without hour, we use gmt
+                $sqlDate               = dol_mktime(12, 0, 0, (int)$registrationDateArray[1], (int)$registrationDateArray[0], (int)$registrationDateArray[2]); // for date without hour, we use gmt
 
                 $object->b_first_registration_date        = $sqlDate;
                 $object->d1_vehicle_brand                 = isset($registrationCertificateObject->marque) ? $registrationCertificateObject->marque : '';
@@ -120,7 +135,7 @@ if ($api == 'apiplaqueimmatriculation.com') {
                 $object->p2_maximum_net_power              = isset($registrationCertificateObject->puisFiscReelKW) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->puisFiscReelKW) : '';
                 $object->v9_environmental_category         = isset($registrationCertificateObject->energie) ? $registrationCertificateObject->energie : '';
                 $object->h_validity_period                 = isset($registrationCertificateObject->date30) ? $registrationCertificateObject->date30 : '';
-                
+
                 if (isset($registrationCertificateObject->date1erCir_us) && !empty($registrationCertificateObject->date1erCir_us)) {
                     $dateUs = explode('-', $registrationCertificateObject->date1erCir_us);
                     if (count($dateUs) == 3) {
@@ -138,9 +153,11 @@ if ($api == 'apiplaqueimmatriculation.com') {
                 $_POST['fk_product'] = $productId;
                 $_POST['fk_lot']     = $productLotID;
 
+                $finalRegistrationNumber = isset($registrationCertificateObject->plaque) ? $registrationCertificateObject->plaque : $registrationNumber;
+
                 $registrationDateArray = explode('-', $registrationCertificateObject->date1erCir_fr);
 
-                $_POST['a_registration_number']            = $registrationNumber;
+                $_POST['a_registration_number']            = $finalRegistrationNumber;
                 $_POST['b_first_registration_date']        = $registrationDateArray[0] . '/' . $registrationDateArray[1] . '/' . $registrationDateArray[2];
                 $_POST['b_first_registration_dateday']     = $registrationDateArray[0];
                 $_POST['b_first_registration_datemonth']   = $registrationDateArray[1];
@@ -166,7 +183,7 @@ if ($api == 'apiplaqueimmatriculation.com') {
                 $_POST['p2_maximum_net_power']             = isset($registrationCertificateObject->puisFiscReelKW) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->puisFiscReelKW) : '';
                 $_POST['v9_environmental_category']        = isset($registrationCertificateObject->energie) ? $registrationCertificateObject->energie : '';
                 $_POST['h_validity_period']                 = isset($registrationCertificateObject->date30) ? $registrationCertificateObject->date30 : '';
-                
+
                 if (isset($registrationCertificateObject->date1erCir_us) && !empty($registrationCertificateObject->date1erCir_us)) {
                     $dateUs = explode('-', $registrationCertificateObject->date1erCir_us);
                     if (count($dateUs) == 3) {
