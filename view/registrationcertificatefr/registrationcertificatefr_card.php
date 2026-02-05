@@ -163,8 +163,20 @@ if ($action == 'create') {
     print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber" value="'. GETPOST('a_registration_number') .'">';
     print '</td>';
     print '</tr>';
-    print '<tr>';
-    print '</tr>';
+    
+    // Add VIN search field only if API is apiplaqueimmatriculation.com
+    $current_api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API', 'immatriculationapi.com');
+    if ($current_api == 'apiplaqueimmatriculation.com') {
+        print '<tr>';
+        print '<td class="titlefieldcreate">';
+        print $langs->trans('FindVINInRepertory');
+        print '</td>';
+        print '<td class="valuefieldcreate">';
+        print '<input class="flat minwidth400 --success" id="vinNumber" name="vinNumber" value="'. GETPOST('vinNumber') .'">';
+        print '</td>';
+        print '</tr>';
+    }
+    
     print '</table>';
     print '<div class="center">';
     print '<input type="submit" class="wpeo-button button butAction" value="'. $langs->trans('Search') .'">';

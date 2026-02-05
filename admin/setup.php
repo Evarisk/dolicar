@@ -33,6 +33,7 @@ if (file_exists('../dolicar.main.inc.php')) {
 // Load DoliCar libraries
 require_once __DIR__ . '/../lib/dolicar.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $user;
@@ -55,8 +56,8 @@ if ($action == 'update') {
 	$error = 0;
 
 	$apiSelected = GETPOST('DOLICAR_REGISTRATION_CERTIFICATE_API', 'alpha');
+    $apiKey      = GETPOST('DOLICAR_APIIMMATRICULATION_API_KEY', 'alphanohtml');
 
-	// Validate that the API is one of the allowed values
 	$allowed_apis = array('immatriculationapi.com', 'apiplaqueimmatriculation.com');
 
 	if (in_array($apiSelected, $allowed_apis)) {
@@ -67,6 +68,10 @@ if ($action == 'update') {
 		$error++;
 	}
 
+    if (!dolibarr_set_const($db, 'DOLICAR_APIIMMATRICULATION_API_KEY', $apiKey, 'chaine', 0, '', $conf->entity)) {
+        $error++;
+    }
+
 	if (!$error) {
 		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
@@ -74,8 +79,22 @@ if ($action == 'update') {
 		$action = 'edit';
 	}
 }
+elseif ($action == 'update_car_brands') {
+    require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+
+    // CSRF token check (Dolibarr standard: compare with session newtoken)
+    $token = GETPOST('token', 'alphanohtml');
+    if (empty($_SESSION['newtoken']) || $token !== $_SESSION['newtoken']) {
+        accessforbidden('Bad token');
+    }
+
+    $result = RegistrationCertificateFr::updateCarBrandsFromApi();
+    // Always stay on setup page; messages are already set in the method
+    $action = 'edit';
+}
 
 $current_api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API', 'immatriculationapi.com');
+$current_api_key = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY', '');
 
 /*
  * View
@@ -123,8 +142,17 @@ print '</td><td class="opacitymedium">';
 print $langs->transnoentities('APIPlaqueImmatriculationDesc');
 print '</td></tr>';
 
+$styleApiKeyRow = ($current_api == 'apiplaqueimmatriculation.com') ? '' : ' style="display:none;"';
+print '<tr class="oddeven"' . $styleApiKeyRow . '>';
+print '<td class="nowraponall">';
+print $langs->trans('ApiKey') . ' (apiplaqueimmatriculation.com)';
+print '</td>';
+print '<td class="center">';
+print '<input class="flat minwidth300" type="text" name="DOLICAR_APIIMMATRICULATION_API_KEY" value="' . dol_escape_htmltag($current_api_key) . '">';
+print '</td></tr>';
 
-if ($apiSelected == 'immatriculationapi.com') {
+
+if ($current_api == 'immatriculationapi.com') {
     print '<tr class="oddeven"><td>';
     print $langs->transnoentities('RemainingRequests');
     print '</td><td class="center">';
@@ -138,6 +166,52 @@ print '<br><div class="center">';
 print '<input class="button button-save" type="submit" value="' . $langs->trans("Save") . '">';
 print '</div>';
 print '</form>';
+
+$carBrandsFile = __DIR__ . '/../core/car_brands.txt';
+$carBrands     = [];
+
+if (is_readable($carBrandsFile)) {
+    $lines = file($carBrandsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (is_array($lines)) {
+        foreach ($lines as $line) {
+            $brand = trim($line);
+            if ($brand !== '') {
+                $carBrands[] = $brand;
+            }
+        }
+    }
+}
+
+print '<br>';
+print load_fiche_titre($langs->transnoentities('CarBrands'), '', '');
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities('CarBrands') . '</td>';
+print '</tr>';
+
+if (!empty($carBrands)) {
+    $var = true;
+    foreach ($carBrands as $brand) {
+        $var = !$var;
+        print '<tr class="' . ($var ? 'oddeven' : 'even') . '">';
+        print '<td class="nowraponall">' . dol_escape_htmltag($brand) . '</td>';
+        print '</tr>';
+    }
+} else {
+    print '<tr class="oddeven"><td class="opacitymedium">' . $langs->transnoentities('NoData') . '</td></tr>';
+}
+
+print '</table>';
+
+print '<br>';
+print '<div class="center">';
+print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="update_car_brands">';
+print '<input class="button" type="submit" value="' . $langs->trans('UpdateCarBrandsList') . '">';
+print '</form>';
+print '</div>';
 
 print dol_get_fiche_end();
 llxFooter();

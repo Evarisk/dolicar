@@ -394,7 +394,7 @@ class RegistrationCertificateFr extends SaturneObject
         return '';
     }
 
-    public function getRegistrationCertificateData($registrationNumber): array
+    public function getRegistrationCertificateData($searchValue, $searchType = 'plaque'): array
     {
         global $conf, $db, $langs, $user;
 
@@ -402,23 +402,39 @@ class RegistrationCertificateFr extends SaturneObject
 
         $api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API');
 
-        if (dol_strlen($registrationNumber) > 0) {
-            $registrationNumber = normalize_registration_number($registrationNumber);
-
-            $result = $this->fetch('', $registrationNumber);
-            if ($result > 0) {
-                setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
-                header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
-                exit;
+        if (dol_strlen($searchValue) > 0) {
+            if ($searchType == 'plaque') {
+                $searchValue = normalize_registration_number($searchValue);
+                $result = $this->fetch('', $searchValue);
+                if ($result > 0) {
+                    setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
+                    header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
+                    exit;
+                }
+            } else {
+                $result = $this->fetch('', '', ' AND e_vehicle_serial_number = "' . $db->escape($searchValue) . '"');
+                if ($result > 0) {
+                    setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
+                    header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
+                    exit;
+                }
             }
         }
 
         if ($api == 'apiplaqueimmatriculation.com') {
             $apiKey = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY');
 
+            if ($searchType == 'vin') {
+                $url = 'https://api.apiplaqueimmatriculation.com/vin?vin=' . urlencode($searchValue) . '&token=' . urlencode($apiKey);
+                $httpMethod = 'GET';
+            } else {
+                $url = 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation=' . urlencode($searchValue) . '&token=' . urlencode($apiKey) . '&pays=FR';
+                $httpMethod = 'POST';
+            }
+
             $curl = curl_init();
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation='. $registrationNumber .'&token='. $apiKey .'&pays=FR',
+                CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_SSL_VERIFYPEER => false,
                 CURLOPT_USERAGENT => $this->module . '-Agent/' . DOL_VERSION,
@@ -428,18 +444,24 @@ class RegistrationCertificateFr extends SaturneObject
                 CURLOPT_TIMEOUT => 0,
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST'
+                CURLOPT_CUSTOMREQUEST => $httpMethod
             ));
             $response = curl_exec($curl);
             curl_close($curl);
 
+
             $registrationCertificateObjectJson = json_decode($response);
 
-            if (is_object($registrationCertificateObjectJson->data)) {
-                $registrationCertificateObject = $registrationCertificateObjectJson->data;
+            if (isset($registrationCertificateObjectJson->code_erreur) && $registrationCertificateObjectJson->code_erreur != 200) {
+                return ['api' => $api, 'error' => isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Error'];
             }
 
-            return ['api' => $api, 'data' => $registrationCertificateObject];
+            if (isset($registrationCertificateObjectJson->data) && is_object($registrationCertificateObjectJson->data)) {
+                $registrationCertificateObject = $registrationCertificateObjectJson->data;
+                return ['api' => $api, 'data' => $registrationCertificateObject];
+            }
+
+            return ['api' => $api, 'error' => isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Invalid API response'];
         }
 
 
@@ -475,6 +497,89 @@ class RegistrationCertificateFr extends SaturneObject
         }
 
         return [];
+    }
+
+    /**
+     * Update car brands list file from apiplaqueimmatriculation.com API.
+     *
+     * @return int            >0 if OK, <0 if error
+     */
+    public static function updateCarBrandsFromApi(): int
+    {
+        global $conf, $langs;
+
+        // Endpoint provided in specs (example for brand id 93)
+        $baseUrl = 'https://api.apiplaqueimmatriculation.com/marques';
+
+        // Use configured API key if available, else fallback to demo token
+        $token = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY');
+
+        $url = $baseUrl . '?token=' . urlencode($token);
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_USERAGENT => 'dolicar-Agent/' . DOL_VERSION,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET'
+        ));
+
+        $response = curl_exec($curl);
+        $curlError = curl_error($curl);
+        curl_close($curl);
+
+        if ($response === false || !empty($curlError)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApi', $curlError), [], 'errors');
+            return -1;
+        }
+
+        $json = json_decode($response);
+
+        if (!is_object($json) || empty($json->success) || empty($json->data) || !is_array($json->data)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApiBadResponse'), [], 'errors');
+            return -2;
+        }
+
+        // Extract brand names from API response (nom_marque)
+        $brands = [];
+        foreach ($json->data as $item) {
+            if (is_object($item) && !empty($item->nom_marque)) {
+                $label = trim((string) $item->nom_marque);
+                if ($label !== '') {
+                    $brands[$label] = true; // use associative array to ensure uniqueness
+                }
+            }
+        }
+
+        if (empty($brands)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApiNoData'), [], 'errors');
+            return -3;
+        }
+
+        // Sort brands alphabetically
+        $brandLabels = array_keys($brands);
+        sort($brandLabels, SORT_NATURAL | SORT_FLAG_CASE);
+
+        // Path to car_brands.txt from this class file
+        $carBrandsFile = __DIR__ . '/../core/car_brands.txt';
+
+        $content = implode("\n", $brandLabels) . "\n";
+        $result = @file_put_contents($carBrandsFile, $content, LOCK_EX);
+
+        if ($result === false) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFile'), [], 'errors');
+            return -4;
+        }
+
+        setEventMessages($langs->trans('CarBrandsUpdated'), [], 'mesgs');
+        return 1;
     }
 
     /**
