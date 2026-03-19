@@ -271,8 +271,6 @@ if ($api == 'immatriculationapi.com') {
                 $registrationCertificateId = $object->create($user);
 
                 $backtopage = dol_buildpath('custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
-                header('Location: ' . $backtopage);
-                exit;
             } else {
                 $_POST['fk_product'] = $productId;
                 $_POST['fk_lot']     = $productLotID;
