@@ -471,8 +471,8 @@ class RegistrationCertificateFr extends SaturneObject
             $apiUrl   = 'https://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
 
             if (dol_strlen($username) > 0) {
-                dol_syslog($apiUrl . '?RegistrationNumber=' . $registrationNumber . '&username=' . $username, LOG_ERR);
-                $xmlData = @file_get_contents( $apiUrl . '?RegistrationNumber=' . $registrationNumber . '&username=' . $username);
+                dol_syslog($apiUrl . '?RegistrationNumber=' . $searchValue . '&username=' . $username, LOG_ERR);
+                $xmlData = @file_get_contents( $apiUrl . '?RegistrationNumber=' . $searchValue . '&username=' . $username);
                 dol_syslog($xmlData, LOG_ERR);
                 if (empty($xmlData)) {
                     setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat'), [], 'errors');
