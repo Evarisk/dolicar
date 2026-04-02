@@ -114,9 +114,9 @@ $extraFields->fetch_name_optionals_label($actionComm->table_element);
 
 // Load object
 if ($id > 0) {
-    $registrationCertificateFR->fetch('', '', ' AND fk_lot = ' . $id);
+    $registrationCertificateFR->fetch(0, '', ' AND fk_lot = ' . $id);
 } else {
-    $registrationCertificateFR->fetch('', '', ' AND a_registration_number = ' . "'" . $registrationNumber . "'");
+    $registrationCertificateFR->fetch(0, '', ' AND a_registration_number = ' . "'" . $registrationNumber . "'");
     $id = $registrationCertificateFR->fk_lot;
 }
 $productLot->fetch($id);

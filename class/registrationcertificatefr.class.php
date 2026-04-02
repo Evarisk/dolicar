@@ -298,11 +298,11 @@ class RegistrationCertificateFr extends SaturneObject
     /**
      * Create object into database
      *
-     * @param  User $user      User that creates
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, ID of created object if OK
+     * @param  User        $user      User that creates
+     * @param  int<0,1>    $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,max>            Return integer 0 < if KO, ID of created object if OK
      */
-    public function create(User $user, bool $notrigger = false): int
+    public function create(User $user, int $noTrigger = 0): int
     {
         global $langs;
 
@@ -320,7 +320,7 @@ class RegistrationCertificateFr extends SaturneObject
             $this->d1_vehicle_brand = $langs->transnoentities('DefaultBrand');
         }
 
-        return $this->createCommon($user, $notrigger);
+        return $this->createCommon($user, $noTrigger);
     }
 
     /**
@@ -405,14 +405,14 @@ class RegistrationCertificateFr extends SaturneObject
         if (dol_strlen($searchValue) > 0) {
             if ($searchType == 'plaque') {
                 $searchValue = normalize_registration_number($searchValue);
-                $result = $this->fetch('', $searchValue);
+                $result = $this->fetch(0, $searchValue);
                 if ($result > 0) {
                     setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
                     header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
                     exit;
                 }
             } else {
-                $result = $this->fetch('', '', ' AND e_vehicle_serial_number = "' . $db->escape($searchValue) . '"');
+                $result = $this->fetch(0, '', ' AND e_vehicle_serial_number = "' . $db->escape($searchValue) . '"');
                 if ($result > 0) {
                     setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
                     header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
