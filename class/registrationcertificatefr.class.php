@@ -326,11 +326,11 @@ class RegistrationCertificateFr extends SaturneObject
     /**
      * Update object into database
      *
-     * @param  User $user      User that modifies
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User       $user      User that modifies
+     * @param  int<0,1>   $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,max>           Return integer 0 < if KO, ID of created object if OK
      */
-    public function update(User $user, bool $notrigger = false): int
+    public function update(User $user, int $noTrigger = 0): int
     {
         global $langs;
 
@@ -341,7 +341,7 @@ class RegistrationCertificateFr extends SaturneObject
         if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
             $this->d1_vehicle_brand = $langs->transnoentities('DefaultBrand');
         }
-        return $this->updateCommon($user, $notrigger);
+        return $this->updateCommon($user, $noTrigger);
     }
 
     /**
@@ -377,21 +377,6 @@ class RegistrationCertificateFr extends SaturneObject
         }
 
         return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
-    }
-
-    /**
-     * Sets object to supplied categories
-     *
-     * Deletes object from existing categories not supplied
-     * Adds it to non-existing supplied categories
-     * Existing categories are left untouched
-     *
-     * @param  int[]|int $categories Category or categories IDs
-     * @return string
-     */
-    public function setCategories($categories): string
-    {
-        return '';
     }
 
     public function getRegistrationCertificateData($searchValue, $searchType = 'plaque'): array
