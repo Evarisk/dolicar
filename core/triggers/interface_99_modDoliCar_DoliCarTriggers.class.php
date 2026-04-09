@@ -87,8 +87,10 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $actionComm->userownerid = $user->id;
         $actionComm->percentage  = -1;
 
-        if (getDolGlobalInt('DOLICAR_ADVANCED_TRIGGER') && !empty($object->fields)) {
-            $actionComm->note_private = method_exists($object, 'getTriggerDescription') ? $object->getTriggerDescription($object) : '';
+        if (getDolGlobalInt('DOLICAR_ADVANCED_TRIGGER') === 1 &&
+            method_exists($object, 'getTriggerDescription') &&
+            !empty($object->fields)) {
+            $actionComm->note_private = $object->getTriggerDescription();
         }
 
         $objects      = ['REGISTRATIONCERTIFICATEFR'];
