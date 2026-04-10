@@ -107,7 +107,7 @@ class ActionsDoliCar
                         $extrafields->attributes[$object->element]['list'][$extraFieldsName] = 1;
                     }
 
-                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
+                    $registrationCertificateFr->fetch(GETPOSTINT('options_registrationcertificatefr'));
                     $product->fetch($registrationCertificateFr->fk_product);
 
                     $_POST['options_registration_number'] = $registrationCertificateFr->a_registration_number;
