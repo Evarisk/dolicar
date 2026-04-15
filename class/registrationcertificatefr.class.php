@@ -63,6 +63,7 @@ class RegistrationCertificateFr extends SaturneObject
      */
     public string $picto = 'fontawesome_fa-car_fas_#d35968';
 
+    public const STATUS_DRAFT     = -2;
     public const STATUS_DELETED   = -1;
     public const STATUS_VALIDATED = 1;
     public const STATUS_LOCKED    = 2;
@@ -307,8 +308,10 @@ class RegistrationCertificateFr extends SaturneObject
         global $langs;
 
         $registrationNumber          = normalize_registration_number(dol_strtoupper($this->a_registration_number));
-        $this->ref                   = $registrationNumber;
         $this->a_registration_number = $registrationNumber;
+        // DRAFT rows act as a hidden API-payload cache keyed by plaque. Prefix the ref so that
+        // the validated clone (which uses plaque as ref) does not collide with the draft.
+        $this->ref = ($this->status == self::STATUS_DRAFT) ? 'DRAFT_' . $registrationNumber : $registrationNumber;
 
         if (empty($this->fk_product) || $this->fk_product == -1) {
             $this->fk_product = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
@@ -357,10 +360,12 @@ class RegistrationCertificateFr extends SaturneObject
             global $langs;
 
             $this->labelStatus[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
+            $this->labelStatus[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('Draft');
             $this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
             $this->labelStatus[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
 
             $this->labelStatusShort[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
+            $this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('Draft');
             $this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
             $this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
         }
@@ -390,20 +395,39 @@ class RegistrationCertificateFr extends SaturneObject
         if (dol_strlen($searchValue) > 0) {
             if ($searchType == 'plaque') {
                 $searchValue = normalize_registration_number($searchValue);
-                $result = $this->fetch(0, $searchValue);
-                if ($result > 0) {
-                    setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
-                    header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
-                    exit;
-                }
+                $plaqueFilter = $searchValue;
+                $vinFilter    = '';
             } else {
-                $result = $this->fetch(0, '', ' AND e_vehicle_serial_number = "' . $db->escape($searchValue) . '"');
-                if ($result > 0) {
-                    setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
-                    header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
-                    exit;
-                }
+                $plaqueFilter = '';
+                $vinFilter    = $searchValue;
             }
+
+            // First, look up any existing DRAFT (hidden cache row) for this plaque/VIN and reuse its stored API payload.
+            $draftFilter = ' AND status = ' . self::STATUS_DRAFT;
+            if ($plaqueFilter !== '') {
+                $draftFilter .= ' AND a_registration_number = "' . $db->escape($plaqueFilter) . '"';
+            } else {
+                $draftFilter .= ' AND e_vehicle_serial_number = "' . $db->escape($vinFilter) . '"';
+            }
+            $draftCache = new self($this->db);
+            if ($draftCache->fetch(0, '', $draftFilter) > 0 && !empty($draftCache->json)) {
+                // Do NOT populate $this here: the caller will create a fresh VALIDATED row from the returned payload.
+                return ['api' => $api, 'data' => json_decode($draftCache->json), 'cached' => true, 'draft_id' => $draftCache->id];
+            }
+
+            // Then, look up an already-validated certificate and redirect to it.
+            if ($plaqueFilter !== '') {
+                $result = $this->fetch(0, $plaqueFilter);
+            } else {
+                $result = $this->fetch(0, '', ' AND e_vehicle_serial_number = "' . $db->escape($vinFilter) . '"');
+            }
+            if ($result > 0 && $this->status != self::STATUS_DRAFT) {
+                setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
+                header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
+                exit;
+            }
+            // Reset $this in case fetch populated it with unrelated data
+            $this->id = 0;
         }
 
         if ($api == 'apiplaqueimmatriculation.com') {

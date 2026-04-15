@@ -152,6 +152,9 @@ LessThanHundredApiRequestsRemaining   = Il vous reste moins de 10 jetons de rech
 LicencePlateWasAlreadyExisting        = La plaque d'immatriculation existe déjà, vous avez été redirigé(e) sur sa page.
 BadAPIUsernameOrBadLicencePlateFormat = Mauvais nom d'utilisateur ou format de plaque d'immatriculation. <br> Veuillez utiliser l'un des formats suivants pour la plaque d'immatriculation : <br><b> XX-111-XX <br>  XX111XX </b>
 LicencePlateInformationsCharged       = Les informations de la carte grise ont bien été récupérées
+LicencePlateDraftCacheHit             = Les informations de cette plaque ont été récupérées depuis un brouillon précédent. Aucun jeton API n'a été consommé.
+LicencePlateDraftSaveFailed           = Impossible d'enregistrer le brouillon de la plaque. Un nouvel appel API sera nécessaire en cas de nouvelle tentative.
+LicencePlateCertificateCreationFailed = Erreur lors de la création de la carte grise. Le brouillon a été conservé, vous pouvez réessayer sans consommer de jeton API.
 BadAPIUsername                        = Nom d'utilisateur pour l'API invalide
 
 # QuickCreation - Ajout rapide

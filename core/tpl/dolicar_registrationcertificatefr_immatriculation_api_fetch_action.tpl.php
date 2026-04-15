@@ -57,6 +57,35 @@ $apiData = $object->getRegistrationCertificateData($searchValue, $searchType);
 $registrationCertificateObject = isset($apiData['data']) ? $apiData['data'] : null;
 $api = isset($apiData['api']) ? $apiData['api'] : '';
 $error = isset($apiData['error']) ? $apiData['error'] : '';
+$cachedDraft = !empty($apiData['cached']);
+
+// Inform the user when cached data is being reused (no API token consumed this time).
+if ($cachedDraft && is_object($registrationCertificateObject)) {
+    setEventMessages($langs->trans('LicencePlateDraftCacheHit'), [], 'mesgs');
+}
+
+// Persist raw API payload as a hidden DRAFT row (cache) so a failure during product/lot creation does not lose the data.
+// On retry with the same plaque/VIN, getRegistrationCertificateData() reuses this draft instead of calling the API again.
+// The DRAFT lives in a separate row with a prefixed ref; the VALIDATED certificate is created later as a clone ($object).
+if (!$error && is_object($registrationCertificateObject) && !$cachedDraft) {
+    if ($api == 'apiplaqueimmatriculation.com') {
+        $draftPlaque = !empty($registrationCertificateObject->plaque) ? $registrationCertificateObject->plaque : $registrationNumber;
+        $draftVin    = !empty($registrationCertificateObject->vin) ? $registrationCertificateObject->vin : $vinNumber;
+    } else {
+        $draftPlaque = !empty($registrationNumber) ? $registrationNumber : $searchValue;
+        $draftVin    = (!empty($registrationCertificateObject->ExtendedData) && !empty($registrationCertificateObject->ExtendedData->numSerieMoteur)) ? $registrationCertificateObject->ExtendedData->numSerieMoteur : $vinNumber;
+    }
+    if (!empty($draftPlaque)) {
+        $draftCache                          = new RegistrationCertificateFr($db);
+        $draftCache->a_registration_number   = $draftPlaque;
+        $draftCache->e_vehicle_serial_number = $draftVin;
+        $draftCache->json                    = json_encode($registrationCertificateObject);
+        $draftCache->status                  = RegistrationCertificateFr::STATUS_DRAFT;
+        if ($draftCache->create($user) <= 0) {
+            setEventMessages($langs->trans('LicencePlateDraftSaveFailed'), [], 'warnings');
+        }
+    }
+}
 
 
 if ($api == 'apiplaqueimmatriculation.com') {
@@ -151,6 +180,11 @@ if ($api == 'apiplaqueimmatriculation.com') {
                 $object->json = json_encode($registrationCertificateObject);
 
                 $registrationCertificateId = $object->create($user);
+                if ($registrationCertificateId <= 0) {
+                    setEventMessages($langs->trans('LicencePlateCertificateCreationFailed'), $object->errors, 'errors');
+                } else {
+                    setEventMessages($langs->trans('LicencePlateInformationsCharged'), [], 'mesgs');
+                }
 
                 $backtopage = dol_buildpath('custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
             } else {
@@ -269,6 +303,11 @@ if ($api == 'immatriculationapi.com') {
                 $object->json = json_encode($registrationCertificateObject);
 
                 $registrationCertificateId = $object->create($user);
+                if ($registrationCertificateId <= 0) {
+                    setEventMessages($langs->trans('LicencePlateCertificateCreationFailed'), $object->errors, 'errors');
+                } else {
+                    setEventMessages($langs->trans('LicencePlateInformationsCharged'), [], 'mesgs');
+                }
 
                 $backtopage = dol_buildpath('custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
             } else {
