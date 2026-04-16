@@ -59,6 +59,11 @@ class RegistrationCertificateFr extends SaturneObject
     public $isextrafieldmanaged = 1;
 
     /**
+     * @var int Does object support categories ? 0 = No, 1 = Yes
+     */
+    public int $isCategoryManaged = 0;
+
+    /**
      * @var string Name of icon for registrationcertificatefr. Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size') or 'registrationcertificatefr@dolicar' if picto is file 'img/object_registrationcertificatefr.png'
      */
     public string $picto = 'fontawesome_fa-car_fas_#d35968';
