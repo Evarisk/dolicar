@@ -39,32 +39,31 @@ if (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') <= 0) {
     setEventMessages($langs->trans('LessThanHundredApiRequestsRemaining'), [], 'warnings');
 }
 
-$registrationNumber = GETPOST('registrationNumber');
-$vinNumber = GETPOST('vinNumber');
-$registrationNumber = dol_strtoupper($registrationNumber);
-$vinNumber = dol_strtoupper($vinNumber);
+$registrationNumber = dol_strtoupper(GETPOST('registrationNumber'));
+$vinNumber          = dol_strtoupper(GETPOST('vinNumber'));
 
 // Use VIN if provided and not empty, otherwise use registration number
 if (!empty($vinNumber)) {
     $searchValue = $vinNumber;
-    $searchType = 'vin';
+    $searchType  = 'vin';
 } else {
     $searchValue = $registrationNumber;
-    $searchType = 'plaque';
+    $searchType  = 'plaque';
 }
 
-$apiData = $object->getRegistrationCertificateData($searchValue, $searchType);
-$registrationCertificateObject = isset($apiData['data']) ? $apiData['data'] : null;
-$api = isset($apiData['api']) ? $apiData['api'] : '';
-$error = isset($apiData['error']) ? $apiData['error'] : '';
-
+$apiData                       = $object->getRegistrationCertificateData($searchValue, $searchType);
+$registrationCertificateObject = isset($apiData['data'])     ? $apiData['data']     : null;
+$api                           = isset($apiData['api'])      ? $apiData['api']      : '';
+$error                         = isset($apiData['error'])    ? $apiData['error']    : '';
+$draftId                       = isset($apiData['draft_id']) ? (int)$apiData['draft_id'] : 0;
 
 if ($api == 'apiplaqueimmatriculation.com') {
     if ($error) {
-        $_POST['a_registration_number'] = $registrationNumber;
+        $_POST['a_registration_number']  = $registrationNumber;
         $_POST['e_vehicle_serial_number'] = $vinNumber;
         setEventMessages($error, [], 'errors');
     }
+
     if (is_object($registrationCertificateObject)) {
 
         $conf->global->BARCODE_PRODUCT_ADDON_NUM = 0;
@@ -101,15 +100,26 @@ if ($api == 'apiplaqueimmatriculation.com') {
         if ($productLotID == -1) {
             $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
         }
-        $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1,0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
+        $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
 
         if ($productId > 0 && $productLotID > 0) {
-
 
             if (isset($createRegistrationCertificate) && $createRegistrationCertificate > 0) {
 
                 $finalRegistrationNumber = isset($registrationCertificateObject->plaque) ? $registrationCertificateObject->plaque : $registrationNumber;
 
+                // Save a draft on first attempt so API data is preserved even if this process fails
+                if ($draftId == 0) {
+                    $draftObject                          = new RegistrationCertificateFr($db);
+                    $draftObject->a_registration_number   = $finalRegistrationNumber;
+                    $draftObject->e_vehicle_serial_number = isset($registrationCertificateObject->vin) ? $registrationCertificateObject->vin : '';
+                    $draftObject->json                    = json_encode($registrationCertificateObject);
+                    $draftObject->status                  = RegistrationCertificateFr::STATUS_DRAFT;
+                    $draftId = $draftObject->create($user);
+                }
+
+                // Load the draft and promote it to validated with full data
+                $object->fetch($draftId);
                 $object->fk_product            = $productId;
                 $object->fk_lot                = $productLotID;
                 $object->fk_soc                = $parameters['thirdpartyID'];
@@ -117,7 +127,7 @@ if ($api == 'apiplaqueimmatriculation.com') {
                 $object->a_registration_number = $finalRegistrationNumber;
 
                 $registrationDateArray = explode('-', $registrationCertificateObject->date1erCir_fr);
-                $sqlDate               = dol_mktime(12, 0, 0, (int)$registrationDateArray[1], (int)$registrationDateArray[0], (int)$registrationDateArray[2]); // for date without hour, we use gmt
+                $sqlDate               = dol_mktime(12, 0, 0, (int)$registrationDateArray[1], (int)$registrationDateArray[0], (int)$registrationDateArray[2]);
 
                 $object->b_first_registration_date        = $sqlDate;
                 $object->d1_vehicle_brand                 = isset($registrationCertificateObject->marque) ? $registrationCertificateObject->marque : '';
@@ -131,15 +141,15 @@ if ($api == 'apiplaqueimmatriculation.com') {
                 $object->p6_national_administrative_power = isset($registrationCertificateObject->puisFisc) ? (int)$registrationCertificateObject->puisFisc : '';
                 $object->s1_seating_capacity              = isset($registrationCertificateObject->nr_passagers) ? (int)$registrationCertificateObject->nr_passagers : '';
                 $object->v7_co2_emission                  = isset($registrationCertificateObject->co2) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->co2) : '';
-                $object->f2_ptac                           = isset($registrationCertificateObject->ptac) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->ptac) : '';
+                $object->f2_ptac                          = isset($registrationCertificateObject->ptac) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->ptac) : '';
                 $object->g_vehicle_weight                 = isset($registrationCertificateObject->poids) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->poids) : '';
                 $object->j2_european_bodywork             = isset($registrationCertificateObject->carrosserieCG) ? $registrationCertificateObject->carrosserieCG : '';
-                $object->j3_national_bodywork              = isset($registrationCertificateObject->carrosserie) ? $registrationCertificateObject->carrosserie : '';
-                $object->j_vehicle_category                = isset($registrationCertificateObject->genreVCGNGC) ? $registrationCertificateObject->genreVCGNGC : '';
-                $object->k_type_approval_number            = isset($registrationCertificateObject->type_mine) ? $registrationCertificateObject->type_mine : '';
-                $object->p2_maximum_net_power              = isset($registrationCertificateObject->puisFiscReelKW) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->puisFiscReelKW) : '';
-                $object->v9_environmental_category         = isset($registrationCertificateObject->energie) ? $registrationCertificateObject->energie : '';
-                $object->h_validity_period                 = isset($registrationCertificateObject->date30) ? $registrationCertificateObject->date30 : '';
+                $object->j3_national_bodywork             = isset($registrationCertificateObject->carrosserie) ? $registrationCertificateObject->carrosserie : '';
+                $object->j_vehicle_category               = isset($registrationCertificateObject->genreVCGNGC) ? $registrationCertificateObject->genreVCGNGC : '';
+                $object->k_type_approval_number           = isset($registrationCertificateObject->type_mine) ? $registrationCertificateObject->type_mine : '';
+                $object->p2_maximum_net_power             = isset($registrationCertificateObject->puisFiscReelKW) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->puisFiscReelKW) : '';
+                $object->v9_environmental_category        = isset($registrationCertificateObject->energie) ? $registrationCertificateObject->energie : '';
+                $object->h_validity_period                = isset($registrationCertificateObject->date30) ? $registrationCertificateObject->date30 : '';
 
                 if (isset($registrationCertificateObject->date1erCir_us) && !empty($registrationCertificateObject->date1erCir_us)) {
                     $dateUs = explode('-', $registrationCertificateObject->date1erCir_us);
@@ -148,9 +158,10 @@ if ($api == 'apiplaqueimmatriculation.com') {
                     }
                 }
 
-                $object->json = json_encode($registrationCertificateObject);
+                $object->json   = json_encode($registrationCertificateObject);
+                $object->status = RegistrationCertificateFr::STATUS_VALIDATED;
 
-                $registrationCertificateId = $object->create($user);
+                $registrationCertificateId = $object->update($user);
 
                 $backtopage = dol_buildpath('custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
             } else {
@@ -184,10 +195,10 @@ if ($api == 'apiplaqueimmatriculation.com') {
                 $_POST['j2_european_bodywork']             = isset($registrationCertificateObject->carrosserieCG) ? $registrationCertificateObject->carrosserieCG : '';
                 $_POST['j3_national_bodywork']             = isset($registrationCertificateObject->carrosserie) ? $registrationCertificateObject->carrosserie : '';
                 $_POST['j_vehicle_category']               = isset($registrationCertificateObject->genreVCGNGC) ? $registrationCertificateObject->genreVCGNGC : '';
-                $_POST['k_type_approval_number']            = isset($registrationCertificateObject->type_mine) ? $registrationCertificateObject->type_mine : '';
+                $_POST['k_type_approval_number']           = isset($registrationCertificateObject->type_mine) ? $registrationCertificateObject->type_mine : '';
                 $_POST['p2_maximum_net_power']             = isset($registrationCertificateObject->puisFiscReelKW) ? preg_replace('/[^0-9]/', '', $registrationCertificateObject->puisFiscReelKW) : '';
                 $_POST['v9_environmental_category']        = isset($registrationCertificateObject->energie) ? $registrationCertificateObject->energie : '';
-                $_POST['h_validity_period']                 = isset($registrationCertificateObject->date30) ? $registrationCertificateObject->date30 : '';
+                $_POST['h_validity_period']                = isset($registrationCertificateObject->date30) ? $registrationCertificateObject->date30 : '';
 
                 if (isset($registrationCertificateObject->date1erCir_us) && !empty($registrationCertificateObject->date1erCir_us)) {
                     $dateUs = explode('-', $registrationCertificateObject->date1erCir_us);
@@ -239,10 +250,23 @@ if ($api == 'immatriculationapi.com') {
         if ($productLotID == -1) {
             $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
         }
-        $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1,0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
+        $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
 
         if ($productId > 0 && $productLotID > 0) {
             if (isset($createRegistrationCertificate) && $createRegistrationCertificate > 0) {
+
+                // Save a draft on first attempt so API data is preserved even if this process fails
+                if ($draftId == 0) {
+                    $draftObject                          = new RegistrationCertificateFr($db);
+                    $draftObject->a_registration_number   = $registrationNumber;
+                    $draftObject->e_vehicle_serial_number = $registrationCertificateObject->ExtendedData->numSerieMoteur;
+                    $draftObject->json                    = json_encode($registrationCertificateObject);
+                    $draftObject->status                  = RegistrationCertificateFr::STATUS_DRAFT;
+                    $draftId = $draftObject->create($user);
+                }
+
+                // Load the draft and promote it to validated with full data
+                $object->fetch($draftId);
                 $object->fk_product            = $productId;
                 $object->fk_lot                = $productLotID;
                 $object->fk_soc                = $parameters['thirdpartyID'];
@@ -250,7 +274,7 @@ if ($api == 'immatriculationapi.com') {
                 $object->a_registration_number = $registrationNumber;
 
                 $registrationDateArray = str_split($registrationCertificateObject->ExtendedData->datePremiereMiseCirculation, 2);
-                $sqlDate               = dol_mktime(12, 0, 0, $registrationDateArray[1], $registrationDateArray[0], $registrationDateArray[2] . $registrationDateArray[3]); // for date without hour, we use gmt
+                $sqlDate               = dol_mktime(12, 0, 0, $registrationDateArray[1], $registrationDateArray[0], $registrationDateArray[2] . $registrationDateArray[3]);
 
                 $object->b_first_registration_date        = $sqlDate;
                 $object->d1_vehicle_brand                 = $registrationCertificateObject->CarMake->CurrentTextValue;
@@ -266,9 +290,10 @@ if ($api == 'immatriculationapi.com') {
                 $object->s1_seating_capacity              = $registrationCertificateObject->ExtendedData->nbPlace;
                 $object->v7_co2_emission                  = $registrationCertificateObject->ExtendedData->Co2;
 
-                $object->json = json_encode($registrationCertificateObject);
+                $object->json   = json_encode($registrationCertificateObject);
+                $object->status = RegistrationCertificateFr::STATUS_VALIDATED;
 
-                $registrationCertificateId = $object->create($user);
+                $registrationCertificateId = $object->update($user);
 
                 $backtopage = dol_buildpath('custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
             } else {
@@ -296,7 +321,6 @@ if ($api == 'immatriculationapi.com') {
                 $_POST['v7_co2_emission']                  = $registrationCertificateObject->ExtendedData->Co2;
 
                 $_POST['json'] = json_encode($registrationCertificateObject);
-
             }
         }
     }
