@@ -228,6 +228,30 @@ class ActionsDoliCar
     }
 
     /**
+     * Overloading the formDolBanner function : replacing the parent's function with the one below
+     *
+     * @param  array        $parameters Hook metadatas (context, etc...)
+     * @param  CommonObject $object     Current object
+     * @return int                      0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function formDolBanner(array $parameters, $object): int
+    {
+        if (strpos($parameters['context'], 'productlotcard') !== false) {
+            $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+            $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 1, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
+
+            if (is_array($registrationCertificates) && !empty($registrationCertificates)) {
+                $registrationCertificateFr = reset($registrationCertificates);
+                $this->resprints  = '<div class="refidno">';
+                $this->resprints .= $registrationCertificateFr->getNomUrl(1);
+                $this->resprints .= '</div>';
+            }
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
      * Overloading the printCommonFooter function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadatas (context, etc...)
