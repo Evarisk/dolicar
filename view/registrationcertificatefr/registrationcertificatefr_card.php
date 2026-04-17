@@ -271,7 +271,7 @@ if (($id || $ref) && $action == 'edit') {
         }
     }
     print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOST('fk_lot') > 0 ? GETPOST('fk_lot') : $object->fk_lot, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
-    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : $object->fk_product) . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
+    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : ($object->fk_product > 0 ? '&fk_product=' . $object->fk_product : '')) . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
     print '</td></tr>';
 
     // Common attributes
