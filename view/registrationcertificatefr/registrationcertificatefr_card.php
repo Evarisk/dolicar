@@ -57,6 +57,8 @@ $cancel              = GETPOST('cancel', 'aZ09');
 $contextpage         = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'registrationcertificatefrcard'; // To manage different context of search
 $backtopage          = GETPOST('backtopage', 'alpha');
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
+$fromtype            = GETPOST('fromtype', 'alpha');
+$fromid              = GETPOSTINT('fromid');
 
 // Initialize technical objects
 $object      = new RegistrationCertificateFr($db);
@@ -198,21 +200,30 @@ if ($action == 'create') {
 
     print '<table class="border centpercent tableforfieldcreate">';
 
-    $object->fields['fk_product']['default']       = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
-    $object->fields['d1_vehicle_brand']['default'] = get_vehicle_brand(GETPOSTINT('fk_product'));
+    // Pre-fill fk_product and fk_lot when creating from a product lot
+    $fkProductDefault = GETPOSTINT('fk_product');
+    $fkLotDefault     = GETPOSTINT('fk_lot');
+    if ($fromtype === 'productlot' && $fromid > 0 && $fkLotDefault <= 0) {
+        $productLot->fetch($fromid);
+        $fkProductDefault = $fkProductDefault > 0 ? $fkProductDefault : (int)$productLot->fk_product;
+        $fkLotDefault     = $fromid;
+    }
+
+    $object->fields['fk_product']['default']       = $fkProductDefault > 0 ? $fkProductDefault : getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
+    $object->fields['d1_vehicle_brand']['default'] = get_vehicle_brand($fkProductDefault);
 
     // Fk_lot
     print'<tr class="field_fk_lot"><td>';
     print $langs->trans('DolicarBatch');
     print '</td><td>';
     $productLotsData = [];
-    $productLots     = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . GETPOSTINT('fk_product')]);
+    $productLots     = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . ($fkProductDefault > 0 ? $fkProductDefault : 0)]);
     if (is_array($productLots) && !empty($productLots)) {
         foreach ($productLots as $productLotSingle) {
             $productLotsData[$productLotSingle->id] = $productLotSingle->batch;
         }
     }
-    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOSTINT('fk_lot'), $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
+    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, $fkLotDefault, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
     print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . (GETPOSTISSET('fk_product') && GETPOST('fk_product') > 0 ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
     print '</td></tr>';
 
