@@ -68,6 +68,7 @@ class RegistrationCertificateFr extends SaturneObject
      */
     public string $picto = 'fontawesome_fa-car_fas_#d35968';
 
+    public const STATUS_DRAFT     = 0;
     public const STATUS_DELETED   = -1;
     public const STATUS_VALIDATED = 1;
     public const STATUS_LOCKED    = 2;
@@ -122,7 +123,7 @@ class RegistrationCertificateFr extends SaturneObject
         'date_creation'                       => ['type' => 'datetime',     'label' => 'DateCreation',                  'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 2],
         'tms'                                 => ['type' => 'timestamp',    'label' => 'DateModification',              'enabled' => 1, 'position' => 50,  'notnull' => 0, 'visible' => -2],
         'import_key'                          => ['type' => 'varchar(14)',  'label' => 'ImportId',                      'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => -2],
-        'status'                              => ['type' => 'integer',      'label' => 'Status',                        'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => -2, 'index' => 1, 'default' => 1, 'arrayofkeyval' => [1 => 'Validated', 3 => 'Archived']],
+        'status'                              => ['type' => 'integer',      'label' => 'Status',                        'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => -2, 'index' => 1, 'default' => 1, 'arrayofkeyval' => [0 => 'Draft', 1 => 'Validated', 3 => 'Archived']],
         'a_registration_number'               => ['type' => 'varchar(128)', 'label' => 'RegistrationNumber',            'enabled' => 1, 'position' => 11,  'notnull' => 1, 'visible' => 1],
         'b_first_registration_date'           => ['type' => 'date',         'label' => 'FirstRegistrationDate',         'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => -3, 'config' => 1],
         'c1_owner_fullname'                   => ['type' => 'varchar(255)', 'label' => 'OwnerFullName',                 'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => -3, 'config' => 1],
@@ -315,14 +316,16 @@ class RegistrationCertificateFr extends SaturneObject
         $this->ref                   = $registrationNumber;
         $this->a_registration_number = $registrationNumber;
 
-        if (empty($this->fk_product) || $this->fk_product == -1) {
-            $this->fk_product = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
-        }
-        if (empty($this->fk_lot) || $this->fk_lot == -1) {
-            $this->fk_lot = create_default_product_lot($this->fk_product);
-        }
-        if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
-            $this->d1_vehicle_brand = $langs->transnoentities('DefaultBrand');
+        if ($this->status !== self::STATUS_DRAFT) {
+            if (empty($this->fk_product) || $this->fk_product == -1) {
+                $this->fk_product = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
+            }
+            if (empty($this->fk_lot) || $this->fk_lot == -1) {
+                $this->fk_lot = create_default_product_lot($this->fk_product);
+            }
+            if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
+                $this->d1_vehicle_brand = $langs->transnoentities('DefaultBrand');
+            }
         }
 
         return $this->createCommon($user, $noTrigger);
@@ -376,16 +379,21 @@ class RegistrationCertificateFr extends SaturneObject
         if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
             global $langs;
 
+            $this->labelStatus[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('Draft');
             $this->labelStatus[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
             $this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
             $this->labelStatus[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
 
+            $this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('Draft');
             $this->labelStatusShort[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
             $this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
             $this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
         }
 
         $statusType = 'status' . $status;
+        if ($status == self::STATUS_DRAFT) {
+            $statusType = 'status0';
+        }
         if ($status == self::STATUS_VALIDATED) {
             $statusType = 'status4';
         }
@@ -411,14 +419,20 @@ class RegistrationCertificateFr extends SaturneObject
             if ($searchType == 'plaque') {
                 $searchValue = normalize_registration_number($searchValue);
                 $result = $this->fetch(0, $searchValue);
-                if ($result > 0) {
-                    setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
-                    header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
-                    exit;
-                }
             } else {
                 $result = $this->fetch(0, '', ' AND e_vehicle_serial_number = "' . $db->escape($searchValue) . '"');
-                if ($result > 0) {
+            }
+
+            if ($result > 0) {
+                if ($this->status == self::STATUS_DRAFT && !empty($this->json)) {
+                    // Draft found: return cached API data so tokens are not re-consumed
+                    $draftData = json_decode($this->json);
+                    $draftId   = $this->id;
+                    $this->id  = 0;
+                    if ($draftData !== null) {
+                        return ['api' => $api, 'data' => $draftData, 'draft_id' => $draftId];
+                    }
+                } else {
                     setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
                     header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
                     exit;
@@ -664,4 +678,6 @@ class RegistrationCertificateFr extends SaturneObject
 
         return $array;
     }
+
 }
+
