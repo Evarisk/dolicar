@@ -379,6 +379,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         }
         print '</div>';
     }
+
+    // Linked objects section
+    require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
 }
 
 // End of page
