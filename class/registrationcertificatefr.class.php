@@ -350,6 +350,21 @@ class RegistrationCertificateFr extends SaturneObject
     }
 
     /**
+     * Return tooltip content array
+     *
+     * @param  array $params Tooltip params
+     * @return array         Tooltip content
+     */
+    public function getTooltipContentArray($params): array
+    {
+        global $langs;
+
+        $langs->load('dolicar@dolicar');
+
+        return parent::getTooltipContentArray($params);
+    }
+
+    /**
      * Return the status
      *
      * @param  int    $status ID status
