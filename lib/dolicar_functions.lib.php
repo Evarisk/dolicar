@@ -62,6 +62,7 @@ function create_default_product_lot(int $productID): int
 function get_vehicle_brand(int $productID): string
 {
     // Global variables definitions
+    require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
     global $db;
 
     // Initialize technical objects
