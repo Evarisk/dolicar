@@ -36,15 +36,19 @@ $digiqualiEnabled = isModEnabled('digiquali');
 if ($digiqualiEnabled) {
     require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
     require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/survey.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/sheet.class.php';
 }
 
-$colspanEmpty = $digiqualiEnabled ? 7 : 4;
+$colspanEmpty = $digiqualiEnabled ? 8 : 4;
 
 $out  = load_fiche_titre($langs->transnoentities('LinkedObjects'), '', 'dolicar_color@dolicar');
 $out .= '<table class="noborder centpercent">';
 $out .= '<tr class="liste_titre">';
 $out .= '<td>' . $langs->trans('ObjectType') . '</td>';
 $out .= '<td>' . $langs->trans('Object') . '</td>';
+if ($digiqualiEnabled) {
+    $out .= '<td>' . $langs->trans('Sheet') . '</td>';
+}
 $out .= '<td>' . $langs->trans('Mileage') . '</td>';
 $out .= '<td>' . $langs->trans('Date') . '</td>';
 if ($digiqualiEnabled) {
@@ -64,12 +68,25 @@ $out .= '</tr>';
  * @return string                           HTML row string
  */
 $renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectElement, bool $digiqualiEnabled, $langs): string {
+    global $db;
     $isControl = ($linkedObjectElement === 'digiquali_control');
     $isSurvey  = ($linkedObjectElement === 'digiquali_survey');
 
     $row  = '<tr>';
     $row .= '<td class="nowrap">' . $langs->transnoentities(ucfirst($linkedObjectElement)) . '</td>';
     $row .= '<td>' . $linkedObject->getNomUrl(1) . '</td>';
+    if ($digiqualiEnabled) {
+        if ($isControl || $isSurvey) {
+            $sheet = new Sheet($db);
+            $sheetLink = '';
+            if (!empty($linkedObject->fk_sheet) && $sheet->fetch($linkedObject->fk_sheet) > 0) {
+                $sheetLink = $sheet->getNomUrl(1) . (!empty($sheet->label) ? ' - ' . $sheet->label : '');
+            }
+            $row .= '<td>' . $sheetLink . '</td>';
+        } else {
+            $row .= '<td></td>';
+        }
+    }
     $row .= '<td>' . (!$isControl && !$isSurvey ? $linkedObject->array_options['options_mileage'] : '') . '</td>';
     $row .= '<td>' . dol_print_date($linkedObject->date_creation, 'dayhour') . '</td>';
     if ($digiqualiEnabled) {
