@@ -34,6 +34,8 @@ if (file_exists('../dolicar.main.inc.php')) {
 require_once __DIR__ . '/../lib/dolicar.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/security.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $user;
@@ -51,6 +53,24 @@ $action = GETPOST('action', 'aZ09');
 /*
  * Actions
  */
+
+if ($action == 'update_warehouse') {
+    $error = 0;
+
+    $warehouseId = GETPOSTINT('DOLICAR_DEFAULT_WAREHOUSE_ID');
+    if ($warehouseId > 0) {
+        if (!dolibarr_set_const($db, 'DOLICAR_DEFAULT_WAREHOUSE_ID', $warehouseId, 'integer', 0, '', $conf->entity)) {
+            $error++;
+        }
+    } else {
+        $error++;
+    }
+
+    if (!$error) {
+        setEventMessages($langs->trans('SetupSaved'), null, 'mesgs');
+    }
+    $action = 'edit';
+}
 
 if ($action == 'update') {
 	$error = 0;
@@ -164,6 +184,36 @@ print '</table>';
 
 print '<br><div class="center">';
 print '<input class="button button-save" type="submit" value="' . $langs->trans("Save") . '">';
+print '</div>';
+print '</form>';
+
+// Warehouse configuration section
+print '<br>';
+print load_fiche_titre($langs->transnoentities('WarehouseConfig'), '', '');
+
+print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="update_warehouse">';
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities('Parameters') . '</td>';
+print '<td class="center">' . $langs->transnoentities('Value') . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '<td class="nowraponall">';
+print $langs->transnoentities('DefaultWarehouseForVehicle') . '<br><span class="opacitymedium">' . $langs->transnoentities('DefaultWarehouseForVehicleDesc') . '</span>';
+print '</td>';
+print '<td class="center">';
+$formproduct = new FormProduct($db);
+print $formproduct->selectWarehouses(getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 'DOLICAR_DEFAULT_WAREHOUSE_ID', '', 1, 0, 0, '', 0, 0, [], 'minwidth300');
+print '</td>';
+print '</tr>';
+print '</table>';
+
+print '<br><div class="center">';
+print '<input class="button button-save" type="submit" value="' . $langs->trans('Save') . '">';
 print '</div>';
 print '</form>';
 
