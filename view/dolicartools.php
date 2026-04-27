@@ -147,12 +147,12 @@ print '<input type="hidden" name="action" value="fix_lot_stock_quantity">';
 print '<tr class="oddeven"><td>';
 print $langs->trans('FixLotStockQuantity');
 print '</td><td>';
-print '<div class="wpeo-notice ' . ($nbLots > 0 ? 'notice-warning' : 'notice-success') . '">';
+print '<div class="wpeo-notice ' . ($nbLots > 0 ? 'notice-warning' : 'notice-success') . '" style="' . ($nbLots > 0 ? 'display:block' : '') . '">';
 print '<div class="notice-content">';
 
 if ($nbLots > 0) {
-    // Detailed list of affected lots
-    $sqlDetail  = 'SELECT pb.batch, pb.qty, p.ref as product_ref, p.label as product_label';
+    $sqlDetail  = 'SELECT pb.batch, pb.qty, p.ref as product_ref, p.label as product_label,';
+    $sqlDetail .= ' rc.rowid as rc_id, rc.ref as rc_ref, rc.a_registration_number';
     $sqlDetail .= ' FROM ' . MAIN_DB_PREFIX . 'productbatch pb';
     $sqlDetail .= ' JOIN ' . MAIN_DB_PREFIX . 'product_stock ps ON ps.rowid = pb.fk_product_stock';
     $sqlDetail .= ' JOIN ' . MAIN_DB_PREFIX . 'product_lot pl ON pl.fk_product = ps.fk_product AND pl.batch = pb.batch';
@@ -163,16 +163,27 @@ if ($nbLots > 0) {
 
     $resqlDetail = $db->query($sqlDetail);
 
+    $rcCardUrl = dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1);
+
     print '<div class="notice-subtitle"><strong>' . $langs->transnoentities('FixLotStockQuantityWarning', $nbLots, $excess) . '</strong></div>';
     print '<br>';
-    print '<table class="nobordernopadding">';
-    print '<tr><th>' . $langs->trans('Batch') . '</th><th style="padding-left:20px">' . $langs->trans('Product') . '</th><th style="padding-left:20px">' . $langs->trans('Qty') . '</th></tr>';
+    print '<table class="noborder" style="width:100%">';
+    print '<tr class="liste_titre">';
+    print '<td>' . $langs->trans('RegistrationCertificateFr') . '</td>';
+    print '<td>' . $langs->trans('RegistrationNumber') . '</td>';
+    print '<td>' . $langs->trans('DolicarBatch') . '</td>';
+    print '<td>' . $langs->trans('Product') . '</td>';
+    print '<td class="center">' . $langs->trans('Qty') . '</td>';
+    print '</tr>';
     if ($resqlDetail) {
         while ($obj = $db->fetch_object($resqlDetail)) {
-            print '<tr>';
+            $rcLink = '<a href="' . $rcCardUrl . '?id=' . $obj->rc_id . '">' . dol_escape_htmltag($obj->rc_ref) . '</a>';
+            print '<tr class="oddeven">';
+            print '<td>' . $rcLink . '</td>';
+            print '<td>' . dol_escape_htmltag($obj->a_registration_number) . '</td>';
             print '<td>' . dol_escape_htmltag($obj->batch) . '</td>';
-            print '<td style="padding-left:20px">' . dol_escape_htmltag($obj->product_ref) . ' – ' . dol_escape_htmltag($obj->product_label) . '</td>';
-            print '<td style="padding-left:20px"><strong>' . $obj->qty . '</strong></td>';
+            print '<td>' . dol_escape_htmltag($obj->product_ref) . ' – ' . dol_escape_htmltag($obj->product_label) . '</td>';
+            print '<td class="center"><strong style="color:var(--colorbacktitle2,#e05d2c)">' . $obj->qty . '</strong></td>';
             print '</tr>';
         }
         $db->free($resqlDetail);
