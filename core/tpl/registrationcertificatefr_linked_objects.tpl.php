@@ -116,6 +116,9 @@ $registrationCertificate->fetchObjectLinked();
 if (!empty($registrationCertificate->linkedObjects)) {
     foreach ($registrationCertificate->linkedObjects as $linkedObjectElement => $linkedObjects) {
         foreach ($linkedObjects as $linkedObjectId => $linkedObject) {
+            if (isset($linkedObject->status) && $linkedObject->status == -1) {
+                continue;
+            }
             $rows[$linkedObjectElement . '_' . $linkedObjectId] = $renderLinkedObjectRow($linkedObject, $linkedObjectElement, $digiqualiEnabled, $langs);
         }
     }
@@ -130,6 +133,9 @@ if ($digiqualiEnabled && $registrationCertificate->fk_lot > 0) {
     foreach (['digiquali_control', 'digiquali_survey'] as $elementType) {
         if (!empty($productLotLinked->linkedObjects[$elementType])) {
             foreach ($productLotLinked->linkedObjects[$elementType] as $linkedObjectId => $linkedObject) {
+                if (isset($linkedObject->status) && $linkedObject->status == -1) {
+                    continue;
+                }
                 $key = $elementType . '_' . $linkedObjectId;
                 if (!isset($rows[$key])) {
                     $rows[$key] = $renderLinkedObjectRow($linkedObject, $elementType, $digiqualiEnabled, $langs);
