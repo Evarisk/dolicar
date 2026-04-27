@@ -456,6 +456,22 @@ class modDoliCar extends DolibarrModules
             'target'   => '',
             'user'     => 0
         ];
+
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('Tools'),
+            'prefix'   => '<i class="fas fa-wrench pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'dolicartools',
+            'url'      => '/dolicar/view/dolicartools.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->adminpage->read',
+            'target'   => '',
+            'user'     => 0
+        ];
     }
 
     /**
