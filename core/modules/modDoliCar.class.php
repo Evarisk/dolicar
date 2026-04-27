@@ -175,6 +175,8 @@ class modDoliCar extends DolibarrModules
             // CONST REGISTRATION CERTIFICATE
             $i++ => ['DOLICAR_REGISTRATIONCERTIFICATEFR_ADDON', 'chaine', 'mod_registrationcertificatefr_standard', '', 0, 'current'],
             $i++ => ['DOLICAR_DEFAULT_WAREHOUSE_ID', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_INTERNE_WAREHOUSE_ID', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_REPARATION_WAREHOUSE_ID', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_TAGS_SET', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_DEFAULT_VEHICLE_SET', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_DEFAULT_VEHICLE', 'integer', 0, '', 0, 'current'],
@@ -456,6 +458,22 @@ class modDoliCar extends DolibarrModules
             'target'   => '',
             'user'     => 0
         ];
+
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('Tools'),
+            'prefix'   => '<i class="fas fa-wrench pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'dolicartools',
+            'url'      => '/dolicar/view/dolicartools.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->adminpage->read',
+            'target'   => '',
+            'user'     => 0
+        ];
     }
 
     /**
@@ -527,19 +545,60 @@ class modDoliCar extends DolibarrModules
             dolibarr_set_const($this->db, 'DOLICAR_EXTRAFIELDS_BACKWARD_COMPATIBILITY', 1, 'integer', 0, '', $conf->entity);
         }
 
-        // Warehouse
-        if (getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID') <= 0) {
-            require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
+        // Warehouses
+        require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/product/class/productbatch.class.php';
+        require_once __DIR__ . '/../../../saturne/lib/object.lib.php';
 
-            $wareHouse = new Entrepot($this->db);
+        if (getDolGlobalInt('DOLICAR_INTERNE_WAREHOUSE_ID') <= 0) {
+            $oldWarehouseID = getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID');
 
-            $wareHouse->ref    = $langs->transnoentities('DoliCarWarehouse');
-            $wareHouse->label  = $langs->transnoentities('DoliCarWarehouse');
-            $wareHouse->statut = Entrepot::STATUS_OPEN_ALL;
+            $wareHouseInterne         = new Entrepot($this->db);
+            $wareHouseInterne->ref    = $langs->transnoentities('DoliCarInterneWarehouse');
+            $wareHouseInterne->label  = $langs->transnoentities('DoliCarInterneWarehouse');
+            $wareHouseInterne->statut = Entrepot::STATUS_OPEN_ALL;
+            $wareHouseInterneID       = $wareHouseInterne->create($user);
+            dolibarr_set_const($this->db, 'DOLICAR_INTERNE_WAREHOUSE_ID', $wareHouseInterneID, 'integer', 0, '', $conf->entity);
+            dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE_ID', $wareHouseInterneID, 'integer', 0, '', $conf->entity);
 
-            $wareHouseID = $wareHouse->create($user);
+            if ($oldWarehouseID > 0 && $oldWarehouseID != $wareHouseInterneID) {
+                $productBatchHelper = new Productbatch($this->db);
+                $allProducts        = saturne_fetch_all_object_type('Product');
 
-            dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_WAREHOUSE_ID', $wareHouseID, 'integer', 0, '', $conf->entity);
+                if (is_array($allProducts) && !empty($allProducts)) {
+                    foreach ($allProducts as $product) {
+                        $batches = $productBatchHelper->findAllForProduct($product->id, $oldWarehouseID, 0);
+                        if (is_array($batches) && !empty($batches)) {
+                            foreach ($batches as $batch) {
+                                $product->correct_stock_batch($user, $oldWarehouseID, $batch->qty, 1, 'Migration DoliCar', 0, '', '', $batch->batch);
+                                $product->correct_stock_batch($user, $wareHouseInterneID, $batch->qty, 0, 'Migration DoliCar', 0, '', '', $batch->batch);
+                            }
+                        } else {
+                            $product->load_stock();
+                            if (!empty($product->stock_warehouse[$oldWarehouseID]) && $product->stock_warehouse[$oldWarehouseID]->real > 0) {
+                                $qty = $product->stock_warehouse[$oldWarehouseID]->real;
+                                $product->correct_stock($user, $oldWarehouseID, $qty, 1, 'Migration DoliCar');
+                                $product->correct_stock($user, $wareHouseInterneID, $qty, 0, 'Migration DoliCar');
+                            }
+                        }
+                    }
+                }
+
+                $oldWarehouse = new Entrepot($this->db);
+                if ($oldWarehouse->fetch($oldWarehouseID) > 0) {
+                    $oldWarehouse->delete($user);
+                }
+            }
+        }
+
+        if (getDolGlobalInt('DOLICAR_REPARATION_WAREHOUSE_ID') <= 0) {
+            $wareHouseReparation         = new Entrepot($this->db);
+            $wareHouseReparation->ref    = $langs->transnoentities('DoliCarReparationWarehouse');
+            $wareHouseReparation->label  = $langs->transnoentities('DoliCarReparationWarehouse');
+            $wareHouseReparation->statut = Entrepot::STATUS_OPEN_ALL;
+            $wareHouseReparationID       = $wareHouseReparation->create($user);
+            dolibarr_set_const($this->db, 'DOLICAR_REPARATION_WAREHOUSE_ID', $wareHouseReparationID, 'integer', 0, '', $conf->entity);
         }
 
         require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';

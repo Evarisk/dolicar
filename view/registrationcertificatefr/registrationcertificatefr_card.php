@@ -37,6 +37,8 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
@@ -229,6 +231,17 @@ if ($action == 'create') {
 
     // Common attributes
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_add.tpl.php';
+
+    // Warehouse
+    print '<tr>';
+    print '<td class="titlefieldcreate">';
+    print $langs->trans('WarehouseForThisVehicle');
+    print '</td>';
+    print '<td class="valuefieldcreate">';
+    $formproduct = new FormProduct($db);
+    print $formproduct->selectWarehouses(GETPOSTINT('warehouse_id') > 0 ? GETPOSTINT('warehouse_id') : getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 'warehouse_id', '', 1, 0, 0, '', 0, 0, [], 'minwidth300');
+    print '</td>';
+    print '</tr>';
 
     // Other attributes
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_add.tpl.php';

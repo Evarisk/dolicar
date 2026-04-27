@@ -96,11 +96,14 @@ if ($api == 'apiplaqueimmatriculation.com') {
         $productLot->batch      = $registrationCertificateObject->vin;
         $productLot->fk_product = $productId;
 
-        $productLotID = $productLot->create($user);
+        $productLotID    = $productLot->create($user);
+        $isNewProductLot = $productLotID > 0;
         if ($productLotID == -1) {
             $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
         }
-        $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
+        if ($isNewProductLot) {
+            $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
+        }
 
         if ($productId > 0 && $productLotID > 0) {
 
@@ -246,11 +249,14 @@ if ($api == 'immatriculationapi.com') {
         $productLot->batch      = $registrationCertificateObject->ExtendedData->numSerieMoteur;
         $productLot->fk_product = $productId;
 
-        $productLotID = $productLot->create($user);
+        $productLotID    = $productLot->create($user);
+        $isNewProductLot = $productLotID > 0;
         if ($productLotID == -1) {
             $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
         }
-        $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
+        if ($isNewProductLot) {
+            $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
+        }
 
         if ($productId > 0 && $productLotID > 0) {
             if (isset($createRegistrationCertificate) && $createRegistrationCertificate > 0) {

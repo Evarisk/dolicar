@@ -180,6 +180,18 @@ LicencePlateNotFoundInDB      = La plaque d'immatriculation est introuvable dans
 
 
 #
+# Tools - Outils
+#
+
+Tools                        = Outils
+FixLotStockQuantity          = Corriger les stocks de numéros de série
+FixLotStockQuantityWarning   = %s numéro(s) de série ont un stock supérieur à 1 (excédent total : %s pièce(s)). Ces lots seront ramenés à une quantité de 1.
+NoLotStockQuantityToFix      = Aucun numéro de série avec un stock supérieur à 1 détecté.
+Fix                          = Corriger
+FixLotStockQuantityLabel     = Correction du stock par l'outil DoliCar
+LotStockQuantityFixed        = %s numéro(s) de série corrigé(s) avec succès.
+
+#
 # Other
 #
 
