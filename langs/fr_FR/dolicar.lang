@@ -23,7 +23,9 @@ DoliCarDescription = Gestion et réparations d'un parc automobile
 
 # Init - Initialisation
 DefaultBrand     = Marque par défaut
-DoliCarWarehouse = Entrepôt de DoliCar
+DoliCarWarehouse           = Entrepôt de DoliCar
+DoliCarInterneWarehouse    = Dolicar Interne
+DoliCarReparationWarehouse = Dolicar Reparation
 ClientVehicle    = Véhicule client
 DefaultVehicle   = Véhicule par défaut
 
@@ -72,8 +74,12 @@ MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
 MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
 
 # Setup - Réglages
-ImmatriculationAPIConfig = Configuration de l'API
-RemainingRequests        = Jetons de recherche de plaque d'immatriculation restants : %s
+ImmatriculationAPIConfig          = Configuration de l'API
+RemainingRequests                 = Jetons de recherche de plaque d'immatriculation restants : %s
+WarehouseConfig                   = Configuration des entrepôts
+DefaultWarehouseForVehicle        = Entrepôt par défaut pour la création de véhicule
+DefaultWarehouseForVehicleDesc    = Entrepôt dans lequel les véhicules sont créés par défaut (modifiable lors de la création d'une carte grise)
+WarehouseForThisVehicle           = Entrepôt de destination
 
 
 
