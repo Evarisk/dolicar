@@ -102,7 +102,7 @@ if ($api == 'apiplaqueimmatriculation.com') {
             $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
         }
         if ($isNewProductLot) {
-            $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
+            $product->correct_stock_batch($user, GETPOSTINT('warehouse_id') > 0 ? GETPOSTINT('warehouse_id') : getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
         }
 
         if ($productId > 0 && $productLotID > 0) {
@@ -255,7 +255,7 @@ if ($api == 'immatriculationapi.com') {
             $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
         }
         if ($isNewProductLot) {
-            $product->correct_stock_batch($user, getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
+            $product->correct_stock_batch($user, GETPOSTINT('warehouse_id') > 0 ? GETPOSTINT('warehouse_id') : getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
         }
 
         if ($productId > 0 && $productLotID > 0) {
