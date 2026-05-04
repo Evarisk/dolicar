@@ -34,6 +34,7 @@ if (file_exists('../dolicar.main.inc.php')) {
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
+require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
@@ -64,6 +65,7 @@ $fromid              = GETPOSTINT('fromid');
 
 // Initialize technical objects
 $object      = new RegistrationCertificateFr($db);
+$category    = new Categorie($db);
 $product     = new Product($db);
 $productLot  = new Productlot($db);
 $extrafields = new ExtraFields($db);
