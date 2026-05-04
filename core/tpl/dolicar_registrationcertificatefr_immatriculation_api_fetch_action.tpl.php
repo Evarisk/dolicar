@@ -232,7 +232,7 @@ if ($api == 'immatriculationapi.com') {
             $productId = $product->create($user);
             if ($productId > 0) {
                 $resultCategory = $category->fetch(0, $registrationCertificateObject->CarMake->CurrentTextValue);
-                if ($category <= 0) {
+                if ($category->id <= 0) {
                     $category->label       = $registrationCertificateObject->CarMake->CurrentTextValue;
                     $category->description = $registrationCertificateObject->CarMake->CurrentTextValue;
                     $category->visible     = 1;
