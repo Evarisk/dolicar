@@ -1,0 +1,31 @@
+.tableforfield,
+.tableforfieldcreate,
+.tableforfieldedit {
+    .registration-certificate-group-header {
+        cursor: pointer;
+        user-select: none;
+
+        td {
+            background: var(--colorbacktitle1) !important;
+            font-weight: bold !important;
+            padding: 5px 10px !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+        }
+
+        &:hover td {
+            filter: brightness(0.95) !important;
+        }
+
+        .registration-certificate-group-icon {
+            margin-right: 10px;
+            display: inline-block;
+            width: 10px;
+        }
+    }
+
+    .registration-certificate-field {
+        td:first-child {
+            padding-left: 18px !important;
+        }
+    }
+}
