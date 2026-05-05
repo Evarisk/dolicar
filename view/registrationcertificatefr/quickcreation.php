@@ -298,6 +298,9 @@ print '<input type="hidden" name="action" value="add">';
 if ($backtopage) {
     print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
 }
+if (GETPOST('confirm_retry', 'int') == 1) {
+    print '<input type="hidden" name="confirm_retry" value="1">';
+}
 
 print load_fiche_titre($langs->trans('QuickRegistrationCertificateCreation'), '', 'object_' . $object->picto);
 

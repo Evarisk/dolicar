@@ -159,6 +159,9 @@ if ($action == 'create') {
     print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="getRegistrationCertificateData">';
     print '<input type="hidden" name="action" value="getRegistrationCertificateData">';
     print '<input type="hidden" name="token" value="'. newToken() .'">';
+    if (GETPOST('confirm_retry', 'int') == 1) {
+        print '<input type="hidden" name="confirm_retry" value="1">';
+    }
     print '<table class="border centpercent tableforfieldcreate">';
     print '<tr>';
     print '<td class="titlefieldcreate">';

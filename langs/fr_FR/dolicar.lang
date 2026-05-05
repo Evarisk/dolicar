@@ -159,6 +159,7 @@ LicencePlateWasAlreadyExisting        = La plaque d'immatriculation existe déj�
 BadAPIUsernameOrBadLicencePlateFormat = Erreur (<strong> %s </strong>) <br> Mauvais nom d'utilisateur ou format de plaque d'immatriculation. <br> Veuillez utiliser l'un des formats suivants pour la plaque d'immatriculation : <br><b> XX-111-XX <br>  XX111XX </b>
 LicencePlateInformationsCharged       = Les informations de la carte grise ont bien été récupérées
 BadAPIUsername                        = Nom d'utilisateur pour l'API invalide
+RegistrationNumberPreviousApiError    = La plaque <strong>%s</strong> a déjà généré une erreur lors de la dernière recherche API.<br>Erreur retournée : « %s »<br>Cliquez à nouveau sur <strong>Rechercher</strong> pour relancer la recherche et consommer un nouveau jeton.
 
 # QuickCreation - Ajout rapide
 QuickRegistrationCertificateCreation = Ajout rapide de carte grise

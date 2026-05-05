@@ -35,12 +35,11 @@ if (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') <= 0) {
     setEventMessages($langs->trans('ZeroApiRequestsRemaining'), [], 'errors');
     header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
     exit;
-} elseif (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') <= 10) {
-    setEventMessages($langs->trans('LessThanHundredApiRequestsRemaining'), [], 'warnings');
 }
 
 $registrationNumber = dol_strtoupper(GETPOST('registrationNumber'));
 $vinNumber          = dol_strtoupper(GETPOST('vinNumber'));
+$confirmRetry       = GETPOST('confirm_retry', 'int') == 1;
 
 // Use VIN if provided and not empty, otherwise use registration number
 if (!empty($vinNumber)) {
@@ -51,11 +50,29 @@ if (!empty($vinNumber)) {
     $searchType  = 'plaque';
 }
 
-$apiData                       = $object->getRegistrationCertificateData($searchValue, $searchType);
-$registrationCertificateObject = isset($apiData['data'])     ? $apiData['data']     : null;
-$api                           = isset($apiData['api'])      ? $apiData['api']      : '';
-$error                         = isset($apiData['error'])    ? $apiData['error']    : '';
-$draftId                       = isset($apiData['draft_id']) ? (int)$apiData['draft_id'] : 0;
+$apiData                       = $object->getRegistrationCertificateData($searchValue, $searchType, $confirmRetry);
+$registrationCertificateObject = isset($apiData['data'])        ? $apiData['data']        : null;
+$api                           = isset($apiData['api'])         ? $apiData['api']         : '';
+$error                         = isset($apiData['error'])       ? $apiData['error']       : '';
+$draftId                       = isset($apiData['draft_id'])    ? (int)$apiData['draft_id'] : 0;
+$errorDraft                    = isset($apiData['error_draft']) ? $apiData['error_draft'] : false;
+
+// Previous API attempt had an error: ask the user to confirm before consuming a new token
+if ($errorDraft) {
+    setEventMessages($langs->trans('RegistrationNumberPreviousApiError', $registrationNumber, $error), [], 'warnings');
+    if (!empty($createRegistrationCertificate)) {
+        // Quick creation context: redirect back to the same form (no action = display form)
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?confirm_retry=1&registrationNumber=' . urlencode($registrationNumber));
+    } else {
+        // Card creation context
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . urlencode($registrationNumber) . '&confirm_retry=1');
+    }
+    exit;
+}
+
+if (getDolGlobalInt('DOLICAR_API_REMAINING_REQUESTS_COUNTER') <= 10) {
+    setEventMessages($langs->trans('LessThanHundredApiRequestsRemaining'), [], 'warnings');
+}
 
 if ($api == 'apiplaqueimmatriculation.com') {
     if ($error) {

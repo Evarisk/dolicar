@@ -407,30 +407,55 @@ class RegistrationCertificateFr extends SaturneObject
         return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
     }
 
-    public function getRegistrationCertificateData($searchValue, $searchType = 'plaque'): array
+    public function getRegistrationCertificateData($searchValue, $searchType = 'plaque', $confirmRetry = false): array
     {
         global $conf, $db, $langs, $user;
 
         require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
-        $api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API');
+        $api            = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API');
+        $pendingDraftId = 0;
 
         if (dol_strlen($searchValue) > 0) {
             if ($searchType == 'plaque') {
                 $searchValue = normalize_registration_number($searchValue);
-                $result = $this->fetch(0, $searchValue);
+                $result      = $this->fetch(0, $searchValue);
             } else {
                 $result = $this->fetch(0, '', ' AND e_vehicle_serial_number = "' . $db->escape($searchValue) . '"');
             }
 
             if ($result > 0) {
-                if ($this->status == self::STATUS_DRAFT && !empty($this->json)) {
-                    // Draft found: return cached API data so tokens are not re-consumed
-                    $draftData = json_decode($this->json);
-                    $draftId   = $this->id;
-                    $this->id  = 0;
-                    if ($draftData !== null) {
-                        return ['api' => $api, 'data' => $draftData, 'draft_id' => $draftId];
+                if ($this->status == self::STATUS_DRAFT) {
+                    if (!empty($this->json)) {
+                        $draftData = json_decode($this->json);
+                        $draftId   = $this->id;
+                        $this->id  = 0;
+                        if ($draftData !== null) {
+                            if (isset($draftData->_api_error) && $draftData->_api_error === true) {
+                                if (!$confirmRetry) {
+                                    // Ask user to confirm before consuming a new token
+                                    return [
+                                        'api'         => $api,
+                                        'error_draft' => true,
+                                        'draft_id'    => $draftId,
+                                        'error'       => isset($draftData->_api_error_message) ? $draftData->_api_error_message : '',
+                                    ];
+                                }
+                                // User confirmed retry: clear error JSON and reuse this draft
+                                $pendingDraftId   = $draftId;
+                                $retryDraft       = new self($db);
+                                $retryDraft->fetch($draftId);
+                                $retryDraft->json = '';
+                                $retryDraft->update($user);
+                            } else {
+                                // Valid cached draft: return without consuming API token
+                                return ['api' => $api, 'data' => $draftData, 'draft_id' => $draftId];
+                            }
+                        }
+                    } else {
+                        // Draft with empty JSON (pending): reuse it
+                        $pendingDraftId = $this->id;
+                        $this->id       = 0;
                     }
                 } else {
                     setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
@@ -440,30 +465,46 @@ class RegistrationCertificateFr extends SaturneObject
             }
         }
 
+        // Create a pending draft in DB before consuming an API token
+        if ($pendingDraftId == 0) {
+            $pendingDraft         = new self($db);
+            $pendingDraft->status = self::STATUS_DRAFT;
+            if ($searchType == 'plaque') {
+                $pendingDraft->a_registration_number = $searchValue;
+            } else {
+                $pendingDraft->a_registration_number   = '';
+                $pendingDraft->e_vehicle_serial_number = $searchValue;
+            }
+            $createdId = $pendingDraft->create($user);
+            if ($createdId > 0) {
+                $pendingDraftId = $createdId;
+            }
+        }
+
         if ($api == 'apiplaqueimmatriculation.com') {
             $apiKey = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY');
 
             if ($searchType == 'vin') {
-                $url = 'https://api.apiplaqueimmatriculation.com/vin?vin=' . urlencode($searchValue) . '&token=' . urlencode($apiKey);
+                $url        = 'https://api.apiplaqueimmatriculation.com/vin?vin=' . urlencode($searchValue) . '&token=' . urlencode($apiKey);
                 $httpMethod = 'GET';
             } else {
-                $url = 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation=' . urlencode($searchValue) . '&token=' . urlencode($apiKey) . '&pays=FR';
+                $url        = 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation=' . urlencode($searchValue) . '&token=' . urlencode($apiKey) . '&pays=FR';
                 $httpMethod = 'POST';
             }
 
             $curl = curl_init();
             curl_setopt_array($curl, array(
-                CURLOPT_URL => $url,
+                CURLOPT_URL            => $url,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_USERAGENT => $this->module . '-Agent/' . DOL_VERSION,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_USERAGENT      => $this->module . '-Agent/' . DOL_VERSION,
+                CURLOPT_ENCODING       => '',
+                CURLOPT_MAXREDIRS      => 10,
                 CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_TIMEOUT => 0,
+                CURLOPT_TIMEOUT        => 0,
                 CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => $httpMethod
+                CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST  => $httpMethod
             ));
             $response = curl_exec($curl);
             curl_close($curl);
@@ -471,18 +512,19 @@ class RegistrationCertificateFr extends SaturneObject
             $registrationCertificateObjectJson = json_decode($response);
 
             if (isset($registrationCertificateObjectJson->code_erreur) && $registrationCertificateObjectJson->code_erreur != 200) {
-                return ['api' => $api, 'error' => isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Error'];
+                $errorMessage = isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Error';
+                $this->saveApiErrorToDraft($pendingDraftId, $errorMessage);
+                return ['api' => $api, 'error' => $errorMessage, 'draft_id' => $pendingDraftId];
             }
 
             if (isset($registrationCertificateObjectJson->data) && is_object($registrationCertificateObjectJson->data)) {
-                $registrationCertificateObject = $registrationCertificateObjectJson->data;
-                return ['api' => $api, 'data' => $registrationCertificateObject];
+                return ['api' => $api, 'data' => $registrationCertificateObjectJson->data, 'draft_id' => $pendingDraftId];
             }
 
-            return ['api' => $api, 'error' => isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Invalid API response'];
+            $errorMessage = isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Invalid API response';
+            $this->saveApiErrorToDraft($pendingDraftId, $errorMessage);
+            return ['api' => $api, 'error' => $errorMessage, 'draft_id' => $pendingDraftId];
         }
-
-
 
         if ($api == 'immatriculationapi.com') {
             $username = getDolGlobalString('DOLICAR_IMMATRICULATION_API_USERNAME');
@@ -507,6 +549,7 @@ class RegistrationCertificateFr extends SaturneObject
                 curl_close($curl);
 
                 if (empty($xmlData) || !empty($curlError)) {
+                    $this->saveApiErrorToDraft($pendingDraftId, $curlError);
                     setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $curlError), [], 'errors');
                     header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
                     exit;
@@ -514,18 +557,19 @@ class RegistrationCertificateFr extends SaturneObject
                     $xml = @simplexml_load_string($xmlData);
                     if ($xml === false || !isset($xml->vehicleJson)) {
                         dol_syslog(__METHOD__ . ' immatriculationapi.com: unexpected response (not XML or missing vehicleJson): ' . $xmlData, LOG_ERR);
+                        $this->saveApiErrorToDraft($pendingDraftId, $xmlData);
                         setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $xmlData), [], 'errors');
                         header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
                         exit;
                     }
-                    $strJson = (string) $xml->vehicleJson;
+                    $strJson                       = (string) $xml->vehicleJson;
                     $registrationCertificateObject = json_decode($strJson);
                     dolibarr_set_const($db, 'DOLICAR_API_REMAINING_REQUESTS_COUNTER', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER') - 1, 'integer', 0, '', $conf->entity);
                     dolibarr_set_const($db, 'DOLICAR_API_REQUESTS_COUNTER', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER') + 1, 'integer', 0, '', $conf->entity);
                     setEventMessages($langs->trans('LicencePlateInformationsCharged'), []);
                     setEventMessages($langs->trans('RemainingRequests', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER')), []);
 
-                    return ['api' => $api, 'data' => $registrationCertificateObject];
+                    return ['api' => $api, 'data' => $registrationCertificateObject, 'draft_id' => $pendingDraftId];
                 }
             } else {
                 setEventMessages($langs->trans('BadAPIUsername'), [], 'errors');
@@ -535,6 +579,26 @@ class RegistrationCertificateFr extends SaturneObject
         }
 
         return [];
+    }
+
+    /**
+     * Save an API error marker into an existing draft's json field.
+     */
+    private function saveApiErrorToDraft(int $draftId, string $errorMessage): void
+    {
+        global $db, $user;
+
+        if ($draftId <= 0) {
+            return;
+        }
+        $draft       = new self($db);
+        $draft->fetch($draftId);
+        $draft->json = json_encode([
+            '_api_error'           => true,
+            '_api_error_message'   => $errorMessage,
+            '_api_error_timestamp' => dol_now(),
+        ]);
+        $draft->update($user);
     }
 
     /**
