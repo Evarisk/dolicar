@@ -48,6 +48,7 @@ window.dolicar.registrationcertificate = {};
  */
 window.dolicar.registrationcertificate.init = function() {
   window.dolicar.registrationcertificate.event();
+  window.dolicar.registrationcertificate.reorderFieldsOnCreate();
 };
 
 /**
@@ -74,6 +75,32 @@ window.dolicar.registrationcertificate.event = function() {
   $(document).on('click', '.signature-erase', function () {
     window.saturne.toolbox.removeAddButtonClass('public-vehicle-log-book-validate', 'button-blue', 'button-grey button-disable');
   });
+};
+
+/**
+ * Reload product lot selector and vehicle brand
+ *
+ * @since   0.0.2
+ * @version 1.2.0
+ *
+ * @return {void}
+ */
+/**
+ * Move warehouse field after chassis number field on create form
+ *
+ * @since   1.2.0
+ * @version 1.2.0
+ *
+ * @return {void}
+ */
+window.dolicar.registrationcertificate.reorderFieldsOnCreate = function() {
+  let $table        = $('.tableforfieldcreate');
+  let $warehouseRow = $table.find('.field_warehouse_id');
+  let $fkLotRow     = $table.find('.field_fk_lot');
+
+  if ($warehouseRow.length && $fkLotRow.length) {
+    $fkLotRow.after($warehouseRow);
+  }
 };
 
 /**

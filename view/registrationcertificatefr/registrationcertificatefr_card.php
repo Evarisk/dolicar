@@ -166,9 +166,10 @@ if ($action == 'create') {
     print '</td>';
     print '<td class="valuefieldcreate">';
     print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber" value="'. GETPOST('a_registration_number') .'">';
+    print ' <input type="submit" class="wpeo-button button butAction" value="'. $langs->trans('Search') .'">';
     print '</td>';
     print '</tr>';
-    
+
     // Add VIN search field only if API is apiplaqueimmatriculation.com
     $current_api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API', 'immatriculationapi.com');
     if ($current_api == 'apiplaqueimmatriculation.com') {
@@ -181,11 +182,8 @@ if ($action == 'create') {
         print '</td>';
         print '</tr>';
     }
-    
+
     print '</table>';
-    print '<div class="center">';
-    print '<input type="submit" class="wpeo-button button butAction" value="'. $langs->trans('Search') .'">';
-    print '</div>';
     print '</form>';
     print '<hr>';
     print '<br>';
@@ -235,7 +233,7 @@ if ($action == 'create') {
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_add.tpl.php';
 
     // Warehouse
-    print '<tr>';
+    print '<tr class="field_warehouse_id">';
     print '<td class="titlefieldcreate">';
     print $langs->trans('WarehouseForThisVehicle');
     print '</td>';
