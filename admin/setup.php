@@ -41,7 +41,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
 global $conf, $db, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['admin']);
 
 // Security check - Protection if external user
 $permissionToRead = $user->rights->dolicar->adminpage->read;
