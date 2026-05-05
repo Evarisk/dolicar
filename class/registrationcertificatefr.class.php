@@ -468,7 +468,6 @@ class RegistrationCertificateFr extends SaturneObject
             $response = curl_exec($curl);
             curl_close($curl);
 
-
             $registrationCertificateObjectJson = json_decode($response);
 
             if (isset($registrationCertificateObjectJson->code_erreur) && $registrationCertificateObjectJson->code_erreur != 200) {
@@ -490,16 +489,36 @@ class RegistrationCertificateFr extends SaturneObject
             $apiUrl   = 'https://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
 
             if (dol_strlen($username) > 0) {
-                dol_syslog($apiUrl . '?RegistrationNumber=' . $searchValue . '&username=' . $username, LOG_ERR);
-                $xmlData = @file_get_contents( $apiUrl . '?RegistrationNumber=' . $searchValue . '&username=' . $username);
-                dol_syslog($xmlData, LOG_ERR);
-                if (empty($xmlData)) {
-                    setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat'), [], 'errors');
+                $curl = curl_init();
+                curl_setopt_array($curl, [
+                    CURLOPT_URL            => $apiUrl . '?RegistrationNumber=' . urlencode($searchValue) . '&username=' . urlencode($username),
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_USERAGENT      => $this->module . '-Agent/' . DOL_VERSION,
+                    CURLOPT_CONNECTTIMEOUT => 5,
+                    CURLOPT_TIMEOUT        => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST  => 'GET',
+                ]);
+                $xmlData   = curl_exec($curl);
+                $httpCode  = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($curl);
+                curl_close($curl);
+
+                if (empty($xmlData) || !empty($curlError)) {
+                    setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $curlError), [], 'errors');
                     header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
                     exit;
                 } else {
-                    $xml     = simplexml_load_string($xmlData);
-                    $strJson = $xml->vehicleJson;
+                    $xml = @simplexml_load_string($xmlData);
+                    if ($xml === false || !isset($xml->vehicleJson)) {
+                        dol_syslog(__METHOD__ . ' immatriculationapi.com: unexpected response (not XML or missing vehicleJson): ' . $xmlData, LOG_ERR);
+                        setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $xmlData), [], 'errors');
+                        header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
+                        exit;
+                    }
+                    $strJson = (string) $xml->vehicleJson;
                     $registrationCertificateObject = json_decode($strJson);
                     dolibarr_set_const($db, 'DOLICAR_API_REMAINING_REQUESTS_COUNTER', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER') - 1, 'integer', 0, '', $conf->entity);
                     dolibarr_set_const($db, 'DOLICAR_API_REQUESTS_COUNTER', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER') + 1, 'integer', 0, '', $conf->entity);
