@@ -239,7 +239,7 @@ if ($action == 'create') {
     print '</td>';
     print '<td class="valuefieldcreate">';
     $formproduct = new FormProduct($db);
-    print $formproduct->selectWarehouses(GETPOSTINT('warehouse_id') > 0 ? GETPOSTINT('warehouse_id') : getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 'warehouse_id', '', 1, 0, 0, '', 0, 0, [], 'minwidth300');
+    print img_picto('', 'stock', 'class="pictofixedwidth"') . $formproduct->selectWarehouses(GETPOSTINT('warehouse_id') > 0 ? GETPOSTINT('warehouse_id') : getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 'warehouse_id', '', 1, 0, 0, '', 0, 0, [], 'minwidth300');
     print '</td>';
     print '</tr>';
 
