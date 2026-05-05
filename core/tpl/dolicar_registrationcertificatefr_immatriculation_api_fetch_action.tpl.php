@@ -93,14 +93,22 @@ if ($api == 'apiplaqueimmatriculation.com') {
             }
         }
 
-        $productLot->batch      = $registrationCertificateObject->vin;
-        $productLot->fk_product = $productId;
+        $vin = isset($registrationCertificateObject->vin) ? trim((string)$registrationCertificateObject->vin) : '';
 
-        $productLotID    = $productLot->create($user);
-        $isNewProductLot = $productLotID > 0;
-        if ($productLotID == -1) {
-            $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
+        if (!empty($vin)) {
+            $productLot->batch      = $vin;
+            $productLot->fk_product = $productId;
+            $productLotID    = $productLot->create($user);
+            $isNewProductLot = $productLotID > 0;
+            if ($productLotID == -1) {
+                $productLotID = $productLot->fetch(0, $productId, $vin);
+            }
+        } else {
+            // VIN absent from API response: fall back to a default lot so data mapping can proceed
+            $productLotID    = create_default_product_lot($productId);
+            $isNewProductLot = $productLotID > 0;
         }
+
         if ($isNewProductLot) {
             $product->correct_stock_batch($user, GETPOSTINT('warehouse_id') > 0 ? GETPOSTINT('warehouse_id') : getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
         }
@@ -252,7 +260,7 @@ if ($api == 'immatriculationapi.com') {
         $productLotID    = $productLot->create($user);
         $isNewProductLot = $productLotID > 0;
         if ($productLotID == -1) {
-            $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->vin);
+            $productLotID = $productLot->fetch(0, $productId, $registrationCertificateObject->ExtendedData->numSerieMoteur);
         }
         if ($isNewProductLot) {
             $product->correct_stock_batch($user, GETPOSTINT('warehouse_id') > 0 ? GETPOSTINT('warehouse_id') : getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 1, 0, $langs->transnoentities('ClientVehicle'), 0, '', '', $productLot->batch, '', 'dolicar_registrationcertificate', 0);
