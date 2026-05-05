@@ -145,6 +145,13 @@ if (empty($resHook)) {
 $title   = $langs->trans(ucfirst($object->element));
 $helpUrl = 'FR:Module_DoliCar';
 
+$configFields     = array_keys(array_filter($object->fields, static function ($field) {
+    return !empty($field['config']);
+}));
+$configFieldsJson = json_encode(array_map(static function ($f) {
+    return 'field_' . $f;
+}, $configFields));
+
 saturne_header( 0, '', $title, $helpUrl);
 
 // Part to create
@@ -258,11 +265,37 @@ if ($action == 'create') {
     print '</form>'; ?>
 
     <script>
-        const $table     = $('.tableforfieldcreate');
-        const $rowToMove = $table.find('.field_fk_lot');
-        const $targetRow = $table.find('.field_fk_product');
+        const $createTable = $('.tableforfieldcreate');
+        const $rowToMove   = $createTable.find('.field_fk_lot');
+        const $targetRow   = $createTable.find('.field_fk_product');
 
         $targetRow.after($rowToMove);
+
+        const registrationCertificateCreateConfigFields = <?= $configFieldsJson ?>;
+        let $registrationCertificateCreateFirstRow      = null;
+        let $registrationCertificateCreateGroupRows     = $();
+
+        $.each(registrationCertificateCreateConfigFields, function (index, fieldClass) {
+            const $row = $createTable.find('tr.' + fieldClass);
+            if ($row.length > 0) {
+                $registrationCertificateCreateGroupRows = $registrationCertificateCreateGroupRows.add($row);
+                if ($registrationCertificateCreateFirstRow === null) {
+                    $registrationCertificateCreateFirstRow = $row;
+                }
+            }
+        });
+
+        if ($registrationCertificateCreateGroupRows.length > 0) {
+            $registrationCertificateCreateGroupRows.hide();
+
+            const $createGroupHeader = $('<tr class="registration-certificate-group-header"><td colspan="2"><i class="fas fa-chevron-right registration-certificate-group-icon"></i><?= dol_escape_htmltag($langs->trans('RegistrationCertificateData')) ?></td></tr>');
+            $registrationCertificateCreateFirstRow.before($createGroupHeader);
+
+            $createTable.on('click', '.registration-certificate-group-header', function () {
+                $registrationCertificateCreateGroupRows.toggle();
+                $(this).find('.registration-certificate-group-icon').toggleClass('fa-chevron-down fa-chevron-right');
+            });
+        }
     </script>
     <?php
 }
@@ -316,11 +349,37 @@ if (($id || $ref) && $action == 'edit') {
     print '</form>'; ?>
 
     <script>
-        const $table     = $('.tableforfieldedit');
-        const $rowToMove = $table.find('.field_fk_lot');
-        const $targetRow = $table.find('.field_fk_product');
+        const $editTable     = $('.tableforfieldedit');
+        const $editRowToMove = $editTable.find('.field_fk_lot');
+        const $editTargetRow = $editTable.find('.field_fk_product');
 
-        $targetRow.after($rowToMove);
+        $editTargetRow.after($editRowToMove);
+
+        const registrationCertificateEditConfigFields = <?= $configFieldsJson ?>;
+        let $registrationCertificateEditFirstRow      = null;
+        let $registrationCertificateEditGroupRows     = $();
+
+        $.each(registrationCertificateEditConfigFields, function (index, fieldClass) {
+            const $row = $editTable.find('tr.' + fieldClass);
+            if ($row.length > 0) {
+                $registrationCertificateEditGroupRows = $registrationCertificateEditGroupRows.add($row);
+                if ($registrationCertificateEditFirstRow === null) {
+                    $registrationCertificateEditFirstRow = $row;
+                }
+            }
+        });
+
+        if ($registrationCertificateEditGroupRows.length > 0) {
+            $registrationCertificateEditGroupRows.hide();
+
+            const $editGroupHeader = $('<tr class="registration-certificate-group-header"><td colspan="2"><i class="fas fa-chevron-right registration-certificate-group-icon"></i><?= dol_escape_htmltag($langs->trans('RegistrationCertificateData')) ?></td></tr>');
+            $registrationCertificateEditFirstRow.before($editGroupHeader);
+
+            $editTable.on('click', '.registration-certificate-group-header', function () {
+                $registrationCertificateEditGroupRows.toggle();
+                $(this).find('.registration-certificate-group-icon').toggleClass('fa-chevron-down fa-chevron-right');
+            });
+        }
     </script>
     <?php
 }
@@ -360,6 +419,41 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     print '</table>';
     print '</div>';
     print '</div>';
+
+    ?>
+
+    <script>
+        const $registrationCertificateTable = $('.tableforfield');
+
+        if ($registrationCertificateTable.length > 0) {
+            const registrationCertificateConfigFields = <?= $configFieldsJson ?>;
+            let $registrationCertificateFirstRow      = null;
+            let $registrationCertificateGroupRows     = $();
+
+            $.each(registrationCertificateConfigFields, function (index, fieldClass) {
+                const $row = $registrationCertificateTable.find('tr.' + fieldClass);
+                if ($row.length > 0) {
+                    $registrationCertificateGroupRows = $registrationCertificateGroupRows.add($row);
+                    if ($registrationCertificateFirstRow === null) {
+                        $registrationCertificateFirstRow = $row;
+                    }
+                }
+            });
+
+            if ($registrationCertificateGroupRows.length > 0) {
+                $registrationCertificateGroupRows.addClass('registration-certificate-field').hide();
+
+                const $groupHeader = $('<tr class="registration-certificate-group-header"><td colspan="2"><i class="fas fa-chevron-right registration-certificate-group-icon"></i><?= dol_escape_htmltag($langs->trans('RegistrationCertificateData')) ?></td></tr>');
+                $registrationCertificateFirstRow.before($groupHeader);
+
+                $registrationCertificateTable.on('click', '.registration-certificate-group-header', function () {
+                    $registrationCertificateGroupRows.toggle();
+                    $(this).find('.registration-certificate-group-icon').toggleClass('fa-chevron-down fa-chevron-right');
+                });
+            }
+        }
+    </script>
+    <?php
 
     print '<div class="clearboth"></div>';
 

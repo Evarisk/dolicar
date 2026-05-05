@@ -88,6 +88,7 @@ WarehouseForThisVehicle           = Entrepôt de destination
 #
 
 # Data - Donnée
+RegistrationCertificateData     = Données de la carte grise
 RegistrationCertificateFr       = Carte grise
 Registrationcertificatefrs      = Cartes grises
 Registrationcertificatefr       = Carte grise
