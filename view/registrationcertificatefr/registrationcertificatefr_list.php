@@ -255,6 +255,8 @@ if (!empty($fromType)) {
     $moreUrlParameters = '&fromtype=' . $fromType . '&fromid=' . $fromId . '&mode=' . $mode;
 }
 
+$createUrl = dol_buildpath('custom/dolicar/view/registrationcertificatefr/quickcreation.php', 1);
+
 require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_build_sql_select.tpl.php';
 require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_header.tpl.php';
 require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_search_input.tpl.php';
