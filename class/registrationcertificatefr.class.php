@@ -449,7 +449,8 @@ class RegistrationCertificateFr extends SaturneObject
                                 $retryDraft->update($user);
                             } else {
                                 // Valid cached draft: return without consuming API token
-                                return ['api' => $api, 'data' => $draftData, 'draft_id' => $draftId];
+                                setEventMessages($langs->trans('LicencePlateInformationsFromDatabase'), []);
+                                return ['api' => $api, 'data' => $draftData, 'draft_id' => $draftId, 'from_cache' => true];
                             }
                         }
                     } else {
@@ -518,6 +519,8 @@ class RegistrationCertificateFr extends SaturneObject
             }
 
             if (isset($registrationCertificateObjectJson->data) && is_object($registrationCertificateObjectJson->data)) {
+                $this->saveJsonToDraft($pendingDraftId, $registrationCertificateObjectJson->data);
+                $this->populateAndSaveDraft($pendingDraftId, $api, $registrationCertificateObjectJson->data);
                 return ['api' => $api, 'data' => $registrationCertificateObjectJson->data, 'draft_id' => $pendingDraftId];
             }
 
@@ -569,6 +572,8 @@ class RegistrationCertificateFr extends SaturneObject
                     setEventMessages($langs->trans('LicencePlateInformationsCharged'), []);
                     setEventMessages($langs->trans('RemainingRequests', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER')), []);
 
+                    $this->saveJsonToDraft($pendingDraftId, $registrationCertificateObject);
+                    $this->populateAndSaveDraft($pendingDraftId, $api, $registrationCertificateObject);
                     return ['api' => $api, 'data' => $registrationCertificateObject, 'draft_id' => $pendingDraftId];
                 }
             } else {
@@ -598,6 +603,98 @@ class RegistrationCertificateFr extends SaturneObject
             '_api_error_message'   => $errorMessage,
             '_api_error_timestamp' => dol_now(),
         ]);
+        $draft->update($user);
+    }
+
+    /**
+     * Save only the raw JSON of an API response into a draft — guarantees the cache mechanism
+     * works even if populateAndSaveDraft fails on a specific vehicle's data structure.
+     */
+    private function saveJsonToDraft(int $draftId, object $data): void
+    {
+        global $db, $user;
+
+        if ($draftId <= 0) {
+            return;
+        }
+        $draft       = new self($db);
+        $draft->fetch($draftId);
+        $draft->json = json_encode($data);
+        $draft->update($user);
+    }
+
+    /**
+     * Populate all fields of an existing draft from a successful API response and save it.
+     * Keeps STATUS_DRAFT so the next search for the same plate hits the DB cache instead of the API.
+     */
+    private function populateAndSaveDraft(int $draftId, string $api, object $data): void
+    {
+        global $db, $user;
+
+        if ($draftId <= 0) {
+            return;
+        }
+        $draft = new self($db);
+        $draft->fetch($draftId);
+
+        if ($api === 'apiplaqueimmatriculation.com') {
+            if (isset($data->plaque) && !empty($data->plaque)) {
+                $draft->a_registration_number = $data->plaque;
+            }
+            if (isset($data->date1erCir_fr) && !empty($data->date1erCir_fr)) {
+                $parts = explode('-', $data->date1erCir_fr);
+                if (count($parts) === 3) {
+                    $draft->b_first_registration_date = dol_mktime(12, 0, 0, (int) $parts[1], (int) $parts[0], (int) $parts[2]);
+                }
+            }
+            $draft->d1_vehicle_brand                 = isset($data->marque)       ? (string) $data->marque       : '';
+            $draft->d2_vehicle_type                  = isset($data->type_moteur)  ? (string) $data->type_moteur  : '';
+            $draft->d21_vehicle_cnit                 = isset($data->cnit)         ? (string) $data->cnit         : '';
+            $draft->d3_vehicle_model                 = isset($data->modele)       ? (string) $data->modele       : '';
+            $draft->e_vehicle_serial_number          = isset($data->vin)          ? (string) $data->vin          : '';
+            $draft->j1_national_type                 = isset($data->genreVCG)     ? (string) $data->genreVCG     : '';
+            $draft->p1_cylinder_capacity             = isset($data->ccm)          ? (int) preg_replace('/[^0-9]/', '', $data->ccm) : 0;
+            $draft->p3_fuel_type                     = isset($data->energieNGC)   ? (string) $data->energieNGC   : '';
+            $draft->p6_national_administrative_power = isset($data->puisFisc)     ? (int) $data->puisFisc        : 0;
+            $draft->s1_seating_capacity              = isset($data->nr_passagers) ? (int) $data->nr_passagers    : 0;
+            $draft->v7_co2_emission                  = isset($data->co2)          ? (int) preg_replace('/[^0-9]/', '', $data->co2) : 0;
+            $draft->f2_ptac                          = isset($data->ptac)         ? (int) preg_replace('/[^0-9]/', '', $data->ptac) : 0;
+            $draft->g_vehicle_weight                 = isset($data->poids)        ? (int) preg_replace('/[^0-9]/', '', $data->poids) : 0;
+            $draft->j2_european_bodywork             = isset($data->carrosserieCG)   ? (string) $data->carrosserieCG   : '';
+            $draft->j3_national_bodywork             = isset($data->carrosserie)     ? (string) $data->carrosserie     : '';
+            $draft->j_vehicle_category               = isset($data->genreVCGNGC)     ? (string) $data->genreVCGNGC     : '';
+            $draft->k_type_approval_number           = isset($data->type_mine)       ? (string) $data->type_mine       : '';
+            $draft->p2_maximum_net_power             = isset($data->puisFiscReelKW)  ? (int) preg_replace('/[^0-9]/', '', $data->puisFiscReelKW) : 0;
+            $draft->v9_environmental_category        = isset($data->energie)         ? (string) $data->energie         : '';
+            $draft->h_validity_period                = isset($data->date30)          ? (string) $data->date30          : '';
+            if (isset($data->date1erCir_us) && !empty($data->date1erCir_us)) {
+                $dateUs = explode('-', $data->date1erCir_us);
+                if (count($dateUs) === 3) {
+                    $draft->i_vehicle_registration_date = dol_mktime(12, 0, 0, (int) $dateUs[1], (int) $dateUs[2], (int) $dateUs[0]);
+                }
+            }
+        } elseif ($api === 'immatriculationapi.com') {
+            $ext = isset($data->ExtendedData) ? $data->ExtendedData : null;
+            if ($ext !== null && isset($ext->datePremiereMiseCirculation) && !empty($ext->datePremiereMiseCirculation)) {
+                $parts = str_split($ext->datePremiereMiseCirculation, 2);
+                if (count($parts) >= 4) {
+                    $draft->b_first_registration_date = dol_mktime(12, 0, 0, (int) $parts[1], (int) $parts[0], (int) ($parts[2] . $parts[3]));
+                }
+            }
+            $draft->d1_vehicle_brand                 = isset($data->CarMake->CurrentTextValue)  ? (string) $data->CarMake->CurrentTextValue  : '';
+            $draft->d2_vehicle_type                  = isset($ext->typeVehicule)                ? (string) $ext->typeVehicule                : '';
+            $draft->d21_vehicle_cnit                 = isset($ext->CNIT)                        ? (string) $ext->CNIT                        : '';
+            $draft->d3_vehicle_model                 = isset($ext->libelleModele)               ? (string) $ext->libelleModele               : '';
+            $draft->e_vehicle_serial_number          = isset($ext->numSerieMoteur)              ? (string) $ext->numSerieMoteur              : '';
+            $draft->i_vehicle_registration_date      = isset($data->RegistrationDate)           ? (string) $data->RegistrationDate           : '';
+            $draft->j1_national_type                 = isset($ext->genre)                       ? (string) $ext->genre                       : '';
+            $draft->p1_cylinder_capacity             = isset($ext->EngineCC)                    ? (int)    $ext->EngineCC                    : 0;
+            $draft->p3_fuel_type                     = isset($data->FuelType->CurrentTextValue) ? (string) $data->FuelType->CurrentTextValue : '';
+            $draft->p6_national_administrative_power = isset($ext->puissance)                   ? (int)    $ext->puissance                   : 0;
+            $draft->s1_seating_capacity              = isset($ext->nbPlace)                     ? (int)    $ext->nbPlace                     : 0;
+            $draft->v7_co2_emission                  = isset($ext->Co2)                         ? (int)    $ext->Co2                         : 0;
+        }
+
         $draft->update($user);
     }
 

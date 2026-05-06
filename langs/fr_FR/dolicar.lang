@@ -159,12 +159,25 @@ LessThanHundredApiRequestsRemaining   = Il vous reste moins de 10 jetons de rech
 LicencePlateWasAlreadyExisting        = La plaque d'immatriculation existe déjà, vous avez été redirigé(e) sur sa page.
 BadAPIUsernameOrBadLicencePlateFormat = Erreur (<strong> %s </strong>) <br> Mauvais nom d'utilisateur ou format de plaque d'immatriculation. <br> Veuillez utiliser l'un des formats suivants pour la plaque d'immatriculation : <br><b> XX-111-XX <br>  XX111XX </b>
 LicencePlateInformationsCharged       = Les informations de la carte grise ont bien été récupérées
+LicencePlateInformationsFromDatabase  = Les informations ont été récupérées depuis la base de données (aucun jeton consommé)
 BadAPIUsername                        = Nom d'utilisateur pour l'API invalide
 RegistrationNumberPreviousApiError    = La plaque <strong>%s</strong> a déjà généré une erreur lors de la dernière recherche API.<br>Erreur retournée : « %s »<br>Cliquez à nouveau sur <strong>Rechercher</strong> pour relancer la recherche et consommer un nouveau jeton.
 
 # QuickCreation - Ajout rapide
-QuickRegistrationCertificateCreation = Ajout rapide de carte grise
-LicencePlate                         = Plaque d'immatriculation
+QuickRegistrationCertificateCreation  = Ajout rapide de carte grise
+LicencePlate                          = Plaque d'immatriculation
+PleaseEnterRegistrationNumber         = Veuillez saisir un numéro de plaque d'immatriculation
+Step                                  = Étape
+VerifyResult                          = Vérifier le résultat
+SIVSource                             = Source SIV principale
+LaunchSearch                          = Lancer la recherche
+OrDirectlyCreate                      = Pas de plaque ?
+CreateEmptyRegistrationCertificate    = Créer directement une carte grise vide
+NoPlateFound                          = Aucune plaque trouvée
+CreateManuallyFromPaper               = La recherche n'a rien renvoyé. Créez la carte grise manuellement à partir du document papier.
+VehicleCharacteristics                = Caractéristiques du véhicule
+CreateRegistrationCertificate         = Créer la carte grise
+DestinationWarehouse                  = Entrepôt de destination
 
 # DigiQuali
 LinkDolicar_registrationcertificatefr            = Activer le lien avec les cartes grises
