@@ -43,6 +43,11 @@ function registrationcertificatefr_prepare_head(RegistrationCertificateFr $objec
     $head[$h][0] = dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_linkedobjects.php', 1) . '?id=' . $object->id;
     $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-link pictofixedwidth"></i>' . $langs->trans('LinkedObjects') : '<i class="fas fa-link"></i>';
     $head[$h][2] = 'linkedobjects';
+    $h++;
+
+    $head[$h][0] = dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_vehiclehistory.php', 1) . '?id=' . $object->id;
+    $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-history pictofixedwidth"></i>' . $langs->trans('VehicleHistory') : '<i class="fas fa-history"></i>';
+    $head[$h][2] = 'vehiclehistory';
 
     return saturne_object_prepare_head($object, $head);
 }

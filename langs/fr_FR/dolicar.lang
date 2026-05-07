@@ -247,6 +247,17 @@ FindVINInRepertory = Rechercher un VIN
 VINWasAlreadyExisting = Ce VIN existe déjà
 UpdateCarBrandsList    = Mettre à jour la liste
 CarBrandsUpdated       = La liste des marques a été mise à jour
+
+# Vehicle history - Historique véhicule
+AddVehicleEvent            = Ajouter un événement véhicule
+VehicleEventType           = Type d'événement
+VehicleEventTypeCT         = Contrôle technique
+VehicleEventTypeRevision   = Révision
+VehicleEventTypeAccident   = Accident
+VehicleEventTypeAutre      = Autre
+VehicleHistory             = Historique du véhicule
+NoVehicleHistory           = Aucun événement enregistré
+VehicleEventAdded          = Événement véhicule ajouté avec succès
 ErrorUpdateCarBrandsFromApi = Erreur lors de la mise à jour des marques depuis l''API : %s
 ErrorUpdateCarBrandsFromApiBadResponse = Réponse invalide de l''API lors de la mise à jour des marques
 ErrorUpdateCarBrandsFromApiNoData = Aucune donnée de marque trouvée dans la réponse de l''API
