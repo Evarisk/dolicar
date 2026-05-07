@@ -44,6 +44,17 @@ Bicycle           = Vélo
 DashboardRemainingRequestsRequest         = Jetons de recherche de plaque d'immatriculation
 DashboardNumberOfRegestrationCertifatesFr = Nombre de carte grises
 DashboardCarState                         = Statut des véhicules
+DashboardWarehouseStats                   = Cartes grises par entrepôt
+DashboardWarehouseList                    = Liste des cartes grises par entrepôt
+DashboardRecentActivities                 = Activité récente
+DashboardOverdueCT                        = Contrôles techniques dépassés
+DashboardActivity                         = Activité
+Warehouse                                 = Entrepôt
+ExpiryDate                                = Date de péremption
+NoRecentActivityDolicar                   = Aucune activité récente
+NoCTOverdueDolicar                        = Aucun contrôle technique dépassé
+LotCreatedForRegistrationCertificate      = Numéro de série créé pour la carte grise %s
+DaysOverdue                               = Dépassement
 
 
 #

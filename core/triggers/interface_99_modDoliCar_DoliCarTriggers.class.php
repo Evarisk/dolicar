@@ -105,6 +105,20 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         }
 
         switch ($action) {
+            case 'REGISTRATIONCERTIFICATEFR_CREATE':
+                if (!empty($object->fk_lot) && $object->fk_lot > 0) {
+                    $lotActionComm              = new ActionComm($this->db);
+                    $lotActionComm->code        = 'AC_PRODUCTBATCH_CREATE';
+                    $lotActionComm->type_code   = 'AC_OTH_AUTO';
+                    $lotActionComm->fk_element  = $object->fk_lot;
+                    $lotActionComm->elementtype = 'productlot';
+                    $lotActionComm->label       = $langs->transnoentities('LotCreatedForRegistrationCertificate', $object->a_registration_number);
+                    $lotActionComm->datep       = dol_now();
+                    $lotActionComm->userownerid = $user->id;
+                    $lotActionComm->percentage  = -1;
+                    $lotActionComm->create($user);
+                }
+                break;
             case 'PROPAL_CREATE' :
             case 'ORDER_CREATE' :
             case 'BILL_CREATE' :
