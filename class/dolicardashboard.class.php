@@ -54,11 +54,15 @@ class DolicarDashboard
         $interneWarehouseID    = getDolGlobalInt('DOLICAR_INTERNE_WAREHOUSE_ID');
         $reparationWarehouseID = getDolGlobalInt('DOLICAR_REPARATION_WAREHOUSE_ID');
 
-        $array['dolicar']['widgets']['warehouseStats'] = $this->loadWarehouseWidget($interneWarehouseID, $reparationWarehouseID);
+        [$warehouseCounts, $warehouseList] = $this->loadWarehouseData($interneWarehouseID, $reparationWarehouseID);
 
-        $array['dolicar']['lists']['overdueCtList']    = $this->loadOverdueCTList();
+        $array['dolicar']['widgets']['warehouseStats'] = $this->buildWarehouseWidget(
+            $warehouseCounts[$interneWarehouseID] ?? 0,
+            $warehouseCounts[$reparationWarehouseID] ?? 0
+        );
 
-        $warehouseList = $this->loadWarehouseList($interneWarehouseID, $reparationWarehouseID);
+        $array['dolicar']['lists']['overdueCtList'] = $this->loadOverdueCTList();
+
         if (!empty($warehouseList)) {
             $array['dolicar']['lists']['warehouseList'] = $warehouseList;
         }
@@ -69,19 +73,15 @@ class DolicarDashboard
     }
 
     /**
-     * Build the warehouse stats widget data
+     * Build the warehouse stats widget from pre-computed counts.
      *
-     * @param  int   $interneWarehouseID    ID of the internal warehouse
-     * @param  int   $reparationWarehouseID ID of the repair warehouse
-     * @return array                        Widget data array
+     * @param  int   $interneCount    CG count in the internal warehouse
+     * @param  int   $reparationCount CG count in the repair warehouse
+     * @return array                  Widget data array
      */
-    private function loadWarehouseWidget(int $interneWarehouseID, int $reparationWarehouseID): array
+    private function buildWarehouseWidget(int $interneCount, int $reparationCount): array
     {
         global $langs;
-
-        $warehouseCounts = $this->getWarehouseCounts($interneWarehouseID, $reparationWarehouseID);
-        $interneCount    = $warehouseCounts[$interneWarehouseID] ?? 0;
-        $reparationCount = $warehouseCounts[$reparationWarehouseID] ?? 0;
 
         $listUrl = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php', 1);
 
@@ -101,108 +101,115 @@ class DolicarDashboard
     }
 
     /**
-     * Count registration certificates per warehouse.
-     * GROUP BY aggregation has no ORM equivalent — raw SQL is intentional here.
+     * Load warehouse counts and list data in a single pass using ORM.
+     * The product_lot → product_batch → product_stock join has no ORM equivalent
+     * so a targeted SQL is used only for that mapping; all business objects
+     * (RegistrationCertificateFr, Entrepot) are fetched via ORM.
      *
      * @param  int   $interneWarehouseID    ID of the internal warehouse
      * @param  int   $reparationWarehouseID ID of the repair warehouse
-     * @return array                        Map of warehouse ID => count
+     * @return array                        [counts map, list array (may be empty)]
+     * @throws Exception
      */
-    private function getWarehouseCounts(int $interneWarehouseID, int $reparationWarehouseID): array
-    {
-        $warehouseIds = array_values(array_filter([$interneWarehouseID, $reparationWarehouseID]));
-        if (empty($warehouseIds)) {
-            return [];
-        }
-
-        $warehouseIdsStr = implode(',', array_map('intval', $warehouseIds));
-
-        $sql  = 'SELECT ps.fk_entrepot, COUNT(DISTINCT rcfr.rowid) as nb';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'dolicar_registrationcertificatefr rcfr';
-        $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'product_lot pl ON pl.rowid = rcfr.fk_lot';
-        $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'product_batch pb ON pb.batch = pl.batch AND pb.qty > 0';
-        $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'product_stock ps ON ps.rowid = pb.fk_product_stock AND ps.fk_product = pl.fk_product';
-        $sql .= ' WHERE rcfr.entity IN (' . getEntity('registrationcertificatefr') . ')';
-        $sql .= ' AND rcfr.status >= 0';
-        $sql .= ' AND rcfr.fk_lot IS NOT NULL AND rcfr.fk_lot > 0';
-        $sql .= ' AND ps.fk_entrepot IN (' . $warehouseIdsStr . ')';
-        $sql .= ' GROUP BY ps.fk_entrepot';
-
-        $counts = [];
-        $resql  = $this->db->query($sql);
-
-        if ($resql) {
-            while ($obj = $this->db->fetch_object($resql)) {
-                $counts[(int) $obj->fk_entrepot] = (int) $obj->nb;
-            }
-        }
-
-        return $counts;
-    }
-
-    /**
-     * Build the dashboard list showing registration certificates sorted by warehouse.
-     * GROUP BY + JOIN aggregation has no ORM equivalent — raw SQL is intentional here.
-     *
-     * @param  int   $interneWarehouseID    ID of the internal warehouse
-     * @param  int   $reparationWarehouseID ID of the repair warehouse
-     * @return array                        List data array, empty if no data
-     */
-    private function loadWarehouseList(int $interneWarehouseID, int $reparationWarehouseID): array
+    private function loadWarehouseData(int $interneWarehouseID, int $reparationWarehouseID): array
     {
         global $langs;
 
         $warehouseIds = array_values(array_filter([$interneWarehouseID, $reparationWarehouseID]));
         if (empty($warehouseIds)) {
-            return [];
+            return [[], []];
         }
 
-        $warehouseIdsStr = implode(',', array_map('intval', $warehouseIds));
+        require_once __DIR__ . '/registrationcertificatefr.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
 
-        $sql  = 'SELECT rcfr.rowid, rcfr.a_registration_number, rcfr.d1_vehicle_brand, rcfr.d3_vehicle_model,';
-        $sql .= ' e.rowid as warehouse_id, e.ref as warehouse_ref';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'dolicar_registrationcertificatefr rcfr';
-        $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'product_lot pl ON pl.rowid = rcfr.fk_lot';
+        // Minimal SQL: resolve lot_id → warehouse_id through batch/stock tables (no ORM for these Dolibarr core tables)
+        $warehouseIdsStr = implode(',', array_map('intval', $warehouseIds));
+        $sql  = 'SELECT pl.rowid as lot_id, ps.fk_entrepot as warehouse_id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_lot pl';
         $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'product_batch pb ON pb.batch = pl.batch AND pb.qty > 0';
         $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'product_stock ps ON ps.rowid = pb.fk_product_stock AND ps.fk_product = pl.fk_product';
-        $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'entrepot e ON e.rowid = ps.fk_entrepot';
-        $sql .= ' WHERE rcfr.entity IN (' . getEntity('registrationcertificatefr') . ')';
-        $sql .= ' AND rcfr.status >= 0';
-        $sql .= ' AND rcfr.fk_lot IS NOT NULL AND rcfr.fk_lot > 0';
-        $sql .= ' AND ps.fk_entrepot IN (' . $warehouseIdsStr . ')';
-        $sql .= ' ORDER BY e.rowid ASC, rcfr.a_registration_number ASC';
+        $sql .= ' WHERE ps.fk_entrepot IN (' . $warehouseIdsStr . ')';
 
-        $listData = [];
-        $resql    = $this->db->query($sql);
-
+        $lotWarehouseMap = [];
+        $resql           = $this->db->query($sql);
         if ($resql) {
             while ($obj = $this->db->fetch_object($resql)) {
-                $cardUrl    = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . ((int) $obj->rowid);
-                $refLink    = '<a href="' . $cardUrl . '">' . dol_escape_htmltag($obj->a_registration_number) . '</a>';
-                $brandModel = dol_escape_htmltag(trim($obj->d1_vehicle_brand . ' ' . $obj->d3_vehicle_model));
-
-                $listData[] = [
-                    'Ref'       => ['value' => $refLink],
-                    'Vehicle'   => ['value' => $brandModel, 'morecss' => 'center'],
-                    'Warehouse' => ['value' => dol_escape_htmltag($obj->warehouse_ref), 'morecss' => 'center'],
-                ];
+                $lotWarehouseMap[(int) $obj->lot_id] = (int) $obj->warehouse_id;
             }
         }
 
-        if (empty($listData)) {
-            return [];
+        if (empty($lotWarehouseMap)) {
+            return [[], []];
         }
 
+        // Fetch CGs via ORM — fetchAll() handles entity filtering automatically
+        $lotIdsStr = implode(',', array_map('intval', array_keys($lotWarehouseMap)));
+        $cgObject  = new RegistrationCertificateFr($this->db);
+        $cgList = $cgObject->fetchAll('ASC', 'a_registration_number', 0, 0, [
+            'customsql' => 't.status >= 0 AND t.fk_lot IN (' . $lotIdsStr . ')',
+        ]);
+
+        if (!is_array($cgList) || empty($cgList)) {
+            return [[], []];
+        }
+
+        // Fetch warehouses via ORM and cache them
+        $warehouseCache = [];
+        foreach ($warehouseIds as $wid) {
+            $entrepot = new Entrepot($this->db);
+            $entrepot->fetch($wid);
+            $warehouseCache[$wid] = $entrepot;
+        }
+
+        $counts       = [];
+        $unsortedRows = [];
+
+        foreach ($cgList as $cg) {
+            $warehouseId = $lotWarehouseMap[(int) $cg->fk_lot] ?? null;
+            if ($warehouseId === null || !isset($warehouseCache[$warehouseId])) {
+                continue;
+            }
+
+            $counts[$warehouseId] = ($counts[$warehouseId] ?? 0) + 1;
+
+            $warehouseObj = $warehouseCache[$warehouseId];
+            $brandModel   = dol_escape_htmltag(trim($cg->d1_vehicle_brand . ' ' . $cg->d3_vehicle_model));
+            $cardUrl      = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $cg->id;
+
+            $unsortedRows[] = [
+                '_warehouseOrder' => array_search($warehouseId, $warehouseIds, true),
+                'Ref'             => ['value' => $cg->getNomUrl(1)],
+                'Vehicle'         => ['value' => '<a href="' . $cardUrl . '">' . $brandModel . '</a>', 'morecss' => 'center'],
+                'Warehouse'       => ['value' => $warehouseObj->getNomUrl(1), 'morecss' => 'center'],
+            ];
+        }
+
+        if (empty($unsortedRows)) {
+            return [$counts, []];
+        }
+
+        // Sort by warehouse config order (interne first, then reparation)
+        usort($unsortedRows, static fn($a, $b) => $a['_warehouseOrder'] <=> $b['_warehouseOrder']);
+
+        $listData = array_map(static function (array $row): array {
+            unset($row['_warehouseOrder']);
+            return $row;
+        }, $unsortedRows);
+
         return [
-            'title'  => $langs->transnoentities('DashboardWarehouseList'),
-            'picto'  => 'fas fa-warehouse',
-            'name'   => 'warehouseList',
-            'labels' => [
-                'Ref'       => 'RegistrationNumber',
-                'Vehicle'   => 'Vehicle',
-                'Warehouse' => 'Warehouse',
+            $counts,
+            [
+                'title'  => $langs->transnoentities('DashboardWarehouseList'),
+                'picto'  => 'fas fa-warehouse',
+                'name'   => 'warehouseList',
+                'labels' => [
+                    'Ref'       => 'RegistrationNumber',
+                    'Vehicle'   => 'Vehicle',
+                    'Warehouse' => 'Warehouse',
+                ],
+                'data'   => $listData,
             ],
-            'data'   => $listData,
         ];
     }
 
@@ -219,6 +226,7 @@ class DolicarDashboard
         global $langs;
 
         require_once __DIR__ . '/registrationcertificatefr.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
         $cgObject = new RegistrationCertificateFr($this->db);
         // fetchAll() handles entity filtering automatically via ismultientitymanaged
@@ -228,27 +236,28 @@ class DolicarDashboard
             return $this->buildActivitiesListResult([], $langs);
         }
 
-        $cgIds         = [];
-        $lotIds        = [];
-        $cgPlaques     = [];
-        $linkedByType  = [];
-        $linkedPlaques = [];
+        $cgIds        = [];
+        $lotIds       = [];
+        $cgById       = [];
+        $cgByLotId    = [];
+        $linkedByType = [];
+        $cgByLinked   = [];
 
         foreach ($cgList as $cg) {
-            $cgIds[]            = $cg->id;
-            $cgPlaques[$cg->id] = $cg->a_registration_number;
+            $cgIds[]         = $cg->id;
+            $cgById[$cg->id] = $cg;
 
             if (!empty($cg->fk_lot) && $cg->fk_lot > 0) {
-                $lotIds[]                               = (int) $cg->fk_lot;
-                $cgPlaques['lot_' . (int) $cg->fk_lot] = $cg->a_registration_number;
+                $lotIds[]                      = (int) $cg->fk_lot;
+                $cgByLotId[(int) $cg->fk_lot] = $cg;
             }
 
             // Use ORM to fetch linked objects (invoices, orders, proposals, controls, etc.)
             $cg->fetchObjectLinked();
             foreach ($cg->linkedObjects as $type => $linkedObjArray) {
                 foreach ($linkedObjArray as $linkedObjId => $linkedObj) {
-                    $linkedByType[$type][]                          = (int) $linkedObjId;
-                    $linkedPlaques[$type . '_' . (int) $linkedObjId] = $cg->a_registration_number;
+                    $linkedByType[$type][]                         = (int) $linkedObjId;
+                    $cgByLinked[$type . '_' . (int) $linkedObjId] = $cg;
                 }
             }
         }
@@ -269,46 +278,65 @@ class DolicarDashboard
             $orClauses[] = "(ac.fk_element IN ($idsStr) AND (ac.elementtype = '$escaped' OR ac.elementtype LIKE '$escaped@%'))";
         }
 
+        $activityIcons = [
+            'AC_REGISTRATIONCERTIFICATEFR_CREATE'  => ['fa-plus-circle',        '#5BA86E'],
+            'AC_REGISTRATIONCERTIFICATEFR_MODIFY'  => ['fa-pencil-alt',          '#4A90D9'],
+            'AC_REGISTRATIONCERTIFICATEFR_DELETE'  => ['fa-trash-alt',           '#E05353'],
+            'AC_REGISTRATIONCERTIFICATEFR_ARCHIVE' => ['fa-archive',             '#888888'],
+            'AC_PRODUCTBATCH_CREATE'               => ['fa-barcode',             '#5BA86E'],
+            'AC_DOLICAR_CT'                        => ['fa-check-circle',        '#5BA86E'],
+            'AC_DOLICAR_REVISION'                  => ['fa-wrench',              '#E8A317'],
+            'AC_DOLICAR_ACCIDENT'                  => ['fa-exclamation-triangle','#E05353'],
+            'AC_DOLICAR_AUTRE'                     => ['fa-circle',              '#888888'],
+        ];
+
         // ActionComm multi-element query — no ORM equivalent for this pattern
-        $sql  = 'SELECT ac.id, ac.label, ac.datep, ac.fk_element, ac.elementtype,';
-        $sql .= ' u.login, u.lastname, u.firstname';
+        $sql  = 'SELECT ac.id, ac.code, ac.label, ac.datep, ac.fk_element, ac.elementtype, ac.fk_user_action';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm ac';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user u ON u.rowid = ac.fk_user_action';
         $sql .= ' WHERE ac.entity IN (' . getEntity('agenda') . ')';
         $sql .= ' AND (' . implode(' OR ', $orClauses) . ')';
-        $sql .= ' ORDER BY ac.datep DESC LIMIT 15';
+        $sql .= ' ORDER BY ac.datep DESC LIMIT 10';
 
-        $listData = [];
-        $resql    = $this->db->query($sql);
+        $userCache = [];
+        $listData  = [];
+        $resql     = $this->db->query($sql);
 
         if ($resql) {
             while ($obj = $this->db->fetch_object($resql)) {
                 $dateStr    = dol_print_date($this->db->jdate($obj->datep), 'dayhour');
-                $userStr    = trim($obj->firstname . ' ' . $obj->lastname) ?: $obj->login;
-                $label      = dol_escape_htmltag($obj->label);
                 $isCgDirect = strpos((string) $obj->elementtype, 'registrationcertificatefr') !== false;
 
-                if ($isCgDirect && isset($cgPlaques[(int) $obj->fk_element])) {
-                    $cardUrl = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . ((int) $obj->fk_element);
-                    $label   = '<a href="' . $cardUrl . '">' . $label . '</a>';
+                // Resolve which CG this activity belongs to
+                if ($isCgDirect) {
+                    $cg = $cgById[(int) $obj->fk_element] ?? null;
+                } else {
+                    $typeBase = explode('@', (string) $obj->elementtype)[0];
+                    $cg       = $cgByLotId[(int) $obj->fk_element]
+                        ?? $cgByLinked[$obj->elementtype . '_' . (int) $obj->fk_element]
+                        ?? $cgByLinked[$typeBase . '_' . (int) $obj->fk_element]
+                        ?? null;
                 }
 
-                if (!$isCgDirect) {
-                    $plaque = $cgPlaques['lot_' . (int) $obj->fk_element]
-                        ?? $linkedPlaques[$obj->elementtype . '_' . (int) $obj->fk_element]
-                        ?? $linkedPlaques[explode('@', $obj->elementtype)[0] . '_' . (int) $obj->fk_element]
-                        ?? null;
+                $cgCell = $cg !== null ? $cg->getNomUrl(1) : '';
 
-                    if ($plaque !== null) {
-                        $label .= ' <span style="border:1px solid #d35968;padding:1px 5px;border-radius:3px;font-size:0.85em;color:#d35968;">'
-                               . dol_escape_htmltag($plaque) . '</span>';
-                    }
+                // Icon + color badge based on action code
+                $iconDef      = $activityIcons[$obj->code] ?? ['fa-circle', '#aaaaaa'];
+                $activityCell = '<span style="color:' . $iconDef[1] . '"><i class="fas ' . $iconDef[0] . '" style="margin-right:8px;"></i></span>'
+                              . dol_escape_htmltag($obj->label);
+
+                // Fetch user once per unique ID and use getNomUrl
+                $userId = (int) $obj->fk_user_action;
+                if (!isset($userCache[$userId])) {
+                    $ownerUser = new User($this->db);
+                    $ownerUser->fetch($userId);
+                    $userCache[$userId] = $ownerUser;
                 }
 
                 $listData[] = [
-                    'Ref'  => ['value' => $label],
+                    'CG'   => ['value' => $cgCell, 'morecss' => 'center nowraponall'],
+                    'Ref'  => ['value' => $activityCell],
                     'Date' => ['value' => $dateStr, 'morecss' => 'center nowraponall'],
-                    'User' => ['value' => dol_escape_htmltag($userStr), 'morecss' => 'center'],
+                    'User' => ['value' => $userCache[$userId]->getNomUrl(1), 'morecss' => 'center nowraponall'],
                 ];
             }
         }
@@ -327,6 +355,7 @@ class DolicarDashboard
     {
         if (empty($listData)) {
             $listData[] = [
+                'CG'   => ['value' => '', 'morecss' => 'center'],
                 'Ref'  => ['value' => '<em>' . $langs->transnoentities('NoRecentActivityDolicar') . '</em>'],
                 'Date' => ['value' => '', 'morecss' => 'center'],
                 'User' => ['value' => '', 'morecss' => 'center'],
@@ -338,6 +367,7 @@ class DolicarDashboard
             'picto'  => 'fontawesome_fa-history_fas_#d35968',
             'name'   => 'recentActivities',
             'labels' => [
+                'CG'   => 'RegistrationCertificateFr',
                 'Ref'  => 'DashboardActivity',
                 'Date' => 'Date',
                 'User' => 'UserAuthor',
