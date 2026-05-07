@@ -211,6 +211,10 @@ class modDoliCar extends DolibarrModules
             $i++ => ['DOLICAR_APIIMMATRICULATION_API_KEY', 'chaine', '', '', 0, 'current'],
             $i++ => ['DOLICAR_IMMATRICULATION_API_USERNAME', 'chaine', '', '', 0, 'current'],
             $i++ => ['DOLICAR_REGISTRATION_CERTIFICATE_API', 'chaine', 'immatriculationapi.com', '', 0, 'current'],
+
+            // CONST LIVRET ENTRETIEN
+            $i++ => ['DOLICAR_LIVRETENTRETIEN_ADDON', 'chaine', 'mod_livretentretien_standard', '', 0, 'current'],
+            $i++ => ['DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH', 'chaine', 'DOL_DOCUMENT_ROOT/custom/dolicar/documents/doctemplates/livretentretien/', '', 0, 'current'],
         ];
 
         if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -685,6 +689,8 @@ class modDoliCar extends DolibarrModules
                 dolibarr_set_const($this->db, 'DOLICAR_DEFAULT_VEHICLE_SET', 1, 'integer', 0, '', $conf->entity);
             }
         }
+
+        addDocumentModel('livretentretien_odt', 'livretentretien', 'ODT templates', 'DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH');
 
         return $this->_init($sql, $options);
     }
