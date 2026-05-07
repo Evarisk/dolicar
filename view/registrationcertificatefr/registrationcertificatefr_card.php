@@ -43,6 +43,7 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+require_once __DIR__ . '/../../class/dolicardocuments/livretentretien.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 // Global variables definitions
@@ -65,6 +66,7 @@ $fromid              = GETPOSTINT('fromid');
 
 // Initialize technical objects
 $object      = new RegistrationCertificateFr($db);
+$document    = new LivretEntretien($db);
 $category    = new Categorie($db);
 $product     = new Product($db);
 $productLot  = new Productlot($db);
@@ -136,6 +138,23 @@ if (empty($resHook)) {
 
     // Actions set_thirdparty, set_project
     require_once __DIR__ . '/../../../saturne/core/tpl/actions/banner_actions.tpl.php';
+
+    // Actions builddoc, forcebuilddoc, remove_file
+    $upload_dir = '';
+    if ($id > 0) {
+        $dirOutput  = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+        $upload_dir = $dirOutput . '/livretentretien/' . dol_sanitizeFileName($object->ref);
+
+        $moreParams = [
+            'object'           => $object,
+            'user'             => $user,
+            'zone'             => 'private',
+            'specimen'         => 0,
+            'tmparray'         => [],
+            'hideTemplateName' => 0,
+        ];
+        require_once __DIR__ . '/../../../saturne/core/tpl/documents/documents_action.tpl.php';
+    }
 }
 
 /*
@@ -492,6 +511,20 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     // Linked objects section
     require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
+
+    // Documents section
+    if ($action != 'presend') {
+        $dirOutput = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+        $dirFiles  = 'livretentretien/' . dol_sanitizeFileName($object->ref);
+        $fileDir   = $dirOutput . '/' . $dirFiles;
+        $urlSource = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
+
+        print '<div class="fichecenter">';
+        print '<div class="fichehalfleft">';
+        print saturne_show_documents('dolicar:Livretentretien', $dirFiles, $fileDir, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object);
+        print '</div>';
+        print '</div>';
+    }
 }
 
 // End of page
