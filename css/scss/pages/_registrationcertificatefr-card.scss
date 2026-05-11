@@ -1,3 +1,74 @@
+.dolicar-control-inline-creator {
+    display: inline-flex;
+    align-items: center;
+    background: #f8fbff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 4px 8px 4px 6px;
+    vertical-align: middle;
+    font-weight: 500;
+    font-size: 0.9em;
+    color: #4a5568;
+    gap: 6px;
+    margin-left: 0;
+
+    .dolicar-control-logo {
+        height: 16px;
+        width: auto;
+        vertical-align: middle;
+        flex-shrink: 0;
+    }
+
+    .dolicar-control-separator {
+        color: #cbd5e0;
+        font-size: 14px;
+        line-height: 1;
+        flex-shrink: 0;
+        user-select: none;
+    }
+
+    // Select2 generated container width
+    .select2-container {
+        min-width: 120px;
+        max-width: 240px;
+    }
+
+    .dolicar-control-add-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: #1571d3;
+        cursor: pointer;
+        padding: 2px 3px;
+        font-size: 15px;
+        line-height: 1;
+        flex-shrink: 0;
+        transition: color 0.15s;
+
+        &:hover { color: #0c447c; }
+
+        &[disabled],
+        &.button-disable {
+            color: #cbd5e0;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    }
+}
+
+.tableforfield {
+    .field_fk_lot {
+        td:last-child {
+            .dolicar-control-inline-creator {
+                display: block;
+                margin-top: 4px;
+            }
+        }
+    }
+}
+
 .tableforfield,
 .tableforfieldcreate,
 .tableforfieldedit {

@@ -45,6 +45,9 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 require_once __DIR__ . '/../../class/dolicardocuments/livretentretien.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
+if (isModEnabled('digiquali')) {
+    require_once __DIR__ . '/../../../digiquali/class/sheet.class.php';
+}
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -106,6 +109,18 @@ $permissionToRead   = $user->rights->dolicar->registrationcertificatefr->read;
 $permissiontoadd    = $user->rights->dolicar->registrationcertificatefr->write;
 $permissiontodelete = $user->rights->dolicar->registrationcertificatefr->delete;
 saturne_check_access($permissionToRead);
+
+// Build the list of DigiQuali sheets linked to productlot (used in quick-control creator widget)
+$digiQualiSheets = [];
+if (isModEnabled('digiquali') && !empty($object->fk_lot) && $object->fk_lot > 0) {
+    $digiQualiSheetObj = new Sheet($db);
+    $result            = $digiQualiSheetObj->fetchAll('', '', 0, 0, [
+        'customsql' => "t.status = " . Sheet::STATUS_LOCKED . " AND t.element_linked LIKE '%\"productlot\"%' AND t.type = 'control'",
+    ]);
+    if (is_array($result)) {
+        $digiQualiSheets = $result;
+    }
+}
 
 /*
  * Actions
@@ -475,20 +490,42 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
             }
         }
 
-        <?php if (isModEnabled('digiquali')) :
-            $controlUrl = dol_buildpath('digiquali/view/control/control_card.php', 1) . '?action=create' . ($object->fk_lot > 0 ? '&fromtype=productlot&fromid=' . (int) $object->fk_lot : '') . ($object->fk_soc > 0 ? '&fk_soc=' . (int) $object->fk_soc : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?id=' . $object->id);
-            $controlBtn = '<a class="butActionNew" href="' . dol_escape_htmltag($controlUrl) . '">'
-                . '<span class="fa fa-plus-circle valignmiddle paddingright" title="' . dol_escape_htmltag($langs->trans('NewControl')) . '"></span>'
-                . img_picto($langs->trans('NewControl'), 'fontawesome_fa-tasks_fas_#d35968', 'class="valignmiddle"')
-                . '</a>';
-        ?>
-        var $fkLotRow = $registrationCertificateTable.find('tr.field_fk_lot');
-        if ($fkLotRow.length > 0) {
-            $fkLotRow.find('td:last').append(<?= json_encode(' ' . $controlBtn) ?>);
-        }
-        <?php endif; ?>
     </script>
     <?php
+
+    if (isModEnabled('digiquali') && !empty($object->fk_lot) && $object->fk_lot > 0 && !empty($digiQualiSheets)) {
+        $controlCardUrl = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1);
+        $backToPage     = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
+        $logoUrl        = dol_buildpath('/custom/digiquali/img/digiquali_color.svg', 1);
+
+        $sheetsForJs = [];
+        foreach ($digiQualiSheets as $digiQualiSheet) {
+            $sheetsForJs[] = ['id' => (int) $digiQualiSheet->id, 'text' => $digiQualiSheet->label];
+        }
+
+        print '<div id="dolicar-quick-control-widget" data-sheets="' . dol_escape_htmltag(json_encode($sheetsForJs)) . '">';
+        print '<div class="dolicar-control-inline-creator">';
+        print '<img src="' . dol_escape_htmltag($logoUrl) . '" alt="DigiQuali" class="dolicar-control-logo">';
+        print '<span class="dolicar-control-separator">|</span>';
+        print '<select id="dolicar_quick_control_sheet" class="dolicar-control-model-select">';
+        print '</select>';
+        print ajax_combobox('dolicar_quick_control_sheet', [], 0, 0, 'resolve', '-1', 'dolicar-control-model-select');
+        print '<button type="button" class="dolicar-control-add-btn button-disable" disabled title="' . dol_escape_htmltag($langs->transnoentities('NewControl')) . '">';
+        print '<i class="fas fa-plus-circle"></i>';
+        print '</button>';
+        print '</div>';
+        print '</div>';
+
+        print '<form id="dolicar-quick-control-form" method="POST" action="' . dol_escape_htmltag($controlCardUrl) . '" style="display:none">';
+        print '<input type="hidden" name="token" value="' . newToken() . '">';
+        print '<input type="hidden" name="action" value="add">';
+        print '<input type="hidden" name="label" value="">';
+        print '<input type="hidden" name="fk_user_controller" value="' . (int) $user->id . '">';
+        print '<input type="hidden" name="fk_productlot" value="' . (int) $object->fk_lot . '">';
+        print '<input type="hidden" name="fk_sheet" value="">';
+        print '<input type="hidden" name="backtopage" value="' . dol_escape_htmltag($backToPage) . '">';
+        print '</form>';
+    }
 
     print '<div class="clearboth"></div>';
 
