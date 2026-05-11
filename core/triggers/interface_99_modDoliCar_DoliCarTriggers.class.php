@@ -46,7 +46,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'DoliCar triggers.';
-        $this->version     = '21.0.0';
+        $this->version     = '22.0.0';
         $this->picto       = 'dolicar@dolicar';
     }
 
@@ -87,8 +87,10 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $actionComm->userownerid = $user->id;
         $actionComm->percentage  = -1;
 
-        if (getDolGlobalInt('DOLICAR_ADVANCED_TRIGGER') && !empty($object->fields)) {
-            $actionComm->note_private = method_exists($object, 'getTriggerDescription') ? $object->getTriggerDescription($object) : '';
+        if (getDolGlobalInt('DOLICAR_ADVANCED_TRIGGER') === 1 &&
+            method_exists($object, 'getTriggerDescription') &&
+            !empty($object->fields)) {
+            $actionComm->note_private = $object->getTriggerDescription();
         }
 
         $objects      = ['REGISTRATIONCERTIFICATEFR'];
@@ -103,6 +105,20 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         }
 
         switch ($action) {
+            case 'REGISTRATIONCERTIFICATEFR_CREATE':
+                if (!empty($object->fk_lot) && $object->fk_lot > 0) {
+                    $lotActionComm              = new ActionComm($this->db);
+                    $lotActionComm->code        = 'AC_PRODUCTBATCH_CREATE';
+                    $lotActionComm->type_code   = 'AC_OTH_AUTO';
+                    $lotActionComm->fk_element  = $object->fk_lot;
+                    $lotActionComm->elementtype = 'productlot';
+                    $lotActionComm->label       = $langs->transnoentities('LotCreatedForRegistrationCertificate', $object->a_registration_number);
+                    $lotActionComm->datep       = dol_now();
+                    $lotActionComm->userownerid = $user->id;
+                    $lotActionComm->percentage  = -1;
+                    $lotActionComm->create($user);
+                }
+                break;
             case 'PROPAL_CREATE' :
             case 'ORDER_CREATE' :
             case 'BILL_CREATE' :
@@ -115,7 +131,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
 
                     $object->note_public  = $langs->transnoentities('RegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
-                    $object->note_public .= $langs->transnoentities('VINNumber') . ' : ' .  (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
+                    $object->note_public .= $langs->transnoentities('VINNumber') . ' : ' . (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('Mileage') . ' : ' . ($object->array_options['options_mileage'] > 0 ? price($object->array_options['options_mileage'], 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
 

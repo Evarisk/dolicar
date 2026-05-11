@@ -39,8 +39,11 @@ global $conf, $db, $langs, $moduleNameLowerCase, $user;
 // Load translation files required by the page
 saturne_load_langs();
 
+// Get parameters
+$action = GETPOST('action', 'alpha');
+
 // Security check - Protection if external user
-$permissionToRead = $user->rights->dolicar->adminpage->read && isModEnabled('easycrm');
+$permissionToRead = $user->rights->dolicar->adminpage->read && isModEnabled('reedcrm');
 saturne_check_access($permissionToRead);
 
 /*

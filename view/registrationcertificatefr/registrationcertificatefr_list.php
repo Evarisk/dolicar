@@ -22,10 +22,13 @@
  */
 
 // Load DoliCar environment
-if (!file_exists('../../dolicar.main.inc.php')) {
+if (file_exists('../dolicar.main.inc.php')) {
+    require_once __DIR__ . '/../dolicar.main.inc.php';
+} elseif (file_exists('../../dolicar.main.inc.php')) {
+    require_once __DIR__ . '/../../dolicar.main.inc.php';
+} else {
     die('Include of dolicar main fails');
 }
-require_once __DIR__ . '/../../dolicar.main.inc.php';
 
 // load dolicar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
@@ -251,6 +254,8 @@ if (!empty($fromType)) {
 
     $moreUrlParameters = '&fromtype=' . $fromType . '&fromid=' . $fromId . '&mode=' . $mode;
 }
+
+$createUrl = dol_buildpath('custom/dolicar/view/registrationcertificatefr/quickcreation.php', 1);
 
 require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_build_sql_select.tpl.php';
 require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_header.tpl.php';

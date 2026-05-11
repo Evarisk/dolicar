@@ -59,10 +59,16 @@ class RegistrationCertificateFr extends SaturneObject
     public $isextrafieldmanaged = 1;
 
     /**
+     * @var int Does object support categories ? 0 = No, 1 = Yes
+     */
+    public int $isCategoryManaged = 0;
+
+    /**
      * @var string Name of icon for registrationcertificatefr. Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size') or 'registrationcertificatefr@dolicar' if picto is file 'img/object_registrationcertificatefr.png'
      */
     public string $picto = 'fontawesome_fa-car_fas_#d35968';
 
+    public const STATUS_DRAFT     = 0;
     public const STATUS_DELETED   = -1;
     public const STATUS_VALIDATED = 1;
     public const STATUS_LOCKED    = 2;
@@ -111,14 +117,14 @@ class RegistrationCertificateFr extends SaturneObject
      */
     public $fields = [
         'rowid'                               => ['type' => 'integer',      'label' => 'TechnicalID',                   'enabled' => 1, 'position' => 1,   'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
-        'ref'                                 => ['type' => 'varchar(128)', 'label' => 'Ref',                           'enabled' => 1, 'position' => 10,  'notnull' => 1, 'visible' => 4, 'noteditable' => 1, 'index' => 1, 'searchall' => 1, 'comment' => 'Reference of object'],
+        'ref'                                 => ['type' => 'varchar(128)', 'label' => 'Ref',                           'enabled' => 1, 'position' => 10,  'notnull' => 1, 'visible' => 4, 'showinpwa' => 1, 'noteditable' => 1, 'index' => 1, 'searchall' => 1, 'comment' => 'Reference of object'],
         'ref_ext'                             => ['type' => 'varchar(128)', 'label' => 'RefExt',                        'enabled' => 1, 'position' => 20,  'notnull' => 0, 'visible' => -2],
         'entity'                              => ['type' => 'integer',      'label' => 'Entity',                        'enabled' => 1, 'position' => 30,  'notnull' => 1, 'visible' => -2, 'index' => 1],
         'date_creation'                       => ['type' => 'datetime',     'label' => 'DateCreation',                  'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 2],
         'tms'                                 => ['type' => 'timestamp',    'label' => 'DateModification',              'enabled' => 1, 'position' => 50,  'notnull' => 0, 'visible' => -2],
         'import_key'                          => ['type' => 'varchar(14)',  'label' => 'ImportId',                      'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => -2],
         'status'                              => ['type' => 'integer',      'label' => 'Status',                        'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => -2, 'index' => 1, 'default' => 1, 'arrayofkeyval' => [1 => 'Validated', 3 => 'Archived']],
-        'a_registration_number'               => ['type' => 'varchar(128)', 'label' => 'RegistrationNumber',            'enabled' => 1, 'position' => 11,  'notnull' => 1, 'visible' => 1],
+        'a_registration_number'               => ['type' => 'varchar(128)', 'label' => 'RegistrationNumber',            'enabled' => 1, 'position' => 11,  'notnull' => 1, 'visible' => 1, 'showinpwa' => 1],
         'b_first_registration_date'           => ['type' => 'date',         'label' => 'FirstRegistrationDate',         'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => -3, 'config' => 1],
         'c1_owner_fullname'                   => ['type' => 'varchar(255)', 'label' => 'OwnerFullName',                 'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => -3, 'config' => 1],
         'c3_registration_address'             => ['type' => 'html',         'label' => 'RegistrationAddress',           'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => -3, 'config' => 1],
@@ -165,8 +171,8 @@ class RegistrationCertificateFr extends SaturneObject
         'z3_specific_details'                 => ['type' => 'html',         'label' => 'SpecificDetails3',              'enabled' => 1, 'position' => 510, 'notnull' => 0, 'visible' => -3, 'config' => 1],
         'z4_specific_details'                 => ['type' => 'html',         'label' => 'SpecificDetails4',              'enabled' => 1, 'position' => 520, 'notnull' => 0, 'visible' => -3, 'config' => 1],
         'json'                                => ['type' => 'html',         'label' => 'JSON',                          'enabled' => 1, 'position' => 530, 'notnull' => 0, 'visible' => 0],
-        'fk_product'                          => ['type' => 'integer:Product:product/class/product.class.php:1',             'label' => 'Product',      'picto' => 'product', 'enabled' => 1, 'position' => 12,  'notnull' => 0, 'visible' => 1,  'index' => 1, 'css' => 'minwidth150 maxwidth500 widthcentpercentminusx product-object', 'foreignkey' => 'product.rowid'],
-        'fk_lot'                              => ['type' => 'integer:Productlot:product/stock/class/productlot.class.php:1', 'label' => 'DolicarBatch', 'picto' => 'lot',     'enabled' => 1, 'position' => 13,  'notnull' => 0, 'visible' => 5,  'index' => 1, 'css' => 'minwidth200 maxwidth500 widthcentpercentminusx',                'foreignkey' => 'productlot.rowid'],
+        'fk_product'                          => ['type' => 'integer:Product:product/class/product.class.php:1',             'label' => 'Product',      'picto' => 'product', 'enabled' => 1, 'position' => 12,  'notnull' => 0, 'visible' => 1,  'showinpwa' => 1, 'index' => 1, 'css' => 'minwidth150 maxwidth500 widthcentpercentminusx product-object', 'foreignkey' => 'product.rowid'],
+        'fk_lot'                              => ['type' => 'integer:Productlot:product/stock/class/productlot.class.php:1', 'label' => 'DolicarBatch', 'picto' => 'lot',     'enabled' => 1, 'position' => 13,  'notnull' => 0, 'visible' => 5,  'showinpwa' => 1, 'index' => 1, 'css' => 'minwidth200 maxwidth500 widthcentpercentminusx',                'foreignkey' => 'productlot.rowid'],
         'fk_soc'                              => ['type' => 'integer:Societe:societe/class/societe.class.php:1',             'label' => 'ThirdParty',   'picto' => 'company', 'enabled' => 1, 'position' => 14,  'notnull' => 0, 'visible' => 1,  'index' => 1, 'css' => 'minwidth150 maxwidth500 widthcentpercentminusx',                'foreignkey' => 'societe.rowid'],
         'fk_project'                          => ['type' => 'integer:Project:projet/class/project.class.php:1',              'label' => 'Project',      'picto' => 'project', 'enabled' => 1, 'position' => 15,  'notnull' => 0, 'visible' => 1,  'index' => 1, 'css' => 'minwidth150 maxwidth500 widthcentpercentminusx',                'foreignkey' => 'projet.rowid'],
         'fk_user_creat'                       => ['type' => 'integer:User:user/class/user.class.php',                        'label' => 'UserAuthor',   'picto' => 'user',    'enabled' => 1, 'position' => 540, 'notnull' => 1, 'visible' => -2,               'css' => 'minwidth150 maxwidth500 widthcentpercentminusx',                'foreignkey' => 'user.rowid'],
@@ -279,7 +285,7 @@ class RegistrationCertificateFr extends SaturneObject
     /**
      * Constructor
      *
-     * @param DoliDb $db Database handler
+     * @param DoliDB $db Database handler
      */
     public function __construct(DoliDB $db)
     {
@@ -298,11 +304,11 @@ class RegistrationCertificateFr extends SaturneObject
     /**
      * Create object into database
      *
-     * @param  User $user      User that creates
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, ID of created object if OK
+     * @param  User        $user      User that creates
+     * @param  int<0,1>    $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,max>            Return integer 0 < if KO, ID of created object if OK
      */
-    public function create(User $user, bool $notrigger = false): int
+    public function create(User $user, int $noTrigger = 0): int
     {
         global $langs;
 
@@ -310,27 +316,29 @@ class RegistrationCertificateFr extends SaturneObject
         $this->ref                   = $registrationNumber;
         $this->a_registration_number = $registrationNumber;
 
-        if (empty($this->fk_product) || $this->fk_product == -1) {
-            $this->fk_product = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
-        }
-        if (empty($this->fk_lot) || $this->fk_lot == -1) {
-            $this->fk_lot = create_default_product_lot($this->fk_product);
-        }
-        if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
-            $this->d1_vehicle_brand = $langs->transnoentities('DefaultBrand');
+        if ($this->status !== self::STATUS_DRAFT) {
+            if (empty($this->fk_product) || $this->fk_product == -1) {
+                $this->fk_product = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
+            }
+            if (empty($this->fk_lot) || $this->fk_lot == -1) {
+                $this->fk_lot = create_default_product_lot($this->fk_product);
+            }
+            if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
+                $this->d1_vehicle_brand = $langs->transnoentities('DefaultBrand');
+            }
         }
 
-        return $this->createCommon($user, $notrigger);
+        return $this->createCommon($user, $noTrigger);
     }
 
     /**
      * Update object into database
      *
-     * @param  User $user      User that modifies
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User       $user      User that modifies
+     * @param  int<0,1>   $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,max>           Return integer 0 < if KO, ID of created object if OK
      */
-    public function update(User $user, bool $notrigger = false): int
+    public function update(User $user, int $noTrigger = 0): int
     {
         global $langs;
 
@@ -341,7 +349,22 @@ class RegistrationCertificateFr extends SaturneObject
         if (empty($this->d1_vehicle_brand) || $this->d1_vehicle_brand == -1) {
             $this->d1_vehicle_brand = $langs->transnoentities('DefaultBrand');
         }
-        return $this->updateCommon($user, $notrigger);
+        return $this->updateCommon($user, $noTrigger);
+    }
+
+    /**
+     * Return tooltip content array
+     *
+     * @param  array $params Tooltip params
+     * @return array         Tooltip content
+     */
+    public function getTooltipContentArray($params): array
+    {
+        global $langs;
+
+        $langs->load('dolicar@dolicar');
+
+        return parent::getTooltipContentArray($params);
     }
 
     /**
@@ -356,16 +379,21 @@ class RegistrationCertificateFr extends SaturneObject
         if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
             global $langs;
 
+            $this->labelStatus[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('Draft');
             $this->labelStatus[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
             $this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
             $this->labelStatus[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
 
+            $this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('Draft');
             $this->labelStatusShort[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
             $this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Enabled');
             $this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
         }
 
         $statusType = 'status' . $status;
+        if ($status == self::STATUS_DRAFT) {
+            $statusType = 'status0';
+        }
         if ($status == self::STATUS_VALIDATED) {
             $statusType = 'status4';
         }
@@ -379,19 +407,378 @@ class RegistrationCertificateFr extends SaturneObject
         return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
     }
 
-    /**
-     * Sets object to supplied categories
-     *
-     * Deletes object from existing categories not supplied
-     * Adds it to non-existing supplied categories
-     * Existing categories are left untouched
-     *
-     * @param  int[]|int $categories Category or categories IDs
-     * @return string
-     */
-    public function setCategories($categories): string
+    public function getRegistrationCertificateData($searchValue, $searchType = 'plaque', $confirmRetry = false): array
     {
-        return '';
+        global $conf, $db, $langs, $user;
+
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+        $api            = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API');
+        $pendingDraftId = 0;
+
+        if (dol_strlen($searchValue) > 0) {
+            if ($searchType == 'plaque') {
+                $searchValue = normalize_registration_number($searchValue);
+                $result      = $this->fetch(0, $searchValue);
+            } else {
+                $result = $this->fetch(0, '', ' AND e_vehicle_serial_number = "' . $db->escape($searchValue) . '"');
+            }
+
+            if ($result > 0) {
+                if ($this->status == self::STATUS_DRAFT) {
+                    if (!empty($this->json)) {
+                        $draftData = json_decode($this->json);
+                        $draftId   = $this->id;
+                        $this->id  = 0;
+                        if ($draftData !== null) {
+                            if (isset($draftData->_api_error) && $draftData->_api_error === true) {
+                                if (!$confirmRetry) {
+                                    // Ask user to confirm before consuming a new token
+                                    return [
+                                        'api'         => $api,
+                                        'error_draft' => true,
+                                        'draft_id'    => $draftId,
+                                        'error'       => isset($draftData->_api_error_message) ? $draftData->_api_error_message : '',
+                                    ];
+                                }
+                                // User confirmed retry: clear error JSON and reuse this draft
+                                $pendingDraftId   = $draftId;
+                                $retryDraft       = new self($db);
+                                $retryDraft->fetch($draftId);
+                                $retryDraft->json = '';
+                                $retryDraft->update($user);
+                            } else {
+                                // Valid cached draft: return without consuming API token
+                                setEventMessages($langs->trans('LicencePlateInformationsFromDatabase'), []);
+                                return ['api' => $api, 'data' => $draftData, 'draft_id' => $draftId, 'from_cache' => true];
+                            }
+                        }
+                    } else {
+                        // Draft with empty JSON (pending): reuse it
+                        $pendingDraftId = $this->id;
+                        $this->id       = 0;
+                    }
+                } else {
+                    setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), []);
+                    header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $this->id);
+                    exit;
+                }
+            }
+        }
+
+        // Create a pending draft in DB before consuming an API token
+        if ($pendingDraftId == 0) {
+            $pendingDraft         = new self($db);
+            $pendingDraft->status = self::STATUS_DRAFT;
+            if ($searchType == 'plaque') {
+                $pendingDraft->a_registration_number = $searchValue;
+            } else {
+                $pendingDraft->a_registration_number   = '';
+                $pendingDraft->e_vehicle_serial_number = $searchValue;
+            }
+            $createdId = $pendingDraft->create($user);
+            if ($createdId > 0) {
+                $pendingDraftId = $createdId;
+            }
+        }
+
+        if ($api == 'apiplaqueimmatriculation.com') {
+            $apiKey = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY');
+
+            if ($searchType == 'vin') {
+                $url        = 'https://api.apiplaqueimmatriculation.com/vin?vin=' . urlencode($searchValue) . '&token=' . urlencode($apiKey);
+                $httpMethod = 'GET';
+            } else {
+                $url        = 'https://api.apiplaqueimmatriculation.com/plaque?immatriculation=' . urlencode($searchValue) . '&token=' . urlencode($apiKey) . '&pays=FR';
+                $httpMethod = 'POST';
+            }
+
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL            => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_USERAGENT      => $this->module . '-Agent/' . DOL_VERSION,
+                CURLOPT_ENCODING       => '',
+                CURLOPT_MAXREDIRS      => 10,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_TIMEOUT        => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST  => $httpMethod
+            ));
+            $response = curl_exec($curl);
+            curl_close($curl);
+
+            $registrationCertificateObjectJson = json_decode($response);
+
+            if (isset($registrationCertificateObjectJson->code_erreur) && $registrationCertificateObjectJson->code_erreur != 200) {
+                $errorMessage = isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Error';
+                $this->saveApiErrorToDraft($pendingDraftId, $errorMessage);
+                return ['api' => $api, 'error' => $errorMessage, 'draft_id' => $pendingDraftId];
+            }
+
+            if (isset($registrationCertificateObjectJson->data) && is_object($registrationCertificateObjectJson->data)) {
+                $this->saveJsonToDraft($pendingDraftId, $registrationCertificateObjectJson->data);
+                $this->populateAndSaveDraft($pendingDraftId, $api, $registrationCertificateObjectJson->data);
+                return ['api' => $api, 'data' => $registrationCertificateObjectJson->data, 'draft_id' => $pendingDraftId];
+            }
+
+            $errorMessage = isset($registrationCertificateObjectJson->message) ? $registrationCertificateObjectJson->message : 'Invalid API response';
+            $this->saveApiErrorToDraft($pendingDraftId, $errorMessage);
+            return ['api' => $api, 'error' => $errorMessage, 'draft_id' => $pendingDraftId];
+        }
+
+        if ($api == 'immatriculationapi.com') {
+            $username = getDolGlobalString('DOLICAR_IMMATRICULATION_API_USERNAME');
+            $apiUrl   = 'https://www.immatriculationapi.com/api/reg.asmx/CheckFrance';
+
+            if (dol_strlen($username) > 0) {
+                $curl = curl_init();
+                curl_setopt_array($curl, [
+                    CURLOPT_URL            => $apiUrl . '?RegistrationNumber=' . urlencode($searchValue) . '&username=' . urlencode($username),
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_USERAGENT      => $this->module . '-Agent/' . DOL_VERSION,
+                    CURLOPT_CONNECTTIMEOUT => 5,
+                    CURLOPT_TIMEOUT        => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST  => 'GET',
+                ]);
+                $xmlData   = curl_exec($curl);
+                $httpCode  = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($curl);
+                curl_close($curl);
+
+                if (empty($xmlData) || !empty($curlError)) {
+                    $this->saveApiErrorToDraft($pendingDraftId, $curlError);
+                    setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $curlError), [], 'errors');
+                    header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
+                    exit;
+                } else {
+                    $xml = @simplexml_load_string($xmlData);
+                    if ($xml === false || !isset($xml->vehicleJson)) {
+                        dol_syslog(__METHOD__ . ' immatriculationapi.com: unexpected response (not XML or missing vehicleJson): ' . $xmlData, LOG_ERR);
+                        $this->saveApiErrorToDraft($pendingDraftId, $xmlData);
+                        setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $xmlData), [], 'errors');
+                        header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
+                        exit;
+                    }
+                    $strJson                       = (string) $xml->vehicleJson;
+                    $registrationCertificateObject = json_decode($strJson);
+                    dolibarr_set_const($db, 'DOLICAR_API_REMAINING_REQUESTS_COUNTER', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER') - 1, 'integer', 0, '', $conf->entity);
+                    dolibarr_set_const($db, 'DOLICAR_API_REQUESTS_COUNTER', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER') + 1, 'integer', 0, '', $conf->entity);
+                    setEventMessages($langs->trans('LicencePlateInformationsCharged'), []);
+                    setEventMessages($langs->trans('RemainingRequests', getDolGlobalString('DOLICAR_API_REMAINING_REQUESTS_COUNTER')), []);
+
+                    $this->saveJsonToDraft($pendingDraftId, $registrationCertificateObject);
+                    $this->populateAndSaveDraft($pendingDraftId, $api, $registrationCertificateObject);
+                    return ['api' => $api, 'data' => $registrationCertificateObject, 'draft_id' => $pendingDraftId];
+                }
+            } else {
+                setEventMessages($langs->trans('BadAPIUsername'), [], 'errors');
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
+                exit;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Save an API error marker into an existing draft's json field.
+     */
+    private function saveApiErrorToDraft(int $draftId, string $errorMessage): void
+    {
+        global $db, $user;
+
+        if ($draftId <= 0) {
+            return;
+        }
+        $draft       = new self($db);
+        $draft->fetch($draftId);
+        $draft->json = json_encode([
+            '_api_error'           => true,
+            '_api_error_message'   => $errorMessage,
+            '_api_error_timestamp' => dol_now(),
+        ]);
+        $draft->update($user);
+    }
+
+    /**
+     * Save only the raw JSON of an API response into a draft — guarantees the cache mechanism
+     * works even if populateAndSaveDraft fails on a specific vehicle's data structure.
+     */
+    private function saveJsonToDraft(int $draftId, object $data): void
+    {
+        global $db, $user;
+
+        if ($draftId <= 0) {
+            return;
+        }
+        $draft       = new self($db);
+        $draft->fetch($draftId);
+        $draft->json = json_encode($data);
+        $draft->update($user);
+    }
+
+    /**
+     * Populate all fields of an existing draft from a successful API response and save it.
+     * Keeps STATUS_DRAFT so the next search for the same plate hits the DB cache instead of the API.
+     */
+    private function populateAndSaveDraft(int $draftId, string $api, object $data): void
+    {
+        global $db, $user;
+
+        if ($draftId <= 0) {
+            return;
+        }
+        $draft = new self($db);
+        $draft->fetch($draftId);
+
+        if ($api === 'apiplaqueimmatriculation.com') {
+            if (isset($data->plaque) && !empty($data->plaque)) {
+                $draft->a_registration_number = $data->plaque;
+            }
+            if (isset($data->date1erCir_fr) && !empty($data->date1erCir_fr)) {
+                $parts = explode('-', $data->date1erCir_fr);
+                if (count($parts) === 3) {
+                    $draft->b_first_registration_date = dol_mktime(12, 0, 0, (int) $parts[1], (int) $parts[0], (int) $parts[2]);
+                }
+            }
+            $draft->d1_vehicle_brand                 = isset($data->marque)       ? (string) $data->marque       : '';
+            $draft->d2_vehicle_type                  = isset($data->type_moteur)  ? (string) $data->type_moteur  : '';
+            $draft->d21_vehicle_cnit                 = isset($data->cnit)         ? (string) $data->cnit         : '';
+            $draft->d3_vehicle_model                 = isset($data->modele)       ? (string) $data->modele       : '';
+            $draft->e_vehicle_serial_number          = isset($data->vin)          ? (string) $data->vin          : '';
+            $draft->j1_national_type                 = isset($data->genreVCG)     ? (string) $data->genreVCG     : '';
+            $draft->p1_cylinder_capacity             = isset($data->ccm)          ? (int) preg_replace('/[^0-9]/', '', $data->ccm) : 0;
+            $draft->p3_fuel_type                     = isset($data->energieNGC)   ? (string) $data->energieNGC   : '';
+            $draft->p6_national_administrative_power = isset($data->puisFisc)     ? (int) $data->puisFisc        : 0;
+            $draft->s1_seating_capacity              = isset($data->nr_passagers) ? (int) $data->nr_passagers    : 0;
+            $draft->v7_co2_emission                  = isset($data->co2)          ? (int) preg_replace('/[^0-9]/', '', $data->co2) : 0;
+            $draft->f2_ptac                          = isset($data->ptac)         ? (int) preg_replace('/[^0-9]/', '', $data->ptac) : 0;
+            $draft->g_vehicle_weight                 = isset($data->poids)        ? (int) preg_replace('/[^0-9]/', '', $data->poids) : 0;
+            $draft->j2_european_bodywork             = isset($data->carrosserieCG)   ? (string) $data->carrosserieCG   : '';
+            $draft->j3_national_bodywork             = isset($data->carrosserie)     ? (string) $data->carrosserie     : '';
+            $draft->j_vehicle_category               = isset($data->genreVCGNGC)     ? (string) $data->genreVCGNGC     : '';
+            $draft->k_type_approval_number           = isset($data->type_mine)       ? (string) $data->type_mine       : '';
+            $draft->p2_maximum_net_power             = isset($data->puisFiscReelKW)  ? (int) preg_replace('/[^0-9]/', '', $data->puisFiscReelKW) : 0;
+            $draft->v9_environmental_category        = isset($data->energie)         ? (string) $data->energie         : '';
+            $draft->h_validity_period                = isset($data->date30)          ? (string) $data->date30          : '';
+            if (isset($data->date1erCir_us) && !empty($data->date1erCir_us)) {
+                $dateUs = explode('-', $data->date1erCir_us);
+                if (count($dateUs) === 3) {
+                    $draft->i_vehicle_registration_date = dol_mktime(12, 0, 0, (int) $dateUs[1], (int) $dateUs[2], (int) $dateUs[0]);
+                }
+            }
+        } elseif ($api === 'immatriculationapi.com') {
+            $ext = isset($data->ExtendedData) ? $data->ExtendedData : null;
+            if ($ext !== null && isset($ext->datePremiereMiseCirculation) && !empty($ext->datePremiereMiseCirculation)) {
+                $parts = str_split($ext->datePremiereMiseCirculation, 2);
+                if (count($parts) >= 4) {
+                    $draft->b_first_registration_date = dol_mktime(12, 0, 0, (int) $parts[1], (int) $parts[0], (int) ($parts[2] . $parts[3]));
+                }
+            }
+            $draft->d1_vehicle_brand                 = isset($data->CarMake->CurrentTextValue)  ? (string) $data->CarMake->CurrentTextValue  : '';
+            $draft->d2_vehicle_type                  = isset($ext->typeVehicule)                ? (string) $ext->typeVehicule                : '';
+            $draft->d21_vehicle_cnit                 = isset($ext->CNIT)                        ? (string) $ext->CNIT                        : '';
+            $draft->d3_vehicle_model                 = isset($ext->libelleModele)               ? (string) $ext->libelleModele               : '';
+            $draft->e_vehicle_serial_number          = isset($ext->numSerieMoteur)              ? (string) $ext->numSerieMoteur              : '';
+            $draft->i_vehicle_registration_date      = isset($data->RegistrationDate)           ? (string) $data->RegistrationDate           : '';
+            $draft->j1_national_type                 = isset($ext->genre)                       ? (string) $ext->genre                       : '';
+            $draft->p1_cylinder_capacity             = isset($ext->EngineCC)                    ? (int)    $ext->EngineCC                    : 0;
+            $draft->p3_fuel_type                     = isset($data->FuelType->CurrentTextValue) ? (string) $data->FuelType->CurrentTextValue : '';
+            $draft->p6_national_administrative_power = isset($ext->puissance)                   ? (int)    $ext->puissance                   : 0;
+            $draft->s1_seating_capacity              = isset($ext->nbPlace)                     ? (int)    $ext->nbPlace                     : 0;
+            $draft->v7_co2_emission                  = isset($ext->Co2)                         ? (int)    $ext->Co2                         : 0;
+        }
+
+        $draft->update($user);
+    }
+
+    /**
+     * Update car brands list file from apiplaqueimmatriculation.com API.
+     *
+     * @return int            >0 if OK, <0 if error
+     */
+    public static function updateCarBrandsFromApi(): int
+    {
+        global $conf, $langs;
+
+        // Endpoint provided in specs (example for brand id 93)
+        $baseUrl = 'https://api.apiplaqueimmatriculation.com/marques';
+
+        // Use configured API key if available, else fallback to demo token
+        $token = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY');
+
+        $url = $baseUrl . '?token=' . urlencode($token);
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_USERAGENT => 'dolicar-Agent/' . DOL_VERSION,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET'
+        ));
+
+        $response = curl_exec($curl);
+        $curlError = curl_error($curl);
+        curl_close($curl);
+
+        if ($response === false || !empty($curlError)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApi', $curlError), [], 'errors');
+            return -1;
+        }
+
+        $json = json_decode($response);
+
+        if (!is_object($json) || empty($json->success) || empty($json->data) || !is_array($json->data)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApiBadResponse'), [], 'errors');
+            return -2;
+        }
+
+        // Extract brand names from API response (nom_marque)
+        $brands = [];
+        foreach ($json->data as $item) {
+            if (is_object($item) && !empty($item->nom_marque)) {
+                $label = trim((string) $item->nom_marque);
+                if ($label !== '') {
+                    $brands[$label] = true; // use associative array to ensure uniqueness
+                }
+            }
+        }
+
+        if (empty($brands)) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFromApiNoData'), [], 'errors');
+            return -3;
+        }
+
+        // Sort brands alphabetically
+        $brandLabels = array_keys($brands);
+        sort($brandLabels, SORT_NATURAL | SORT_FLAG_CASE);
+
+        // Path to car_brands.txt from this class file
+        $carBrandsFile = __DIR__ . '/../core/car_brands.txt';
+
+        $content = implode("\n", $brandLabels) . "\n";
+        $result = @file_put_contents($carBrandsFile, $content, LOCK_EX);
+
+        if ($result === false) {
+            setEventMessages($langs->trans('ErrorUpdateCarBrandsFile'), [], 'errors');
+            return -4;
+        }
+
+        setEventMessages($langs->trans('CarBrandsUpdated'), [], 'mesgs');
+        return 1;
     }
 
     /**
@@ -442,6 +829,7 @@ class RegistrationCertificateFr extends SaturneObject
 
         // Graph Title parameters
         $array['title'] = $langs->transnoentities('DashboardCarState');
+        $array['picto'] = 'fontawesome_fa-car_fas_#d35968';
         $array['name']  = 'DashboardCarState';
 
         // Graph parameters
@@ -470,4 +858,6 @@ class RegistrationCertificateFr extends SaturneObject
 
         return $array;
     }
+
 }
+

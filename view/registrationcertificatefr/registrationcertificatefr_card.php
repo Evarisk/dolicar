@@ -35,11 +35,15 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+require_once __DIR__ . '/../../class/dolicardocuments/livretentretien.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 // Global variables definitions
@@ -57,12 +61,15 @@ $cancel              = GETPOST('cancel', 'aZ09');
 $contextpage         = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'registrationcertificatefrcard'; // To manage different context of search
 $backtopage          = GETPOST('backtopage', 'alpha');
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
+$fromtype            = GETPOST('fromtype', 'alpha');
+$fromid              = GETPOSTINT('fromid');
 
 // Initialize technical objects
 $object      = new RegistrationCertificateFr($db);
+$document    = new LivretEntretien($db);
+$category    = new Categorie($db);
 $product     = new Product($db);
 $productLot  = new Productlot($db);
-$category    = new Categorie($db);
 $extrafields = new ExtraFields($db);
 
 // Initialize view objects
@@ -131,6 +138,23 @@ if (empty($resHook)) {
 
     // Actions set_thirdparty, set_project
     require_once __DIR__ . '/../../../saturne/core/tpl/actions/banner_actions.tpl.php';
+
+    // Actions builddoc, forcebuilddoc, remove_file
+    $upload_dir = '';
+    if ($id > 0) {
+        $dirOutput  = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+        $upload_dir = $dirOutput . '/livretentretien/' . dol_sanitizeFileName($object->ref);
+
+        $moreParams = [
+            'object'           => $object,
+            'user'             => $user,
+            'zone'             => 'private',
+            'specimen'         => 0,
+            'tmparray'         => [],
+            'hideTemplateName' => 0,
+        ];
+        require_once __DIR__ . '/../../../saturne/core/tpl/documents/documents_action.tpl.php';
+    }
 }
 
 /*
@@ -139,6 +163,13 @@ if (empty($resHook)) {
 
 $title   = $langs->trans(ucfirst($object->element));
 $helpUrl = 'FR:Module_DoliCar';
+
+$configFields     = array_keys(array_filter($object->fields, static function ($field) {
+    return !empty($field['config']);
+}));
+$configFieldsJson = json_encode(array_map(static function ($f) {
+    return 'field_' . $f;
+}, $configFields));
 
 saturne_header( 0, '', $title, $helpUrl);
 
@@ -154,6 +185,9 @@ if ($action == 'create') {
     print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" id="getRegistrationCertificateData">';
     print '<input type="hidden" name="action" value="getRegistrationCertificateData">';
     print '<input type="hidden" name="token" value="'. newToken() .'">';
+    if (GETPOST('confirm_retry', 'int') == 1) {
+        print '<input type="hidden" name="confirm_retry" value="1">';
+    }
     print '<table class="border centpercent tableforfieldcreate">';
     print '<tr>';
     print '<td class="titlefieldcreate">';
@@ -161,14 +195,24 @@ if ($action == 'create') {
     print '</td>';
     print '<td class="valuefieldcreate">';
     print '<input class="flat minwidth400 --success" id="registrationNumber" name="registrationNumber" value="'. GETPOST('a_registration_number') .'">';
+    print ' <input type="submit" class="wpeo-button button butAction" value="'. $langs->trans('Search') .'">';
     print '</td>';
     print '</tr>';
-    print '<tr>';
-    print '</tr>';
+
+    // Add VIN search field only if API is apiplaqueimmatriculation.com
+    $current_api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API', 'immatriculationapi.com');
+    if ($current_api == 'apiplaqueimmatriculation.com') {
+        print '<tr>';
+        print '<td class="titlefieldcreate">';
+        print $langs->trans('FindVINInRepertory');
+        print '</td>';
+        print '<td class="valuefieldcreate">';
+        print '<input class="flat minwidth400 --success" id="vinNumber" name="vinNumber" value="'. GETPOST('vinNumber') .'">';
+        print '</td>';
+        print '</tr>';
+    }
+
     print '</table>';
-    print '<div class="center">';
-    print '<input type="submit" class="button butAction" value="'. $langs->trans('Search') .'">';
-    print '</div>';
     print '</form>';
     print '<hr>';
     print '<br>';
@@ -187,26 +231,46 @@ if ($action == 'create') {
 
     print '<table class="border centpercent tableforfieldcreate">';
 
-    $object->fields['fk_product']['default']       = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
-    $object->fields['d1_vehicle_brand']['default'] = get_vehicle_brand(GETPOSTINT('fk_product'));
+    // Pre-fill fk_product and fk_lot when creating from a product lot
+    $fkProductDefault = GETPOSTINT('fk_product');
+    $fkLotDefault     = GETPOSTINT('fk_lot');
+    if ($fromtype === 'productlot' && $fromid > 0 && $fkLotDefault <= 0) {
+        $productLot->fetch($fromid);
+        $fkProductDefault = $fkProductDefault > 0 ? $fkProductDefault : (int)$productLot->fk_product;
+        $fkLotDefault     = $fromid;
+    }
+
+    $object->fields['fk_product']['default']       = $fkProductDefault > 0 ? $fkProductDefault : getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
+    $object->fields['d1_vehicle_brand']['default'] = get_vehicle_brand($fkProductDefault);
 
     // Fk_lot
     print'<tr class="field_fk_lot"><td>';
     print $langs->trans('DolicarBatch');
     print '</td><td>';
     $productLotsData = [];
-    $productLots     = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . GETPOSTINT('fk_product')]);
+    $productLots     = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . ($fkProductDefault > 0 ? $fkProductDefault : 0)]);
     if (is_array($productLots) && !empty($productLots)) {
         foreach ($productLots as $productLotSingle) {
             $productLotsData[$productLotSingle->id] = $productLotSingle->batch;
         }
     }
-    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOSTINT('fk_lot'), $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
+    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, $fkLotDefault, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
     print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . (GETPOSTISSET('fk_product') && GETPOST('fk_product') > 0 ? '&fk_product=' . GETPOST('fk_product') : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
     print '</td></tr>';
 
     // Common attributes
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_add.tpl.php';
+
+    // Warehouse
+    print '<tr class="field_warehouse_id">';
+    print '<td class="titlefieldcreate">';
+    print $langs->trans('WarehouseForThisVehicle');
+    print '</td>';
+    print '<td class="valuefieldcreate">';
+    $formproduct = new FormProduct($db);
+    print img_picto('', 'stock', 'class="pictofixedwidth"') . $formproduct->selectWarehouses(GETPOSTINT('warehouse_id') > 0 ? GETPOSTINT('warehouse_id') : getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 'warehouse_id', '', 1, 0, 0, '', 0, 0, [], 'minwidth300');
+    print '</td>';
+    print '</tr>';
 
     // Other attributes
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_add.tpl.php';
@@ -220,11 +284,37 @@ if ($action == 'create') {
     print '</form>'; ?>
 
     <script>
-        const $table     = $('.tableforfieldcreate');
-        const $rowToMove = $table.find('.field_fk_lot');
-        const $targetRow = $table.find('.field_fk_product');
+        const $createTable = $('.tableforfieldcreate');
+        const $rowToMove   = $createTable.find('.field_fk_lot');
+        const $targetRow   = $createTable.find('.field_fk_product');
 
         $targetRow.after($rowToMove);
+
+        const registrationCertificateCreateConfigFields = <?= $configFieldsJson ?>;
+        let $registrationCertificateCreateFirstRow      = null;
+        let $registrationCertificateCreateGroupRows     = $();
+
+        $.each(registrationCertificateCreateConfigFields, function (index, fieldClass) {
+            const $row = $createTable.find('tr.' + fieldClass);
+            if ($row.length > 0) {
+                $registrationCertificateCreateGroupRows = $registrationCertificateCreateGroupRows.add($row);
+                if ($registrationCertificateCreateFirstRow === null) {
+                    $registrationCertificateCreateFirstRow = $row;
+                }
+            }
+        });
+
+        if ($registrationCertificateCreateGroupRows.length > 0) {
+            $registrationCertificateCreateGroupRows.hide();
+
+            const $createGroupHeader = $('<tr class="registration-certificate-group-header"><td colspan="2"><i class="fas fa-chevron-right registration-certificate-group-icon"></i><?= dol_escape_htmltag($langs->trans('RegistrationCertificateData')) ?></td></tr>');
+            $registrationCertificateCreateFirstRow.before($createGroupHeader);
+
+            $createTable.on('click', '.registration-certificate-group-header', function () {
+                $registrationCertificateCreateGroupRows.toggle();
+                $(this).find('.registration-certificate-group-icon').toggleClass('fa-chevron-down fa-chevron-right');
+            });
+        }
     </script>
     <?php
 }
@@ -260,7 +350,7 @@ if (($id || $ref) && $action == 'edit') {
         }
     }
     print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOST('fk_lot') > 0 ? GETPOST('fk_lot') : $object->fk_lot, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
-    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : $object->fk_product) . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
+    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : ($object->fk_product > 0 ? '&fk_product=' . $object->fk_product : '')) . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
     print '</td></tr>';
 
     // Common attributes
@@ -278,11 +368,37 @@ if (($id || $ref) && $action == 'edit') {
     print '</form>'; ?>
 
     <script>
-        const $table     = $('.tableforfieldedit');
-        const $rowToMove = $table.find('.field_fk_lot');
-        const $targetRow = $table.find('.field_fk_product');
+        const $editTable     = $('.tableforfieldedit');
+        const $editRowToMove = $editTable.find('.field_fk_lot');
+        const $editTargetRow = $editTable.find('.field_fk_product');
 
-        $targetRow.after($rowToMove);
+        $editTargetRow.after($editRowToMove);
+
+        const registrationCertificateEditConfigFields = <?= $configFieldsJson ?>;
+        let $registrationCertificateEditFirstRow      = null;
+        let $registrationCertificateEditGroupRows     = $();
+
+        $.each(registrationCertificateEditConfigFields, function (index, fieldClass) {
+            const $row = $editTable.find('tr.' + fieldClass);
+            if ($row.length > 0) {
+                $registrationCertificateEditGroupRows = $registrationCertificateEditGroupRows.add($row);
+                if ($registrationCertificateEditFirstRow === null) {
+                    $registrationCertificateEditFirstRow = $row;
+                }
+            }
+        });
+
+        if ($registrationCertificateEditGroupRows.length > 0) {
+            $registrationCertificateEditGroupRows.hide();
+
+            const $editGroupHeader = $('<tr class="registration-certificate-group-header"><td colspan="2"><i class="fas fa-chevron-right registration-certificate-group-icon"></i><?= dol_escape_htmltag($langs->trans('RegistrationCertificateData')) ?></td></tr>');
+            $registrationCertificateEditFirstRow.before($editGroupHeader);
+
+            $editTable.on('click', '.registration-certificate-group-header', function () {
+                $registrationCertificateEditGroupRows.toggle();
+                $(this).find('.registration-certificate-group-icon').toggleClass('fa-chevron-down fa-chevron-right');
+            });
+        }
     </script>
     <?php
 }
@@ -323,6 +439,41 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     print '</div>';
     print '</div>';
 
+    ?>
+
+    <script>
+        const $registrationCertificateTable = $('.tableforfield');
+
+        if ($registrationCertificateTable.length > 0) {
+            const registrationCertificateConfigFields = <?= $configFieldsJson ?>;
+            let $registrationCertificateFirstRow      = null;
+            let $registrationCertificateGroupRows     = $();
+
+            $.each(registrationCertificateConfigFields, function (index, fieldClass) {
+                const $row = $registrationCertificateTable.find('tr.' + fieldClass);
+                if ($row.length > 0) {
+                    $registrationCertificateGroupRows = $registrationCertificateGroupRows.add($row);
+                    if ($registrationCertificateFirstRow === null) {
+                        $registrationCertificateFirstRow = $row;
+                    }
+                }
+            });
+
+            if ($registrationCertificateGroupRows.length > 0) {
+                $registrationCertificateGroupRows.addClass('registration-certificate-field').hide();
+
+                const $groupHeader = $('<tr class="registration-certificate-group-header"><td colspan="2"><i class="fas fa-chevron-right registration-certificate-group-icon"></i><?= dol_escape_htmltag($langs->trans('RegistrationCertificateData')) ?></td></tr>');
+                $registrationCertificateFirstRow.before($groupHeader);
+
+                $registrationCertificateTable.on('click', '.registration-certificate-group-header', function () {
+                    $registrationCertificateGroupRows.toggle();
+                    $(this).find('.registration-certificate-group-icon').toggleClass('fa-chevron-down fa-chevron-right');
+                });
+            }
+        }
+    </script>
+    <?php
+
     print '<div class="clearboth"></div>';
 
     print dol_get_fiche_end();
@@ -355,6 +506,23 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
                 print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
             }
         }
+        print '</div>';
+    }
+
+    // Linked objects section
+    require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
+
+    // Documents section
+    if ($action != 'presend') {
+        $dirOutput = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+        $dirFiles  = 'livretentretien/' . dol_sanitizeFileName($object->ref);
+        $fileDir   = $dirOutput . '/' . $dirFiles;
+        $urlSource = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
+
+        print '<div class="fichecenter">';
+        print '<div class="fichehalfleft">';
+        print saturne_show_documents('dolicar:Livretentretien', $dirFiles, $fileDir, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object);
+        print '</div>';
         print '</div>';
     }
 }

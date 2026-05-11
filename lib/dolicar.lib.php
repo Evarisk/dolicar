@@ -43,7 +43,7 @@ function dolicar_admin_prepare_head(): array
     $head[$h][2] = 'registrationcertificate';
     $h++;
 
-    if (isModEnabled('easycrm')) {
+    if (isModEnabled('reedcrm')) {
         $head[$h][0] = dol_buildpath('dolicar/admin/quickcreation.php', 1);
         $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-plus pictofixedwidth"></i>' . $langs->trans('QuickCreation') : '<i class="fas fa-plus"></i>';
         $head[$h][2] = 'quickcreation';

@@ -99,20 +99,23 @@ class ActionsDoliCar
             if ($action == 'add') {
                 if (GETPOSTISSET('options_registrationcertificatefr') && !empty(GETPOST('options_registrationcertificatefr'))) {
                     require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+                    require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 
-                    $product = new Product($this->db);
+                    $product    = new Product($this->db);
+                    $productLot = new Productlot($this->db);
 
                     $extraFieldsNames = ['registration_number', 'vehicle_model', 'first_registration_date', 'VIN_number', 'linked_product', 'linked_lot'];
                     foreach ($extraFieldsNames as $extraFieldsName) {
                         $extrafields->attributes[$object->element]['list'][$extraFieldsName] = 1;
                     }
 
-                    $registrationCertificateFr->fetch(GETPOST('options_registrationcertificatefr'));
+                    $registrationCertificateFr->fetch(GETPOSTINT('options_registrationcertificatefr'));
                     $product->fetch($registrationCertificateFr->fk_product);
+                    $productLot->fetch($registrationCertificateFr->fk_lot);
 
                     $_POST['options_registration_number'] = $registrationCertificateFr->a_registration_number;
                     $_POST['options_vehicle_model']       = $product->label;
-                    $_POST['options_VIN_number']          = $registrationCertificateFr->e_vehicle_serial_number;
+                    $_POST['options_VIN_number']          = $productLot->batch;
 
                     $bFirstRegistrationDate                        = dol_getdate($registrationCertificateFr->b_first_registration_date);
                     $_POST['options_first_registration_date']      = $bFirstRegistrationDate['mday'] . '/' . $bFirstRegistrationDate['mon'] . '/' . $bFirstRegistrationDate['year'];
@@ -122,22 +125,27 @@ class ActionsDoliCar
 
                     $_POST['options_linked_product'] = $registrationCertificateFr->fk_product;
                     $_POST['options_linked_lot']     = $registrationCertificateFr->fk_lot;
+
+                    $object->array_options['options_VIN_number'] = $productLot->batch;
                 }
             }
 
             if ($action == 'update_extras') {
                 if (GETPOST('attribute') == 'registrationcertificatefr' && !empty(GETPOSTINT('options_registrationcertificatefr'))) {
                     require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+                    require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 
-                    $product = new Product($this->db);
+                    $product    = new Product($this->db);
+                    $productLot = new Productlot($this->db);
 
                     $registrationCertificateFrId = GETPOSTINT('options_registrationcertificatefr');
                     $registrationCertificateFr->fetch($registrationCertificateFrId);
                     $product->fetch($registrationCertificateFr->fk_product);
+                    $productLot->fetch($registrationCertificateFr->fk_lot);
 
                     $object->array_options['options_registration_number']     = $registrationCertificateFr->a_registration_number;
                     $object->array_options['options_vehicle_model']           = $product->label;
-                    $object->array_options['options_VIN_number']              = $registrationCertificateFr->e_vehicle_serial_number;
+                    $object->array_options['options_VIN_number']              = $productLot->batch;
                     $object->array_options['options_first_registration_date'] = dol_print_date($registrationCertificateFr->b_first_registration_date, 'day');
                     $object->array_options['options_linked_product']          = $registrationCertificateFr->fk_product;
                     $object->array_options['options_linked_lot']              = $registrationCertificateFr->fk_lot;
@@ -221,6 +229,30 @@ class ActionsDoliCar
             $extraFieldsNames = ['registration_number', 'vehicle_model', 'VIN_number', 'first_registration_date', 'mileage', 'registrationcertificatefr', 'linked_product', 'linked_lot'];
             foreach ($extraFieldsNames as $extraFieldsName) {
                 $extrafields->attributes[$object->element]['label'][$extraFieldsName] = $picto . $langs->transnoentities($extrafields->attributes[$object->element]['label'][$extraFieldsName]);
+            }
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     * Overloading the formDolBanner function : replacing the parent's function with the one below
+     *
+     * @param  array        $parameters Hook metadatas (context, etc...)
+     * @param  CommonObject $object     Current object
+     * @return int                      0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function formDolBanner(array $parameters, $object): int
+    {
+        if (strpos($parameters['context'], 'productlotcard') !== false) {
+            $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+            $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 1, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
+
+            if (is_array($registrationCertificates) && !empty($registrationCertificates)) {
+                $registrationCertificateFr = reset($registrationCertificates);
+                $this->resprints  = '<div class="refidno">';
+                $this->resprints .= $registrationCertificateFr->getNomUrl(1);
+                $this->resprints .= '</div>';
             }
         }
 
