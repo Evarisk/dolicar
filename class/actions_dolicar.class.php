@@ -210,6 +210,10 @@ class ActionsDoliCar
             }
         }
 
+        if (preg_match('/propalcard|invoicecard/', $parameters['context'])) {
+            $extrafields->attributes[$object->element]['list']['registration_number'] = 0;
+        }
+
         return 0; // or return 1 to replace standard code
     }
 
