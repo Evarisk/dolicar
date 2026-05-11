@@ -51,6 +51,9 @@ global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs(['propal', 'interventions']);
+if (isModEnabled('digiquali')) {
+    $langs->load('digiquali@digiquali');
+}
 
 // Get parameters
 $id                  = GETPOST('id', 'int');
@@ -471,6 +474,19 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
                 });
             }
         }
+
+        <?php if (isModEnabled('digiquali')) :
+            $controlUrl = dol_buildpath('digiquali/view/control/control_card.php', 1) . '?action=create' . ($object->fk_lot > 0 ? '&fromtype=productlot&fromid=' . (int) $object->fk_lot : '') . ($object->fk_soc > 0 ? '&fk_soc=' . (int) $object->fk_soc : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?id=' . $object->id);
+            $controlBtn = '<a class="butActionNew" href="' . dol_escape_htmltag($controlUrl) . '">'
+                . '<span class="fa fa-plus-circle valignmiddle paddingright" title="' . dol_escape_htmltag($langs->trans('NewControl')) . '"></span>'
+                . img_picto($langs->trans('NewControl'), 'fontawesome_fa-tasks_fas_#d35968', 'class="valignmiddle"')
+                . '</a>';
+        ?>
+        var $fkLotRow = $registrationCertificateTable.find('tr.field_fk_lot');
+        if ($fkLotRow.length > 0) {
+            $fkLotRow.find('td:last').append(<?= json_encode(' ' . $controlBtn) ?>);
+        }
+        <?php endif; ?>
     </script>
     <?php
 
@@ -505,6 +521,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
                 $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-ambulance"></i>' . ' ' . $langs->trans('NewIntervention') : '<i class="fas fa-ambulance fa-2x"></i>';
                 print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
             }
+
         }
         print '</div>';
     }
