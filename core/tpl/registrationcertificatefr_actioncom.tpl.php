@@ -75,7 +75,7 @@ if (is_array($listofactions) && !empty($listofactions)) {
         print '<tr class="oddeven">';
         print '<td class="nowraponall nopaddingrightimp">' . $evt->getNomUrl(1, -1) . '</td>';
         print '<td class="center nowraponall celldateheight">';
-        print dolOutputDates($evt->datep, $evt->datef, $evt->fulldayevent, 0, '', 'tzuserrel', 1);
+        print dol_print_date($evt->datep, $evt->fulldayevent ? 'day' : 'dayhour', 'tzuserrel');
         print '</td>';
         print '<td class="nowraponall tdoverflowmax100">';
         if (!empty($evt->userownerid)) {
