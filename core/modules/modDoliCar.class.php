@@ -690,6 +690,7 @@ class modDoliCar extends DolibarrModules
             }
         }
 
+        delDocumentModel('livretentretien_odt', 'livretentretien');
         addDocumentModel('livretentretien_odt', 'livretentretien', 'ODT templates', 'DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH');
 
         return $this->_init($sql, $options);
