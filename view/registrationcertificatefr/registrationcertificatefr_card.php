@@ -512,7 +512,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     // Linked objects section
     require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
 
-    // Documents section
+    // Documents and actions section
     if ($action != 'presend') {
         $dirOutput = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
         $dirFiles  = 'livretentretien/' . dol_sanitizeFileName($object->ref);
@@ -520,9 +520,15 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         $urlSource = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
 
         print '<div class="fichecenter">';
+
         print '<div class="fichehalfleft">';
         print saturne_show_documents('dolicar:Livretentretien', $dirFiles, $fileDir, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object);
         print '</div>';
+
+        print '<div class="fichehalfright">';
+        require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_actioncom.tpl.php';
+        print '</div>';
+
         print '</div>';
     }
 }
