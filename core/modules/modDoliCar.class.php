@@ -336,7 +336,7 @@ class modDoliCar extends DolibarrModules
         ];
 
         $this->menu[$r++] = [
-            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'fk_menu'  => 'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',
             'type'     => 'left',
             'titre'    => $langs->transnoentities('QuickCreation'),
             'prefix'   => '<i class="fas fa-plus-circle pictofixedwidth"></i>',
@@ -345,7 +345,7 @@ class modDoliCar extends DolibarrModules
             'url'      => '/dolicar/view/registrationcertificatefr/quickcreation.php',
             'langs'    => 'dolicar@dolicar',
             'position' => 1000 + $r,
-            'enabled'  => '$conf->reedcrm->enabled',
+            'enabled'  => '$conf->dolicar->enabled',
             'perms'    => '$user->rights->dolicar->read',
             'target'   => '',
             'user'     => 0
