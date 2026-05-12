@@ -32,6 +32,9 @@ if (file_exists('../dolicar.main.inc.php')) {
 
 // Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
@@ -73,6 +76,9 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     $eventDate    = dol_mktime(12, 0, 0, GETPOSTINT('event_datemonth'), GETPOSTINT('event_dateday'), GETPOSTINT('event_dateyear'));
     $eventMileage = GETPOSTINT('event_mileage');
     $eventNote    = GETPOST('event_note', 'restricthtml');
+    $fkFacture    = GETPOSTINT('event_fk_facture');
+    $fkPropal     = GETPOSTINT('event_fk_propal');
+    $fkControl    = GETPOSTINT('event_fk_control');
 
     if (!in_array($eventType, $allowedCodes, true)) {
         setEventMessages($langs->transnoentities('VehicleEventType') . ' ' . $langs->transnoentities('NotValid'), null, 'errors');
@@ -105,6 +111,16 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
         }
 
         if ($result > 0) {
+            if ($fkFacture > 0) {
+                $actionComm->add_object_linked('facture', $fkFacture);
+            }
+            if ($fkPropal > 0) {
+                $actionComm->add_object_linked('propal', $fkPropal);
+            }
+            if ($fkControl > 0) {
+                $actionComm->add_object_linked('control', $fkControl);
+            }
+
             setEventMessages($langs->transnoentities('VehicleEventAdded'), null, 'mesgs');
             header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
             exit;
