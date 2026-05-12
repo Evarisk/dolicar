@@ -18,47 +18,30 @@
 /**
  * \file    core/tpl/registrationcertificatefr_vehicle_history.tpl.php
  * \ingroup dolicar
- * \brief   Template for vehicle history events (CT, Révision, Accident, Autre)
+ * \brief   Template for vehicle history events driven by ActionComm categories
  */
 
 /**
  * The following vars must be defined:
- * Global   : $db, $langs, $form, $user
+ * Global   : $conf, $db, $form, $langs
  * Variable : $object (RegistrationCertificateFr), $permissiontoadd
+ *            $iconMap   (array label => FA class)
+ *            $catById   (array id => Categorie)
+ *            $catLabels (array id => ['label' => string, 'data-html' => string])
+ *            $eventsList (array of ActionComm)
+ *            $evtCatById (array evtId => Categorie)
  */
 
-require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
 
-$vehicleEventTypes = [
-    'AC_DOLICAR_CT'       => $langs->transnoentities('VehicleEventTypeCT'),
-    'AC_DOLICAR_REVISION' => $langs->transnoentities('VehicleEventTypeRevision'),
-    'AC_DOLICAR_ACCIDENT' => $langs->transnoentities('VehicleEventTypeAccident'),
-    'AC_DOLICAR_AUTRE'    => $langs->transnoentities('VehicleEventTypeAutre'),
-];
-
-$vehicleEventIcons = [
-    'AC_DOLICAR_CT'       => 'fa-check-circle',
-    'AC_DOLICAR_REVISION' => 'fa-wrench',
-    'AC_DOLICAR_ACCIDENT' => 'fa-exclamation-triangle',
-    'AC_DOLICAR_AUTRE'    => 'fa-circle',
-];
-
-$vehicleEventColors = [
-    'AC_DOLICAR_CT'       => '#5BA86E',
-    'AC_DOLICAR_REVISION' => '#E8A317',
-    'AC_DOLICAR_ACCIDENT' => '#E05353',
-    'AC_DOLICAR_AUTRE'    => '#888888',
-];
-
-$out = '';
-
 if (empty($object->fk_lot) || $object->fk_lot <= 0) {
     return;
 }
+
+$out = '';
 
 // === Add event form ===
 if (!empty($permissiontoadd)) {
@@ -72,7 +55,7 @@ if (!empty($permissiontoadd)) {
 
     $out .= '<tr>';
     $out .= '<td class="titlefield fieldrequired">' . $langs->transnoentities('VehicleEventType') . '</td>';
-    $out .= '<td>' . Form::selectarray('event_type', $vehicleEventTypes, GETPOST('event_type', 'aZ09'), 0, 0, 0, '', 0, 0, 0, '', 'minwidth200') . '</td>';
+    $out .= '<td>' . Form::selectarray('event_category_id', $catLabels, GETPOSTINT('event_category_id'), 1, 0, 0, '', 0, 0, 0, '', 'minwidth200') . '</td>';
     $out .= '</tr>';
 
     $out .= '<tr>';
@@ -115,12 +98,6 @@ if (!empty($permissiontoadd)) {
 }
 
 // === Event history list ===
-$allowedCodes = array_keys($vehicleEventTypes);
-$codeFilter   = " AND a.code IN ('" . implode("','", $allowedCodes) . "')";
-
-$actionComm = new ActionComm($db);
-$eventsList = $actionComm->getActions(0, (int) $object->fk_lot, 'productlot', $codeFilter, 'a.datep', 'DESC');
-
 $out .= load_fiche_titre($langs->transnoentities('VehicleHistory'), '', 'dolicar_color@dolicar');
 $out .= '<table class="noborder centpercent">';
 $out .= '<tr class="liste_titre">';
@@ -132,17 +109,17 @@ $out .= '<td class="center">' . $langs->transnoentities('UserAuthor') . '</td>';
 $out .= '<td>' . $langs->transnoentities('LinkedDocuments') . '</td>';
 $out .= '</tr>';
 
-if (is_array($eventsList) && !empty($eventsList)) {
+if (!empty($eventsList)) {
     foreach ($eventsList as $evt) {
         $evt->fetch_optionals();
 
         $ownerUser = new User($db);
         $ownerUser->fetch($evt->userownerid);
 
-        $code    = $evt->code;
-        $icon    = $vehicleEventIcons[$code] ?? 'fa-circle';
-        $color   = $vehicleEventColors[$code] ?? '#888888';
-        $label   = $vehicleEventTypes[$code] ?? dol_escape_htmltag($evt->label);
+        $evtCat  = $evtCatById[(int) $evt->id] ?? null;
+        $label   = $evtCat ? dol_escape_htmltag($evtCat->label) : dol_escape_htmltag($evt->label);
+        $color   = $evtCat ? '#' . ltrim($evtCat->color, '#') : '#888888';
+        $icon    = $evtCat ? ($iconMap[$evtCat->label] ?? 'fa-circle') : 'fa-circle';
         $km      = (int) ($evt->array_options['options_starting_mileage'] ?? 0);
         $userStr = $ownerUser->getNomUrl(1);
         $badge   = '<span style="color:' . $color . ';font-weight:bold;"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';

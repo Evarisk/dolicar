@@ -31,6 +31,7 @@ if (file_exists('../dolicar.main.inc.php')) {
 }
 
 // Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
@@ -41,7 +42,7 @@ require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 
 // Global variables definitions
-global $db, $form, $langs, $user;
+global $conf, $db, $form, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs();
@@ -65,40 +66,132 @@ $permissionToRead = $user->rights->dolicar->registrationcertificatefr->read;
 $permissiontoadd  = $user->rights->dolicar->registrationcertificatefr->write;
 saturne_check_access($permissionToRead);
 
+// Ensure parent event category exists and children are initialized
+$parentCategoryId = getDolGlobalInt('DOLICAR_VEHICLE_EVENT_CATEGORY_ID');
+if ($parentCategoryId > 0) {
+    $checkCat = new Categorie($db);
+    if ($checkCat->fetch($parentCategoryId) <= 0) {
+        $parentCategoryId = 0;
+    }
+}
+if ($parentCategoryId <= 0) {
+    $findParent = new Categorie($db);
+    if ($findParent->fetch(0, 'DoliCar Véhicule Événement', Categorie::TYPE_ACTIONCOMM) > 0) {
+        $parentCategoryId = $findParent->id;
+    } else {
+        $newParent            = new Categorie($db);
+        $newParent->label     = 'DoliCar Véhicule Événement';
+        $newParent->type      = Categorie::TYPE_ACTIONCOMM;
+        $newParent->fk_parent = 0;
+        $newParent->visible   = 1;
+        $parentCategoryId     = $newParent->create($user);
+    }
+
+    if ($parentCategoryId > 0) {
+        dolibarr_set_const($db, 'DOLICAR_VEHICLE_EVENT_CATEGORY_ID', $parentCategoryId, 'chaine', 0, '', $conf->entity);
+
+        $defaultChildren = [
+            ['label' => 'Contrôle technique', 'color' => '5BA86E'],
+            ['label' => 'Révision',           'color' => 'E8A317'],
+            ['label' => 'Accident',           'color' => 'E05353'],
+            ['label' => 'Autre',              'color' => '888888'],
+        ];
+        foreach ($defaultChildren as $childDef) {
+            $child            = new Categorie($db);
+            $child->label     = $childDef['label'];
+            $child->type      = Categorie::TYPE_ACTIONCOMM;
+            $child->fk_parent = $parentCategoryId;
+            $child->color     = $childDef['color'];
+            $child->visible   = 1;
+            if (!$child->already_exists()) {
+                $child->create($user);
+            }
+        }
+    }
+}
+
+// Icon mapping for default event types (label → Font Awesome class)
+$iconMap = [
+    'Contrôle technique' => 'fa-check-circle',
+    'Révision'           => 'fa-wrench',
+    'Accident'           => 'fa-exclamation-triangle',
+    'Autre'              => 'fa-circle',
+];
+
+// Load child categories and build display structures for the TPL
+$catById   = [];
+$catLabels = [];
+if ($parentCategoryId > 0) {
+    $parentCat = new Categorie($db);
+    if ($parentCat->fetch($parentCategoryId) > 0) {
+        $filles = $parentCat->get_filles();
+        if (is_array($filles)) {
+            foreach ($filles as $cat) {
+                $catIcon  = $iconMap[$cat->label] ?? 'fa-circle';
+                $catColor = '#' . ltrim($cat->color, '#');
+
+                $catById[$cat->id]   = $cat;
+                $catLabels[$cat->id] = [
+                    'label'     => $cat->label,
+                    'data-html' => '<i class="fas ' . $catIcon . '" style="color:' . $catColor . '"></i> ' . dol_escape_htmltag($cat->label),
+                ];
+            }
+        }
+    }
+}
+
+// Load all vehicle history events and resolve their category in one pass
+$eventsList = [];
+$evtCatById = [];
+if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
+    $actionCommHelper = new ActionComm($db);
+    $catHelper        = new Categorie($db);
+    $allEvents        = $actionCommHelper->getActions(0, (int) $object->fk_lot, 'productlot', '', 'a.datep', 'DESC');
+
+    if (is_array($allEvents)) {
+        foreach ($allEvents as $evt) {
+            $evtCatIds = $catHelper->containing($evt->id, Categorie::TYPE_ACTIONCOMM, 'id');
+            if (!is_array($evtCatIds)) {
+                continue;
+            }
+            foreach ($evtCatIds as $evtCatId) {
+                if (isset($catById[(int) $evtCatId])) {
+                    $eventsList[]               = $evt;
+                    $evtCatById[(int) $evt->id] = $catById[(int) $evtCatId];
+                    break;
+                }
+            }
+        }
+    }
+}
+
 /*
  * Actions
  */
 
 if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object->fk_lot) && $object->fk_lot > 0) {
-    $error        = 0;
-    $allowedCodes = ['AC_DOLICAR_CT', 'AC_DOLICAR_REVISION', 'AC_DOLICAR_ACCIDENT', 'AC_DOLICAR_AUTRE'];
-    $eventType    = GETPOST('event_type', 'aZ09');
-    $eventDate    = dol_mktime(12, 0, 0, GETPOSTINT('event_datemonth'), GETPOSTINT('event_dateday'), GETPOSTINT('event_dateyear'));
-    $eventMileage = GETPOSTINT('event_mileage');
-    $eventNote    = GETPOST('event_note', 'restricthtml');
-    $fkFacture    = GETPOSTINT('event_fk_facture');
-    $fkPropal     = GETPOSTINT('event_fk_propal');
-    $fkControl    = GETPOSTINT('event_fk_control');
+    $error           = 0;
+    $eventCategoryId = GETPOSTINT('event_category_id');
+    $eventDate       = dol_mktime(12, 0, 0, GETPOSTINT('event_datemonth'), GETPOSTINT('event_dateday'), GETPOSTINT('event_dateyear'));
+    $eventMileage    = GETPOSTINT('event_mileage');
+    $eventNote       = GETPOST('event_note', 'restricthtml');
+    $fkFacture       = GETPOSTINT('event_fk_facture');
+    $fkPropal        = GETPOSTINT('event_fk_propal');
+    $fkControl       = GETPOSTINT('event_fk_control');
 
-    if (!in_array($eventType, $allowedCodes, true)) {
+    $selectedCat = new Categorie($db);
+    if ($eventCategoryId <= 0 || $selectedCat->fetch($eventCategoryId) <= 0 || (int) $selectedCat->fk_parent !== $parentCategoryId) {
         setEventMessages($langs->transnoentities('VehicleEventType') . ' ' . $langs->transnoentities('NotValid'), null, 'errors');
         $error++;
     }
 
     if (!$error) {
-        $eventLabelKeys = [
-            'AC_DOLICAR_CT'       => 'VehicleEventTypeCT',
-            'AC_DOLICAR_REVISION' => 'VehicleEventTypeRevision',
-            'AC_DOLICAR_ACCIDENT' => 'VehicleEventTypeAccident',
-            'AC_DOLICAR_AUTRE'    => 'VehicleEventTypeAutre',
-        ];
-
         $actionComm               = new ActionComm($db);
-        $actionComm->code         = $eventType;
+        $actionComm->code         = 'AC_OTH';
         $actionComm->type_code    = 'AC_OTH';
         $actionComm->fk_element   = (int) $object->fk_lot;
         $actionComm->elementtype  = 'productlot';
-        $actionComm->label        = $langs->transnoentities($eventLabelKeys[$eventType]);
+        $actionComm->label        = $selectedCat->label;
         $actionComm->datep        = $eventDate ?: dol_now();
         $actionComm->userownerid  = $user->id;
         $actionComm->percentage   = -1;
@@ -111,6 +204,8 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
         }
 
         if ($result > 0) {
+            $actionComm->setCategories([$eventCategoryId]);
+
             if ($fkFacture > 0) {
                 $actionComm->add_object_linked('facture', $fkFacture);
             }
