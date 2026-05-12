@@ -29,6 +29,9 @@
 
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
 
 $vehicleEventTypes = [
     'AC_DOLICAR_CT'       => $langs->transnoentities('VehicleEventTypeCT'),
@@ -87,6 +90,21 @@ if (!empty($permissiontoadd)) {
     $out .= '<td><textarea name="event_note" class="flat minwidth400" rows="2">' . dol_escape_htmltag(GETPOST('event_note', 'restricthtml')) . '</textarea></td>';
     $out .= '</tr>';
 
+    $out .= '<tr>';
+    $out .= '<td>' . img_picto('', 'bill', 'class="pictofixedwidth"') . $langs->transnoentities('Invoices') . '</td>';
+    $out .= '<td>' . $form->selectForForms('Facture:compta/facture/class/facture.class.php', 'event_fk_facture', GETPOSTINT('event_fk_facture'), 1, '', '', 'minwidth300') . '</td>';
+    $out .= '</tr>';
+
+    $out .= '<tr>';
+    $out .= '<td>' . img_picto('', 'propal', 'class="pictofixedwidth"') . $langs->transnoentities('Proposals') . '</td>';
+    $out .= '<td>' . $form->selectForForms('Propal:comm/propal/class/propal.class.php', 'event_fk_propal', GETPOSTINT('event_fk_propal'), 1, '', '', 'minwidth300') . '</td>';
+    $out .= '</tr>';
+
+    $out .= '<tr>';
+    $out .= '<td><i class="fas fa-tasks pictofixedwidth"></i>' . $langs->transnoentities('Controls') . '</td>';
+    $out .= '<td>' . $form->selectForForms('Control:custom/digiquali/class/control.class.php', 'event_fk_control', GETPOSTINT('event_fk_control'), 1, '', '', 'minwidth300') . '</td>';
+    $out .= '</tr>';
+
     $out .= '</table>';
 
     $out .= '<div class="tabsAction">';
@@ -111,6 +129,7 @@ $out .= '<td class="center">' . $langs->transnoentities('Date') . '</td>';
 $out .= '<td class="center">' . $langs->transnoentities('Mileage') . '</td>';
 $out .= '<td>' . $langs->transnoentities('Note') . '</td>';
 $out .= '<td class="center">' . $langs->transnoentities('UserAuthor') . '</td>';
+$out .= '<td>' . $langs->transnoentities('LinkedDocuments') . '</td>';
 $out .= '</tr>';
 
 if (is_array($eventsList) && !empty($eventsList)) {
@@ -128,16 +147,62 @@ if (is_array($eventsList) && !empty($eventsList)) {
         $userStr = $ownerUser->getNomUrl(1);
         $badge   = '<span style="color:' . $color . ';font-weight:bold;"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';
 
+        $evt->fetchObjectLinked(null, null, null, null, 'OR', 1, 'sourcetype', 0);
+        $linkedHtml = '';
+        foreach (($evt->linkedObjectsIds['facture'] ?? []) as $facId) {
+            $tmpFac = new Facture($db);
+            if ($tmpFac->fetch($facId) > 0) {
+                $linkedHtml .= '<div class="inline-block">';
+                $linkedHtml .= $tmpFac->getNomUrl(1);
+                $linkedHtml .= ' &mdash; <strong>' . price($tmpFac->total_ttc) . ' ' . $conf->currency . '</strong>';
+                if (!empty($tmpFac->note_public)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpFac->note_public, 80)) . '</span>';
+                }
+                if (!empty($tmpFac->note_private)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpFac->note_private, 80)) . '</span>';
+                }
+                $linkedHtml .= '</div><br>';
+            }
+        }
+        foreach (($evt->linkedObjectsIds['propal'] ?? []) as $propalId) {
+            $tmpPropal = new Propal($db);
+            if ($tmpPropal->fetch($propalId) > 0) {
+                $linkedHtml .= '<div class="inline-block">';
+                $linkedHtml .= $tmpPropal->getNomUrl(1);
+                $linkedHtml .= ' &mdash; <strong>' . price($tmpPropal->total_ttc) . ' ' . $conf->currency . '</strong>';
+                if (!empty($tmpPropal->note_public)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpPropal->note_public, 80)) . '</span>';
+                }
+                if (!empty($tmpPropal->note_private)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpPropal->note_private, 80)) . '</span>';
+                }
+                $linkedHtml .= '</div><br>';
+            }
+        }
+        foreach (($evt->linkedObjectsIds['control'] ?? []) as $controlId) {
+            $tmpControl = new Control($db);
+            if ($tmpControl->fetch($controlId) > 0) {
+                $linkedHtml .= '<div class="inline-block">';
+                $linkedHtml .= $tmpControl->getNomUrl(1);
+                $linkedHtml .= ' &mdash; ' . $tmpControl->getLibVerdict(4);
+                if (!empty($tmpControl->note_public)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpControl->note_public, 80)) . '</span>';
+                }
+                $linkedHtml .= '</div><br>';
+            }
+        }
+
         $out .= '<tr class="oddeven">';
         $out .= '<td class="nowrap">' . $badge . '</td>';
         $out .= '<td class="center nowraponall">' . dol_print_date($evt->datep, 'day') . '</td>';
         $out .= '<td class="center">' . ($km > 0 ? price($km, 0, '', 1, 0) . ' km' : '') . '</td>';
         $out .= '<td>' . dol_escape_htmltag((string) $evt->note_private) . '</td>';
         $out .= '<td class="center nowraponall">' . $userStr . '</td>';
+        $out .= '<td>' . $linkedHtml . '</td>';
         $out .= '</tr>';
     }
 } else {
-    $out .= '<tr><td colspan="5"><em>' . $langs->transnoentities('NoVehicleHistory') . '</em></td></tr>';
+    $out .= '<tr><td colspan="6"><em>' . $langs->transnoentities('NoVehicleHistory') . '</em></td></tr>';
 }
 
 $out .= '</table>';
