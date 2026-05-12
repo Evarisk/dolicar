@@ -22,7 +22,9 @@
  */
 
 // Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 
 // Load Saturne libraries
@@ -79,14 +81,11 @@ class doc_livretentretien_odt extends SaturneDocumentModel
      */
     public function fillTagsLines(Odf $odfHandler, Translate $outputLangs, array $moreParam): int
     {
-        $object = $moreParam['object'];
-
-        $vehicleEventTypes = [
-            'AC_DOLICAR_CT'       => 'VehicleEventTypeCT',
-            'AC_DOLICAR_REVISION' => 'VehicleEventTypeRevision',
-            'AC_DOLICAR_ACCIDENT' => 'VehicleEventTypeAccident',
-            'AC_DOLICAR_AUTRE'    => 'VehicleEventTypeAutre',
-        ];
+        // Data is pre-loaded in write_file to avoid duplicate DB calls
+        $eventsList = $moreParam['eventsList'] ?? [];
+        $catById    = $moreParam['catById']    ?? [];
+        $evtCatById = $moreParam['evtCatById'] ?? [];
+        $evtCostById = $moreParam['evtCostById'] ?? [];
 
         try {
             $foundTagForLines = 1;
@@ -99,25 +98,14 @@ class doc_livretentretien_odt extends SaturneDocumentModel
             }
 
             if ($foundTagForLines) {
-                $actionComm = new ActionComm($this->db);
-                $eventCodes = array_keys($vehicleEventTypes);
-                $eventsList = [];
-
-                if (!empty($object->fk_lot)) {
-                    $codeFilter = " AND a.code IN ('" . implode("','", $eventCodes) . "')";
-                    $rawList    = $actionComm->getActions(0, (int) $object->fk_lot, 'productlot', $codeFilter, 'a.datep', 'ASC');
-                    if (is_array($rawList)) {
-                        $eventsList = $rawList;
-                    }
-                }
-
                 if (!empty($eventsList)) {
                     foreach ($eventsList as $evt) {
                         $evt->fetch_optionals();
-                        $km        = (int) ($evt->array_options['options_starting_mileage'] ?? 0);
-                        $typeLabel = !empty($vehicleEventTypes[$evt->code])
-                            ? $outputLangs->trans($vehicleEventTypes[$evt->code])
-                            : $evt->code;
+                        $km      = (int) ($evt->array_options['options_starting_mileage'] ?? 0);
+                        $evtCat  = $evtCatById[(int) $evt->id] ?? null;
+                        $cost    = $evtCostById[(int) $evt->id] ?? 0;
+
+                        $typeLabel = $evtCat ? $evtCat->label : $evt->label;
 
                         $tmpArray = [];
                         $tmpArray['interventions_date']       = dol_print_date($evt->datep, 'day');
@@ -125,7 +113,7 @@ class doc_livretentretien_odt extends SaturneDocumentModel
                         $tmpArray['interventions_type_label'] = $typeLabel;
                         $tmpArray['interventions_comment']    = strip_tags($evt->note_private ?? '');
                         $tmpArray['interventions_parts']      = '';
-                        $tmpArray['interventions_cost']       = '';
+                        $tmpArray['interventions_cost']       = $cost > 0 ? price($cost) : '';
                         $tmpArray['interventions_doc_ref']    = '';
 
                         $this->setTmpArrayVars($tmpArray, $listLines, $outputLangs);
@@ -201,29 +189,74 @@ class doc_livretentretien_odt extends SaturneDocumentModel
             $thirdParty->fetch($object->fk_soc);
         }
 
-        $actionComm = new ActionComm($this->db);
-        $eventCodes = ['AC_DOLICAR_CT', 'AC_DOLICAR_REVISION', 'AC_DOLICAR_ACCIDENT', 'AC_DOLICAR_AUTRE'];
-        $eventsList = [];
+        // Load child event categories from the parent category
+        $parentCategoryId = getDolGlobalInt('DOLICAR_VEHICLE_EVENT_CATEGORY_ID');
+        $catById          = [];
 
-        if (!empty($object->fk_lot)) {
-            $codeFilter = " AND a.code IN ('" . implode("','", $eventCodes) . "')";
-            $rawList    = $actionComm->getActions(0, (int) $object->fk_lot, 'productlot', $codeFilter, 'a.datep', 'ASC');
-            if (is_array($rawList)) {
-                $eventsList = $rawList;
+        if ($parentCategoryId > 0) {
+            $parentCat = new Categorie($this->db);
+            if ($parentCat->fetch($parentCategoryId) > 0) {
+                $filles = $parentCat->get_filles();
+                if (is_array($filles)) {
+                    foreach ($filles as $cat) {
+                        $catById[$cat->id] = $cat;
+                    }
+                }
             }
         }
 
+        // Load all events for this lot and resolve their category in one pass
+        $eventsList  = [];
+        $evtCatById  = [];
+        $evtCostById = [];
+
+        if (!empty($object->fk_lot) && !empty($catById)) {
+            $actionCommHelper = new ActionComm($this->db);
+            $catHelper        = new Categorie($this->db);
+            $allEvents        = $actionCommHelper->getActions(0, (int) $object->fk_lot, 'productlot', '', 'a.datep', 'ASC');
+
+            if (is_array($allEvents)) {
+                foreach ($allEvents as $evt) {
+                    $evtCatIds = $catHelper->containing($evt->id, Categorie::TYPE_ACTIONCOMM, 'id');
+                    if (!is_array($evtCatIds)) {
+                        continue;
+                    }
+                    foreach ($evtCatIds as $evtCatId) {
+                        if (isset($catById[(int) $evtCatId])) {
+                            $eventsList[]               = $evt;
+                            $evtCatById[(int) $evt->id] = $catById[(int) $evtCatId];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Compute per-event invoice total and global totals
         $totalInterventions   = count($eventsList);
         $lastInterventionDate = '';
         $currentMileage       = 0;
+        $totalCost            = 0.0;
 
         foreach ($eventsList as $evt) {
             $lastInterventionDate = $evt->datep;
+
             $evt->fetch_optionals();
             $km = (int) ($evt->array_options['options_starting_mileage'] ?? 0);
             if ($km > $currentMileage) {
                 $currentMileage = $km;
             }
+
+            $evt->fetchObjectLinked(null, null, null, null, 'OR', 1, 'sourcetype', 0);
+            $evtCost = 0.0;
+            foreach (($evt->linkedObjectsIds['facture'] ?? []) as $facId) {
+                $tmpFac = new Facture($this->db);
+                if ($tmpFac->fetch($facId) > 0) {
+                    $evtCost += (float) $tmpFac->total_ttc;
+                }
+            }
+            $evtCostById[(int) $evt->id] = $evtCost;
+            $totalCost                   += $evtCost;
         }
 
         $firstRegDate = !empty($object->b_first_registration_date)
@@ -240,7 +273,7 @@ class doc_livretentretien_odt extends SaturneDocumentModel
         $tmpArray['object_socname']                 = !empty($thirdParty->name) ? $thirdParty->name : '';
         $tmpArray['object_current_mileage']         = $currentMileage > 0 ? $currentMileage . ' km' : '';
         $tmpArray['object_total_interventions']     = (string) $totalInterventions;
-        $tmpArray['object_total_cost']              = '';
+        $tmpArray['object_total_cost']              = $totalCost > 0 ? price($totalCost) : '';
         $tmpArray['object_last_intervention_date']  = !empty($lastInterventionDate)
             ? dol_print_date($lastInterventionDate, 'day')
             : '';
@@ -250,7 +283,11 @@ class doc_livretentretien_odt extends SaturneDocumentModel
         $tmpArray['myuser_firstname']               = ucfirst($user->firstname);
         $tmpArray['mycompany_name']                 = !empty($mysoc->name) ? $mysoc->name : getDolGlobalString('MAIN_INFO_SOCIETE_NOM');
 
-        $moreParam['tmparray'] = $tmpArray;
+        $moreParam['tmparray']    = $tmpArray;
+        $moreParam['eventsList']  = $eventsList;
+        $moreParam['catById']     = $catById;
+        $moreParam['evtCatById']  = $evtCatById;
+        $moreParam['evtCostById'] = $evtCostById;
 
         return parent::write_file($objectDocument, $outputLangs, $srcTemplatePath, $hideDetails, $hideDesc, $hideRef, $moreParam);
     }
