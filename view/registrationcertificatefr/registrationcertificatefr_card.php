@@ -44,6 +44,7 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
 // Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 require_once __DIR__ . '/../../class/dolicardocuments/livretentretien.class.php';
+require_once __DIR__ . '/../../class/dolicardocuments/vehiclelogbookdocument.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 if (isModEnabled('digiquali')) {
     require_once __DIR__ . '/../../../digiquali/class/sheet.class.php';
@@ -160,8 +161,31 @@ if (empty($resHook)) {
     // Actions builddoc, forcebuilddoc, remove_file
     $upload_dir = '';
     if ($id > 0) {
-        $dirOutput  = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
-        $upload_dir = $dirOutput . '/livretentretien/' . dol_sanitizeFileName($object->ref);
+        $dirOutput = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+
+        if ($action === 'remove_file_vlb' && $permissiontodelete) {
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            $fileToDelete  = GETPOST('file', 'alpha');
+            $file          = $dirOutput . '/vehiclelogbookdocument/' . dol_sanitizeFileName($object->ref) . '/' . $fileToDelete;
+            $result        = dol_delete_file($file, 0, 0, 0, $object);
+            if ($result > 0) {
+                setEventMessages($langs->trans('FileWasRemoved', $fileToDelete), []);
+            } else {
+                setEventMessages($langs->trans('ErrorFailToDeleteFile', $fileToDelete), [], 'errors');
+            }
+            $urlToRedirect = preg_replace('/#builddoc$/', '', $_SERVER['REQUEST_URI']);
+            $urlToRedirect = preg_replace('/action=remove_file_vlb&?/', '', $urlToRedirect);
+            header('Location: ' . $urlToRedirect);
+            exit;
+        }
+
+        $requestedModel = GETPOST('model', 'alpha');
+        if (($action === 'builddoc' || GETPOST('forcebuilddoc')) && strpos($requestedModel, 'vehiclelogbookdocument') !== false) {
+            $document   = new VehicleLogBookDocument($db);
+            $upload_dir = $dirOutput . '/vehiclelogbookdocument/' . dol_sanitizeFileName($object->ref);
+        } else {
+            $upload_dir = $dirOutput . '/livretentretien/' . dol_sanitizeFileName($object->ref);
+        }
 
         $moreParams = [
             'object'           => $object,
@@ -559,6 +583,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
                 print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
             }
 
+
         }
         print '</div>';
     }
@@ -568,15 +593,19 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     // Documents and actions section
     if ($action != 'presend') {
-        $dirOutput = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
-        $dirFiles  = 'livretentretien/' . dol_sanitizeFileName($object->ref);
-        $fileDir   = $dirOutput . '/' . $dirFiles;
-        $urlSource = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
+        $dirOutput   = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+        $urlSource   = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
+
+        $dirFilesLe  = 'livretentretien/' . dol_sanitizeFileName($object->ref);
+        $fileDirLe   = $dirOutput . '/' . $dirFilesLe;
+        $dirFilesVlb = 'vehiclelogbookdocument/' . dol_sanitizeFileName($object->ref);
+        $fileDirVlb  = $dirOutput . '/' . $dirFilesVlb;
 
         print '<div class="fichecenter">';
 
         print '<div class="fichehalfleft">';
-        print saturne_show_documents('dolicar:Livretentretien', $dirFiles, $fileDir, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object);
+        print saturne_show_documents('dolicar:Livretentretien', $dirFilesLe, $fileDirLe, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object);
+        print saturne_show_documents('dolicar:VehicleLogBookDocument', $dirFilesVlb, $fileDirVlb, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_VEHICLELOGBOOKDOCUMENT_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object, 0, 'remove_file_vlb');
         print '</div>';
 
         print '<div class="fichehalfright">';

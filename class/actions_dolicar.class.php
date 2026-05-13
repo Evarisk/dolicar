@@ -248,6 +248,8 @@ class ActionsDoliCar
      */
     public function formDolBanner(array $parameters, $object): int
     {
+        global $conf, $langs;
+
         if (strpos($parameters['context'], 'productlotcard') !== false) {
             $registrationCertificateFr = new RegistrationCertificateFr($this->db);
             $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 1, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
@@ -258,6 +260,15 @@ class ActionsDoliCar
                 $this->resprints .= $registrationCertificateFr->getNomUrl(1);
                 $this->resprints .= '</div>';
             }
+        }
+
+        if (strpos($parameters['context'], 'registrationcertificatefrcard') !== false && !empty($object->fk_lot)) {
+            $publicLogbookUrl = dol_buildpath('/custom/dolicar/public/agenda/public_vehicle_logbook.php', 1) . '?id=' . (int) $object->fk_lot . '&entity=' . (int) $conf->entity;
+            $this->resprints  = '<div class="refidno">';
+            $this->resprints .= '<a href="' . dol_escape_htmltag($publicLogbookUrl) . '" target="_blank" class="dolicar-public-logbook-link">';
+            $this->resprints .= '<i class="fas fa-globe"></i> ' . $langs->transnoentities('PublicVehicleLogBook');
+            $this->resprints .= '</a>';
+            $this->resprints .= '</div>';
         }
 
         return 0; // or return 1 to replace standard code

@@ -199,6 +199,7 @@ LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les c
 # Public interface - Interface publique
 PublicVehicleLogBook          = Carnet de bord publique du véhicule
 Driver                        = Conducteur
+DriverName                    = Nom du conducteur
 StartDateAndHour              = Date et heure de départ
 StartingMileage               = Kilométrage de départ
 StartComment                  = Commentaire de départ
@@ -208,6 +209,49 @@ EndComment                    = Commentaire d'arrivé
 ObjectAddPublicVehicleLogBook = Suivi Km : %s - VIN : %s
 SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
 LicencePlateNotFoundInDB      = La plaque d'immatriculation est introuvable dans la base de données des cartes grises
+
+# Public interface v2 - Nouveaux libellés
+HelloDriver                  = Bonjour
+WhichVehicleToday            = Quel véhicule prenez-vous aujourd'hui ?
+EnterPlate                   = Saisir la plaque d'immatriculation
+QRCodeMayHavePrefilled       = Le QRCode collé dans le véhicule l'a peut-être déjà préremplie
+PlateNotFound                = Plaque introuvable
+VehicleFound                 = Véhicule trouvé
+KnownMileage                 = Kilométrage connu
+VehicleCurrentlyOut          = Véhicule actuellement SORTI
+VehicleCurrentlyIn           = Véhicule disponible
+WhatDoYouWantToDo            = Que voulez-vous faire ?
+TakeVehicle                  = Je prends
+DeclareDeparture             = Déclarer un départ
+ReturnVehicle                = Je rends
+DeclareReturn                = Déclarer un retour
+ReturnExpected               = Le véhicule étant sorti, le retour est attendu
+WhoAreYou                    = Qui êtes-vous ?
+SelectDriver                 = Sélectionner un conducteur
+When                         = Quand
+LastKnownMileage             = Dernier kilométrage connu
+DepartureMileage             = Kilométrage au départ
+FuelLevel                    = Niveau de carburant
+FuelReserve                  = Réserve
+FuelFull                     = Plein
+Observation                  = Observation
+Remarks                      = Remarques (optionnel)
+RemarksPlaceholder           = Voyants, incidents, état général, plein effectué...
+VehiclePhotos                = Photos du véhicule
+AddPhoto                     = Ajouter
+SignHere                     = Appuyer pour signer
+ValidateDeparture            = Valider le départ
+ValidateReturn               = Valider le retour
+DepartureRecorded            = Départ enregistré !
+ReturnRecorded               = Retour enregistré !
+ActionCommCreatedInAgenda    = L'événement a été ajouté à l'agenda Dolibarr et la carte grise mise à jour.
+NewEntry                     = Saisir une autre entrée
+Departure                    = Départ
+Return                       = Retour
+RecentTrips                  = Derniers trajets
+TripInProgress               = En cours
+TripDone                     = Terminé
+ClosePublicLogBook           = Fermer
 
 
 
@@ -249,8 +293,10 @@ UpdateCarBrandsList    = Mettre à jour la liste
 CarBrandsUpdated       = La liste des marques a été mise à jour
 
 # Documents
-LivretEntretien          = Carnet d'entretien
-GenerateLivretEntretien  = Générer le carnet d'entretien
+LivretEntretien              = Carnet d'entretien
+GenerateLivretEntretien      = Générer le carnet d'entretien
+VehicleLogBookDocument       = Carnet de bord
+GenerateVehicleLogBookDocument = Générer le carnet de bord
 
 # Vehicle history - Historique véhicule
 AddVehicleEvent                = Ajouter un événement véhicule
