@@ -604,8 +604,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         print '<div class="fichecenter">';
 
         print '<div class="fichehalfleft">';
-        print saturne_show_documents('dolicar:Livretentretien', $dirFilesLe, $fileDirLe, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object);
-        print saturne_show_documents('dolicar:VehicleLogBookDocument', $dirFilesVlb, $fileDirVlb, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_VEHICLELOGBOOKDOCUMENT_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object, 0, 'remove_file_vlb');
+        print '<div class="dolicar-documents-group">';
+        print load_fiche_titre($langs->trans('Documents'), '', '', 0, '');
+        print saturne_show_documents('dolicar:Livretentretien', $dirFilesLe, $fileDirLe, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, '', 'none', $langs->trans('GenerateLivretEntretien'), $langs->defaultlang, '', $object);
+        print saturne_show_documents('dolicar:VehicleLogBookDocument', $dirFilesVlb, $fileDirVlb, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_VEHICLELOGBOOKDOCUMENT_DEFAULT_MODEL'), 1, 0, 0, 0, '', 'none', $langs->trans('GenerateVehicleLogBookDocument'), $langs->defaultlang, '', $object, 0, 'remove_file_vlb');
+        print '</div>';
         print '</div>';
 
         print '<div class="fichehalfright">';
