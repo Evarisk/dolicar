@@ -215,6 +215,10 @@ class modDoliCar extends DolibarrModules
             // CONST LIVRET ENTRETIEN
             $i++ => ['DOLICAR_LIVRETENTRETIEN_ADDON', 'chaine', 'mod_livretentretien_standard', '', 0, 'current'],
             $i++ => ['DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH', 'chaine', 'DOL_DOCUMENT_ROOT/custom/dolicar/documents/doctemplates/livretentretien/', '', 0, 'current'],
+
+            // CONST VEHICLE LOGBOOK DOCUMENT
+            $i++ => ['DOLICAR_VEHICLELOGBOOKDOCUMENT_ADDON', 'chaine', 'mod_vehiclelogbookdocument_standard', '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLELOGBOOKDOCUMENT_ADDON_ODT_PATH', 'chaine', 'DOL_DOCUMENT_ROOT/custom/dolicar/documents/doctemplates/vehiclelogbookdocument/', '', 0, 'current'],
         ];
 
         if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -454,11 +458,11 @@ class modDoliCar extends DolibarrModules
             'prefix'   => '<i class="fas fa-globe pictofixedwidth"></i>',
             'mainmenu' => 'dolicar',
             'leftmenu' => 'public_interface',
-            'url'      => '/custom/dolicar/public/agenda/public_vehicle_logbook.php?entity=' . $conf->entity,
+            'url'      => '/custom/dolicar/admin/publicinterface.php',
             'langs'    => 'dolicar@dolicar',
             'position' => 1000 + $r,
-            'enabled'  => '$conf->dolicar->enabled && $conf->global->SATURNE_ENABLE_PUBLIC_INTERFACE',
-            'perms'    => 1,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->adminpage->read',
             'target'   => '',
             'user'     => 0
         ];
@@ -776,6 +780,9 @@ class modDoliCar extends DolibarrModules
 
         delDocumentModel('livretentretien_odt', 'livretentretien');
         addDocumentModel('livretentretien_odt', 'livretentretien', 'ODT templates', 'DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH');
+
+        delDocumentModel('vehiclelogbookdocument_odt', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclelogbookdocument_odt', 'vehiclelogbookdocument', 'ODT templates', 'DOLICAR_VEHICLELOGBOOKDOCUMENT_ADDON_ODT_PATH');
 
         return $this->_init($sql, $options);
     }

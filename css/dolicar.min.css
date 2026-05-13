@@ -8,39 +8,848 @@
   background: none;
 }
 
-.information-last-control {
+.page-public-card {
+  background: #f4f5f7 !important;
+  margin: 0;
+  padding: 0;
+}
+.page-public-card .plv2-app {
+  --pico-primary: #1571d3;
+  --pico-primary-hover: #0c447c;
+  --pico-primary-focus: rgba(21,113,211,0.25);
+  --pico-form-element-color: #1d2937;
+  --pico-color: #1d2937;
+  --pico-background-color: #f4f5f7;
+}
+.page-public-card .plv2-app a {
+  color: #1571d3;
+}
+.page-public-card .plv2-app button,
+.page-public-card .plv2-app input,
+.page-public-card .plv2-app select,
+.page-public-card .plv2-app textarea {
+  accent-color: #1571d3;
+}
+.page-public-card .plv2-app {
+  background: #f4f5f7;
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  color: #1d2937;
+}
+.page-public-card .plv2-app .plv2-header {
+  background: linear-gradient(135deg, #1d2937, #0f1822);
+  color: #fff;
+  padding: 14px 20px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.page-public-card .plv2-app .plv2-header__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-public-card .plv2-app .plv2-header__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.page-public-card .plv2-app .plv2-header__logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+}
+.page-public-card .plv2-app .plv2-header__logo-text {
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.page-public-card .plv2-app .plv2-header__logo-text small {
+  display: block;
+  font-size: 10px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.page-public-card .plv2-app .plv2-action-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 2px;
+}
+.page-public-card .plv2-app .plv2-action-badge--depart {
+  background: #1571d3;
+  color: #fff;
+}
+.page-public-card .plv2-app .plv2-action-badge--retour {
+  background: #16a34a;
+  color: #fff;
+}
+.page-public-card .plv2-app .plv2-back-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.page-public-card .plv2-app .plv2-content {
+  padding: 16px;
+}
+.page-public-card .plv2-app .plv2-form {
+  padding: 16px;
+  padding-bottom: 80px;
+}
+.page-public-card .plv2-app .plv2-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  margin-bottom: 14px;
+}
+.page-public-card .plv2-app .plv2-card h3 {
+  font-size: 13px;
+  color: #1d2937;
+  font-weight: 600;
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eef0f3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-public-card .plv2-app .plv2-card h3 i {
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+.page-public-card .plv2-app .plv2-notice i {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.page-public-card .plv2-app .plv2-notice p {
+  margin: 2px 0 0;
+  opacity: 0.85;
+}
+.page-public-card .plv2-app .plv2-notice--error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.page-public-card .plv2-app .plv2-plate-card {
+  text-align: center;
+}
+.page-public-card .plv2-app .plv2-plate-card__icon {
+  width: 64px;
+  height: 64px;
+  background: #dbeafe;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  color: #1571d3;
+  font-size: 26px;
+}
+.page-public-card .plv2-app .plv2-plate-card h2 {
+  font-size: 17px;
+  margin: 0 0 6px;
+  font-weight: 500;
+  color: #1d2937;
+}
+.page-public-card .plv2-app .plv2-plate-card p {
+  font-size: 12px;
+  color: #5b6470;
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+.page-public-card .plv2-app .plv2-plate-input {
+  background: #fff;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  padding: 14px;
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  font-size: 22px;
+  text-align: center;
+  letter-spacing: 2px;
+  color: #1d2937;
+  width: 100%;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+.page-public-card .plv2-app .plv2-plate-input::placeholder {
+  color: #9ca3af;
+}
+.page-public-card .plv2-app .plv2-plate-input:focus {
+  outline: none;
+  border-color: #1571d3;
+  box-shadow: 0 0 0 4px rgba(21, 113, 211, 0.15);
+}
+.page-public-card .plv2-app .plv2-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.page-public-card .plv2-app .plv2-btn:active {
+  transform: scale(0.98);
+}
+.page-public-card .plv2-app .plv2-btn--full {
+  width: 100%;
+  box-sizing: border-box;
+}
+.page-public-card .plv2-app .plv2-btn--primary {
+  background: linear-gradient(135deg, #1571d3, #0c447c);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(21, 113, 211, 0.3);
+}
+.page-public-card .plv2-app .plv2-btn--success {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+.page-public-card .plv2-app .plv2-btn--ghost {
+  background: #fff;
+  color: #5b6470;
+  border: 1px solid #d4d8de;
+}
+.page-public-card .plv2-app .plv2-vehicle-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  margin-bottom: 14px;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__head {
+  padding: 16px;
+  background: linear-gradient(135deg, #1d2937, #0f1822);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(21, 113, 211, 0.25);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #93c5fd;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.page-public-card .plv2-app .plv2-vehicle-card h3 {
+  font-size: 15px;
+  margin: 0 0 4px;
+  font-weight: 500;
+  color: #fff;
+  border: none;
+  padding: 0;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__info {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef0f3;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__state {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__state i {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__state strong {
+  display: block;
+  font-weight: 600;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__state span {
+  opacity: 0.75;
+  font-size: 11px;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__state--out {
+  background: #eff6ff;
+  color: #1e3a8a;
+  border-top: 3px solid #1571d3;
+}
+.page-public-card .plv2-app .plv2-vehicle-card__state--in {
+  background: #f0fdf4;
+  color: #15803d;
+  border-top: 3px solid #16a34a;
+}
+.page-public-card .plv2-app .plv2-plate-badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.page-public-card .plv2-app .plv2-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.page-public-card .plv2-app .plv2-info-cell__label {
+  display: block;
+  font-size: 10px;
+  color: #8a93a0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.page-public-card .plv2-app .plv2-info-cell__value {
+  display: block;
+  font-size: 13px;
+  color: #1d2937;
+  font-weight: 500;
+}
+.page-public-card .plv2-app .plv2-section-label {
+  font-size: 11px;
+  color: #8a93a0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin: 14px 0 10px;
+}
+.page-public-card .plv2-app .plv2-action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.page-public-card .plv2-app .plv2-action-btn {
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 20px 14px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.15s;
+}
+.page-public-card .plv2-app .plv2-action-btn:active {
+  transform: scale(0.97);
+}
+.page-public-card .plv2-app .plv2-action-btn--depart {
+  border-color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-action-btn--depart .plv2-action-btn__icon {
+  background: #dbeafe;
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-action-btn--retour {
+  border-color: #16a34a;
+}
+.page-public-card .plv2-app .plv2-action-btn--retour .plv2-action-btn__icon {
+  background: #d1fae5;
+  color: #16a34a;
+}
+.page-public-card .plv2-app .plv2-action-btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: #c8ccd2;
+  pointer-events: none;
+}
+.page-public-card .plv2-app .plv2-action-btn--disabled .plv2-action-btn__icon {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+.page-public-card .plv2-app .plv2-action-btn__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.page-public-card .plv2-app .plv2-action-btn__label {
+  font-weight: 600;
+  color: #1d2937;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+.page-public-card .plv2-app .plv2-action-btn__sub {
+  font-size: 11px;
+  color: #5b6470;
+}
+.page-public-card .plv2-app .plv2-hint {
+  font-size: 11px;
+  color: #8a93a0;
+  text-align: center;
+  margin-top: 6px;
+}
+.page-public-card .plv2-app .plv2-hint i {
+  margin-right: 4px;
+}
+.page-public-card .plv2-app .plv2-form-group {
+  margin-bottom: 14px;
+}
+.page-public-card .plv2-app .plv2-form-group:last-child {
+  margin-bottom: 0;
+}
+.page-public-card .plv2-app .plv2-form-group label {
+  display: block;
+  font-size: 11px;
+  color: #5b6470;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+.page-public-card .plv2-app .plv2-form-group input[type=text],
+.page-public-card .plv2-app .plv2-form-group input[type=number],
+.page-public-card .plv2-app .plv2-form-group input[type=datetime-local],
+.page-public-card .plv2-app .plv2-form-group select,
+.page-public-card .plv2-app .plv2-form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d4d8de;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #fff;
+  color: #1d2937;
+  box-sizing: border-box;
+}
+.page-public-card .plv2-app .plv2-form-group input[type=text]:focus,
+.page-public-card .plv2-app .plv2-form-group input[type=number]:focus,
+.page-public-card .plv2-app .plv2-form-group input[type=datetime-local]:focus,
+.page-public-card .plv2-app .plv2-form-group select:focus,
+.page-public-card .plv2-app .plv2-form-group textarea:focus {
+  outline: none;
+  border-color: #1571d3;
+  box-shadow: 0 0 0 3px rgba(21, 113, 211, 0.15);
+}
+.page-public-card .plv2-app .plv2-form-group textarea {
+  resize: vertical;
+}
+.page-public-card .plv2-app .plv2-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.page-public-card .plv2-app .plv2-form-row .plv2-form-group {
+  margin-bottom: 0;
+}
+.page-public-card .plv2-app .plv2-req {
+  color: #dc2626;
+}
+.page-public-card .plv2-app .plv2-km-input {
+  font-family: "Courier New", monospace !important;
+  font-weight: 700 !important;
+  font-size: 22px !important;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.page-public-card .plv2-app .plv2-km-hint {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #5b6470;
+  text-align: center;
+}
+.page-public-card .plv2-app .plv2-km-hint strong {
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-fuel-btns {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.page-public-card .plv2-app .plv2-fuel-btn {
+  background: #fff;
+  border: 1px solid #d4d8de;
+  border-radius: 8px;
+  padding: 10px 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+  color: #5b6470;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.page-public-card .plv2-app .plv2-fuel-btn i {
+  font-size: 18px;
+}
+.page-public-card .plv2-app .plv2-fuel-btn:hover {
+  border-color: #93c5fd;
+}
+.page-public-card .plv2-app .plv2-fuel-btn.active {
+  background: #dbeafe;
+  border-color: #1571d3;
+  color: #1e40af;
+  font-weight: 600;
+}
+.page-public-card .plv2-app .plv2-fuel-btn.active i {
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.page-public-card .plv2-app .plv2-photo-slot {
+  aspect-ratio: 1;
+  border: 2px dashed #d4d8de;
+  border-radius: 10px;
+  background: #fafbfc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #8a93a0;
+  cursor: pointer;
+  font-size: 10px;
+  text-align: center;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.page-public-card .plv2-app .plv2-photo-slot input[type=file] {
+  display: none;
+}
+.page-public-card .plv2-app .plv2-photo-slot i {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+.page-public-card .plv2-app .plv2-photo-slot:hover {
+  border-color: #1571d3;
+  background: #eff6ff;
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-photo-slot--filled {
+  border-style: solid;
+  border-color: #16a34a;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #15803d;
+}
+.page-public-card .plv2-app .plv2-photo-slot--filled i {
+  color: #15803d;
+}
+.page-public-card .plv2-app .plv2-signature-pad {
+  border: 2px dashed #d4d8de;
+  border-radius: 10px;
+  background: #fafbfc;
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.page-public-card .plv2-app .plv2-signature-pad__hint {
+  font-size: 12px;
+  color: #8a93a0;
+  margin-top: 6px;
+}
+.page-public-card .plv2-app .plv2-signature-pad canvas {
+  width: 100% !important;
+}
+.page-public-card .plv2-app .plv2-signature-pad img {
+  max-width: 100%;
+  max-height: 120px;
+}
+.page-public-card .plv2-app .plv2-erase-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+}
+.page-public-card .plv2-app .plv2-submit-area {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 14px 16px;
+  border-top: 1px solid #eef0f3;
+}
+.page-public-card .plv2-app .plv2-success {
+  padding: 40px 20px 30px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
-.information-last-control .control-title {
-  color: #000;
-}
-.information-last-control .control-title i {
-  color: #0d8aff;
-}
-.information-last-control .control-result {
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-.information-last-control .control-result.result-green {
-  background: #47e58e;
+.page-public-card .plv2-app .plv2-success__icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
+  font-size: 42px;
+  margin-bottom: 20px;
+  animation: plv2-pop 0.4s ease-out;
 }
-.information-last-control .control-result.result-red {
-  background: #fd3636;
-  color: #fff;
+.page-public-card .plv2-app .plv2-success__icon--green {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  box-shadow: 0 8px 30px rgba(22, 163, 74, 0.3);
 }
-.information-last-control .control-result.result-grey {
-  background: #878787;
-  color: #fff;
+.page-public-card .plv2-app .plv2-success__icon--blue {
+  background: linear-gradient(135deg, #1571d3, #0c447c);
+  box-shadow: 0 8px 30px rgba(21, 113, 211, 0.3);
+}
+.page-public-card .plv2-app .plv2-success h2 {
+  font-size: 22px;
+  margin: 0 0 8px;
+  font-weight: 500;
+  color: #1d2937;
+}
+.page-public-card .plv2-app .plv2-success p {
+  font-size: 13px;
+  color: #5b6470;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+.page-public-card .plv2-app .plv2-success__recap {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+.page-public-card .plv2-app .plv2-success__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12px;
+  border-bottom: 1px solid #eef0f3;
+}
+.page-public-card .plv2-app .plv2-success__row:last-child {
+  border-bottom: none;
+}
+.page-public-card .plv2-app .plv2-success__row span:first-child {
+  color: #5b6470;
+}
+.page-public-card .plv2-app .plv2-success__row span:last-child {
+  color: #1d2937;
+  font-weight: 600;
+}
+.page-public-card .plv2-app .plv2-success__actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.page-public-card .plv2-app .plv2-text--green {
+  color: #16a34a;
+}
+.page-public-card .plv2-app .plv2-text--blue {
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.page-public-card .plv2-app .plv2-history-item {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.page-public-card .plv2-app .plv2-history-item__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.page-public-card .plv2-app .plv2-history-item__driver {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d2937;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-public-card .plv2-app .plv2-history-item__driver i {
+  color: #6b7280;
+  font-size: 15px;
+}
+.page-public-card .plv2-app .plv2-history-item__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #5b6470;
+  padding: 3px 0;
+}
+.page-public-card .plv2-app .plv2-history-item__row:first-of-type {
+  border-top: 1px solid #eef0f3;
+  padding-top: 8px;
+}
+.page-public-card .plv2-app .plv2-history-item__type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.page-public-card .plv2-app .plv2-history-item__type--depart {
+  background: #dbeafe;
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-history-item__type--retour {
+  background: #d1fae5;
+  color: #16a34a;
+}
+.page-public-card .plv2-app .plv2-history-item__km {
+  margin-left: auto;
+  font-weight: 600;
+  color: #1d2937;
+}
+.page-public-card .plv2-app .plv2-history-item__fuel {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #6b7280;
+}
+.page-public-card .plv2-app .plv2-history-item__fuel i {
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-history-item__comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: #6b7280;
+  font-style: italic;
+  padding: 4px 0 2px;
+  border-top: 1px dashed #eef0f3;
+}
+.page-public-card .plv2-app .plv2-history-item__comment i {
+  color: #9ca3af;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+.page-public-card .plv2-app .plv2-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+.page-public-card .plv2-app .plv2-badge--out {
+  background: #fef3c7;
+  color: #b45309;
+}
+.page-public-card .plv2-app .plv2-badge--done {
+  background: #d1fae5;
+  color: #15803d;
+}
+.page-public-card .plv2-app .plv2-forbidden {
+  padding: 60px 20px;
+  text-align: center;
+  color: #5b6470;
+}
+.page-public-card .plv2-app .plv2-forbidden i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+.page-public-card .plv2-app .plv2-forbidden p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+@keyframes plv2-pop {
+  0% {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-.information-control-image {
-  padding: 0.4em;
+.dolicar-public-logbook-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: #e8f0fd;
+  color: #1a5cdc !important;
+  border: 1px solid #c0d4f7;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  vertical-align: middle;
+  line-height: 1.6;
+}
+.dolicar-public-logbook-link i {
+  font-size: 10px;
+}
+.dolicar-public-logbook-link:hover {
+  background: #d0e2fb;
+  border-color: #90b8f0;
+  text-decoration: none;
+  color: #1a5cdc !important;
 }
 
 .dolicar-control-inline-creator {

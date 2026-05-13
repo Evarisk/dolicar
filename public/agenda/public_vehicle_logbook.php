@@ -60,6 +60,7 @@ $isModEnabledDigiquali       = isModEnabled('digiquali');
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 // Load Saturne libraries
 if ($publicInterfaceUseSignatory) {
@@ -85,8 +86,9 @@ $id                 = GETPOST('id', 'int');
 $registrationNumber = GETPOST('registration_number');
 $entity             = GETPOST('entity');
 $action             = GETPOST('action', 'aZ09');
-$subaction          = GETPOST('subaction', 'aZ09');
 $backToPage         = GETPOST('backtopage', 'alpha');
+$actionType         = GETPOST('action_type', 'alpha');
+$success            = GETPOSTINT('success');
 
 // Initialize technical objects
 $actionComm                = new ActionComm($db);
@@ -134,6 +136,11 @@ if (!empty($lastUnfinishedActionComm) && is_array($lastUnfinishedActionComm)) {
     }
 }
 
+$recentActionComms = $actionComm->getActions(0, $id, 'productlot', ' AND fk_element = ' . $id . ' AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id', 'DESC', 5);
+if (!is_array($recentActionComms)) {
+    $recentActionComms = [];
+}
+
 if ($isModEnabledDigiquali) {
     $controls = saturne_fetch_all_object_type('Control', 'DESC', 't.control_date', 1, 0, ['customsql' => 't.rowid = ee.fk_target AND t.status = ' . Control::STATUS_LOCKED], 'AND', false, true, false, ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ee.sourcetype = "productbatch" AND ee.fk_source = ' . $id . ' AND ee.targettype = "digiquali_control" AND ee.fk_target = t.rowid');
     if (is_array($controls) && !empty($controls)) {
@@ -160,20 +167,16 @@ if (empty($resHook)) {
         exit;
     }
 
-    if ($subaction == 'add_img') {
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        $encodedImage = explode(',', $data['img'])[1];
-        $decodedImage = base64_decode($encodedImage);
-        $uploadDir    = $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/' . $data['objectSubdir'] . '/';
-        if (!dol_is_dir($uploadDir)) {
-            dol_mkdir($uploadDir);
-        }
-        file_put_contents($uploadDir . dol_print_date(dol_now(), 'dayhourlog') . '_img.jpg', $decodedImage);
-        $subaction = '';
-    }
-
     if ($action == 'add') {
+        // Resolve driver full name from user ID posted by select_dolusers
+        $driverUserId = GETPOSTINT('driver_user_id');
+        $driverName   = '';
+        if ($driverUserId > 0) {
+            $driverUserObj = new User($db);
+            $driverUserObj->fetch($driverUserId);
+            $driverName = trim($driverUserObj->firstname . ' ' . $driverUserObj->lastname);
+        }
+
         if (empty($lastUnfinishedActionComm)) {
             $actionComm->elementtype = $productLot->element;
             $actionComm->type_code   = 'AC_PUBLIC';
@@ -186,23 +189,16 @@ if (empty($resHook)) {
 
             // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user
             $actionComm->note_private  = (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . '<br>' : $langs->transnoentities('NoData'));
-            $actionComm->note_private .= $langs->transnoentities('Driver') . ' : ' . GETPOST('driver') . '<br>';
+            $actionComm->note_private .= $langs->transnoentities('Driver') . ' : ' . $driverName . '<br>';
             $actionComm->note_private .= GETPOSTISSET('start_comment') && !empty(GETPOST('start_comment', 'restricthtml')) ? $langs->transnoentities('StartComment') . ' : ' . GETPOST('start_comment', 'restricthtml') . '<br>' : '';
             $actionComm->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
             $actionComm->label         = $langs->transnoentities('ObjectAddPublicVehicleLogBook', $registrationCertificateFR->a_registration_number, $productLot->batch);
 
-            $actionComm->array_options['json'] = json_encode(['driver' => GETPOST('driver'), 'start_comment' => GETPOST('start_comment', 'restricthtml'), 'end_comment' => GETPOST('end_comment', 'restricthtml')]);
+            $actionComm->array_options['json'] = json_encode(['driver' => $driverName, 'fuel_level' => GETPOST('options_fuel_level', 'alpha'), 'start_comment' => GETPOST('start_comment', 'restricthtml'), 'end_comment' => GETPOST('end_comment', 'restricthtml')]);
 
             $extraFields->setOptionalsFromPost([], $actionComm);
 
             $actionCommID = $actionComm->create($user);
-
-            $pathToObjectImg         = $conf->agenda->multidir_output[$conf->entity] . '/' . $actionCommID;
-            $pathToTmpStartActionImg = $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/start_action/';
-            $pathToTmpEndActionImg   = $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/end_action/';
-            $startImgList            = dol_dir_list($pathToTmpStartActionImg, 'files');
-            $endImgList              = dol_dir_list($pathToTmpEndActionImg, 'files');
-            $imgList                 = array_merge($startImgList, $endImgList);
         } else {
             $lastUnfinishedActionComm[0]->datef         = dol_stringtotime(GETPOST('end_date_and_hour'));
             $lastUnfinishedActionComm[0]->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? '<br>' . $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
@@ -210,29 +206,19 @@ if (empty($resHook)) {
             $lastUnfinishedActionComm[0]->array_options['options_arrival_mileage'] = GETPOST('options_arrival_mileage');
             $lastUnfinishedActionComm[0]->updateExtraField('arrival_mileage');
 
+            $existingJson = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'] ?? '{}', true);
+            $existingJson['return_fuel_level'] = GETPOST('options_fuel_level', 'alpha');
+            $existingJson['end_comment']       = GETPOST('end_comment', 'restricthtml');
+            $lastUnfinishedActionComm[0]->array_options['options_json'] = json_encode($existingJson);
+            $lastUnfinishedActionComm[0]->updateExtraField('json');
+
             $lastUnfinishedActionComm[0]->update($user);
-
-            $pathToObjectImg       = $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id;
-            $pathToTmpEndActionImg = $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/end_action/';
-            $imgList               = dol_dir_list($pathToTmpEndActionImg, 'files');
-        }
-
-        if (!empty($imgList)) {
-            foreach ($imgList as $img) {
-                if (!dol_is_dir($pathToObjectImg)) {
-                    dol_mkdir($pathToObjectImg);
-                }
-
-                $fullPath = $pathToObjectImg . '/' . $img['name'];
-                dol_copy($img['fullname'], $fullPath);
-                unlink($img['fullname']);
-            }
         }
 
         if ($publicInterfaceUseSignatory && (isset($actionCommID) || isset($lastUnfinishedActionComm[0]))) {
             $signatory->status    = SaturneSignature::STATUS_SIGNED;
             $signatory->role      = $langs->transnoentities('Driver');
-            $signatory->firstname = $lastUnfinishedActionCommJSON['driver'] ?? GETPOST('driver');
+            $signatory->firstname = $lastUnfinishedActionCommJSON['driver'] ?? $driverName;
 
             $signatory->signature_date = dol_now();
             $signatory->signature      = GETPOST('signature');
@@ -245,12 +231,33 @@ if (empty($resHook)) {
 
             $signatory->create($user);
         }
+
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . $entity . '&success=1');
+        exit;
     }
 }
 
 /*
  * View
  */
+
+// Determine vehicle state and which screen to show
+$isVehicleOut = !empty($lastUnfinishedActionComm);
+
+// Form instance for native Dolibarr selectors
+$form = new Form($db);
+
+// Pre-select driver from cookie
+$preselectedDriverId = isset($_COOKIE['plv2_driver_id']) ? (int) $_COOKIE['plv2_driver_id'] : 0;
+
+if ($success) {
+    $showScreen  = 'success';
+    $successType = $isVehicleOut ? 'depart' : 'retour';
+} elseif ($id > 0 && $registrationCertificateFR->id > 0) {
+    $showScreen = in_array($actionType, ['depart', 'retour']) ? 'form' : 'vehicle';
+} else {
+    $showScreen = 'search';
+}
 
 $title   = $langs->trans('PublicVehicleLogBook');
 $moreJS  = ['/custom/saturne/js/includes/signature-pad.min.js'];
@@ -259,188 +266,449 @@ $moreCSS = ['/custom/saturne/css/pico.min.css'];
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
 
-saturne_header(1, '', $title,  '', '', 0, 0, $moreJS, $moreCSS, '', 'page-public-card page-signature');
+saturne_header(1, '', $title, '', '', 0, 0, $moreJS, $moreCSS, '', 'page-public-card page-signature');
 
-print '<form id="public-vehicle-log-book-form' . ($id > 0 ? '' : '-pwa') . '" method="POST" action="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '&entity=' . $entity . '">';
-print '<input type="hidden" name="token" value="' . newToken() . '">';
-print '<input type="hidden" name="action" value="' . ($id > 0 ? 'add' : 'get_registration_number') . '">';
-if ($backToPage) {
-    print '<input type="hidden" name="backtopage" value="' . $backToPage . '">';
-} ?>
+$baseUrl     = $_SERVER['PHP_SELF'] . '?entity=' . urlencode($entity);
+$vehicleUrl  = $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . urlencode($entity);
+$logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
 
-<div class="public-card__container" data-public-interface="true">
-    <?php if (getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) : ?>
-        <?php if ($id > 0 && $registrationCertificateFR->id > 0) : ?>
-            <div class="public-card__header wpeo-gridlayout grid-2">
-                <div class="header-information">
-                    <div><a href="<?php echo $backToPage; ?>" class="information-back">
-                        <i class="fas fa-sm fa-chevron-left"></i>
-                        <?php echo $langs->trans('Back'); ?>
-                    </a></div>
-                    <div class="wpeo-gridlayout grid-4">
-                        <div class="information-control-image">
-                            <?php if ($isModEnabledDigiquali && !empty($lastControl)) :
-                                echo saturne_show_medias_linked('digiquali', $conf->digiquali->multidir_output[$conf->entity] . '/control/' . $lastControl->ref . '/photos/', 'small', 1, 0, 0, 0, 120, 120, 0, 0, 1, 'control/' . $lastControl->ref . '/photos/', $lastControl, 'photo', 0, 0);
-                            endif; ?>
+<div class="plv2-app">
+
+<?php if (!getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) : ?>
+    <div class="plv2-forbidden">
+        <i class="fas fa-lock"></i>
+        <p><?php echo $langs->trans('PublicInterfaceForbidden', $langs->transnoentities('OfPublicVehicleLogBook')); ?></p>
+    </div>
+
+<?php elseif ($showScreen === 'search') : ?>
+    <!-- ===== SCREEN 1 : saisie plaque ===== -->
+    <div class="plv2-header plv2-header--dark">
+        <div class="plv2-header__top">
+            <div class="plv2-header__logo">
+                <img src="<?php echo $logoUrl; ?>" alt="DoliCar" class="plv2-header__logo-img">
+                <div class="plv2-header__logo-text">
+                    DoliCar
+                    <small><?php echo $langs->trans('PublicVehicleLogBook'); ?></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="plv2-content">
+        <?php if (!empty($registrationNumber) && empty($registrationCertificateFR->id)) : ?>
+            <div class="plv2-notice plv2-notice--error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    <strong><?php echo $langs->trans('PlateNotFound'); ?></strong>
+                    <p><?php echo $langs->trans('LicencePlateNotFoundInDB'); ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="<?php echo $baseUrl; ?>">
+            <input type="hidden" name="token" value="<?php echo newToken(); ?>">
+            <input type="hidden" name="action" value="get_registration_number">
+            <div class="plv2-card plv2-plate-card">
+                <div class="plv2-plate-card__icon"><i class="fas fa-id-card"></i></div>
+                <h2><?php echo $langs->trans('EnterPlate'); ?></h2>
+                <p><?php echo $langs->trans('QRCodeMayHavePrefilled'); ?></p>
+                <input type="text"
+                       name="registration_number"
+                       class="plv2-plate-input"
+                       placeholder="AB-123-CD"
+                       value="<?php echo dol_escape_htmltag($registrationNumber); ?>"
+                       maxlength="11"
+                       required
+                       autocomplete="off">
+                <button type="submit" class="plv2-btn plv2-btn--primary plv2-btn--full">
+                    <i class="fas fa-arrow-right"></i>
+                    <?php echo $langs->trans('Continue'); ?>
+                </button>
+            </div>
+        </form>
+    </div>
+
+<?php elseif ($showScreen === 'vehicle') : ?>
+    <!-- ===== SCREEN 2 : fiche véhicule + choix action ===== -->
+    <div class="plv2-header plv2-header--dark">
+        <div class="plv2-header__top">
+            <a href="<?php echo $baseUrl; ?>" class="plv2-back-btn"><i class="fas fa-arrow-left"></i></a>
+            <div class="plv2-header__logo">
+                <img src="<?php echo $logoUrl; ?>" alt="DoliCar" class="plv2-header__logo-img">
+                <div class="plv2-header__logo-text">
+                    DoliCar
+                    <small><?php echo $langs->trans('PublicVehicleLogBook'); ?></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="plv2-content">
+        <div class="plv2-vehicle-card">
+            <div class="plv2-vehicle-card__head">
+                <div class="plv2-vehicle-card__icon"><i class="fas fa-car"></i></div>
+                <div>
+                    <h3><?php echo dol_escape_htmltag($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model); ?></h3>
+                    <span class="plv2-plate-badge"><?php echo dol_escape_htmltag($registrationCertificateFR->a_registration_number); ?></span>
+                </div>
+            </div>
+
+            <div class="plv2-vehicle-card__info">
+                <div class="plv2-info-grid">
+                    <?php if (!empty($registrationCertificateFR->fk_soc)) : ?>
+                        <div class="plv2-info-cell">
+                            <span class="plv2-info-cell__label"><?php echo $langs->trans('ThirdParty'); ?></span>
+                            <span class="plv2-info-cell__value"><?php echo dol_escape_htmltag($registrationCertificateFR->thirdparty->name ?? ''); ?></span>
                         </div>
-                        <div class="gridw-3">
-                            <div class="information-title"><?php echo $langs->trans('PublicVehicleLogBook'); ?></div>
-                            <?php if ($isModEnabledDigiquali && !empty($lastControl)) : ?>
-                                <div class="information-last-control">
-                                    <div class="control-title"><?php echo $lastControl->getNomUrl(1, 'nolink'); ?></div>
-                                    <div class="control-date"><?php echo '<i class="fas fa-calendar-alt pictofixedwidth"></i>' . dol_print_date($lastControl->control_date, 'day'); ?></div>
-                                    <div class="control-status">
-                                        <?php $verdictColor = $lastControl->verdict == 1 ? 'green' : ($lastControl->verdict == 2 ? 'red' : 'grey');
-                                        print dol_strlen($lastControl->verdict) > 0 ? '<div class="control-result result-' . $verdictColor . '">' . $lastControl->fields['verdict']['arrayofkeyval'][(!empty($lastControl->verdict)) ? $lastControl->verdict : 3] . '</div>' : 'N/A'; ?>
-                                    </div>
-                                </div>
+                    <?php endif; ?>
+                    <?php if (!empty($registrationCertificateFR->p3_fuel_type)) : ?>
+                        <div class="plv2-info-cell">
+                            <span class="plv2-info-cell__label"><?php echo $langs->trans('FuelType'); ?></span>
+                            <span class="plv2-info-cell__value"><?php echo dol_escape_htmltag($registrationCertificateFR->p3_fuel_type); ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($registrationCertificateFR->b_first_registration_date)) : ?>
+                        <div class="plv2-info-cell">
+                            <span class="plv2-info-cell__label"><?php echo $langs->trans('FirstRegistrationDate'); ?></span>
+                            <span class="plv2-info-cell__value"><?php echo dol_print_date($registrationCertificateFR->b_first_registration_date, 'day'); ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($lastArrivalMileage)) : ?>
+                        <div class="plv2-info-cell">
+                            <span class="plv2-info-cell__label"><?php echo $langs->trans('KnownMileage'); ?></span>
+                            <span class="plv2-info-cell__value"><?php echo number_format($lastArrivalMileage, 0, ',', ' ') . ' km'; ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <?php if ($isVehicleOut) : ?>
+                <div class="plv2-vehicle-card__state plv2-vehicle-card__state--out">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <div>
+                        <strong><?php echo $langs->trans('VehicleCurrentlyOut'); ?></strong>
+                        <?php if (!empty($lastUnfinishedActionComm[0])) :
+                            $driverName = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'] ?? '{}', true)['driver'] ?? '';
+                            echo '<span>' . ($driverName ? dol_escape_htmltag($driverName) . ' · ' : '') . dol_print_date($lastUnfinishedActionComm[0]->datep, 'dayhour') . '</span>';
+                        endif; ?>
+                    </div>
+                </div>
+            <?php else : ?>
+                <div class="plv2-vehicle-card__state plv2-vehicle-card__state--in">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <strong><?php echo $langs->trans('VehicleCurrentlyIn'); ?></strong>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <p class="plv2-section-label"><?php echo $langs->trans('WhatDoYouWantToDo'); ?></p>
+
+        <div class="plv2-action-buttons">
+            <a href="<?php echo $vehicleUrl . '&action_type=depart'; ?>"
+               class="plv2-action-btn plv2-action-btn--depart<?php echo $isVehicleOut ? ' plv2-action-btn--disabled' : ''; ?>">
+                <div class="plv2-action-btn__icon"><i class="fas fa-sign-out-alt"></i></div>
+                <div class="plv2-action-btn__label"><?php echo $langs->trans('TakeVehicle'); ?></div>
+                <div class="plv2-action-btn__sub"><?php echo $langs->trans('DeclareDeparture'); ?></div>
+            </a>
+            <a href="<?php echo $vehicleUrl . '&action_type=retour'; ?>"
+               class="plv2-action-btn plv2-action-btn--retour<?php echo !$isVehicleOut ? ' plv2-action-btn--disabled' : ''; ?>">
+                <div class="plv2-action-btn__icon"><i class="fas fa-sign-in-alt"></i></div>
+                <div class="plv2-action-btn__label"><?php echo $langs->trans('ReturnVehicle'); ?></div>
+                <div class="plv2-action-btn__sub"><?php echo $langs->trans('DeclareReturn'); ?></div>
+            </a>
+        </div>
+
+        <?php if (!empty($recentActionComms)) : ?>
+            <p class="plv2-section-label"><?php echo $langs->trans('RecentTrips'); ?></p>
+            <div class="plv2-history">
+                <?php
+                $fuelIcons = ['reserve' => 'fa-battery-empty', 'quarter' => 'fa-battery-quarter', 'half' => 'fa-battery-half', 'threequarters' => 'fa-battery-three-quarters', 'full' => 'fa-battery-full'];
+                $fuelLabels = ['reserve' => $langs->trans('FuelReserve'), 'quarter' => '1/4', 'half' => '1/2', 'threequarters' => '3/4', 'full' => $langs->trans('FuelFull')];
+                foreach ($recentActionComms as $ac) :
+                    $acJson      = json_decode($ac->array_options['options_json'] ?? '{}', true);
+                    $acDriver    = $acJson['driver'] ?? '—';
+                    $acIsOpen    = empty($ac->datef);
+                    $acKmStart   = $ac->array_options['options_starting_mileage'] ?? null;
+                    $acKmEnd           = $ac->array_options['options_arrival_mileage'] ?? null;
+                    $acFuelLevel       = $acJson['fuel_level'] ?? null;
+                    $acReturnFuelLevel = $acJson['return_fuel_level'] ?? null;
+                    $acStartComment    = $acJson['start_comment'] ?? null;
+                    $acEndComment      = $acJson['end_comment'] ?? null;
+                ?>
+                    <div class="plv2-history-item">
+                        <div class="plv2-history-item__head">
+                            <div class="plv2-history-item__driver">
+                                <i class="fas fa-user-circle"></i>
+                                <?php echo dol_escape_htmltag($acDriver); ?>
+                            </div>
+                            <span class="plv2-badge <?php echo $acIsOpen ? 'plv2-badge--out' : 'plv2-badge--done'; ?>">
+                                <?php echo $acIsOpen ? $langs->trans('TripInProgress') : $langs->trans('TripDone'); ?>
+                            </span>
+                        </div>
+                        <div class="plv2-history-item__row">
+                            <span class="plv2-history-item__type plv2-history-item__type--depart">
+                                <i class="fas fa-sign-out-alt"></i> <?php echo $langs->trans('Departure'); ?>
+                            </span>
+                            <span><?php echo dol_print_date($ac->datep, 'dayhour'); ?></span>
+                            <?php if (!empty($acKmStart)) : ?>
+                                <span class="plv2-history-item__km"><?php echo number_format((int) $acKmStart, 0, ',', ' ') . ' km'; ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($acFuelLevel) && isset($fuelIcons[$acFuelLevel])) : ?>
+                                <span class="plv2-history-item__fuel">
+                                    <i class="fas <?php echo $fuelIcons[$acFuelLevel]; ?>"></i>
+                                    <?php echo $fuelLabels[$acFuelLevel]; ?>
+                                </span>
                             <?php endif; ?>
                         </div>
-                    </div>
-                </div>
-                <div class="header-objet">
-                    <div class="objet-container">
-                        <div class="objet-info">
-                            <div class="objet-type"><?php echo $langs->trans('Batch'); ?></div>
-                            <div class="objet-label">
-                                <?php echo $productLot->getNomUrl(1, 'nolink'); ?>
-                                <?php echo '<br>' . $registrationCertificateFR->getNomUrl(1, 'nolink'); ?>
-                            </div>
-                        </div>
-<!--                        <div class="objet-actions file-generation">-->
-<!--                            --><?php //$path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
-<!--                            <input type="hidden" class="specimen-name" data-specimen-name="--><?php //echo $objectType . '_specimen_' . $trackID . '.odt'; ?><!--">-->
-<!--                            <input type="hidden" class="specimen-path" data-specimen-path="--><?php //echo $path; ?><!--">-->
-<!--                            --><?php //if (GETPOSTISSET('document_type') && $fileExists) : ?>
-<!--                                <div class="wpeo-button button-square-40 button-rounded button-blue auto-download"><i class="fas fa-download"></i></div>-->
-<!--                            --><?php //else : ?>
-<!--                                <div class="wpeo-button button-square-40 button-rounded button-grey"><i class="fas fa-download"></i></div>-->
-<!--                            --><?php //endif; ?>
-<!--                        </div>-->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Driver -->
-            <label for="driver">
-                <input type="text" id="driver" name="driver" placeholder="<?php echo $langs->trans('Driver'); ?>" value="<?php echo $lastUnfinishedActionCommJSON['driver'] ?? ''; ?>" required <?php echo isset($lastUnfinishedActionCommJSON['driver']) ? 'disabled' : ''; ?>>
-            </label>
-
-            <div class="wpeo-gridlayout grid-2">
-                <!-- Start date and hour/mileage/comment/signature -->
-                <div>
-                    <label for="start_date_and_hour">
-                        <?php echo $langs->transnoentities('StartDateAndHour'); ?>
-                        <input type="datetime-local" name="start_date_and_hour" id="start_date_and_hour" value="<?php echo (isset($lastUnfinishedActionComm[0]->datep) ? dol_print_date($lastUnfinishedActionComm[0]->datep, '%Y-%m-%dT%H:%M:%S') : ''); ?>" required <?php echo isset($lastUnfinishedActionComm[0]->datep) && $lastUnfinishedActionComm[0]->datep ? 'disabled' : ''; ?>>
-                    </label>
-                    <label for="starting_mileage">
-                        <input type="number" id="starting_mileage" name="options_starting_mileage" min="<?php echo $lastArrivalMileage ?? 0; ?>" placeholder="<?php echo $langs->transnoentities('StartingMileage'); ?>" value="<?php echo $lastArrivalMileage ?? $lastUnfinishedActionComm[0]->array_options['options_starting_mileage']; ?>" required <?php echo isset($lastUnfinishedActionComm[0]->array_options['options_starting_mileage']) && $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ? 'disabled' : ''; ?>>
-                    </label>
-                    <label for="start_comment">
-                        <textarea name="start_comment" id="start_comment" rows="3" placeholder="<?php echo $langs->transnoentities('StartComment'); ?>" <?php echo isset($lastUnfinishedActionCommJSON['start_comment']) ? 'disabled' : ''; ?>><?php echo $lastUnfinishedActionCommJSON['start_comment'] ?? ''; ?></textarea>
-                    </label>
-                    <div class="linked-medias-list linked-medias start_action">
-                        <?php if (!isset($lastUnfinishedActionComm[0])) : ?>
-                            <div class="wpeo-button button-square-50">
-                                <label for="fast-upload-photo-start_action">
-                                    <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-start_action" type="file" name="userfile[]" capture="environment" accept="image/*">
-                                    <input type="hidden" class="<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? 'fast-upload-options' : 'modal-options'; ?>" data-from-id="0" data-from-type="actioncomm" data-from-subtype="start_action" data-from-subdir="start_action" />
-                                    <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
-                                </label>
+                        <?php if (!empty($acStartComment)) : ?>
+                            <div class="plv2-history-item__comment">
+                                <i class="fas fa-comment-dots"></i>
+                                <?php echo dol_escape_htmltag($acStartComment); ?>
                             </div>
                         <?php endif; ?>
-                        <?php print saturne_show_medias_linked(!isset($lastUnfinishedActionComm[0]) ? 'dolicar' : 'agenda', !isset($lastUnfinishedActionComm[0]->id) ? $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/start_action/' : $conf->agenda->multidir_output[$conf->entity] . '/' . $lastUnfinishedActionComm[0]->id, 'small', '', 0, 0, 0, 50, 50, 0, 0, 1, !isset($lastUnfinishedActionComm[0]->id) ? '/actioncomm/tmp/start_action/' : '/' . $lastUnfinishedActionComm[0]->id, !isset($lastUnfinishedActionComm[0]) ? $actionComm : $lastUnfinishedActionComm[0], 'photo', 0, isset($lastUnfinishedActionComm[0]) ? 0 : 1); ?>
-                    </div>
-                    <?php if ($publicInterfaceUseSignatory) : ?>
-                        <div class="public-card__content signature">
-                            <div class="signature-element">
-                                <?php if (empty($signatory->signature) && !isset($lastUnfinishedActionComm[0])) : ?>
-                                    <canvas class="canvas-container editable canvas-signature"></canvas>
-                                    <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
-                                <?php else : ?>
-                                    <div class="canvas-container">
-                                        <img src='<?php echo $signatory->signature ?>' alt="">
-                                    </div>
+                        <?php if (!$acIsOpen) : ?>
+                            <div class="plv2-history-item__row">
+                                <span class="plv2-history-item__type plv2-history-item__type--retour">
+                                    <i class="fas fa-sign-in-alt"></i> <?php echo $langs->trans('Return'); ?>
+                                </span>
+                                <span><?php echo dol_print_date($ac->datef, 'dayhour'); ?></span>
+                                <?php if (!empty($acKmEnd)) : ?>
+                                    <span class="plv2-history-item__km"><?php echo number_format((int) $acKmEnd, 0, ',', ' ') . ' km'; ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($acReturnFuelLevel) && isset($fuelIcons[$acReturnFuelLevel])) : ?>
+                                    <span class="plv2-history-item__fuel">
+                                        <i class="fas <?php echo $fuelIcons[$acReturnFuelLevel]; ?>"></i>
+                                        <?php echo $fuelLabels[$acReturnFuelLevel]; ?>
+                                    </span>
                                 <?php endif; ?>
                             </div>
-                        </div>
-                    <?php endif; ?>
-                </div>
-                <!-- End date and hour/mileage/comment/signature -->
-                <div>
-                    <label for="end_date_and_hour">
-                        <?php echo $langs->trans('EndDateAndHour'); ?>
-                        <input type="datetime-local" name="end_date_and_hour" id="end_date_and_hour" <?php echo isset($lastUnfinishedActionComm[0]) ? 'required' : ''; ?>>
-                    </label>
-                    <label for="arrival_mileage">
-                        <input type="number" id="arrival_mileage" name="options_arrival_mileage" min="<?php echo isset($lastArrivalMileage) ? $lastArrivalMileage + 1 : 0; ?>" max="<?php echo ($lastArrivalMileage ?? 0) + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>" placeholder="<?php echo $langs->transnoentities('ArrivalMileage'); ?>" <?php echo isset($lastUnfinishedActionComm[0]) ? 'required' : ''; ?>>
-                    </label>
-                    <label for="end_comment">
-                        <textarea name="end_comment" id="end_comment" rows="3" placeholder="<?php echo $langs->transnoentities('EndComment'); ?>"></textarea>
-                    </label>
-                    <div class="linked-medias-list linked-medias end_action">
-                        <div class="wpeo-button button-square-50">
-                            <label for="fast-upload-photo-end_action">
-                                <input hidden multiple class="fast-upload<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : ''; ?>" id="fast-upload-photo-end_action" type="file" name="userfile[]" capture="environment" accept="image/*">
-                                <input type="hidden" class="<?php echo getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? 'fast-upload-options' : 'modal-options'; ?>" data-from-id="0" data-from-type="actioncomm" data-from-subtype="end_action" data-from-subdir="end_action" />
-                                <i class="fas fa-camera"></i><i class="fas fa-plus-circle button-add"></i>
-                            </label>
-                        </div>
-                        <?php print saturne_show_medias_linked('dolicar', $conf->dolicar->multidir_output[$conf->entity] . '/actioncomm/tmp/end_action/', 'small', '', 0, 0, 0, 50, 50, 0, 0, 1, '/actioncomm/tmp/end_action/', $actionComm, 'photo', 0); ?>
+                            <?php if (!empty($acEndComment)) : ?>
+                                <div class="plv2-history-item__comment">
+                                    <i class="fas fa-comment-dots"></i>
+                                    <?php echo dol_escape_htmltag($acEndComment); ?>
+                                </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
-                    <?php if ($publicInterfaceUseSignatory && isset($lastUnfinishedActionComm[0])) : ?>
-                        <div class="public-card__content signature">
-                            <div class="signature-element">
-                                <canvas class="canvas-container editable canvas-signature"></canvas>
-                                <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+<?php elseif ($showScreen === 'form') : ?>
+    <!-- ===== SCREEN 3 : formulaire départ / retour ===== -->
+    <?php $isDepart = ($actionType === 'depart'); ?>
+    <div class="plv2-header plv2-header--dark">
+        <div class="plv2-header__top">
+            <a href="<?php echo $vehicleUrl; ?>" class="plv2-back-btn"><i class="fas fa-arrow-left"></i></a>
+            <div class="plv2-header__logo">
+                <img src="<?php echo $logoUrl; ?>" alt="DoliCar" class="plv2-header__logo-img">
+                <div class="plv2-header__logo-text">
+                    <span class="plv2-action-badge <?php echo $isDepart ? 'plv2-action-badge--depart' : 'plv2-action-badge--retour'; ?>">
+                        <?php echo $isDepart ? $langs->trans('Departure') : $langs->trans('Return'); ?>
+                    </span>
+                    <small><?php echo dol_escape_htmltag($registrationCertificateFR->a_registration_number . ' · ' . $registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model); ?></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="<?php echo $vehicleUrl; ?>">
+        <input type="hidden" name="token" value="<?php echo newToken(); ?>">
+        <input type="hidden" name="action" value="add">
+        <input type="hidden" name="action_type" value="<?php echo dol_escape_htmltag($actionType); ?>">
+
+        <div class="plv2-form">
+            <!-- Identité -->
+            <?php if ($isDepart) : ?>
+                <div class="plv2-card">
+                    <h3><i class="fas fa-user"></i> <?php echo $langs->trans('WhoAreYou'); ?></h3>
+                    <div class="plv2-form-group">
+                        <label><?php echo $langs->trans('Driver'); ?> <span class="plv2-req">*</span></label>
+                        <?php echo $form->select_dolusers($preselectedDriverId, 'driver_user_id', 1, null, 0, '', '', (string) $conf->entity); ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Date / Heure -->
+            <div class="plv2-card">
+                <h3><i class="fas fa-calendar"></i> <?php echo $langs->trans('When'); ?></h3>
+                <div class="plv2-form-group">
+                    <label><?php echo $isDepart ? $langs->trans('StartDateAndHour') : $langs->trans('EndDateAndHour'); ?></label>
+                    <input type="datetime-local"
+                           name="<?php echo $isDepart ? 'start_date_and_hour' : 'end_date_and_hour'; ?>"
+                           value="<?php echo dol_print_date(dol_now(), '%Y-%m-%dT%H:%M'); ?>"
+                           required>
+                </div>
+            </div>
+
+            <!-- Kilométrage -->
+            <div class="plv2-card">
+                <h3><i class="fas fa-gauge"></i> <?php echo $langs->trans('Mileage'); ?></h3>
+                <div class="plv2-form-group">
+                    <label>
+                        <?php echo $isDepart ? $langs->trans('StartingMileage') : $langs->trans('ArrivalMileage'); ?>
+                        <span class="plv2-req">*</span>
+                    </label>
+                    <?php if ($isDepart) :
+                        $minKm = $lastArrivalMileage ?? 0; ?>
+                        <input type="number"
+                               name="options_starting_mileage"
+                               class="plv2-km-input"
+                               min="<?php echo $minKm; ?>"
+                               placeholder="000000"
+                               required>
+                        <?php if ($minKm > 0) : ?>
+                            <div class="plv2-km-hint">
+                                <?php echo $langs->trans('LastKnownMileage'); ?> : <strong><?php echo number_format($minKm, 0, ',', ' ') . ' km'; ?></strong>
                             </div>
-                        </div>
+                        <?php endif; ?>
+                    <?php else :
+                        $startKm    = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
+                        $minKmRetour = $startKm > 0 ? $startKm + 1 : 0;
+                        $maxKmRetour = $startKm + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>
+                        <input type="number"
+                               name="options_arrival_mileage"
+                               class="plv2-km-input"
+                               min="<?php echo $minKmRetour; ?>"
+                               max="<?php echo $maxKmRetour; ?>"
+                               placeholder="000000"
+                               required>
+                        <?php if ($startKm > 0) : ?>
+                            <div class="plv2-km-hint">
+                                <?php echo $langs->trans('DepartureMileage'); ?> : <strong><?php echo number_format($startKm, 0, ',', ' ') . ' km'; ?></strong>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <div class="public-card__footer">
-                <button type="submit" class="wpeo-button no-load public-vehicle-log-book-validate <?php echo $publicInterfaceUseSignatory ? 'button-grey button-disable' : 'button-blue'; ?>"><i class="fas fa-save pictofixedwidth"></i><?php echo $langs->trans('Save'); ?></button>
-            </div>
-
-            <?php
-            $confirmationParams = [
-                'picto'             => 'fontawesome_fa-check-circle_fas_#47e58e',
-                'color'             => '#47e58e',
-                'confirmationTitle' => 'SavedPublicVehicleLogBook',
-                'buttonParams'      => ['CloseModal' => 'button-blue public-vehicle-log-book-confirmation-close']
-            ];
-            require __DIR__ . '/../../../saturne/core/tpl/utils/confirmation_view.tpl.php'; ?>
-        <?php else : ?>
-            <div class="public-card__header">
-                <div class="header-information">
-                    <div class="information-title"><?php echo $langs->trans('PublicVehicleLogBook'); ?></div>
+            <!-- Niveau de carburant -->
+            <div class="plv2-card">
+                <h3><i class="fas fa-gas-pump"></i> <?php echo $langs->trans('FuelLevel'); ?></h3>
+                <div class="plv2-fuel-btns">
+                    <?php
+                    $fuelLevels = [
+                        'reserve'     => ['label' => $langs->trans('FuelReserve'), 'icon' => 'fa-battery-empty'],
+                        'quarter'     => ['label' => '1/4',                         'icon' => 'fa-battery-quarter'],
+                        'half'        => ['label' => '1/2',                         'icon' => 'fa-battery-half'],
+                        'threequarters' => ['label' => '3/4',                       'icon' => 'fa-battery-three-quarters'],
+                        'full'        => ['label' => $langs->trans('FuelFull'),      'icon' => 'fa-battery-full'],
+                    ];
+                    foreach ($fuelLevels as $val => $data) : ?>
+                        <button type="button"
+                                class="plv2-fuel-btn"
+                                data-value="<?php echo $val; ?>"
+                                onclick="plv2SelectFuel(this)">
+                            <i class="fas <?php echo $data['icon']; ?>"></i>
+                            <span><?php echo $data['label']; ?></span>
+                        </button>
+                    <?php endforeach; ?>
                 </div>
-                <?php if (empty($registrationCertificateFR->id) && dol_strlen($registrationNumber) > 0) : ?>
-                    <div class="wpeo-notice notice-error">
-                        <div class="notice-content">
-                            <div class="notice-title">Plaque introuvable</div>
-                            <div class="notice-subtitle"><?php echo $langs->trans('LicencePlateNotFoundInDB'); ?></div>
-                        </div>
-                        <div class="notice-close"><i class="fas fa-times"></i></div>
+                <input type="hidden" name="options_fuel_level" id="plv2-fuel-value">
+            </div>
+
+            <!-- Observation -->
+            <div class="plv2-card">
+                <h3><i class="fas fa-comment-dots"></i> <?php echo $langs->trans('Observation'); ?></h3>
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('Remarks'); ?></label>
+                    <textarea name="<?php echo $isDepart ? 'start_comment' : 'end_comment'; ?>"
+                              rows="3"
+                              placeholder="<?php echo $langs->trans('RemarksPlaceholder'); ?>"></textarea>
+                </div>
+            </div>
+
+            <!-- Signature -->
+            <?php if ($publicInterfaceUseSignatory) : ?>
+                <div class="plv2-card">
+                    <h3><i class="fas fa-signature"></i> <?php echo $langs->trans('Signature'); ?></h3>
+                    <div class="plv2-signature-pad" id="plv2-sig-pad">
+                        <?php if (empty($signatory->signature)) : ?>
+                            <canvas class="canvas-container editable canvas-signature"></canvas>
+                            <div class="plv2-signature-pad__hint"><?php echo $langs->trans('SignHere'); ?></div>
+                            <button type="button"
+                                    class="signature-erase plv2-erase-btn wpeo-button button-square-40 button-rounded button-grey">
+                                <i class="fas fa-eraser"></i>
+                            </button>
+                        <?php else : ?>
+                            <img src="<?php echo $signatory->signature; ?>" alt="">
+                        <?php endif; ?>
                     </div>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
+        </div>
 
-            <!-- Driver -->
-            <label for="registration_number">
-                <input type="text" id="registration_number" name="registration_number" placeholder="<?php echo $langs->trans('RegistrationNumber'); ?>" required>
-            </label>
+        <div class="plv2-submit-area">
+            <button type="submit"
+                    class="plv2-btn plv2-btn--full <?php echo $isDepart ? 'plv2-btn--primary' : 'plv2-btn--success'; ?> <?php echo $publicInterfaceUseSignatory ? 'wpeo-button no-load public-vehicle-log-book-validate button-grey button-disable' : ''; ?>">
+                <i class="fas fa-check"></i>
+                <?php echo $isDepart ? $langs->trans('ValidateDeparture') : $langs->trans('ValidateReturn'); ?>
+            </button>
+        </div>
+    </form>
 
-            <div class="public-card__footer">
-                <button type="submit" class="wpeo-button no-load button-blue"><i class="fas fa-save pictofixedwidth"></i><?php echo $langs->trans('Save'); ?></button>
+<?php elseif ($showScreen === 'success') : ?>
+    <!-- ===== SCREEN 4 : confirmation ===== -->
+    <?php
+    $successIsDepart = $isVehicleOut;
+    $successAction   = $successIsDepart ? ($lastUnfinishedActionComm[0] ?? null) : ($lastActionComm[0] ?? null);
+    ?>
+    <div class="plv2-success">
+        <div class="plv2-success__icon <?php echo $successIsDepart ? 'plv2-success__icon--blue' : 'plv2-success__icon--green'; ?>">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2><?php echo $successIsDepart ? $langs->trans('DepartureRecorded') : $langs->trans('ReturnRecorded'); ?></h2>
+        <p><?php echo $langs->trans('ActionCommCreatedInAgenda'); ?></p>
+
+        <div class="plv2-success__recap">
+            <div class="plv2-success__row">
+                <span><?php echo $langs->trans('Vehicle'); ?></span>
+                <span><?php echo dol_escape_htmltag($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model . ' (' . $registrationCertificateFR->a_registration_number . ')'); ?></span>
             </div>
-        <?php endif;
-    else :
-        print '<div class="center">' . $langs->trans('PublicInterfaceForbidden', $langs->transnoentities('OfPublicVehicleLogBook')) . '</div>';
-    endif; ?>
+            <div class="plv2-success__row">
+                <span><?php echo $langs->trans('Type'); ?></span>
+                <span class="<?php echo $successIsDepart ? 'plv2-text--blue' : 'plv2-text--green'; ?>">
+                    <?php echo $successIsDepart ? $langs->trans('Departure') : $langs->trans('Return'); ?>
+                </span>
+            </div>
+            <?php if (!empty($successAction)) : ?>
+                <div class="plv2-success__row">
+                    <span><?php echo $langs->trans('Date'); ?></span>
+                    <span><?php echo dol_print_date($successIsDepart ? $successAction->datep : $successAction->datef, 'dayhour'); ?></span>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="plv2-success__actions">
+            <a href="<?php echo $vehicleUrl; ?>" class="plv2-btn plv2-btn--primary plv2-btn--full">
+                <?php echo $langs->trans('NewEntry'); ?>
+            </a>
+            <a href="<?php echo $baseUrl; ?>" class="plv2-btn plv2-btn--ghost plv2-btn--full">
+                <?php echo $langs->trans('ClosePublicLogBook'); ?>
+            </a>
+        </div>
+    </div>
+
+<?php endif; ?>
+
 </div>
-<?php print '</form>';
 
+<script>
+function plv2SelectFuel(btn) {
+    $(btn).closest('.plv2-fuel-btns').find('.plv2-fuel-btn').removeClass('active');
+    $(btn).addClass('active');
+    $('#plv2-fuel-value').val($(btn).data('value'));
+}
+
+$(document).on('change', '#driver_user_id', function () {
+    var driverId = $(this).val();
+    if (driverId) {
+        document.cookie = 'plv2_driver_id=' + encodeURIComponent(driverId) + '; path=/; max-age=31536000; SameSite=Lax';
+    }
+});
+</script>
+
+<?php
 llxFooter('', 'public');
 $db->close();
