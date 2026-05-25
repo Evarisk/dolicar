@@ -165,6 +165,23 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
     }
 }
 
+// Collect elements already linked to an existing event to prevent assigning the same one twice
+$alreadyLinkedFactureIds = [];
+$alreadyLinkedPropalIds  = [];
+$alreadyLinkedControlIds = [];
+foreach ($eventsList as $linkedEvt) {
+    $linkedEvt->fetchObjectLinked(null, null, null, null, 'OR', 1, 'sourcetype', 0);
+    foreach (($linkedEvt->linkedObjectsIds['facture'] ?? []) as $facId) {
+        $alreadyLinkedFactureIds[(int) $facId] = (int) $facId;
+    }
+    foreach (($linkedEvt->linkedObjectsIds['propal'] ?? []) as $propalId) {
+        $alreadyLinkedPropalIds[(int) $propalId] = (int) $propalId;
+    }
+    foreach (($linkedEvt->linkedObjectsIds['control'] ?? []) as $controlId) {
+        $alreadyLinkedControlIds[(int) $controlId] = (int) $controlId;
+    }
+}
+
 /*
  * Actions
  */
@@ -182,6 +199,20 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     $selectedCat = new Categorie($db);
     if ($eventCategoryId <= 0 || $selectedCat->fetch($eventCategoryId) <= 0 || (int) $selectedCat->fk_parent !== $parentCategoryId) {
         setEventMessages($langs->transnoentities('VehicleEventType') . ' ' . $langs->transnoentities('NotValid'), null, 'errors');
+        $error++;
+    }
+
+    // Prevent assigning an element already linked to another event of this vehicle
+    if (!$error && $fkFacture > 0 && isset($alreadyLinkedFactureIds[$fkFacture])) {
+        setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities('Invoices')), null, 'errors');
+        $error++;
+    }
+    if (!$error && $fkPropal > 0 && isset($alreadyLinkedPropalIds[$fkPropal])) {
+        setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities('Proposals')), null, 'errors');
+        $error++;
+    }
+    if (!$error && $fkControl > 0 && isset($alreadyLinkedControlIds[$fkControl])) {
+        setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities('Controls')), null, 'errors');
         $error++;
     }
 

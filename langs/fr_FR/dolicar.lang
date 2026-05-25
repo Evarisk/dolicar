@@ -304,6 +304,7 @@ VehicleEventType               = Type d'événement
 VehicleHistory                 = Historique du véhicule
 NoVehicleHistory               = Aucun événement enregistré
 VehicleEventAdded              = Événement véhicule ajouté avec succès
+VehicleEventElementAlreadyLinked = Cet élément (%s) est déjà associé à un autre événement de ce véhicule
 LinkedDocuments                = Documents liés
 Invoices                       = Factures
 Proposals                      = Devis
