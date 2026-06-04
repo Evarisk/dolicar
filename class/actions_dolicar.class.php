@@ -228,7 +228,7 @@ class ActionsDoliCar
     {
         global $extrafields, $langs;
 
-        if (preg_match('/propallist|orderlist|invoicelist/', $parameters['context'])) {
+        if (preg_match('/(^|:)(propallist|orderlist|invoicelist)(:|$)/', $parameters['context']) && is_object($object)) {
             $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
             $extraFieldsNames = ['registration_number', 'vehicle_model', 'VIN_number', 'first_registration_date', 'mileage', 'registrationcertificatefr', 'linked_product', 'linked_lot'];
             foreach ($extraFieldsNames as $extraFieldsName) {
