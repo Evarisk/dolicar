@@ -214,11 +214,11 @@ class modDoliCar extends DolibarrModules
 
             // CONST LIVRET ENTRETIEN
             $i++ => ['DOLICAR_LIVRETENTRETIEN_ADDON', 'chaine', 'mod_livretentretien_standard', '', 0, 'current'],
-            $i++ => ['DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH', 'chaine', 'DOL_DOCUMENT_ROOT/custom/dolicar/documents/doctemplates/livretentretien/', '', 0, 'current'],
+            $i++ => ['DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL', 'chaine', 'livretentretien', '', 0, 'current'],
 
             // CONST VEHICLE LOGBOOK DOCUMENT
             $i++ => ['DOLICAR_VEHICLELOGBOOKDOCUMENT_ADDON', 'chaine', 'mod_vehiclelogbookdocument_standard', '', 0, 'current'],
-            $i++ => ['DOLICAR_VEHICLELOGBOOKDOCUMENT_ADDON_ODT_PATH', 'chaine', 'DOL_DOCUMENT_ROOT/custom/dolicar/documents/doctemplates/vehiclelogbookdocument/', '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLELOGBOOKDOCUMENT_DEFAULT_MODEL', 'chaine', 'vehiclelogbookdocument', '', 0, 'current'],
         ];
 
         if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -778,11 +778,14 @@ class modDoliCar extends DolibarrModules
             dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_EVENT_BACKWARD_COMPAT', 1, 'integer', 0, '', $conf->entity);
         }
 
+        // Livret d'entretien and carnet de bord are now generated as PDF (TCPDF), ODT models removed
         delDocumentModel('livretentretien_odt', 'livretentretien');
-        addDocumentModel('livretentretien_odt', 'livretentretien', 'ODT templates', 'DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH');
+        delDocumentModel('livretentretien', 'livretentretien');
+        addDocumentModel('livretentretien', 'livretentretien', $langs->transnoentities('LivretEntretien') . '.pdf');
 
         delDocumentModel('vehiclelogbookdocument_odt', 'vehiclelogbookdocument');
-        addDocumentModel('vehiclelogbookdocument_odt', 'vehiclelogbookdocument', 'ODT templates', 'DOLICAR_VEHICLELOGBOOKDOCUMENT_ADDON_ODT_PATH');
+        delDocumentModel('vehiclelogbookdocument', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclelogbookdocument', 'vehiclelogbookdocument', $langs->transnoentities('VehicleLogBookDocument') . '.pdf');
 
         return $this->_init($sql, $options);
     }
