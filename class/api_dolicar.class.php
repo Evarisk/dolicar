@@ -226,6 +226,52 @@ class Dolicar extends DolibarrApi
     }
 
     /**
+     * Create a registration certificate from a French carte grise JSON
+     *
+     * Keys are the official rubric codes of the carte grise (A, B, C.1, C.3, C.4a, C.4.1, D.1, ..., Z.4).
+     * Rubric A (registration number) is mandatory; unknown rubrics are ignored and null values are skipped.
+     * If a draft already exists for the plate, it is completed and validated instead of creating a duplicate.
+     *
+     * Example: { "A": "AB-123-CD", "B": "12/04/2019", "D.1": "PEUGEOT", "D.3": "208", "E": "VF3XXXXXXXXXXXXXX" }
+     *
+     * @param array $request_data Carte grise JSON data (rubric code => value)
+     * @phan-param ?array<string,mixed> $request_data
+     * @phpstan-param ?array<string,mixed> $request_data
+     * @return int ID of the created (or completed) registration certificate
+     *
+     * @url POST fromjson
+     *
+     * @throws RestException 400 Bad request (empty body or missing rubric A)
+     * @throws RestException 403 Forbidden
+     * @throws RestException 409 Conflict, the plate already exists
+     * @throws RestException 500 Creation error
+     */
+    public function postFromJson($request_data = null): int
+    {
+        if (!DolibarrApiAccess::$user->hasRight('dolicar', 'registrationcertificatefr', 'write')) {
+            throw new RestException(403);
+        }
+
+        if (!is_array($request_data) || empty($request_data)) {
+            throw new RestException(400, 'Empty or invalid carte grise JSON body');
+        }
+
+        $result = $this->registrationcertificatefr->createFromCarteGriseJson(DolibarrApiAccess::$user, $request_data);
+
+        if ($result == -1) {
+            throw new RestException(400, 'Rubric A (registration number) is missing from the carte grise JSON');
+        }
+        if ($result == -2) {
+            throw new RestException(409, 'Registration certificate already exists with id ' . $this->registrationcertificatefr->id);
+        }
+        if ($result <= 0) {
+            throw new RestException(500, 'Error creating registration certificate from JSON', array_merge([$this->registrationcertificatefr->error], $this->registrationcertificatefr->errors));
+        }
+
+        return $result;
+    }
+
+    /**
      * Update a registration certificate
      *
      * @param int   $id           ID of the registration certificate

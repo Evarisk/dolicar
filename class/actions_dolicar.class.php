@@ -446,7 +446,7 @@ class ActionsDoliCar
             $conf->cache['control']  = null;
             $conf->cache['controls'] = [];
             $object->fetchObjectLinked(null, '', '', 'digiquali_control');
-            if (!is_array($object->linkedObjects['digiquali_control']) || empty($object->linkedObjects['digiquali_control'])) {
+            if (empty($object->linkedObjects['digiquali_control']) || !is_array($object->linkedObjects['digiquali_control'])) {
                 return 0;
             }
 
