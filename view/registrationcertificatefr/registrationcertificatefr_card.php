@@ -452,6 +452,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     $formConfirm = '';
 
+    // Confirmation to delete
+    if ($action == 'delete') {
+        $formConfirm .= $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('Delete'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
+    }
+
     // Call Hook formConfirm
     $parameters = ['formConfirm' => $formConfirm];
     $resHook    = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
@@ -583,7 +588,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
                 print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
             }
 
-
+            $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-trash pictofixedwidth"></i>' . $langs->trans('Delete') : '<i class="fas fa-trash fa-2x"></i>';
+            print dolGetButtonAction($displayButton, '', 'delete', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=delete&token=' . newToken(), '', $permissiontodelete);
         }
         print '</div>';
     }
