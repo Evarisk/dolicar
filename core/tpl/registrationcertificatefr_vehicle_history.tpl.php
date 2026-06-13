@@ -30,6 +30,9 @@
  *            $catLabels (array id => ['label' => string, 'data-html' => string])
  *            $eventsList (array of ActionComm)
  *            $evtCatById (array evtId => Categorie)
+ *            $alreadyLinkedFactureIds (array of facture ids already linked to an event)
+ *            $alreadyLinkedPropalIds  (array of propal ids already linked to an event)
+ *            $alreadyLinkedControlIds (array of control ids already linked to an event)
  */
 
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -45,6 +48,11 @@ $out = '';
 
 // === Add event form ===
 if (!empty($permissiontoadd)) {
+    // Exclude elements already linked to an existing event so the same one cannot be assigned twice
+    $factureFilter = !empty($alreadyLinkedFactureIds) ? ':0:(t.rowid:notin:' . implode(',', $alreadyLinkedFactureIds) . ')' : '';
+    $propalFilter  = !empty($alreadyLinkedPropalIds) ? ':0:(t.rowid:notin:' . implode(',', $alreadyLinkedPropalIds) . ')' : '';
+    $controlFilter = !empty($alreadyLinkedControlIds) ? ':0:(t.rowid:notin:' . implode(',', $alreadyLinkedControlIds) . ')' : '';
+
     $out .= load_fiche_titre($langs->transnoentities('AddVehicleEvent'), '', 'dolicar_color@dolicar');
 
     $out .= '<form method="POST" action="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '?id=' . $object->id . '">';
@@ -75,17 +83,17 @@ if (!empty($permissiontoadd)) {
 
     $out .= '<tr>';
     $out .= '<td>' . img_picto('', 'bill', 'class="pictofixedwidth"') . $langs->transnoentities('Invoices') . '</td>';
-    $out .= '<td>' . $form->selectForForms('Facture:compta/facture/class/facture.class.php', 'event_fk_facture', GETPOSTINT('event_fk_facture'), 1, '', '', 'minwidth300') . '</td>';
+    $out .= '<td>' . $form->selectForForms('Facture:compta/facture/class/facture.class.php' . $factureFilter, 'event_fk_facture', GETPOSTINT('event_fk_facture'), 1, '', '', 'minwidth300') . '</td>';
     $out .= '</tr>';
 
     $out .= '<tr>';
     $out .= '<td>' . img_picto('', 'propal', 'class="pictofixedwidth"') . $langs->transnoentities('Proposals') . '</td>';
-    $out .= '<td>' . $form->selectForForms('Propal:comm/propal/class/propal.class.php', 'event_fk_propal', GETPOSTINT('event_fk_propal'), 1, '', '', 'minwidth300') . '</td>';
+    $out .= '<td>' . $form->selectForForms('Propal:comm/propal/class/propal.class.php' . $propalFilter, 'event_fk_propal', GETPOSTINT('event_fk_propal'), 1, '', '', 'minwidth300') . '</td>';
     $out .= '</tr>';
 
     $out .= '<tr>';
     $out .= '<td><i class="fas fa-tasks pictofixedwidth"></i>' . $langs->transnoentities('Controls') . '</td>';
-    $out .= '<td>' . $form->selectForForms('Control:custom/digiquali/class/control.class.php', 'event_fk_control', GETPOSTINT('event_fk_control'), 1, '', '', 'minwidth300') . '</td>';
+    $out .= '<td>' . $form->selectForForms('Control:custom/digiquali/class/control.class.php' . $controlFilter, 'event_fk_control', GETPOSTINT('event_fk_control'), 1, '', '', 'minwidth300') . '</td>';
     $out .= '</tr>';
 
     $out .= '</table>';
