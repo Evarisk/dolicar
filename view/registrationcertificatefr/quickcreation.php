@@ -279,6 +279,67 @@ if (empty($resHook)) {
         }
     }
 
+    if ($action === 'scan_with_ai' && $permissiontoadd && isModEnabled('ai')) {
+        if (empty($_FILES['carte_grise_photo']['tmp_name']) || $_FILES['carte_grise_photo']['error'] != UPLOAD_ERR_OK || !is_uploaded_file($_FILES['carte_grise_photo']['tmp_name'])) {
+            setEventMessages($langs->trans('ErrorNoCarteGrisePhoto'), [], 'errors');
+        } elseif ($_FILES['carte_grise_photo']['size'] > 10 * 1024 * 1024) {
+            setEventMessages($langs->trans('ErrorCarteGrisePhotoTooLarge'), [], 'errors');
+        } else {
+            $imageInfo = getimagesize($_FILES['carte_grise_photo']['tmp_name']);
+            if ($imageInfo === false || empty($imageInfo['mime'])) {
+                setEventMessages($langs->trans('ErrorNoCarteGrisePhoto'), [], 'errors');
+            } else {
+                $jsonData = $object->getCarteGriseJsonFromImage($_FILES['carte_grise_photo']['tmp_name'], $imageInfo['mime']);
+                if (!empty($jsonData['error'])) {
+                    setEventMessages($langs->trans('ErrorAiAnalysisFailed', $jsonData['message']), [], 'errors');
+                } else {
+                    $result = $object->createFromCarteGriseJson($user, $jsonData);
+                    if ($result > 0) {
+                        setEventMessages($langs->trans('RegistrationCertificateCreatedFromAi'), []);
+                        header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $result);
+                        exit;
+                    }
+                    if ($result == -2) {
+                        setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), [], 'warnings');
+                        header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $object->id);
+                        exit;
+                    }
+                    setEventMessages($object->error ?: $langs->trans('ErrorAiInvalidJson'), $object->errors, 'errors');
+                }
+            }
+        }
+    }
+
+    if ($action === 'add_from_json' && $permissiontoadd) {
+        $jsonData = null;
+        if (empty($_FILES['json_file']['tmp_name']) || $_FILES['json_file']['error'] != UPLOAD_ERR_OK || !is_uploaded_file($_FILES['json_file']['tmp_name'])) {
+            setEventMessages($langs->trans('ErrorNoCarteGriseJsonFile'), [], 'errors');
+        } elseif ($_FILES['json_file']['size'] > 1024 * 1024) {
+            setEventMessages($langs->trans('ErrorInvalidCarteGriseJson'), [], 'errors');
+        } else {
+            $jsonData = json_decode((string) file_get_contents($_FILES['json_file']['tmp_name']), true);
+            if (!is_array($jsonData) || empty($jsonData)) {
+                setEventMessages($langs->trans('ErrorInvalidCarteGriseJson'), [], 'errors');
+                $jsonData = null;
+            }
+        }
+
+        if (is_array($jsonData)) {
+            $result = $object->createFromCarteGriseJson($user, $jsonData);
+            if ($result > 0) {
+                setEventMessages($langs->trans('RegistrationCertificateCreatedFromJson'), []);
+                header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $result);
+                exit;
+            }
+            if ($result == -2) {
+                setEventMessages($langs->trans('LicencePlateWasAlreadyExisting'), [], 'warnings');
+                header('Location: ' . dol_buildpath('dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $object->id);
+                exit;
+            }
+            setEventMessages($object->error ?: $langs->trans('ErrorInvalidCarteGriseJson'), $object->errors, 'errors');
+        }
+    }
+
     if ($action === 'add' && $permissiontoadd) {
         $existingDraftId = GETPOSTINT('draft_id');
 
@@ -709,6 +770,89 @@ if ($step === 'edit') {
 }
 
 print '</form>';
+
+// ============================================================
+// AI SCAN — CREATE FROM A CARTE GRISE PHOTO
+// ============================================================
+if ($step === 'search' && isModEnabled('ai')) {
+    print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" enctype="multipart/form-data" class="qc-ai-scan-form">';
+    print '<input type="hidden" name="token" value="' . newToken() . '">';
+    print '<input type="hidden" name="action" value="scan_with_ai">';
+
+    print '<div class="qc-inner">';
+
+    print '<div class="qc-section-header collapsible collapsed">';
+    print '<div class="qc-section-title">';
+    print '<i class="fas fa-wand-magic-sparkles"></i>';
+    print $langs->trans('ScanCarteGriseWithAi');
+    print '</div>';
+    print '<i class="fas fa-chevron-down qc-chevron"></i>';
+    print '</div>';
+
+    print '<div class="qc-section-body collapsed">';
+    print '<div class="opacitymedium" style="margin-bottom:12px">' . $langs->trans('ScanCarteGriseWithAiHelp') . '</div>';
+
+    print '<label class="qc-dropzone" for="qc-carte-grise-photo">';
+    print '<input type="file" name="carte_grise_photo" id="qc-carte-grise-photo" accept="image/*">';
+    print '<i class="fas fa-camera qc-dropzone-icon"></i>';
+    print '<div class="qc-dropzone-text">' . $langs->trans('DropCarteGrisePhotoHere') . '</div>';
+    print '<div class="qc-dropzone-hint">' . $langs->trans('OrClickToBrowsePhoto') . '</div>';
+    print '<div class="qc-dropzone-file"><i class="fas fa-image"></i> <span class="qc-dropzone-filename"></span></div>';
+    print '</label>';
+
+    print '<div class="qc-form-actions">';
+    print '<button type="submit" class="qc-btn qc-btn-primary qc-btn-large" disabled>';
+    print '<i class="fas fa-wand-magic-sparkles"></i> ' . $langs->trans('AnalyzeAndCreate');
+    print '</button>';
+    print '</div>';
+
+    print '</div>'; // .qc-section-body
+
+    print '</div>'; // .qc-inner
+    print '</form>';
+}
+
+// ============================================================
+// DEGRADED MODE — CREATE FROM A CARTE GRISE JSON
+// ============================================================
+if ($step === 'search') {
+    print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" enctype="multipart/form-data">';
+    print '<input type="hidden" name="token" value="' . newToken() . '">';
+    print '<input type="hidden" name="action" value="add_from_json">';
+
+    print '<div class="qc-inner">';
+
+    print '<div class="qc-section-header collapsible collapsed">';
+    print '<div class="qc-section-title">';
+    print '<i class="fas fa-file-code"></i>';
+    print $langs->trans('AddFromCarteGriseJson');
+    print '</div>';
+    print '<i class="fas fa-chevron-down qc-chevron"></i>';
+    print '</div>';
+
+    print '<div class="qc-section-body collapsed">';
+    print '<div class="opacitymedium" style="margin-bottom:12px">' . $langs->trans('AddFromCarteGriseJsonHelp') . '</div>';
+
+    print '<label class="qc-dropzone" for="qc-json-file">';
+    print '<input type="file" name="json_file" id="qc-json-file" accept=".json,application/json">';
+    print '<i class="fas fa-file-arrow-up qc-dropzone-icon"></i>';
+    print '<div class="qc-dropzone-text">' . $langs->trans('DropJsonFileHere') . '</div>';
+    print '<div class="qc-dropzone-hint">' . $langs->trans('OrClickToBrowseJson') . '</div>';
+    print '<div class="qc-dropzone-file"><i class="fas fa-file-code"></i> <span class="qc-dropzone-filename"></span></div>';
+    print '</label>';
+
+    print '<div class="qc-form-actions">';
+    print '<button type="submit" class="qc-btn qc-btn-primary qc-btn-large" disabled>';
+    print '<i class="fas fa-file-import"></i> ' . $langs->trans('CreateFromJson');
+    print '</button>';
+    print '</div>';
+
+    print '</div>'; // .qc-section-body
+
+    print '</div>'; // .qc-inner
+    print '</form>';
+}
+
 print '</div>'; // .quickcreation-page
 
 // End of page

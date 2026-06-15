@@ -356,6 +356,288 @@ class RegistrationCertificateFr extends SaturneObject
     }
 
     /**
+     * Mapping between official French carte grise rubric codes (uppercase) and object properties
+     * Each value is [property name, value type used for conversion]
+     * Rubric C.4.1 is handled separately because it can hold either a number or a name
+     */
+    private const CARTE_GRISE_FIELDS_MAP = [
+        'A'     => ['a_registration_number', 'string'],
+        'B'     => ['b_first_registration_date', 'date'],
+        'C.1'   => ['c1_owner_fullname', 'string'],
+        'C.3'   => ['c3_registration_address', 'string'],
+        'C.4A'  => ['c4a_vehicle_owner', 'bool'],
+        'D.1'   => ['d1_vehicle_brand', 'string'],
+        'D.2'   => ['d2_vehicle_type', 'string'],
+        'D.2.1' => ['d21_vehicle_cnit', 'string'],
+        'D.3'   => ['d3_vehicle_model', 'string'],
+        'E'     => ['e_vehicle_serial_number', 'string'],
+        'F.1'   => ['f1_technical_ptac', 'int'],
+        'F.2'   => ['f2_ptac', 'int'],
+        'F.3'   => ['f3_ptra', 'int'],
+        'G'     => ['g_vehicle_weight', 'int'],
+        'G.1'   => ['g1_vehicle_empty_weight', 'int'],
+        'H'     => ['h_validity_period', 'string'],
+        'I'     => ['i_vehicle_registration_date', 'date'],
+        'J'     => ['j_vehicle_category', 'string'],
+        'J.1'   => ['j1_national_type', 'string'],
+        'J.2'   => ['j2_european_bodywork', 'string'],
+        'J.3'   => ['j3_national_bodywork', 'string'],
+        'K'     => ['k_type_approval_number', 'string'],
+        'P.1'   => ['p1_cylinder_capacity', 'int'],
+        'P.2'   => ['p2_maximum_net_power', 'int'],
+        'P.3'   => ['p3_fuel_type', 'string'],
+        'P.6'   => ['p6_national_administrative_power', 'int'],
+        'Q'     => ['q_power_to_weight_ratio', 'int'],
+        'S.1'   => ['s1_seating_capacity', 'int'],
+        'S.2'   => ['s2_standing_capacity', 'int'],
+        'U.1'   => ['u1_stationary_noise_level', 'int'],
+        'U.2'   => ['u2_motor_speed', 'int'],
+        'V.7'   => ['v7_co2_emission', 'int'],
+        'V.9'   => ['v9_environmental_category', 'string'],
+        'X.1'   => ['x1_first_technical_inspection_date', 'date'],
+        'Y.1'   => ['y1_regional_tax', 'double'],
+        'Y.2'   => ['y2_professional_tax', 'double'],
+        'Y.3'   => ['y3_ecological_tax', 'double'],
+        'Y.4'   => ['y4_management_tax', 'double'],
+        'Y.5'   => ['y5_forwarding_expenses_tax', 'double'],
+        'Y.6'   => ['y6_total_price_vehicle_registration', 'double'],
+        'Z.1'   => ['z1_specific_details', 'string'],
+        'Z.2'   => ['z2_specific_details', 'string'],
+        'Z.3'   => ['z3_specific_details', 'string'],
+        'Z.4'   => ['z4_specific_details', 'string'],
+    ];
+
+    /**
+     * Extraction prompt sent to the AI vision model with the carte grise photo
+     */
+    private const AI_CARTE_GRISE_PROMPT = "Tu analyses la photo d'un certificat d'immatriculation français (carte grise). Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour et sans balises markdown. Les clés sont les rubriques officielles : A, B, C.1, C.3, C.4a, C.4.1, D.1, D.2, D.2.1, D.3, E, F.1, F.2, F.3, G, G.1, H, I, J, J.1, J.2, J.3, K, P.1, P.2, P.3, P.6, Q, S.1, S.2, U.1, U.2, V.7, V.9, X.1, Y.1, Y.2, Y.3, Y.4, Y.5, Y.6, Z.1, Z.2, Z.3, Z.4. Mets null pour toute rubrique illisible ou absente. Formate les dates en jj/mm/aaaa. Donne les valeurs numériques sous forme de nombres sans unité.";
+
+    /**
+     * Extract carte grise data from a photo using the Dolibarr AI module configuration (vision model)
+     * Sends the image to the configured AI service and expects a JSON whose keys are official rubric codes
+     *
+     * @param  string $imagePath Full path of the uploaded image
+     * @param  string $mimeType  Image mime type (image/jpeg, image/png, ...)
+     * @return array             Decoded carte grise JSON, or ['error' => true, 'message' => string]
+     */
+    public function getCarteGriseJsonFromImage(string $imagePath, string $mimeType): array
+    {
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/geturl.lib.php';
+        require_once DOL_DOCUMENT_ROOT . '/ai/lib/ai.lib.php';
+
+        $service = getDolGlobalString('AI_API_SERVICE', 'chatgpt');
+        $apiKey  = getDolGlobalString('AI_API_' . dol_strtoupper($service) . '_KEY');
+
+        if (empty($apiKey) && in_array($service, ['chatgpt', 'groq', 'mistral'])) {
+            return ['error' => true, 'message' => 'API key is not defined for the AI enabled service (' . $service . ')'];
+        }
+
+        $aiServices = getListOfAIServices();
+        $endpoint   = getDolGlobalString('AI_API_' . dol_strtoupper($service) . '_URL', isset($aiServices[$service]['url']) ? $aiServices[$service]['url'] : '');
+        if (empty($endpoint)) {
+            return ['error' => true, 'message' => 'API URL is not defined for the AI enabled service (' . $service . ')'];
+        }
+        $endpoint .= (preg_match('/\/$/', $endpoint) ? '' : '/') . 'chat/completions';
+
+        $model = getDolGlobalString('DOLICAR_AI_VISION_MODEL', 'gpt-4o-mini');
+
+        $payload = json_encode([
+            'model'    => $model,
+            'messages' => [
+                ['role' => 'system', 'content' => self::AI_CARTE_GRISE_PROMPT],
+                ['role' => 'user', 'content' => [
+                    ['type' => 'text', 'text' => 'Voici la photo de la carte grise.'],
+                    ['type' => 'image_url', 'image_url' => ['url' => 'data:' . $mimeType . ';base64,' . base64_encode((string) file_get_contents($imagePath))]]
+                ]]
+            ]
+        ]);
+
+        $headers = [
+            'Authorization: Bearer ' . $apiKey,
+            'Content-Type: application/json'
+        ];
+
+        global $dolibarr_ai_allow_local_endpoints;
+        $localurl = $dolibarr_ai_allow_local_endpoints ?? 0;
+
+        $response = getURLContent($endpoint, 'POST', $payload, 1, $headers, ['http', 'https'], $localurl);
+
+        if (empty($response['http_code']) || $response['http_code'] != 200) {
+            $message = 'AI request failed with HTTP code ' . (empty($response['http_code']) ? '0' : $response['http_code']);
+            $decoded = !empty($response['content']) ? json_decode($response['content'], true) : null;
+            if (!empty($decoded['error']['message'])) {
+                $message .= ' - ' . $decoded['error']['message'];
+            } elseif (!empty($decoded['message'])) {
+                $message .= ' - ' . $decoded['message'];
+            }
+            return ['error' => true, 'message' => $message];
+        }
+
+        $decoded = json_decode($response['content'], true);
+        $content = isset($decoded['choices'][0]['message']['content']) ? trim((string) $decoded['choices'][0]['message']['content']) : '';
+        if ($content === '') {
+            return ['error' => true, 'message' => 'Empty AI response'];
+        }
+
+        // Strip possible markdown fences then decode; fallback on the outermost {...} block
+        $content  = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', $content);
+        $jsonData = json_decode($content, true);
+        if (!is_array($jsonData)) {
+            $start = strpos($content, '{');
+            $end   = strrpos($content, '}');
+            if ($start !== false && $end !== false && $end > $start) {
+                $jsonData = json_decode(substr($content, $start, $end - $start + 1), true);
+            }
+        }
+        if (!is_array($jsonData) || empty($jsonData)) {
+            return ['error' => true, 'message' => 'AI did not return a usable carte grise JSON'];
+        }
+
+        return $jsonData;
+    }
+
+    /**
+     * Fill object properties from a carte grise JSON whose keys are the official rubric codes (A, B, C.1, ..., Z.4)
+     * Unknown rubrics are ignored, null/empty values are skipped, the raw JSON is kept in $this->json
+     *
+     * @param  array $data Decoded carte grise JSON (rubric code => value)
+     * @return void
+     */
+    public function setVarsFromCarteGriseJson(array $data): void
+    {
+        foreach ($data as $code => $value) {
+            if (!is_scalar($value) || (is_string($value) && trim($value) === '')) {
+                continue;
+            }
+            $code = dol_strtoupper(trim((string) $code));
+
+            if ($code === 'C.4.1') {
+                if (is_numeric($value)) {
+                    $this->c41_second_owner_number = (int) $value;
+                } else {
+                    $this->c41_second_owner_name = trim((string) $value);
+                }
+                continue;
+            }
+
+            if (!isset(self::CARTE_GRISE_FIELDS_MAP[$code])) {
+                continue;
+            }
+
+            [$property, $type] = self::CARTE_GRISE_FIELDS_MAP[$code];
+            switch ($type) {
+                case 'date':
+                    $timestamp = $this->parseCarteGriseDate((string) $value);
+                    if ($timestamp > 0) {
+                        $this->$property = $timestamp;
+                    }
+                    break;
+                case 'int':
+                    // Extract the first number so units are not absorbed ("1199 cm3" => 1199, not 11993)
+                    $this->$property = preg_match('/-?\d+/', (string) $value, $matches) ? (int) $matches[0] : 0;
+                    break;
+                case 'double':
+                    $this->$property = preg_match('/-?\d+(?:[.,]\d+)?/', (string) $value, $matches) ? (float) str_replace(',', '.', $matches[0]) : 0.0;
+                    break;
+                case 'bool':
+                    $this->$property = $this->parseCarteGriseBool($value);
+                    break;
+                default:
+                    $this->$property = trim((string) $value);
+            }
+        }
+
+        $this->json = json_encode($data);
+    }
+
+    /**
+     * Create a registration certificate from a carte grise JSON whose keys are the official rubric codes
+     * If a draft already exists for the plate (pending API search cache), it is completed and validated instead
+     *
+     * @param  User  $user User that creates
+     * @param  array $data Decoded carte grise JSON (rubric code => value)
+     * @return int         ID of created/updated object if OK, -1 if rubric A (plate) is missing, -2 if the plate already exists ($this->id holds the existing ID), -3 on create/update error
+     */
+    public function createFromCarteGriseJson(User $user, array $data): int
+    {
+        global $langs;
+
+        $registrationNumber = '';
+        foreach ($data as $code => $value) {
+            if (dol_strtoupper(trim((string) $code)) === 'A' && $value !== null) {
+                $registrationNumber = trim((string) $value);
+                break;
+            }
+        }
+        if (dol_strlen($registrationNumber) == 0) {
+            $this->error = $langs->trans('ErrorJsonMissingRegistrationNumber');
+            return -1;
+        }
+
+        $result = $this->fetch(0, normalize_registration_number(dol_strtoupper($registrationNumber)));
+        if ($result > 0 && $this->status != self::STATUS_DRAFT) {
+            $this->error = $langs->trans('LicencePlateWasAlreadyExisting');
+            return -2;
+        }
+
+        $this->setVarsFromCarteGriseJson($data);
+        $this->status = self::STATUS_VALIDATED;
+
+        if ($result > 0) {
+            // Complete and validate the existing draft: apply the same defaults as create() on validation
+            if (empty($this->fk_product) || $this->fk_product == -1) {
+                $this->fk_product = getDolGlobalInt('DOLICAR_DEFAULT_VEHICLE');
+            }
+            if (empty($this->fk_lot) || $this->fk_lot == -1) {
+                $this->fk_lot = create_default_product_lot($this->fk_product);
+            }
+            return $this->update($user) > 0 ? $this->id : -3;
+        }
+
+        return $this->create($user) > 0 ? $this->id : -3;
+    }
+
+    /**
+     * Parse a carte grise date (dd/mm/yyyy, dd-mm-yyyy or yyyy-mm-dd) into a timestamp
+     *
+     * @param  string $value Date string
+     * @return int           Timestamp at noon, 0 if format is not recognized
+     */
+    private function parseCarteGriseDate(string $value): int
+    {
+        $value = trim($value);
+        if (preg_match('/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/', $value, $matches)) {
+            [, $day, $month, $year] = $matches;
+        } elseif (preg_match('/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/', $value, $matches)) {
+            [, $year, $month, $day] = $matches;
+        } else {
+            return 0;
+        }
+        if (!checkdate((int) $month, (int) $day, (int) $year)) {
+            return 0;
+        }
+        return (int) dol_mktime(12, 0, 0, (int) $month, (int) $day, (int) $year);
+    }
+
+    /**
+     * Parse the carte grise rubric C.4a value into a boolean int
+     * Accepts booleans, numbers and mentions like "est le propriétaire du véhicule" / "n'est pas le propriétaire"
+     *
+     * @param  mixed $value Rubric value
+     * @return int          1 if owner, 0 if not
+     */
+    private function parseCarteGriseBool($value): int
+    {
+        if (is_bool($value)) {
+            return (int) $value;
+        }
+        if (is_numeric($value)) {
+            return (int) ((float) $value != 0);
+        }
+        return preg_match('/n\W{0,2}est\s+pas|non|false|^no$/i', trim((string) $value)) ? 0 : 1;
+    }
+
+    /**
      * Return tooltip content array
      *
      * @param  array $params Tooltip params
