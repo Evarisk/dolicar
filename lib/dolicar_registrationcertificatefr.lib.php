@@ -53,6 +53,83 @@ function registrationcertificatefr_prepare_head(RegistrationCertificateFr $objec
 }
 
 /**
+ * Return the list of document types that can be linked to a vehicle history event.
+ *
+ * Each entry is keyed by its short code and drives both the add-event form
+ * (picto, label, selectForForms argument, field name) and the admin toggle
+ * (visibility constant). The order defines the display order in the form.
+ *
+ * @return array<string, array{const: string, label: string, picto: string, pictofa: string, selectarg: string, field: string}>
+ */
+function dolicar_get_vehicle_event_linkable_types(): array
+{
+    return [
+        'facture' => [
+            'const'     => 'DOLICAR_VEHICLE_EVENT_FACTURE_ENABLED',
+            'label'     => 'Invoices',
+            'picto'     => 'bill',
+            'pictofa'   => '',
+            'selectarg' => 'Facture:compta/facture/class/facture.class.php',
+            'field'     => 'event_fk_facture',
+        ],
+        'propal' => [
+            'const'     => 'DOLICAR_VEHICLE_EVENT_PROPAL_ENABLED',
+            'label'     => 'Proposals',
+            'picto'     => 'propal',
+            'pictofa'   => '',
+            'selectarg' => 'Propal:comm/propal/class/propal.class.php',
+            'field'     => 'event_fk_propal',
+        ],
+        'expensereport' => [
+            'const'     => 'DOLICAR_VEHICLE_EVENT_EXPENSEREPORT_ENABLED',
+            'label'     => 'ExpenseReports',
+            'picto'     => 'trip',
+            'pictofa'   => '',
+            'selectarg' => 'ExpenseReport:expensereport/class/expensereport.class.php',
+            'field'     => 'event_fk_expensereport',
+        ],
+        'order_supplier' => [
+            'const'     => 'DOLICAR_VEHICLE_EVENT_SUPPLIERORDER_ENABLED',
+            'label'     => 'SuppliersOrders',
+            'picto'     => 'supplier_order',
+            'pictofa'   => '',
+            'selectarg' => 'CommandeFournisseur:fourn/class/fournisseur.commande.class.php',
+            'field'     => 'event_fk_supplierorder',
+        ],
+        'invoice_supplier' => [
+            'const'     => 'DOLICAR_VEHICLE_EVENT_SUPPLIERINVOICE_ENABLED',
+            'label'     => 'SuppliersInvoices',
+            'picto'     => 'supplier_invoice',
+            'pictofa'   => '',
+            'selectarg' => 'FactureFournisseur:fourn/class/fournisseur.facture.class.php',
+            'field'     => 'event_fk_supplierinvoice',
+        ],
+        'control' => [
+            'const'     => 'DOLICAR_VEHICLE_EVENT_CONTROL_ENABLED',
+            'label'     => 'Controls',
+            'picto'     => '',
+            'pictofa'   => 'fa-tasks',
+            'selectarg' => 'Control:custom/digiquali/class/control.class.php',
+            'field'     => 'event_fk_control',
+        ],
+    ];
+}
+
+/**
+ * Tell whether a vehicle event linkable document type is enabled.
+ *
+ * Defaults to enabled when the constant has never been set, so existing
+ * installs keep offering every document type until an admin disables one.
+ *
+ * @param  string $const Visibility constant name
+ * @return bool          True if the document type may be offered in the form
+ */
+function dolicar_vehicle_event_type_enabled(string $const): bool
+{
+    return getDolGlobalString($const, '1') !== '0';
+}
+
+/**
  * Normalize with regex registration number field
  *
  * @param  string $registrationNumber Registration number

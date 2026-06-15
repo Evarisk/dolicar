@@ -35,7 +35,11 @@
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
+require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 if (empty($object->fk_lot) || $object->fk_lot <= 0) {
     return;
@@ -73,20 +77,20 @@ if (!empty($permissiontoadd)) {
     $out .= '<td><textarea name="event_note" class="flat minwidth400" rows="2">' . dol_escape_htmltag(GETPOST('event_note', 'restricthtml')) . '</textarea></td>';
     $out .= '</tr>';
 
-    $out .= '<tr>';
-    $out .= '<td>' . img_picto('', 'bill', 'class="pictofixedwidth"') . $langs->transnoentities('Invoices') . '</td>';
-    $out .= '<td>' . $form->selectForForms('Facture:compta/facture/class/facture.class.php', 'event_fk_facture', GETPOSTINT('event_fk_facture'), 1, '', '', 'minwidth300') . '</td>';
-    $out .= '</tr>';
+    foreach (dolicar_get_vehicle_event_linkable_types() as $linkableType) {
+        if (!dolicar_vehicle_event_type_enabled($linkableType['const'])) {
+            continue;
+        }
 
-    $out .= '<tr>';
-    $out .= '<td>' . img_picto('', 'propal', 'class="pictofixedwidth"') . $langs->transnoentities('Proposals') . '</td>';
-    $out .= '<td>' . $form->selectForForms('Propal:comm/propal/class/propal.class.php', 'event_fk_propal', GETPOSTINT('event_fk_propal'), 1, '', '', 'minwidth300') . '</td>';
-    $out .= '</tr>';
+        $typePicto = !empty($linkableType['picto'])
+            ? img_picto('', $linkableType['picto'], 'class="pictofixedwidth"')
+            : '<i class="fas ' . $linkableType['pictofa'] . ' pictofixedwidth"></i>';
 
-    $out .= '<tr>';
-    $out .= '<td><i class="fas fa-tasks pictofixedwidth"></i>' . $langs->transnoentities('Controls') . '</td>';
-    $out .= '<td>' . $form->selectForForms('Control:custom/digiquali/class/control.class.php', 'event_fk_control', GETPOSTINT('event_fk_control'), 1, '', '', 'minwidth300') . '</td>';
-    $out .= '</tr>';
+        $out .= '<tr>';
+        $out .= '<td>' . $typePicto . $langs->transnoentities($linkableType['label']) . '</td>';
+        $out .= '<td>' . $form->selectForForms($linkableType['selectarg'], $linkableType['field'], GETPOSTINT($linkableType['field']), 1, '', '', 'minwidth300') . '</td>';
+        $out .= '</tr>';
+    }
 
     $out .= '</table>';
 
@@ -152,6 +156,51 @@ if (!empty($eventsList)) {
                 }
                 if (!empty($tmpPropal->note_private)) {
                     $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpPropal->note_private, 80)) . '</span>';
+                }
+                $linkedHtml .= '</div><br>';
+            }
+        }
+        foreach (($evt->linkedObjectsIds['expensereport'] ?? []) as $expenseReportId) {
+            $tmpExpenseReport = new ExpenseReport($db);
+            if ($tmpExpenseReport->fetch($expenseReportId) > 0) {
+                $linkedHtml .= '<div class="inline-block">';
+                $linkedHtml .= $tmpExpenseReport->getNomUrl(1);
+                $linkedHtml .= ' &mdash; <strong>' . price($tmpExpenseReport->total_ttc) . ' ' . $conf->currency . '</strong>';
+                if (!empty($tmpExpenseReport->note_public)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpExpenseReport->note_public, 80)) . '</span>';
+                }
+                if (!empty($tmpExpenseReport->note_private)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpExpenseReport->note_private, 80)) . '</span>';
+                }
+                $linkedHtml .= '</div><br>';
+            }
+        }
+        foreach (($evt->linkedObjectsIds['order_supplier'] ?? []) as $supplierOrderId) {
+            $tmpSupplierOrder = new CommandeFournisseur($db);
+            if ($tmpSupplierOrder->fetch($supplierOrderId) > 0) {
+                $linkedHtml .= '<div class="inline-block">';
+                $linkedHtml .= $tmpSupplierOrder->getNomUrl(1);
+                $linkedHtml .= ' &mdash; <strong>' . price($tmpSupplierOrder->total_ttc) . ' ' . $conf->currency . '</strong>';
+                if (!empty($tmpSupplierOrder->note_public)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierOrder->note_public, 80)) . '</span>';
+                }
+                if (!empty($tmpSupplierOrder->note_private)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierOrder->note_private, 80)) . '</span>';
+                }
+                $linkedHtml .= '</div><br>';
+            }
+        }
+        foreach (($evt->linkedObjectsIds['invoice_supplier'] ?? []) as $supplierInvoiceId) {
+            $tmpSupplierInvoice = new FactureFournisseur($db);
+            if ($tmpSupplierInvoice->fetch($supplierInvoiceId) > 0) {
+                $linkedHtml .= '<div class="inline-block">';
+                $linkedHtml .= $tmpSupplierInvoice->getNomUrl(1);
+                $linkedHtml .= ' &mdash; <strong>' . price($tmpSupplierInvoice->total_ttc) . ' ' . $conf->currency . '</strong>';
+                if (!empty($tmpSupplierInvoice->note_public)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierInvoice->note_public, 80)) . '</span>';
+                }
+                if (!empty($tmpSupplierInvoice->note_private)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierInvoice->note_private, 80)) . '</span>';
                 }
                 $linkedHtml .= '</div><br>';
             }

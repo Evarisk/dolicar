@@ -35,6 +35,9 @@ require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
 
 // Load DoliCar libraries
@@ -177,6 +180,9 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     $eventNote       = GETPOST('event_note', 'restricthtml');
     $fkFacture       = GETPOSTINT('event_fk_facture');
     $fkPropal        = GETPOSTINT('event_fk_propal');
+    $fkExpenseReport = GETPOSTINT('event_fk_expensereport');
+    $fkSupplierOrder = GETPOSTINT('event_fk_supplierorder');
+    $fkSupplierInvoice = GETPOSTINT('event_fk_supplierinvoice');
     $fkControl       = GETPOSTINT('event_fk_control');
 
     $selectedCat = new Categorie($db);
@@ -211,6 +217,15 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
             }
             if ($fkPropal > 0) {
                 $actionComm->add_object_linked('propal', $fkPropal);
+            }
+            if ($fkExpenseReport > 0) {
+                $actionComm->add_object_linked('expensereport', $fkExpenseReport);
+            }
+            if ($fkSupplierOrder > 0) {
+                $actionComm->add_object_linked('order_supplier', $fkSupplierOrder);
+            }
+            if ($fkSupplierInvoice > 0) {
+                $actionComm->add_object_linked('invoice_supplier', $fkSupplierInvoice);
             }
             if ($fkControl > 0) {
                 $actionComm->add_object_linked('control', $fkControl);
