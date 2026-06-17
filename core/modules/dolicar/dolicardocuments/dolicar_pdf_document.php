@@ -335,11 +335,21 @@ if (!class_exists('DolicarPdfRender')) {
         private function tableRow(array $cols, array $cells, array $fill, string $fontStyle, float $fontSize, array $textColor): void
         {
             $this->pdf->SetFont('', $fontStyle, $fontSize);
-            $measure = [];
+            $measure   = [];
+            $hasImages = false;
             foreach ($cols as $idx => $col) {
+                if (($col['type'] ?? '') === 'image') {
+                    if (!empty($cells[$idx]) && is_array($cells[$idx])) {
+                        $hasImages = true;
+                    }
+                    continue; // images do not contribute to the text height
+                }
                 $measure[] = [$col['w'], (string) ($cells[$idx] ?? '')];
             }
             $rowH = $this->rowHeight($measure, 5);
+            if ($hasImages) {
+                $rowH = max($rowH, 16); // keep signature thumbnails legible
+            }
 
             if ($this->checkPageBreak($rowH)) {
                 $this->tableHeader($this->headerCols);
@@ -349,13 +359,48 @@ if (!class_exists('DolicarPdfRender')) {
             $y = $this->pdf->GetY();
             $x = $this->margeGauche;
             $this->pdf->SetTextColor(...$textColor);
-            $this->pdf->SetFillColor(...$fill);
             $this->pdf->SetDrawColor(...$this->border);
             foreach ($cols as $idx => $col) {
-                $this->mc($col['w'], $rowH, (string) ($cells[$idx] ?? ''), $col['align'] ?? 'L', $x, $y);
+                $this->pdf->SetFillColor(...$fill);
+                if (($col['type'] ?? '') === 'image') {
+                    $this->mc($col['w'], $rowH, '', 'C', $x, $y); // bordered/filled cell, images drawn on top
+                    $images = (!empty($cells[$idx]) && is_array($cells[$idx])) ? $cells[$idx] : [];
+                    $this->drawCellImages($images, $x, $y, $col['w'], $rowH);
+                } else {
+                    $this->mc($col['w'], $rowH, (string) ($cells[$idx] ?? ''), $col['align'] ?? 'L', $x, $y);
+                }
                 $x += $col['w'];
             }
             $this->pdf->SetXY($this->margeGauche, $y + $rowH);
+        }
+
+        /**
+         * Draw one or several signature images side by side, fitted (aspect ratio kept) inside a table cell.
+         *
+         * @param  array $images List of raw PNG binary strings
+         * @param  float $x      Cell left
+         * @param  float $y      Cell top
+         * @param  float $w      Cell width
+         * @param  float $h      Cell height
+         * @return void
+         */
+        private function drawCellImages(array $images, float $x, float $y, float $w, float $h): void
+        {
+            $images = array_values(array_filter($images, static function ($img) {
+                return !empty($img);
+            }));
+            $count = count($images);
+            if ($count === 0) {
+                return;
+            }
+
+            $pad   = 1;
+            $slotW = ($w - $pad * 2) / $count;
+            $imgH  = $h - $pad * 2;
+            foreach ($images as $i => $img) {
+                $ix = $x + $pad + $i * $slotW;
+                $this->pdf->Image('@' . $img, $ix, $y + $pad, $slotW, $imgH, 'PNG', '', '', false, 300, '', false, false, 0, 'CM');
+            }
         }
 
         /**

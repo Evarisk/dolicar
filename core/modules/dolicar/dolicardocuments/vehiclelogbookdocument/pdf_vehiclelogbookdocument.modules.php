@@ -187,6 +187,47 @@ class pdf_vehiclelogbookdocument
             }
         }
 
+        // Driver signatures linked to the trips (Saturne signatures, object_type 'actiocomm'), grouped by trip
+        $signaturesByTrip = [];
+        if (!empty($tripsList)) {
+            $tripIds = [];
+            foreach ($tripsList as $trip) {
+                $tripIds[] = (int) $trip->id;
+            }
+            if (!empty($tripIds)) {
+                $sql  = 'SELECT fk_object, signature';
+                $sql .= ' FROM ' . MAIN_DB_PREFIX . 'saturne_object_signature';
+                $sql .= " WHERE object_type = 'actiocomm'";
+                $sql .= " AND module_name = 'dolicar'";
+                $sql .= ' AND status > 0';
+                $sql .= " AND signature LIKE 'data:image%'";
+                $sql .= ' AND fk_object IN (' . implode(',', $tripIds) . ')';
+                $sql .= ' ORDER BY fk_object DESC, rowid ASC';
+
+                $resql = $this->db->query($sql);
+                if ($resql) {
+                    $seenByTrip = [];
+                    while ($sig = $this->db->fetch_object($resql)) {
+                        $parts = explode(',', $sig->signature, 2);
+                        if (empty($parts[1])) {
+                            continue;
+                        }
+                        $binary = base64_decode($parts[1]);
+                        if (empty($binary)) {
+                            continue;
+                        }
+                        // Skip exact duplicates of the same trip (artifacts of multiple submissions)
+                        $hash = md5($binary);
+                        if (isset($seenByTrip[$sig->fk_object][$hash])) {
+                            continue;
+                        }
+                        $seenByTrip[$sig->fk_object][$hash] = true;
+                        $signaturesByTrip[$sig->fk_object][] = $binary;
+                    }
+                }
+            }
+        }
+
         $firstRegDate = !empty($object->b_first_registration_date)
             ? dol_print_date($object->b_first_registration_date, 'day')
             : '';
@@ -240,12 +281,13 @@ class pdf_vehiclelogbookdocument
         // Trips history
         $render->sectionTitle($outputLangs->transnoentities('TripsHistory'));
         $cols = [
-            ['w' => 28, 'label' => $outputLangs->transnoentities('Driver'),        'align' => 'L'],
-            ['w' => 27, 'label' => $outputLangs->transnoentities('DepartureDate'), 'align' => 'L'],
-            ['w' => 27, 'label' => $outputLangs->transnoentities('ReturnDate'),    'align' => 'L'],
-            ['w' => 34, 'label' => $outputLangs->transnoentities('Mileage'),       'align' => 'R'],
-            ['w' => 26, 'label' => $outputLangs->transnoentities('Fuel'),          'align' => 'L'],
-            ['w' => 38, 'label' => $outputLangs->transnoentities('Comments'),      'align' => 'L'],
+            ['w' => 24, 'label' => $outputLangs->transnoentities('Driver'),        'align' => 'L'],
+            ['w' => 24, 'label' => $outputLangs->transnoentities('DepartureDate'), 'align' => 'L'],
+            ['w' => 24, 'label' => $outputLangs->transnoentities('ReturnDate'),    'align' => 'L'],
+            ['w' => 30, 'label' => $outputLangs->transnoentities('Mileage'),       'align' => 'R'],
+            ['w' => 22, 'label' => $outputLangs->transnoentities('Fuel'),          'align' => 'L'],
+            ['w' => 26, 'label' => $outputLangs->transnoentities('Comments'),      'align' => 'L'],
+            ['w' => 30, 'label' => $outputLangs->transnoentities('Signatures'),    'align' => 'C', 'type' => 'image'],
         ];
         $tableRows = [];
         foreach ($tripsList as $trip) {
@@ -274,6 +316,7 @@ class pdf_vehiclelogbookdocument
                 $mileageCell,
                 $fuelCell,
                 $commentCell,
+                $signaturesByTrip[$trip->id] ?? [],
             ];
         }
         $render->table($cols, $tableRows, $outputLangs->transnoentities('NoVehicleHistory'));
