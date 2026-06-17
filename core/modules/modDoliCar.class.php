@@ -356,6 +356,22 @@ class modDoliCar extends DolibarrModules
         ];
 
         $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('ImportRegistrationCertificate'),
+            'prefix'   => '<i class="fas fa-file-import pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'registrationcertificatefr_import',
+            'url'      => '/dolicar/view/registrationcertificatefr/registrationcertificatefr_import.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->registrationcertificatefr->write',
+            'target'   => '',
+            'user'     => 0
+        ];
+
+        $this->menu[$r++] = [
             'fk_menu'  => 'fk_mainmenu=dolicar',
             'type'     => 'left',
             'titre'    => $langs->transnoentities('ThirdParty'),
