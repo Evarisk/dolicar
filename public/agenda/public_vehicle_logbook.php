@@ -65,6 +65,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 // Load Saturne libraries
 if ($publicInterfaceUseSignatory) {
     require_once __DIR__ . '/../../../saturne/class/saturnesignature.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/ticket.lib.php'; // For generate_random_id()
 }
 
 // Load DoliCar libraries
@@ -132,7 +133,7 @@ if (!empty($lastUnfinishedActionComm) && is_array($lastUnfinishedActionComm)) {
     $lastUnfinishedActionCommJSON = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'], true);
     $lastArrivalMileage           = $lastUnfinishedActionComm[0]->array_options['options_starting_mileage'];
     if ($publicInterfaceUseSignatory) {
-        $signatory->fetch('', '', ' AND object_type = "actiocomm" AND fk_object = ' . $lastUnfinishedActionComm[0]->id);
+        $signatory->fetch(0, '', ' AND object_type = "actiocomm" AND fk_object = ' . $lastUnfinishedActionComm[0]->id);
     }
 }
 
@@ -221,13 +222,17 @@ if (empty($resHook)) {
             $signatory->firstname = $lastUnfinishedActionCommJSON['driver'] ?? $driverName;
 
             $signatory->signature_date = dol_now();
-            $signatory->signature      = GETPOST('signature');
+            // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,
+            // so we read it raw and decode it ourselves (same intent as the standard Saturne signature flow).
+            $postedSignature      = json_decode(GETPOST('signature', 'none'));
+            $signatory->signature = is_string($postedSignature) ? $postedSignature : '';
 
-            $signatory->element_type = 'user';
-            $signatory->element_id   = 0;
-            $signatory->object_type  = 'actiocomm';
-            $signatory->fk_object    = $actionCommID ?? (isset($lastUnfinishedActionComm[0]) ? $lastUnfinishedActionComm[0]->id : null);
-            $signatory->module_name  = 'dolicar';
+            $signatory->element_type  = 'user';
+            $signatory->element_id    = 0;
+            $signatory->object_type   = 'actiocomm';
+            $signatory->fk_object     = $actionCommID ?? (isset($lastUnfinishedActionComm[0]) ? $lastUnfinishedActionComm[0]->id : null);
+            $signatory->module_name   = 'dolicar';
+            $signatory->signature_url = generate_random_id(); // Mandatory: column has a UNIQUE index, must not stay empty
 
             $signatory->create($user);
         }
@@ -513,7 +518,7 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
         </div>
     </div>
 
-    <form method="POST" action="<?php echo $vehicleUrl; ?>">
+    <form id="public-vehicle-log-book-form" method="POST" action="<?php echo $vehicleUrl; ?>">
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
         <input type="hidden" name="action" value="add">
         <input type="hidden" name="action_type" value="<?php echo dol_escape_htmltag($actionType); ?>">
@@ -624,16 +629,12 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
                 <div class="plv2-card">
                     <h3><i class="fas fa-signature"></i> <?php echo $langs->trans('Signature'); ?></h3>
                     <div class="plv2-signature-pad" id="plv2-sig-pad">
-                        <?php if (empty($signatory->signature)) : ?>
-                            <canvas class="canvas-container editable canvas-signature"></canvas>
-                            <div class="plv2-signature-pad__hint"><?php echo $langs->trans('SignHere'); ?></div>
-                            <button type="button"
-                                    class="signature-erase plv2-erase-btn wpeo-button button-square-40 button-rounded button-grey">
-                                <i class="fas fa-eraser"></i>
-                            </button>
-                        <?php else : ?>
-                            <img src="<?php echo $signatory->signature; ?>" alt="">
-                        <?php endif; ?>
+                        <canvas class="canvas-container editable canvas-signature"></canvas>
+                        <div class="plv2-signature-pad__hint"><?php echo $langs->trans('SignHere'); ?></div>
+                        <button type="button"
+                                class="signature-erase plv2-erase-btn wpeo-button button-square-40 button-rounded button-grey">
+                            <i class="fas fa-eraser"></i>
+                        </button>
                     </div>
                 </div>
             <?php endif; ?>
