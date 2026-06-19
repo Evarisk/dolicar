@@ -48,7 +48,7 @@ require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 global $conf, $db, $form, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['trips']);
 
 // Get parameters
 $id     = GETPOST('id', 'int');
@@ -68,6 +68,46 @@ require_once DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be
 $permissionToRead = $user->rights->dolicar->registrationcertificatefr->read;
 $permissiontoadd  = $user->rights->dolicar->registrationcertificatefr->write;
 saturne_check_access($permissionToRead);
+
+// AJAX: return the lines of an expense report for the vehicle-event form (issue #452)
+if ($action == 'get_expensereport_lines') {
+    require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
+
+    $fkExpenseReport = GETPOSTINT('fk_expensereport');
+    $linesData       = [];
+    if ($fkExpenseReport > 0) {
+        $expenseReport = new ExpenseReport($db);
+        if ($expenseReport->fetch($fkExpenseReport) > 0) {
+            $expenseReport->fetch_lines();
+            if (is_array($expenseReport->lines)) {
+                foreach ($expenseReport->lines as $line) {
+                    $rawTypeLabel = $line->type_fees_libelle ?: ($line->type_fees_code ?: '');
+                    $typeLabel    = $rawTypeLabel !== '' ? $langs->trans($rawTypeLabel) : '';
+                    $projectLabel = $line->projet_title ?: $line->projet_ref;
+                    $label        = dol_print_date($line->date, 'day');
+                    if ($typeLabel !== '') {
+                        $label .= ' · ' . $typeLabel;
+                    }
+                    if (!empty($projectLabel)) {
+                        $label .= ' · ' . $projectLabel;
+                    }
+                    if (!empty($line->comments)) {
+                        $label .= ' · ' . dol_trunc($line->comments, 40);
+                    }
+                    $linesData[] = [
+                        'id'     => (int) $line->rowid,
+                        'label'  => $label,
+                        'amount' => price($line->total_ttc, 0, $langs, 1, -1, -1, $conf->currency),
+                    ];
+                }
+            }
+        }
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($linesData);
+    exit;
+}
 
 // Ensure parent event category exists and children are initialized
 $parentCategoryId = getDolGlobalInt('DOLICAR_VEHICLE_EVENT_CATEGORY_ID');
@@ -192,6 +232,7 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     $fkSupplierOrder = GETPOSTINT('event_fk_supplierorder');
     $fkSupplierInvoice = GETPOSTINT('event_fk_supplierinvoice');
     $fkControl       = GETPOSTINT('event_fk_control');
+    $expenseReportLineIds = array_values(array_filter(array_map('intval', (array) GETPOST('event_expensereport_lines', 'array'))));
 
     $selectedCat = new Categorie($db);
     if ($eventCategoryId <= 0 || $selectedCat->fetch($eventCategoryId) <= 0 || (int) $selectedCat->fk_parent !== $parentCategoryId) {
@@ -226,8 +267,13 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
             if ($fkPropal > 0) {
                 $actionComm->add_object_linked('propal', $fkPropal);
             }
-            if ($fkExpenseReport > 0) {
+            // Link the whole expense report only when no specific lines were selected (issue #452)
+            if (empty($expenseReportLineIds) && $fkExpenseReport > 0) {
                 $actionComm->add_object_linked('expensereport', $fkExpenseReport);
+            }
+            // Otherwise link the selected expense report lines (core element_element table, no schema change)
+            foreach ($expenseReportLineIds as $expenseReportLineId) {
+                $actionComm->add_object_linked('expensereportline', $expenseReportLineId);
             }
             if ($fkSupplierOrder > 0) {
                 $actionComm->add_object_linked('order_supplier', $fkSupplierOrder);

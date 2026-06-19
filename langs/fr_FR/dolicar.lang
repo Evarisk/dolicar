@@ -327,6 +327,7 @@ LinkedDocuments                = Documents liés
 Invoices                       = Factures
 Proposals                      = Devis
 ExpenseReports                 = Notes de frais
+ExpenseReportLines             = Lignes de note de frais
 SuppliersOrders                = Commandes fournisseurs
 SuppliersInvoices              = Factures fournisseurs
 Controls                       = Contrôles DigiQuali

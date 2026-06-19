@@ -77,7 +77,7 @@ if (!empty($permissiontoadd)) {
     $out .= '<td><textarea name="event_note" class="flat minwidth400" rows="2">' . dol_escape_htmltag(GETPOST('event_note', 'restricthtml')) . '</textarea></td>';
     $out .= '</tr>';
 
-    foreach (dolicar_get_vehicle_event_linkable_types() as $linkableType) {
+    foreach (dolicar_get_vehicle_event_linkable_types() as $typeKey => $linkableType) {
         if (!dolicar_vehicle_event_type_enabled($linkableType['const'])) {
             continue;
         }
@@ -90,6 +90,14 @@ if (!empty($permissiontoadd)) {
         $out .= '<td>' . $typePicto . $langs->transnoentities($linkableType['label']) . '</td>';
         $out .= '<td>' . $form->selectForForms($linkableType['selectarg'], $linkableType['field'], GETPOSTINT($linkableType['field']), 1, '', '', 'minwidth300') . '</td>';
         $out .= '</tr>';
+
+        // Expense report: pick specific lines instead of the whole report (issue #452)
+        if ($typeKey === 'expensereport') {
+            $out .= '<tr id="dolicar-er-lines-row" style="display:none;">';
+            $out .= '<td>' . $langs->transnoentities('ExpenseReportLines') . '</td>';
+            $out .= '<td><div id="dolicar-er-lines" class="dolicar-er-lines" data-url="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id) . '"></div></td>';
+            $out .= '</tr>';
+        }
     }
 
     $out .= '</table>';
@@ -213,6 +221,40 @@ if (!empty($eventsList)) {
                 $linkedHtml .= ' &mdash; ' . $tmpControl->getLibVerdict(4);
                 if (!empty($tmpControl->note_public)) {
                     $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpControl->note_public, 80)) . '</span>';
+                }
+                $linkedHtml .= '</div><br>';
+            }
+        }
+
+        // Expense report lines selected for this event (issue #452)
+        $erLineIds = array_values($evt->linkedObjectsIds['expensereportline'] ?? []);
+        if (!empty($erLineIds)) {
+            require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereportline.class.php';
+            foreach ($erLineIds as $erLineId) {
+                $erLine = new ExpenseReportLine($db);
+                if ($erLine->fetch($erLineId) <= 0) {
+                    continue;
+                }
+                $parentEr = new ExpenseReport($db);
+                $parentEr->fetch($erLine->fk_expensereport);
+                $rawTypeLabel = $erLine->type_fees_libelle ?: ($erLine->type_fees_code ?: '');
+                $typeLabel    = $rawTypeLabel !== '' ? $langs->trans($rawTypeLabel) : '';
+                $projectLabel = $erLine->projet_title ?: $erLine->projet_ref;
+
+                $linkedHtml .= '<div class="inline-block">';
+                if ($parentEr->id > 0) {
+                    $linkedHtml .= $parentEr->getNomUrl(1) . ' &mdash; ';
+                }
+                $linkedHtml .= dol_print_date($erLine->date, 'day');
+                if (!empty($typeLabel)) {
+                    $linkedHtml .= ' &middot; ' . dol_escape_htmltag($typeLabel);
+                }
+                if (!empty($projectLabel)) {
+                    $linkedHtml .= ' &middot; ' . dol_escape_htmltag($projectLabel);
+                }
+                $linkedHtml .= ' &mdash; <strong>' . price($erLine->total_ttc) . ' ' . $conf->currency . '</strong>';
+                if (!empty($erLine->comments)) {
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($erLine->comments, 80)) . '</span>';
                 }
                 $linkedHtml .= '</div><br>';
             }
