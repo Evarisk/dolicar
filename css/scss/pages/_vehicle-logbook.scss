@@ -530,6 +530,11 @@
       .saturne-media-gallery:empty { display: none; }
       .saturne-media-upload-block { gap: 0; }
 
+      // Saturne's audio container adds vertical padding/margin — drop it so the
+      // audio buttons sit on the same baseline as the photo button.
+      [id$="master-media-row-container-audio"] { padding: 0; }
+      .saturne-audio-controls { margin-top: 0; }
+
       // pico.css forces bare <button> to display:block / width:100% / coloured bg,
       // which breaks the Saturne media block icon buttons — restore them here.
       button {
