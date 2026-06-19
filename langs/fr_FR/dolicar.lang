@@ -110,6 +110,7 @@ NewRegistrationcertificatefr    = Nouvelle carte grise
 ModifyRegistrationcertificatefr = Modifier la carte grise
 FindLicencePlateInRepertory     = Rechercher une plaque d'immatriculation
 RegistrationPlate               = Immatriculation
+QualityControlInterface         = Interface de contrôle qualité
 
 # Fiels - Champs
 RegistrationNumber            = Numéro d'immatriculation (A)
