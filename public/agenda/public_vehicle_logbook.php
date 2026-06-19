@@ -229,7 +229,7 @@ if (empty($resHook)) {
         $problemAction->percentage   = -1;
         $problemAction->userownerid  = 0;
         $problemAction->label        = $langs->transnoentities('ProblemReportedOnVehicle', $registrationCertificateFR->a_registration_number);
-        $problemAction->note_private = (!empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . '<br>' : '');
+        $problemAction->note_private = (!empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . "\n" : '');
         $problemAction->note_private .= $langs->transnoentities('Comment') . ' : ' . $comment;
         $problemActionID              = $problemAction->create($user);
 

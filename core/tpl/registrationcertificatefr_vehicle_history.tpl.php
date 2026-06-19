@@ -222,7 +222,7 @@ if (!empty($eventsList)) {
         $out .= '<td class="nowrap">' . $badge . '</td>';
         $out .= '<td class="center nowraponall">' . dol_print_date($evt->datep, 'day') . '</td>';
         $out .= '<td class="center">' . ($km > 0 ? price($km, 0, '', 1, 0) . ' km' : '') . '</td>';
-        $out .= '<td>' . dol_escape_htmltag((string) $evt->note_private) . '</td>';
+        $out .= '<td>' . nl2br(dol_escape_htmltag((string) $evt->note_private)) . '</td>';
         $out .= '<td class="center nowraponall">' . $userStr . '</td>';
         $out .= '<td>' . $linkedHtml . '</td>';
         $out .= '</tr>';
