@@ -227,7 +227,16 @@ if (!empty($eventsList)) {
         }
 
         // Expense report lines selected for this event (issue #452)
-        $erLineIds = array_values($evt->linkedObjectsIds['expensereportline'] ?? []);
+        // 'expensereportline' is not a registered element, so fetchObjectLinked() drops it — read the links directly
+        $erLineIds  = [];
+        $sqlErLines = 'SELECT fk_source FROM ' . MAIN_DB_PREFIX . "element_element WHERE fk_target = " . (int) $evt->id . " AND targettype = 'action' AND sourcetype = 'expensereportline'";
+        $resErLines = $db->query($sqlErLines);
+        if ($resErLines) {
+            while ($oErLine = $db->fetch_object($resErLines)) {
+                $erLineIds[] = (int) $oErLine->fk_source;
+            }
+            $db->free($resErLines);
+        }
         if (!empty($erLineIds)) {
             require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereportline.class.php';
             foreach ($erLineIds as $erLineId) {
