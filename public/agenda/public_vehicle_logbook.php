@@ -229,8 +229,7 @@ if (empty($resHook)) {
         $problemAction->percentage   = -1;
         $problemAction->userownerid  = 0;
         $problemAction->label        = $langs->transnoentities('ProblemReportedOnVehicle', $registrationCertificateFR->a_registration_number);
-        $problemAction->note_private = (!empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . "\n" : '');
-        $problemAction->note_private .= $langs->transnoentities('Comment') . ' : ' . $comment;
+        $problemAction->note_private = $comment;
         $problemActionID              = $problemAction->create($user);
 
         // Move the uploaded media from the temp dir to a permanent location keyed by the event
