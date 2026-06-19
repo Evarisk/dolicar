@@ -519,10 +519,16 @@
     .dolicar-problem-media-row {
       display: flex;
       align-items: center;
-      gap: 18px;
+      gap: 14px;
       flex-wrap: wrap;
 
       .linked-medias { margin: 0; }
+
+      // Data-only holders: collapse so they don't introduce a flex gap
+      .fast-upload-options { display: none; }
+      // Empty photo gallery placeholder otherwise pushes the audio buttons away
+      .saturne-media-gallery:empty { display: none; }
+      .saturne-media-upload-block { gap: 0; }
 
       // pico.css forces bare <button> to display:block / width:100% / coloured bg,
       // which breaks the Saturne media block icon buttons — restore them here.
