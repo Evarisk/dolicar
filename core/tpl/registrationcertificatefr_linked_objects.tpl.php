@@ -23,9 +23,11 @@
 
 /**
  * The following vars must be defined :
- * Global   : $db, $langs
+ * Global   : $db, $langs, $conf
  * Variable : $fromProductLot
  */
+
+global $conf;
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
@@ -39,45 +41,45 @@ if ($digiqualiEnabled) {
     require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/sheet.class.php';
 }
 
-$colspanEmpty = $digiqualiEnabled ? 8 : 4;
+// Load commercial document classes to list linked invoices/proposals and sum their amounts
+$factureEnabled = isModEnabled('facture');
+$propalEnabled  = isModEnabled('propal');
+if ($factureEnabled) {
+    require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+}
+if ($propalEnabled) {
+    require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+}
 
-$out  = load_fiche_titre($langs->transnoentities('LinkedObjects'), '', 'dolicar_color@dolicar');
-$out .= '<table class="noborder centpercent">';
-$out .= '<tr class="liste_titre">';
-$out .= '<td>' . $langs->trans('ObjectType') . '</td>';
-$out .= '<td>' . $langs->trans('Object') . '</td>';
-if ($digiqualiEnabled) {
-    $out .= '<td>' . $langs->trans('Sheet') . '</td>';
-}
-$out .= '<td>' . $langs->trans('Mileage') . '</td>';
-$out .= '<td>' . $langs->trans('Date') . '</td>';
-if ($digiqualiEnabled) {
-    $out .= '<td>' . $langs->trans('Verdict') . '</td>';
-    $out .= '<td>' . $langs->trans('ControlDate') . '</td>';
-    $out .= '<td>' . $langs->trans('NextControlDate') . '</td>';
-}
-$out .= '</tr>';
+// Column count for the "no data" message (+1 for the amount column, always displayed)
+$colspanEmpty = ($digiqualiEnabled ? 8 : 4) + 1;
+
+$totalAmount = 0;
 
 /**
  * Helper : render a single linked object row
  *
- * @param CommonObject $linkedObject        The linked object to display
- * @param string       $linkedObjectElement The element type key (e.g. 'digiquali_control')
- * @param bool         $digiqualiEnabled    Whether DigiQuali module is active
- * @param Translate    $langs               Translation object
- * @return string                           HTML row string
+ * @param  CommonObject $linkedObject        The linked object to display
+ * @param  string       $linkedObjectElement The element type key (e.g. 'digiquali_control')
+ * @param  bool         $digiqualiEnabled    Whether DigiQuali module is active
+ * @param  Translate    $langs               Translation object
+ * @param  float        $totalAmount         Running total of amounts (passed by reference)
+ * @return string                            HTML row string
  */
-$renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectElement, bool $digiqualiEnabled, $langs): string {
-    global $db;
-    $isControl = ($linkedObjectElement === 'digiquali_control');
-    $isSurvey  = ($linkedObjectElement === 'digiquali_survey');
+$renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectElement, bool $digiqualiEnabled, $langs, &$totalAmount): string {
+    global $conf, $db;
+    $isControl       = ($linkedObjectElement === 'digiquali_control');
+    $isSurvey        = ($linkedObjectElement === 'digiquali_survey');
+    $isCommercialDoc = in_array($linkedObjectElement, ['facture', 'propal', 'commande'], true);
 
-    $row  = '<tr>';
+    $verdictValue = $isControl ? (int) $linkedObject->verdict : '';
+
+    $row  = '<tr class="dolicar-linked-object-row" data-verdict="' . $verdictValue . '">';
     $row .= '<td class="nowrap">' . $langs->transnoentities(ucfirst($linkedObjectElement)) . '</td>';
     $row .= '<td>' . $linkedObject->getNomUrl(1) . '</td>';
     if ($digiqualiEnabled) {
         if ($isControl || $isSurvey) {
-            $sheet = new Sheet($db);
+            $sheet     = new Sheet($db);
             $sheetLink = '';
             if (!empty($linkedObject->fk_sheet) && $sheet->fetch($linkedObject->fk_sheet) > 0) {
                 $sheetLink = $sheet->getNomUrl(1) . (!empty($sheet->label) ? ' - ' . $sheet->label : '');
@@ -87,7 +89,7 @@ $renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectEle
             $row .= '<td></td>';
         }
     }
-    $row .= '<td>' . (!$isControl && !$isSurvey ? $linkedObject->array_options['options_mileage'] : '') . '</td>';
+    $row .= '<td>' . (!$isControl && !$isSurvey && !$isCommercialDoc ? ($linkedObject->array_options['options_mileage'] ?? '') : '') . '</td>';
     $row .= '<td>' . dol_print_date($linkedObject->date_creation, 'dayhour') . '</td>';
     if ($digiqualiEnabled) {
         if ($isControl) {
@@ -99,6 +101,13 @@ $renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectEle
         } else {
             $row .= '<td></td><td></td><td></td>';
         }
+    }
+    // Amount (incl. tax) column: only commercial documents carry an amount; it feeds the grand total
+    if ($isCommercialDoc && isset($linkedObject->total_ttc)) {
+        $totalAmount += (float) $linkedObject->total_ttc;
+        $row .= '<td class="right nowrap">' . price($linkedObject->total_ttc, 0, $langs, 1, -1, -1, $conf->currency) . '</td>';
+    } else {
+        $row .= '<td class="right"></td>';
     }
     $row .= '</tr>';
     return $row;
@@ -119,7 +128,7 @@ if (!empty($registrationCertificate->linkedObjects)) {
             if (isset($linkedObject->status) && $linkedObject->status == -1) {
                 continue;
             }
-            $rows[$linkedObjectElement . '_' . $linkedObjectId] = $renderLinkedObjectRow($linkedObject, $linkedObjectElement, $digiqualiEnabled, $langs);
+            $rows[$linkedObjectElement . '_' . $linkedObjectId] = $renderLinkedObjectRow($linkedObject, $linkedObjectElement, $digiqualiEnabled, $langs, $totalAmount);
         }
     }
 }
@@ -138,15 +147,85 @@ if ($digiqualiEnabled && $registrationCertificate->fk_lot > 0) {
                 }
                 $key = $elementType . '_' . $linkedObjectId;
                 if (!isset($rows[$key])) {
-                    $rows[$key] = $renderLinkedObjectRow($linkedObject, $elementType, $digiqualiEnabled, $langs);
+                    $rows[$key] = $renderLinkedObjectRow($linkedObject, $elementType, $digiqualiEnabled, $langs, $totalAmount);
                 }
             }
         }
     }
 }
 
+// Invoices and proposals linked through their "registrationcertificatefr" extrafield (set by the New invoice/proposal buttons)
+$commercialDocSources = [];
+if ($factureEnabled) {
+    $commercialDocSources['facture'] = ['table' => 'facture_extrafields', 'class' => 'Facture'];
+}
+if ($propalEnabled) {
+    $commercialDocSources['propal'] = ['table' => 'propal_extrafields', 'class' => 'Propal'];
+}
+foreach ($commercialDocSources as $elementType => $source) {
+    $sql   = 'SELECT fk_object FROM ' . MAIN_DB_PREFIX . $source['table'] . ' WHERE registrationcertificatefr = ' . (int) $registrationCertificate->id;
+    $resql = $db->query($sql);
+    if ($resql) {
+        while ($obj = $db->fetch_object($resql)) {
+            $key = $elementType . '_' . $obj->fk_object;
+            if (isset($rows[$key])) {
+                continue;
+            }
+            $commercialDoc = new $source['class']($db);
+            if ($commercialDoc->fetch($obj->fk_object) > 0) {
+                $rows[$key] = $renderLinkedObjectRow($commercialDoc, $elementType, $digiqualiEnabled, $langs, $totalAmount);
+            }
+        }
+        $db->free($resql);
+    }
+}
+
+$out = load_fiche_titre($langs->transnoentities('LinkedObjects'), '', 'dolicar_color@dolicar');
+
+// Search / filter toolbar (client-side filtering handled by js/modules/linkedObjects.js)
+if (!empty($rows)) {
+    $out .= '<div class="dolicar-linked-objects-toolbar">';
+    $out .= '<input type="text" class="dolicar-linked-objects-search" placeholder="' . dol_escape_htmltag($langs->trans('Search')) . '">';
+    if ($digiqualiEnabled) {
+        $control       = new Control($db);
+        $verdictValues = $control->fields['verdict']['arrayofkeyval'] ?? [];
+        $out .= '<select class="dolicar-linked-objects-verdict-filter flat">';
+        $out .= '<option value="">' . $langs->trans('Verdict') . '</option>';
+        foreach ($verdictValues as $verdictKey => $verdictLabel) {
+            $out .= '<option value="' . (int) $verdictKey . '">' . $langs->trans($verdictLabel) . '</option>';
+        }
+        if (!isset($verdictValues[0])) {
+            $out .= '<option value="0">N/A</option>';
+        }
+        $out .= '</select>';
+    }
+    $out .= '</div>';
+}
+
+$out .= '<table class="noborder centpercent dolicar-linked-objects-table">';
+$out .= '<tr class="liste_titre">';
+$out .= '<td>' . $langs->trans('ObjectType') . '</td>';
+$out .= '<td>' . $langs->trans('Object') . '</td>';
+if ($digiqualiEnabled) {
+    $out .= '<td>' . $langs->trans('Sheet') . '</td>';
+}
+$out .= '<td>' . $langs->trans('Mileage') . '</td>';
+$out .= '<td>' . $langs->trans('Date') . '</td>';
+if ($digiqualiEnabled) {
+    $out .= '<td>' . $langs->trans('Verdict') . '</td>';
+    $out .= '<td>' . $langs->trans('ControlDate') . '</td>';
+    $out .= '<td>' . $langs->trans('NextControlDate') . '</td>';
+}
+$out .= '<td class="right">' . $langs->trans('AmountTTC') . '</td>';
+$out .= '</tr>';
+
 if (!empty($rows)) {
     $out .= implode('', $rows);
+    // Grand total of the linked commercial documents (invoices + proposals)
+    $out .= '<tr class="liste_total">';
+    $out .= '<td class="right" colspan="' . ($colspanEmpty - 1) . '">' . $langs->trans('Total') . '</td>';
+    $out .= '<td class="right nowrap">' . price($totalAmount, 0, $langs, 1, -1, -1, $conf->currency) . '</td>';
+    $out .= '</tr>';
 } else {
     $out .= '<tr><td colspan="' . $colspanEmpty . '">' . $langs->trans('NoLinkedObjectsToPrint') . '</td></tr>';
 }
