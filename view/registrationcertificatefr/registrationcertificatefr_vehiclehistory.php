@@ -48,7 +48,7 @@ require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 global $conf, $db, $form, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['trips']);
 
 // Get parameters
 $id     = GETPOST('id', 'int');
@@ -68,6 +68,46 @@ require_once DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be
 $permissionToRead = $user->rights->dolicar->registrationcertificatefr->read;
 $permissiontoadd  = $user->rights->dolicar->registrationcertificatefr->write;
 saturne_check_access($permissionToRead);
+
+// AJAX: return the lines of an expense report for the vehicle-event form (issue #452)
+if ($action == 'get_expensereport_lines') {
+    require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
+
+    $fkExpenseReport = GETPOSTINT('fk_expensereport');
+    $linesData       = [];
+    if ($fkExpenseReport > 0) {
+        $expenseReport = new ExpenseReport($db);
+        if ($expenseReport->fetch($fkExpenseReport) > 0) {
+            $expenseReport->fetch_lines();
+            if (is_array($expenseReport->lines)) {
+                foreach ($expenseReport->lines as $line) {
+                    $typeLabel    = ($langs->transnoentities($line->type_fees_code) != $line->type_fees_code) ? $langs->transnoentities($line->type_fees_code) : ($line->type_fees_libelle ?: '');
+                    $projectLabel = $line->projet_title ?: $line->projet_ref;
+                    $parts        = [];
+                    if ($typeLabel !== '') {
+                        $parts[] = $typeLabel;
+                    }
+                    if (!empty($projectLabel)) {
+                        $parts[] = $projectLabel;
+                    }
+                    if (!empty($line->comments)) {
+                        $parts[] = dol_trunc($line->comments, 60);
+                    }
+                    $label = implode(' · ', $parts);
+                    $linesData[] = [
+                        'id'     => (int) $line->rowid,
+                        'label'  => $label,
+                        'amount' => price($line->total_ttc, 0, $langs, 1, -1, -1, $conf->currency),
+                    ];
+                }
+            }
+        }
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($linesData);
+    exit;
+}
 
 // Ensure parent event category exists and children are initialized
 $parentCategoryId = getDolGlobalInt('DOLICAR_VEHICLE_EVENT_CATEGORY_ID');
@@ -192,6 +232,15 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     $fkSupplierOrder = GETPOSTINT('event_fk_supplierorder');
     $fkSupplierInvoice = GETPOSTINT('event_fk_supplierinvoice');
     $fkControl       = GETPOSTINT('event_fk_control');
+    $expenseReportLineIds = array_values(array_filter(array_map('intval', (array) GETPOST('event_expensereport_lines', 'array'))));
+
+    // Event type is optional: when none is picked, fall back to the "Autre" category so the event still saves and shows in the history
+    if ($eventCategoryId <= 0 && $parentCategoryId > 0) {
+        $fallbackCat = new Categorie($db);
+        if ($fallbackCat->fetch(0, 'Autre', Categorie::TYPE_ACTIONCOMM) > 0 && (int) $fallbackCat->fk_parent === $parentCategoryId) {
+            $eventCategoryId = (int) $fallbackCat->id;
+        }
+    }
 
     $selectedCat = new Categorie($db);
     if ($eventCategoryId <= 0 || $selectedCat->fetch($eventCategoryId) <= 0 || (int) $selectedCat->fk_parent !== $parentCategoryId) {
@@ -226,8 +275,13 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
             if ($fkPropal > 0) {
                 $actionComm->add_object_linked('propal', $fkPropal);
             }
-            if ($fkExpenseReport > 0) {
+            // Link the whole expense report only when no specific lines were selected (issue #452)
+            if (empty($expenseReportLineIds) && $fkExpenseReport > 0) {
                 $actionComm->add_object_linked('expensereport', $fkExpenseReport);
+            }
+            // Otherwise link the selected expense report lines (core element_element table, no schema change)
+            foreach ($expenseReportLineIds as $expenseReportLineId) {
+                $actionComm->add_object_linked('expensereportline', $expenseReportLineId);
             }
             if ($fkSupplierOrder > 0) {
                 $actionComm->add_object_linked('order_supplier', $fkSupplierOrder);
