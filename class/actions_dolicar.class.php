@@ -265,9 +265,20 @@ class ActionsDoliCar
         if (strpos($parameters['context'], 'registrationcertificatefrcard') !== false && !empty($object->fk_lot)) {
             $publicLogbookUrl = dol_buildpath('/custom/dolicar/public/agenda/public_vehicle_logbook.php', 1) . '?id=' . (int) $object->fk_lot . '&entity=' . (int) $conf->entity;
             $this->resprints  = '<div class="refidno">';
+            $this->resprints .= img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
             $this->resprints .= '<a href="' . dol_escape_htmltag($publicLogbookUrl) . '" target="_blank" class="dolicar-public-logbook-link">';
             $this->resprints .= '<i class="fas fa-globe"></i> ' . $langs->transnoentities('PublicVehicleLogBook');
             $this->resprints .= '</a>';
+
+            // Link to the DigiQuali public quality-control interface for the linked vehicle lot
+            if (isModEnabled('digiquali')) {
+                $trackId          = base64_encode(json_encode(['type' => 'productlot', 'id' => (int) $object->fk_lot]));
+                $publicControlUrl = dol_buildpath('/custom/digiquali/public/control/public_control_history.php', 1) . '?track_id=' . urlencode($trackId) . '&entity=' . (int) $conf->entity;
+                $this->resprints .= '<a href="' . dol_escape_htmltag($publicControlUrl) . '" target="_blank" class="dolicar-public-control-link marginleftonly">';
+                $this->resprints .= '<i class="fas fa-clipboard-check"></i> ' . $langs->transnoentities('QualityControlInterface');
+                $this->resprints .= '</a>';
+            }
+
             $this->resprints .= '</div>';
         }
 
