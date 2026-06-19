@@ -97,6 +97,7 @@
 
       &--depart { background: #1571d3; color: #fff; }
       &--retour { background: #16a34a; color: #fff; }
+      &--probleme { background: #f59e0b; color: #fff; }
     }
 
     // ── Back button ──────────────────────────────────────────────────────
@@ -420,6 +421,15 @@
         }
       }
 
+      &--probleme {
+        border-color: #f59e0b;
+
+        .plv2-action-btn__icon {
+          background: #fef3c7;
+          color: #d97706;
+        }
+      }
+
       &--disabled {
         opacity: 0.4;
         cursor: not-allowed;
@@ -504,6 +514,15 @@
       }
 
       textarea { resize: vertical; }
+    }
+
+    .dolicar-problem-media-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+
+      .linked-medias { margin: 0; }
     }
 
     .plv2-form-row {

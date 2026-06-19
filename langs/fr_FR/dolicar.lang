@@ -112,6 +112,22 @@ FindLicencePlateInRepertory     = Rechercher une plaque d'immatriculation
 RegistrationPlate               = Immatriculation
 QualityControlInterface         = Interface de contrôle qualité
 
+# Public vehicle logbook - Signaler un problème
+ReportProblem                   = Signaler un problème
+ReportProblemSub                = Photo, commentaire, vocal
+DescribeProblem                 = Décrivez le problème rencontré
+PhotoAndVoiceMemo               = Photo et mémo vocal
+SendReport                      = Envoyer le signalement
+ProblemReportSent               = Signalement envoyé
+ProblemReportSentDesc           = Le responsable a été prévenu par email.
+ProblemReportedOnVehicle        = Problème signalé sur le véhicule %s
+ProblemReportEmailSubject       = Problème signalé - véhicule %s
+ProblemReportEmailIntro         = Un problème a été signalé sur le véhicule %s via le carnet de bord public.
+AccessVehicleSheet              = Accéder à la fiche du véhicule
+ProblemReportConfig             = Signalement de problème
+ProblemReportEmail              = Email du responsable
+ProblemReportEmailDesc          = Adresse à laquelle les signalements de problème du carnet de bord public sont envoyés. Si vide, l'email de la société est utilisé.
+
 # Fiels - Champs
 RegistrationNumber            = Numéro d'immatriculation (A)
 FirstRegistrationDate         = Date de la première immatriculation (B)

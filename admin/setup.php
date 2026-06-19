@@ -72,6 +72,13 @@ if ($action == 'update_warehouse') {
     $action = 'edit';
 }
 
+if ($action == 'update_problem_report') {
+    $email = GETPOST('DOLICAR_PROBLEM_REPORT_EMAIL', 'alphanohtml');
+    dolibarr_set_const($db, 'DOLICAR_PROBLEM_REPORT_EMAIL', $email, 'chaine', 0, '', $conf->entity);
+    setEventMessages($langs->trans('SetupSaved'), null, 'mesgs');
+    $action = 'edit';
+}
+
 if ($action == 'update') {
 	$error = 0;
 
@@ -208,6 +215,35 @@ print '</td>';
 print '<td class="center">';
 $formproduct = new FormProduct($db);
 print $formproduct->selectWarehouses(getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID'), 'DOLICAR_DEFAULT_WAREHOUSE_ID', '', 1, 0, 0, '', 0, 0, [], 'minwidth300');
+print '</td>';
+print '</tr>';
+print '</table>';
+
+print '<br><div class="center">';
+print '<input class="button button-save" type="submit" value="' . $langs->trans('Save') . '">';
+print '</div>';
+print '</form>';
+
+// Problem report email section (issue #443)
+print '<br>';
+print load_fiche_titre($langs->transnoentities('ProblemReportConfig'), '', '');
+
+print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="update_problem_report">';
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities('Parameters') . '</td>';
+print '<td class="center">' . $langs->transnoentities('Value') . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '<td class="nowraponall">';
+print $langs->transnoentities('ProblemReportEmail') . '<br><span class="opacitymedium">' . $langs->transnoentities('ProblemReportEmailDesc') . '</span>';
+print '</td>';
+print '<td class="center">';
+print '<input class="flat minwidth300" type="email" name="DOLICAR_PROBLEM_REPORT_EMAIL" value="' . dol_escape_htmltag(getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL')) . '" placeholder="responsable@example.com">';
 print '</td>';
 print '</tr>';
 print '</table>';
