@@ -29,7 +29,8 @@
     }
 }
 
-.dolicar-public-logbook-link {
+.dolicar-public-logbook-link,
+.dolicar-public-control-link {
     background: #e8f0fd;
     color: #1a5cdc !important;
     border-color: #c0d4f7;
@@ -38,19 +39,6 @@
         background: #d0e2fb;
         border-color: #90b8f0;
         color: #1a5cdc !important;
-    }
-}
-
-.dolicar-public-control-link {
-    // DigiQuali public interface palette ($color__public-secondary / $color__public-primary)
-    background: #bdceea;
-    color: #002475 !important;
-    border-color: #9db5da;
-
-    &:hover {
-        background: #aac1e3;
-        border-color: #002475;
-        color: #002475 !important;
     }
 }
 
