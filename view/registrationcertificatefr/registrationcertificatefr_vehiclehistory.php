@@ -81,7 +81,7 @@ if ($action == 'get_expensereport_lines') {
             $expenseReport->fetch_lines();
             if (is_array($expenseReport->lines)) {
                 foreach ($expenseReport->lines as $line) {
-                    $typeLabel    = ($langs->trans($line->type_fees_code) != $line->type_fees_code) ? $langs->trans($line->type_fees_code) : ($line->type_fees_libelle ?: '');
+                    $typeLabel    = ($langs->transnoentities($line->type_fees_code) != $line->type_fees_code) ? $langs->transnoentities($line->type_fees_code) : ($line->type_fees_libelle ?: '');
                     $projectLabel = $line->projet_title ?: $line->projet_ref;
                     $label        = dol_print_date($line->date, 'day');
                     if ($typeLabel !== '') {
