@@ -156,6 +156,10 @@ require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
 $problemUploadContext = 'dolicar_problem_report_' . $id;
 $problemUploadSubDir  = 'problem_report/' . saturne_get_upload_token($problemUploadContext);
 
+// Trip photo/voice comments (issue #446): per-session temp dir keyed by an upload token
+$tripUploadContext = 'dolicar_vehicle_trip_' . $id;
+$tripUploadSubDir  = 'vehicle_trip/' . saturne_get_upload_token($tripUploadContext);
+
 /*
  * Actions
  */
@@ -353,6 +357,22 @@ if (empty($resHook)) {
             $signatory->signature_url = generate_random_id(); // Mandatory: column has a UNIQUE index, must not stay empty
 
             $signatory->create($user);
+        }
+
+        // Attach the uploaded photo/voice comments to the trip event (issue #446)
+        $tripActionId = $actionCommID ?? (isset($lastUnfinishedActionComm[0]) ? $lastUnfinishedActionComm[0]->id : 0);
+        if ($tripActionId > 0) {
+            $tripMediaFiles = saturne_get_media_files('dolicar', $tripUploadSubDir);
+            if (!empty($tripMediaFiles)) {
+                $tripFinalDir = $conf->dolicar->dir_output . '/vehicle_trip/' . (int) $tripActionId;
+                if (!dol_is_dir($tripFinalDir)) {
+                    dol_mkdir($tripFinalDir);
+                }
+                foreach ($tripMediaFiles as $tripMediaFile) {
+                    dol_move($tripMediaFile['fullname'], $tripFinalDir . '/' . $tripMediaFile['name'], 0, 1, 0, 0);
+                }
+            }
+            saturne_invalidate_upload_token($tripUploadContext, 'dolicar', 'vehicle_trip');
         }
 
         header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . $entity . '&success=1');
@@ -622,6 +642,30 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
                                 </div>
                             <?php endif; ?>
                         <?php endif; ?>
+                        <?php
+                        $acMediaDir   = $conf->dolicar->dir_output . '/vehicle_trip/' . (int) $ac->id;
+                        $acPhotoCount = 0;
+                        $acAudioCount = 0;
+                        if (dol_is_dir($acMediaDir)) {
+                            foreach (dol_dir_list($acMediaDir, 'files', 0, '', '(\.meta|_preview.*\.png)$') as $acMediaFile) {
+                                if (image_format_supported($acMediaFile['name']) >= 0) {
+                                    $acPhotoCount++;
+                                } elseif (preg_match('/\.(wav|mp3|ogg|m4a)$/i', $acMediaFile['name'])) {
+                                    $acAudioCount++;
+                                }
+                            }
+                        }
+                        ?>
+                        <?php if ($acPhotoCount > 0 || $acAudioCount > 0) : ?>
+                            <div class="plv2-history-item__media">
+                                <?php if ($acPhotoCount > 0) : ?>
+                                    <span><i class="fas fa-camera"></i> <?php echo $acPhotoCount; ?></span>
+                                <?php endif; ?>
+                                <?php if ($acAudioCount > 0) : ?>
+                                    <span><i class="fas fa-microphone"></i> <?php echo $acAudioCount; ?></span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -749,6 +793,12 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
                     <textarea name="<?php echo $isDepart ? 'start_comment' : 'end_comment'; ?>"
                               rows="3"
                               placeholder="<?php echo $langs->trans('RemarksPlaceholder'); ?>"></textarea>
+                </div>
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('PhotoAndVoiceMemo'); ?></label>
+                    <div class="dolicar-trip-media-row">
+                        <?php print saturne_render_media_block('dolicar', $tripUploadSubDir, 'trip_', '', ['show_photo' => true, 'show_audio' => true, 'show_file' => false]); ?>
+                    </div>
                 </div>
             </div>
 
