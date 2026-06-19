@@ -233,6 +233,14 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     $fkControl       = GETPOSTINT('event_fk_control');
     $expenseReportLineIds = array_values(array_filter(array_map('intval', (array) GETPOST('event_expensereport_lines', 'array'))));
 
+    // Event type is optional: when none is picked, fall back to the "Autre" category so the event still saves and shows in the history
+    if ($eventCategoryId <= 0 && $parentCategoryId > 0) {
+        $fallbackCat = new Categorie($db);
+        if ($fallbackCat->fetch(0, 'Autre', Categorie::TYPE_ACTIONCOMM) > 0 && (int) $fallbackCat->fk_parent === $parentCategoryId) {
+            $eventCategoryId = (int) $fallbackCat->id;
+        }
+    }
+
     $selectedCat = new Categorie($db);
     if ($eventCategoryId <= 0 || $selectedCat->fetch($eventCategoryId) <= 0 || (int) $selectedCat->fk_parent !== $parentCategoryId) {
         setEventMessages($langs->transnoentities('VehicleEventType') . ' ' . $langs->transnoentities('NotValid'), null, 'errors');

@@ -58,7 +58,7 @@ if (!empty($permissiontoadd)) {
     $out .= '<table class="border centpercent tableforfield">';
 
     $out .= '<tr>';
-    $out .= '<td class="titlefield fieldrequired">' . $langs->transnoentities('VehicleEventType') . '</td>';
+    $out .= '<td class="titlefield">' . $langs->transnoentities('VehicleEventType') . '</td>';
     $out .= '<td>' . Form::selectarray('event_category_id', $catLabels, GETPOSTINT('event_category_id'), 1, 0, 0, '', 0, 0, 0, '', 'minwidth200') . '</td>';
     $out .= '</tr>';
 
