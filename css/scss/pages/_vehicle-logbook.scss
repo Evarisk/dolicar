@@ -532,11 +532,19 @@
         margin-bottom: 0;
       }
 
-      .saturne-media-btn {
+      .saturne-media-btn,
+      .saturne-upload-label {
         width: 48px;
         min-width: 48px;
         height: 48px;
+        margin: 0;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 10px;
+
+        i { font-size: 18px; }
       }
     }
 
