@@ -481,14 +481,9 @@
 
       &:last-child { margin-bottom: 0; }
 
+      // Field labels hidden — only the global card titles (h3) are kept
       label {
-        display: block;
-        font-size: 10px;
-        color: #5b6470;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        margin-bottom: 2px;
+        display: none;
       }
 
       input[type="text"],
