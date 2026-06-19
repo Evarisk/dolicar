@@ -595,6 +595,7 @@
       background: #fff;
       border: 1px solid #d4d8de;
       border-radius: 8px;
+      margin: 0; // kill pico.css default button margin-bottom (extra space under the fuel row)
       padding: 5px 3px;
       cursor: pointer;
       font-family: inherit;
@@ -668,7 +669,7 @@
       border: 2px dashed #d4d8de;
       border-radius: 10px;
       background: #fafbfc;
-      min-height: 55px;
+      min-height: 120px;
       display: flex;
       align-items: center;
       justify-content: center;
