@@ -59,12 +59,13 @@ window.dolicar.linkedObjects.init = function() {
  * @return {void}
  */
 window.dolicar.linkedObjects.event = function() {
-  $(document).on('input', '.dolicar-linked-objects-search', window.dolicar.linkedObjects.filter);
+  $(document).on('input', '.dolicar-linked-objects-filter', window.dolicar.linkedObjects.filter);
   $(document).on('change', '.dolicar-linked-objects-verdict-filter', window.dolicar.linkedObjects.filter);
 };
 
 /**
- * Filter the linked objects table rows from the search text and the verdict select
+ * Filter the linked objects table rows from the per-column search inputs and the verdict select.
+ * A row is shown only when every active filter matches its own column (native Dolibarr list behaviour).
  *
  * @memberof DoliCar_LinkedObjects
  *
@@ -74,14 +75,30 @@ window.dolicar.linkedObjects.event = function() {
  * @return {void}
  */
 window.dolicar.linkedObjects.filter = function() {
-  var search  = ($('.dolicar-linked-objects-search').val() || '').toLowerCase();
-  var verdict = $('.dolicar-linked-objects-verdict-filter').val() || '';
+  var $table         = $('.dolicar-linked-objects-table');
+  var $textFilters   = $table.find('.dolicar-linked-objects-filter');
+  var verdict        = $table.find('.dolicar-linked-objects-verdict-filter').val() || '';
 
-  $('.dolicar-linked-objects-table .dolicar-linked-object-row').each(function() {
-    var $row         = $(this);
-    var textMatch    = $row.text().toLowerCase().indexOf(search) !== -1;
-    var verdictMatch = verdict === '' || String($row.attr('data-verdict')) === verdict;
+  $table.find('.dolicar-linked-object-row').each(function() {
+    var $row = $(this);
+    var show = true;
 
-    $row.toggle(textMatch && verdictMatch);
+    $textFilters.each(function() {
+      var value = ($(this).val() || '').toLowerCase();
+      if (value === '') {
+        return;
+      }
+      var column   = parseInt($(this).attr('data-col'), 10);
+      var cellText = $row.children('td').eq(column).text().toLowerCase();
+      if (cellText.indexOf(value) === -1) {
+        show = false;
+      }
+    });
+
+    if (show && verdict !== '' && String($row.attr('data-verdict')) !== verdict) {
+      show = false;
+    }
+
+    $row.toggle(show);
   });
 };

@@ -182,42 +182,58 @@ foreach ($commercialDocSources as $elementType => $source) {
 
 $out = load_fiche_titre($langs->transnoentities('LinkedObjects'), '', 'dolicar_color@dolicar');
 
-// Search / filter toolbar (client-side filtering handled by js/modules/linkedObjects.js)
+// Column definitions: keep the header, the per-column search row and the data cells aligned
+$columns = [];
+$columns[] = ['label' => $langs->trans('ObjectType')];
+$columns[] = ['label' => $langs->trans('Object')];
+if ($digiqualiEnabled) {
+    $columns[] = ['label' => $langs->trans('Sheet')];
+}
+$columns[] = ['label' => $langs->trans('Mileage')];
+$columns[] = ['label' => $langs->trans('Date')];
+if ($digiqualiEnabled) {
+    $columns[] = ['label' => $langs->trans('Verdict'), 'filter' => 'verdict'];
+    $columns[] = ['label' => $langs->trans('ControlDate')];
+    $columns[] = ['label' => $langs->trans('NextControlDate')];
+}
+$columns[] = ['label' => $langs->trans('AmountTTC'), 'align' => 'right'];
+
+$out .= '<table class="noborder centpercent dolicar-linked-objects-table">';
+
+// Header row
+$out .= '<tr class="liste_titre">';
+foreach ($columns as $column) {
+    $out .= '<td' . (($column['align'] ?? '') === 'right' ? ' class="right"' : '') . '>' . $column['label'] . '</td>';
+}
+$out .= '</tr>';
+
+// Per-column search row (native Dolibarr style, client-side filtering handled by js/modules/linkedObjects.js)
 if (!empty($rows)) {
-    $out .= '<div class="dolicar-linked-objects-toolbar">';
-    $out .= '<input type="text" class="dolicar-linked-objects-search" placeholder="' . dol_escape_htmltag($langs->trans('Search')) . '">';
+    $verdictValues = [];
     if ($digiqualiEnabled) {
         $control       = new Control($db);
         $verdictValues = $control->fields['verdict']['arrayofkeyval'] ?? [];
-        $out .= '<select class="dolicar-linked-objects-verdict-filter flat">';
-        $out .= '<option value="">' . $langs->trans('Verdict') . '</option>';
-        foreach ($verdictValues as $verdictKey => $verdictLabel) {
-            $out .= '<option value="' . (int) $verdictKey . '">' . $langs->trans($verdictLabel) . '</option>';
-        }
-        if (!isset($verdictValues[0])) {
-            $out .= '<option value="0">N/A</option>';
-        }
-        $out .= '</select>';
     }
-    $out .= '</div>';
+    $out .= '<tr class="liste_titre">';
+    foreach ($columns as $colIndex => $column) {
+        $out .= '<td' . (($column['align'] ?? '') === 'right' ? ' class="right"' : '') . '>';
+        if (($column['filter'] ?? '') === 'verdict') {
+            $out .= '<select class="dolicar-linked-objects-verdict-filter flat maxwidth100">';
+            $out .= '<option value="">&nbsp;</option>';
+            foreach ($verdictValues as $verdictKey => $verdictLabel) {
+                $out .= '<option value="' . (int) $verdictKey . '">' . $langs->trans($verdictLabel) . '</option>';
+            }
+            if (!isset($verdictValues[0])) {
+                $out .= '<option value="0">N/A</option>';
+            }
+            $out .= '</select>';
+        } else {
+            $out .= '<input type="text" class="dolicar-linked-objects-filter flat maxwidth100" data-col="' . $colIndex . '">';
+        }
+        $out .= '</td>';
+    }
+    $out .= '</tr>';
 }
-
-$out .= '<table class="noborder centpercent dolicar-linked-objects-table">';
-$out .= '<tr class="liste_titre">';
-$out .= '<td>' . $langs->trans('ObjectType') . '</td>';
-$out .= '<td>' . $langs->trans('Object') . '</td>';
-if ($digiqualiEnabled) {
-    $out .= '<td>' . $langs->trans('Sheet') . '</td>';
-}
-$out .= '<td>' . $langs->trans('Mileage') . '</td>';
-$out .= '<td>' . $langs->trans('Date') . '</td>';
-if ($digiqualiEnabled) {
-    $out .= '<td>' . $langs->trans('Verdict') . '</td>';
-    $out .= '<td>' . $langs->trans('ControlDate') . '</td>';
-    $out .= '<td>' . $langs->trans('NextControlDate') . '</td>';
-}
-$out .= '<td class="right">' . $langs->trans('AmountTTC') . '</td>';
-$out .= '</tr>';
 
 if (!empty($rows)) {
     $out .= implode('', $rows);
