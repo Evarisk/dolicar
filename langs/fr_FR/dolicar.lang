@@ -114,6 +114,7 @@ QualityControlInterface         = Interface de contrôle qualité
 
 # Public vehicle logbook - Signaler un problème
 ReportProblem                   = Signaler un problème
+ReportedProblem                 = Problème signalé
 ReportProblemSub                = Photo, commentaire, vocal
 DescribeProblem                 = Décrivez le problème rencontré
 PhotoAndVoiceMemo               = Photo et mémo vocal
