@@ -42,14 +42,15 @@
 }
 
 .dolicar-public-control-link {
-    background: #fbe9ec;
-    color: #b03651 !important;
-    border-color: #f0c2c9;
+    // DigiQuali public interface palette ($color__public-secondary / $color__public-primary)
+    background: #bdceea;
+    color: #002475 !important;
+    border-color: #9db5da;
 
     &:hover {
-        background: #f6d6dc;
-        border-color: #e3a3ae;
-        color: #b03651 !important;
+        background: #aac1e3;
+        border-color: #002475;
+        color: #002475 !important;
     }
 }
 
