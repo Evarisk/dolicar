@@ -120,6 +120,7 @@ $iconMap = [
     'Accident'           => 'fa-exclamation-triangle',
     'Autre'              => 'fa-circle',
 ];
+$iconMap[$langs->transnoentities('ReportedProblem')] = 'fa-exclamation-triangle';
 
 // Load child categories and build display structures for the TPL
 $catById   = [];
@@ -153,16 +154,23 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
 
     if (is_array($allEvents)) {
         foreach ($allEvents as $evt) {
+            $matched   = false;
             $evtCatIds = $catHelper->containing($evt->id, Categorie::TYPE_ACTIONCOMM, 'id');
-            if (!is_array($evtCatIds)) {
-                continue;
-            }
-            foreach ($evtCatIds as $evtCatId) {
-                if (isset($catById[(int) $evtCatId])) {
-                    $eventsList[]               = $evt;
-                    $evtCatById[(int) $evt->id] = $catById[(int) $evtCatId];
-                    break;
+            if (is_array($evtCatIds)) {
+                foreach ($evtCatIds as $evtCatId) {
+                    if (isset($catById[(int) $evtCatId])) {
+                        $eventsList[]               = $evt;
+                        $evtCatById[(int) $evt->id] = $catById[(int) $evtCatId];
+                        $matched                    = true;
+                        break;
+                    }
                 }
+            }
+
+            // Problem reports from the public logbook carry no DoliCar category — surface them with a dedicated badge
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_REPORT_PROBLEM') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('ReportedProblem'), 'color' => 'F59E0B'];
             }
         }
     }

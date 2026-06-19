@@ -151,6 +151,11 @@ if ($isModEnabledDigiquali) {
     }
 }
 
+// Problem report (issue #443): photo/voice are uploaded to a per-session temp dir keyed by an upload token
+require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
+$problemUploadContext = 'dolicar_problem_report_' . $id;
+$problemUploadSubDir  = 'problem_report/' . saturne_get_upload_token($problemUploadContext);
+
 /*
  * Actions
  */
@@ -162,6 +167,119 @@ if ($resHook < 0) {
 }
 
 if (empty($resHook)) {
+    // Problem report — photo upload posted by the Saturne media block (issue #443)
+    if ($action == 'uploadPhoto' && !empty($conf->global->MAIN_UPLOAD_DOC)) {
+        $uploadSubDir = GETPOST('sub_dir', 'alpha');
+        if (!empty($uploadSubDir) && strpos($uploadSubDir, '..') === false) {
+            $uploadDir = $conf->dolicar->dir_output . '/' . $uploadSubDir;
+            if (!dol_is_dir($uploadDir)) {
+                dol_mkdir($uploadDir);
+            }
+
+            $invalidFile   = false;
+            $uploadedFiles = isset($_FILES['userfile']) ? $_FILES['userfile'] : [];
+            if (!empty($uploadedFiles['tmp_name'])) {
+                $tmpNames = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
+                foreach ($tmpNames as $tmpName) {
+                    if (empty($tmpName)) {
+                        continue;
+                    }
+                    $finfo    = new finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($tmpName);
+                    if (strpos($mimeType, 'image/') !== 0) {
+                        $invalidFile = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$invalidFile) {
+                dol_add_file_process($uploadDir, 0, 1, 'userfile', '', null, '', 1);
+            }
+        }
+    }
+
+    // Problem report — voice memo upload posted by the Saturne media block (issue #443)
+    if ($action == 'add_audio') {
+        $uploadSubDir = GETPOST('sub_dir', 'alpha');
+        if (!empty($_FILES['audio']['tmp_name']) && !empty($uploadSubDir) && strpos($uploadSubDir, '..') === false) {
+            $uploadDir = $conf->dolicar->dir_output . '/' . $uploadSubDir;
+            if (!dol_is_dir($uploadDir)) {
+                dol_mkdir($uploadDir);
+            }
+            $destFile = $uploadDir . '/' . dol_print_date(dol_now(), 'dayhourlog') . '_audio.wav';
+            move_uploaded_file($_FILES['audio']['tmp_name'], $destFile);
+        }
+    }
+
+    // Problem report — final submission: create the event, attach the media and email the manager (issue #443)
+    if ($action == 'report_problem') {
+        $comment = GETPOST('problem_comment', 'restricthtml');
+
+        $photoFiles = saturne_get_media_files('dolicar', $problemUploadSubDir, '', '', ['type' => 'image']);
+        $audioFiles = saturne_get_media_files('dolicar', $problemUploadSubDir, '', '', ['type' => 'audio']);
+
+        // Trace the problem as an event on the vehicle lot (visible in the vehicle history)
+        $problemAction               = new ActionComm($db);
+        $problemAction->elementtype  = $productLot->element;
+        $problemAction->type_code    = 'AC_OTH';
+        $problemAction->code         = 'AC_' . strtoupper($productLot->element) . '_REPORT_PROBLEM';
+        $problemAction->fk_element   = $productLot->id;
+        $problemAction->datep        = dol_now();
+        $problemAction->percentage   = -1;
+        $problemAction->userownerid  = 0;
+        $problemAction->label        = $langs->transnoentities('ProblemReportedOnVehicle', $registrationCertificateFR->a_registration_number);
+        $problemAction->note_private = $comment;
+        $problemActionID              = $problemAction->create($user);
+
+        // Move the uploaded media from the temp dir to a permanent location keyed by the event
+        $finalDir = $conf->dolicar->dir_output . '/problem_report/' . ($problemActionID > 0 ? (int) $problemActionID : dol_print_date(dol_now(), 'dayhourlog'));
+        if (!dol_is_dir($finalDir)) {
+            dol_mkdir($finalDir);
+        }
+        $attachmentPaths = [];
+        $attachmentNames = [];
+        $attachmentMimes = [];
+        foreach (array_merge($photoFiles, $audioFiles) as $mediaFile) {
+            $destPath = $finalDir . '/' . $mediaFile['name'];
+            if (dol_move($mediaFile['fullname'], $destPath, 0, 1, 0, 0)) {
+                $attachmentPaths[] = $destPath;
+                $attachmentNames[] = $mediaFile['name'];
+                $attachmentMimes[] = dol_mimetype($mediaFile['name']);
+            }
+        }
+
+        // Email the manager
+        require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
+        $sendTo = getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL');
+        if (empty($sendTo)) {
+            $sendTo = getDolGlobalString('MAIN_INFO_SOCIETE_MAIL');
+        }
+        if (!empty($sendTo)) {
+            $from        = getDolGlobalString('MAIN_MAIL_EMAIL_FROM');
+            $vehicleLink = dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 2) . '?id=' . (int) $registrationCertificateFR->id;
+            $subject     = $langs->transnoentities('ProblemReportEmailSubject', $registrationCertificateFR->a_registration_number);
+
+            $body  = '<p>' . $langs->transnoentities('ProblemReportEmailIntro', $registrationCertificateFR->a_registration_number) . '</p>';
+            $body .= '<ul>';
+            $body .= '<li>' . $langs->transnoentities('RegistrationPlate') . ' : <strong>' . dol_escape_htmltag($registrationCertificateFR->a_registration_number) . '</strong></li>';
+            $body .= '<li>' . $langs->transnoentities('Vehicle') . ' : ' . dol_escape_htmltag($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model) . '</li>';
+            $body .= '<li>' . $langs->transnoentities('Date') . ' : ' . dol_print_date(dol_now(), 'dayhour') . '</li>';
+            $body .= '<li>' . $langs->transnoentities('Comment') . ' : ' . dol_escape_htmltag($comment) . '</li>';
+            $body .= '</ul>';
+            $body .= '<p><a href="' . $vehicleLink . '">' . $langs->transnoentities('AccessVehicleSheet') . '</a></p>';
+
+            $mailFile = new CMailFile($subject, $sendTo, $from, $body, $attachmentPaths, $attachmentMimes, $attachmentNames, '', '', 0, 1);
+            $mailFile->sendfile();
+        }
+
+        // Clean the temp token + dir
+        saturne_invalidate_upload_token($problemUploadContext, 'dolicar', 'problem_report');
+
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . $entity . '&success=1&problem=1');
+        exit;
+    }
+
     if ($action == 'get_registration_number') {
         $registrationNumber = GETPOST('registration_number');
         header('Location: ' . $_SERVER['PHP_SELF'] . '?registration_number=' . $registrationNumber . '&entity=' . $entity);
@@ -259,7 +377,11 @@ if ($success) {
     $showScreen  = 'success';
     $successType = $isVehicleOut ? 'depart' : 'retour';
 } elseif ($id > 0 && $registrationCertificateFR->id > 0) {
-    $showScreen = in_array($actionType, ['depart', 'retour']) ? 'form' : 'vehicle';
+    if ($actionType === 'probleme') {
+        $showScreen = 'problem';
+    } else {
+        $showScreen = in_array($actionType, ['depart', 'retour']) ? 'form' : 'vehicle';
+    }
 } else {
     $showScreen = 'search';
 }
@@ -420,6 +542,12 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
                 <div class="plv2-action-btn__icon"><i class="fas fa-sign-in-alt"></i></div>
                 <div class="plv2-action-btn__label"><?php echo $langs->trans('ReturnVehicle'); ?></div>
                 <div class="plv2-action-btn__sub"><?php echo $langs->trans('DeclareReturn'); ?></div>
+            </a>
+            <a href="<?php echo $vehicleUrl . '&action_type=probleme'; ?>"
+               class="plv2-action-btn plv2-action-btn--probleme">
+                <div class="plv2-action-btn__icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="plv2-action-btn__label"><?php echo $langs->trans('ReportProblem'); ?></div>
+                <div class="plv2-action-btn__sub"><?php echo $langs->trans('ReportProblemSub'); ?></div>
             </a>
         </div>
 
@@ -649,37 +777,95 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
         </div>
     </form>
 
+<?php elseif ($showScreen === 'problem') : ?>
+    <!-- ===== SCREEN : signaler un problème ===== -->
+    <div class="plv2-header plv2-header--dark">
+        <div class="plv2-header__top">
+            <a href="<?php echo $vehicleUrl; ?>" class="plv2-back-btn"><i class="fas fa-arrow-left"></i></a>
+            <div class="plv2-header__logo">
+                <img src="<?php echo $logoUrl; ?>" alt="DoliCar" class="plv2-header__logo-img">
+                <div class="plv2-header__logo-text">
+                    <span class="plv2-action-badge plv2-action-badge--probleme"><?php echo $langs->trans('ReportProblem'); ?></span>
+                    <small><?php echo dol_escape_htmltag($registrationCertificateFR->a_registration_number . ' · ' . $registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model); ?></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="public-vehicle-problem-form" method="POST" action="<?php echo $vehicleUrl; ?>">
+        <input type="hidden" name="token" value="<?php echo newToken(); ?>">
+        <input type="hidden" name="action" value="report_problem">
+
+        <div class="plv2-form">
+            <div class="plv2-card">
+                <div class="plv2-form-group">
+                    <label for="problem_comment"><?php echo $langs->trans('Comment'); ?></label>
+                    <textarea id="problem_comment" name="problem_comment" rows="4" placeholder="<?php echo dol_escape_htmltag($langs->trans('DescribeProblem')); ?>"></textarea>
+                </div>
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('PhotoAndVoiceMemo'); ?></label>
+                    <div class="dolicar-problem-media-row">
+                        <?php print saturne_render_media_block('dolicar', $problemUploadSubDir, 'problem_', '', ['show_photo' => true, 'show_audio' => true, 'show_file' => false]); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="plv2-submit-area">
+            <button type="submit" class="plv2-btn plv2-btn--full plv2-btn--primary">
+                <i class="fas fa-paper-plane"></i>
+                <?php echo $langs->trans('SendReport'); ?>
+            </button>
+        </div>
+    </form>
+
 <?php elseif ($showScreen === 'success') : ?>
     <!-- ===== SCREEN 4 : confirmation ===== -->
     <?php
+    $problemSuccess  = GETPOSTINT('problem');
     $successIsDepart = $isVehicleOut;
     $successAction   = $successIsDepart ? ($lastUnfinishedActionComm[0] ?? null) : ($lastActionComm[0] ?? null);
     ?>
     <div class="plv2-success">
-        <div class="plv2-success__icon <?php echo $successIsDepart ? 'plv2-success__icon--blue' : 'plv2-success__icon--green'; ?>">
-            <i class="fas fa-check"></i>
-        </div>
-        <h2><?php echo $successIsDepart ? $langs->trans('DepartureRecorded') : $langs->trans('ReturnRecorded'); ?></h2>
-        <p><?php echo $langs->trans('ActionCommCreatedInAgenda'); ?></p>
+        <?php if ($problemSuccess) : ?>
+            <div class="plv2-success__icon plv2-success__icon--green">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2><?php echo $langs->trans('ProblemReportSent'); ?></h2>
+            <p><?php echo $langs->trans('ProblemReportSentDesc'); ?></p>
 
-        <div class="plv2-success__recap">
-            <div class="plv2-success__row">
-                <span><?php echo $langs->trans('Vehicle'); ?></span>
-                <span><?php echo dol_escape_htmltag($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model . ' (' . $registrationCertificateFR->a_registration_number . ')'); ?></span>
-            </div>
-            <div class="plv2-success__row">
-                <span><?php echo $langs->trans('Type'); ?></span>
-                <span class="<?php echo $successIsDepart ? 'plv2-text--blue' : 'plv2-text--green'; ?>">
-                    <?php echo $successIsDepart ? $langs->trans('Departure') : $langs->trans('Return'); ?>
-                </span>
-            </div>
-            <?php if (!empty($successAction)) : ?>
+            <div class="plv2-success__recap">
                 <div class="plv2-success__row">
-                    <span><?php echo $langs->trans('Date'); ?></span>
-                    <span><?php echo dol_print_date($successIsDepart ? $successAction->datep : $successAction->datef, 'dayhour'); ?></span>
+                    <span><?php echo $langs->trans('Vehicle'); ?></span>
+                    <span><?php echo dol_escape_htmltag($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model . ' (' . $registrationCertificateFR->a_registration_number . ')'); ?></span>
                 </div>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php else : ?>
+            <div class="plv2-success__icon <?php echo $successIsDepart ? 'plv2-success__icon--blue' : 'plv2-success__icon--green'; ?>">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2><?php echo $successIsDepart ? $langs->trans('DepartureRecorded') : $langs->trans('ReturnRecorded'); ?></h2>
+            <p><?php echo $langs->trans('ActionCommCreatedInAgenda'); ?></p>
+
+            <div class="plv2-success__recap">
+                <div class="plv2-success__row">
+                    <span><?php echo $langs->trans('Vehicle'); ?></span>
+                    <span><?php echo dol_escape_htmltag($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model . ' (' . $registrationCertificateFR->a_registration_number . ')'); ?></span>
+                </div>
+                <div class="plv2-success__row">
+                    <span><?php echo $langs->trans('Type'); ?></span>
+                    <span class="<?php echo $successIsDepart ? 'plv2-text--blue' : 'plv2-text--green'; ?>">
+                        <?php echo $successIsDepart ? $langs->trans('Departure') : $langs->trans('Return'); ?>
+                    </span>
+                </div>
+                <?php if (!empty($successAction)) : ?>
+                    <div class="plv2-success__row">
+                        <span><?php echo $langs->trans('Date'); ?></span>
+                        <span><?php echo dol_print_date($successIsDepart ? $successAction->datep : $successAction->datef, 'dayhour'); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
 
         <div class="plv2-success__actions">
             <a href="<?php echo $vehicleUrl; ?>" class="plv2-btn plv2-btn--primary plv2-btn--full">
