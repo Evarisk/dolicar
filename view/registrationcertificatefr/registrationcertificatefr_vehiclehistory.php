@@ -83,16 +83,17 @@ if ($action == 'get_expensereport_lines') {
                 foreach ($expenseReport->lines as $line) {
                     $typeLabel    = ($langs->transnoentities($line->type_fees_code) != $line->type_fees_code) ? $langs->transnoentities($line->type_fees_code) : ($line->type_fees_libelle ?: '');
                     $projectLabel = $line->projet_title ?: $line->projet_ref;
-                    $label        = dol_print_date($line->date, 'day');
+                    $parts        = [];
                     if ($typeLabel !== '') {
-                        $label .= ' · ' . $typeLabel;
+                        $parts[] = $typeLabel;
                     }
                     if (!empty($projectLabel)) {
-                        $label .= ' · ' . $projectLabel;
+                        $parts[] = $projectLabel;
                     }
                     if (!empty($line->comments)) {
-                        $label .= ' · ' . dol_trunc($line->comments, 40);
+                        $parts[] = dol_trunc($line->comments, 60);
                     }
+                    $label = implode(' · ', $parts);
                     $linesData[] = [
                         'id'     => (int) $line->rowid,
                         'label'  => $label,
