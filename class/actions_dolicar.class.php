@@ -432,6 +432,47 @@ class ActionsDoliCar
     }
 
     /**
+     * Overloading the printPublicControlLinkedObjectIdentity function : replacing the parent's function with the one below
+     *
+     * Replaces the linked object identity block of the public control card to show the vehicle
+     * registration plate prominently, keeping the lot/serial (VIN) as a secondary line.
+     *
+     * @param  array  $parameters Hook metadata (context, etc...)
+     * @param  object $object     Linked object (productlot expected)
+     * @return int                0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function printPublicControlLinkedObjectIdentity(array $parameters, $object): int
+    {
+        global $langs;
+
+        if (strpos($parameters['context'], 'publiccontrol') === false || !is_object($object) || $object->element != 'productlot') {
+            return 0;
+        }
+
+        $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+        $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 1, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
+        if (!is_array($registrationCertificates) || empty($registrationCertificates)) {
+            return 0;
+        }
+        $registrationCertificateFr = reset($registrationCertificates);
+
+        $langs->load('dolicar@dolicar');
+
+        $lotTitle = $parameters['linkedObjectInfoArray']['linkedObject']['title'] ?? '';
+        $lotValue = $parameters['linkedObjectInfoArray']['linkedObject']['name_field'] ?? '';
+
+        $out  = '<div class="information-type">' . $langs->transnoentities('RegistrationPlate') . '</div>';
+        $out .= '<div class="information-label size-l">' . dol_escape_htmltag($registrationCertificateFr->ref) . '</div>';
+        $out .= '<div class="information-type">' . $lotTitle . '</div>';
+        $out .= '<div class="information-label">' . $lotValue . '</div>';
+
+        $this->resprints = $out;
+
+        return 1; // replace standard code
+    }
+
+    /**
      * Overloading the saturneSetVarsFromFetchObj function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadata (context, etc...)
@@ -446,7 +487,7 @@ class ActionsDoliCar
             $conf->cache['control']  = null;
             $conf->cache['controls'] = [];
             $object->fetchObjectLinked(null, '', '', 'digiquali_control');
-            if (!is_array($object->linkedObjects['digiquali_control']) || empty($object->linkedObjects['digiquali_control'])) {
+            if (empty($object->linkedObjects['digiquali_control']) || !is_array($object->linkedObjects['digiquali_control'])) {
                 return 0;
             }
 
