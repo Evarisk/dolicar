@@ -249,21 +249,26 @@ if (!empty($eventsList)) {
                 $typeLabel    = ($langs->transnoentities($erLine->type_fees_code) != $erLine->type_fees_code) ? $langs->transnoentities($erLine->type_fees_code) : ($erLine->type_fees_libelle ?: '');
                 $projectLabel = $erLine->projet_title ?: $erLine->projet_ref;
 
-                $linkedHtml .= '<div class="inline-block">';
-                if ($parentEr->id > 0) {
-                    $linkedHtml .= $parentEr->getNomUrl(1) . ' &mdash; ';
-                }
-                $linkedHtml .= dol_print_date($erLine->date, 'day');
+                $lineParts = [];
                 if (!empty($typeLabel)) {
-                    $linkedHtml .= ' &middot; ' . dol_escape_htmltag($typeLabel);
+                    $lineParts[] = dol_escape_htmltag($typeLabel);
                 }
                 if (!empty($projectLabel)) {
-                    $linkedHtml .= ' &middot; ' . dol_escape_htmltag($projectLabel);
+                    $lineParts[] = dol_escape_htmltag($projectLabel);
                 }
-                $linkedHtml .= ' &mdash; <strong>' . price($erLine->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($erLine->comments)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($erLine->comments, 80)) . '</span>';
+                    $lineParts[] = '<span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($erLine->comments, 80)) . '</span>';
                 }
+
+                $linkedHtml .= '<div class="inline-block">';
+                if ($parentEr->id > 0) {
+                    $linkedHtml .= $parentEr->getNomUrl(1);
+                    if (!empty($lineParts)) {
+                        $linkedHtml .= ' &mdash; ';
+                    }
+                }
+                $linkedHtml .= implode(' &middot; ', $lineParts);
+                $linkedHtml .= ' &mdash; <strong>' . price($erLine->total_ttc) . ' ' . $conf->currency . '</strong>';
                 $linkedHtml .= '</div><br>';
             }
         }
