@@ -35,7 +35,7 @@
     .plv2-header {
       background: linear-gradient(135deg, #1d2937, #0f1822);
       color: #fff;
-      padding: 14px 20px 16px;
+      padding: 10px 16px;
       position: sticky;
       top: 0;
       z-index: 5;
@@ -122,24 +122,24 @@
     }
 
     .plv2-form {
-      padding: 16px;
-      padding-bottom: 80px; // room for sticky submit
+      padding: 10px;
+      padding-bottom: 70px; // room for sticky submit
     }
 
     // ── Card ─────────────────────────────────────────────────────────────
     .plv2-card {
       background: #fff;
-      border-radius: 14px;
-      padding: 16px;
+      border-radius: 12px;
+      padding: 10px 12px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-      margin-bottom: 14px;
+      margin-bottom: 8px;
 
       h3 {
         font-size: 13px;
         color: #1d2937;
         font-weight: 600;
-        margin: 0 0 14px;
-        padding-bottom: 10px;
+        margin: 0 0 8px;
+        padding-bottom: 6px;
         border-bottom: 1px solid #eef0f3;
         display: flex;
         align-items: center;
@@ -477,7 +477,7 @@
 
     // ── Form elements ─────────────────────────────────────────────────────
     .plv2-form-group {
-      margin-bottom: 14px;
+      margin-bottom: 8px;
 
       &:last-child { margin-bottom: 0; }
 
@@ -488,7 +488,7 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.3px;
-        margin-bottom: 6px;
+        margin-bottom: 3px;
       }
 
       input[type="text"],
@@ -497,7 +497,7 @@
       select,
       textarea {
         width: 100%;
-        padding: 12px 14px;
+        padding: 8px 10px;
         border: 1px solid #d4d8de;
         border-radius: 10px;
         font-size: 15px;
@@ -671,7 +671,7 @@
       border: 2px dashed #d4d8de;
       border-radius: 10px;
       background: #fafbfc;
-      min-height: 130px;
+      min-height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
