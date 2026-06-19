@@ -1,11 +1,16 @@
-.dolicar-public-logbook-link {
+.dolicar-banner-links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.dolicar-banner-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     padding: 2px 8px;
-    background: #e8f0fd;
-    color: #1a5cdc !important;
-    border: 1px solid #c0d4f7;
+    border: 1px solid transparent;
     border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
@@ -13,13 +18,38 @@
     vertical-align: middle;
     line-height: 1.6;
 
-    i { font-size: 10px; }
+    .dolicar-banner-logo {
+        height: 13px;
+        width: auto;
+        vertical-align: middle;
+    }
+
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+.dolicar-public-logbook-link {
+    background: #e8f0fd;
+    color: #1a5cdc !important;
+    border-color: #c0d4f7;
 
     &:hover {
         background: #d0e2fb;
         border-color: #90b8f0;
-        text-decoration: none;
         color: #1a5cdc !important;
+    }
+}
+
+.dolicar-public-control-link {
+    background: #fbe9ec;
+    color: #b03651 !important;
+    border-color: #f0c2c9;
+
+    &:hover {
+        background: #f6d6dc;
+        border-color: #e3a3ae;
+        color: #b03651 !important;
     }
 }
 
