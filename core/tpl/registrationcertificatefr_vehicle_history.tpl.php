@@ -237,8 +237,7 @@ if (!empty($eventsList)) {
                 }
                 $parentEr = new ExpenseReport($db);
                 $parentEr->fetch($erLine->fk_expensereport);
-                $rawTypeLabel = $erLine->type_fees_libelle ?: ($erLine->type_fees_code ?: '');
-                $typeLabel    = $rawTypeLabel !== '' ? $langs->trans($rawTypeLabel) : '';
+                $typeLabel    = ($langs->trans($erLine->type_fees_code) != $erLine->type_fees_code) ? $langs->trans($erLine->type_fees_code) : ($erLine->type_fees_libelle ?: '');
                 $projectLabel = $erLine->projet_title ?: $erLine->projet_ref;
 
                 $linkedHtml .= '<div class="inline-block">';
