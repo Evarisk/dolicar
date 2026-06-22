@@ -103,6 +103,10 @@
   background: #16a34a;
   color: #fff;
 }
+.page-public-card .plv2-app .plv2-action-badge--probleme {
+  background: #f59e0b;
+  color: #fff;
+}
 .page-public-card .plv2-app .plv2-back-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -397,6 +401,13 @@
   background: #d1fae5;
   color: #16a34a;
 }
+.page-public-card .plv2-app .plv2-action-btn--probleme {
+  border-color: #f59e0b;
+}
+.page-public-card .plv2-app .plv2-action-btn--probleme .plv2-action-btn__icon {
+  background: #fef3c7;
+  color: #d97706;
+}
 .page-public-card .plv2-app .plv2-action-btn--disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -477,6 +488,51 @@
 }
 .page-public-card .plv2-app .plv2-form-group textarea {
   resize: vertical;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row .linked-medias {
+  margin: 0;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row .fast-upload-options {
+  display: none;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row .saturne-media-gallery:empty {
+  display: none;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row .saturne-media-upload-block {
+  gap: 0;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row [id$=master-media-row-container-audio] {
+  padding: 0;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row .saturne-audio-controls {
+  margin-top: 0;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row button {
+  width: auto;
+  min-width: 0;
+  margin-bottom: 0;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row .saturne-media-btn,
+.page-public-card .plv2-app .dolicar-problem-media-row .saturne-upload-label {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row .saturne-media-btn i,
+.page-public-card .plv2-app .dolicar-problem-media-row .saturne-upload-label i {
+  font-size: 18px;
 }
 .page-public-card .plv2-app .plv2-form-row {
   display: grid;
@@ -827,14 +883,19 @@
   }
 }
 
-.dolicar-public-logbook-link {
+.dolicar-banner-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.dolicar-banner-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   padding: 2px 8px;
-  background: #e8f0fd;
-  color: #1a5cdc !important;
-  border: 1px solid #c0d4f7;
+  border: 1px solid transparent;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
@@ -842,13 +903,25 @@
   vertical-align: middle;
   line-height: 1.6;
 }
-.dolicar-public-logbook-link i {
-  font-size: 10px;
+.dolicar-banner-link .dolicar-banner-logo {
+  height: 13px;
+  width: auto;
+  vertical-align: middle;
 }
-.dolicar-public-logbook-link:hover {
+.dolicar-banner-link:hover {
+  text-decoration: none;
+}
+
+.dolicar-public-logbook-link,
+.dolicar-public-control-link {
+  background: #e8f0fd;
+  color: #1a5cdc !important;
+  border-color: #c0d4f7;
+}
+.dolicar-public-logbook-link:hover,
+.dolicar-public-control-link:hover {
   background: #d0e2fb;
   border-color: #90b8f0;
-  text-decoration: none;
   color: #1a5cdc !important;
 }
 
@@ -941,6 +1014,14 @@
 .tableforfieldcreate .registration-certificate-field td:first-child,
 .tableforfieldedit .registration-certificate-field td:first-child {
   padding-left: 18px !important;
+}
+
+.dolicar-er-lines label.dolicar-er-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 3px 0;
+  cursor: pointer;
 }
 
 .quickcreation-page .qc-stepper {
