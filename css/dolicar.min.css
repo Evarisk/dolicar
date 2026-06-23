@@ -160,6 +160,7 @@
 }
 .page-public-card .plv2-app .plv2-content {
   padding: 16px;
+  padding-bottom: 76px;
 }
 .page-public-card .plv2-app .plv2-form {
   padding: 6px;
@@ -1042,6 +1043,102 @@
 .page-public-card .plv2-app .plv2-badge--done {
   background: #d1fae5;
   color: #15803d;
+}
+.page-public-card .plv2-app .plv2-cg-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.page-public-card .plv2-app .plv2-cg-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  text-decoration: none;
+  transition: transform 0.1s;
+}
+.page-public-card .plv2-app .plv2-cg-item:active {
+  transform: scale(0.99);
+}
+.page-public-card .plv2-app .plv2-cg-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #dbeafe;
+  color: #1571d3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.page-public-card .plv2-app .plv2-cg-item__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.page-public-card .plv2-app .plv2-cg-item__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.page-public-card .plv2-app .plv2-cg-item__chevron {
+  color: #c0c6cd;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.page-public-card .plv2-app .plv2-plate-badge--light {
+  align-self: flex-start;
+  background: #f1f3f5;
+  color: #1d2937;
+  border-color: #d4d8de;
+}
+.page-public-card .plv2-app .plv2-bottombar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  margin: 0;
+  background: #fff;
+  border-top: 1px solid #e3e6ea;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 20;
+}
+.page-public-card .plv2-app .plv2-bottombar__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  text-decoration: none;
+  color: #5b6470;
+  font-size: 10px;
+  font-weight: 600;
+  background: none;
+  border: none;
+}
+.page-public-card .plv2-app .plv2-bottombar__item i {
+  font-size: 17px;
+}
+.page-public-card .plv2-app .plv2-bottombar__item--active {
+  color: #1571d3;
+}
+.page-public-card .plv2-app .plv2-bottombar__item--disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 .page-public-card .plv2-app .plv2-forbidden {
   padding: 60px 20px;

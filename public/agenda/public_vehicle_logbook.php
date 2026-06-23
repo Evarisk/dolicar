@@ -449,9 +449,13 @@ $form = new Form($db);
 // Pre-select driver from cookie
 $preselectedDriverId = isset($_COOKIE['plv2_driver_id']) ? (int) $_COOKIE['plv2_driver_id'] : 0;
 
+$view = GETPOST('view', 'aZ09');
+
 if ($success) {
     $showScreen  = 'success';
     $successType = $isVehicleOut ? 'depart' : 'retour';
+} elseif ($view === 'list') {
+    $showScreen = 'list';
 } elseif ($id > 0 && $registrationCertificateFR->id > 0) {
     if ($actionType === 'probleme') {
         $showScreen = 'problem';
@@ -460,6 +464,25 @@ if ($success) {
     }
 } else {
     $showScreen = 'search';
+}
+
+// Remember the last opened vehicle so the bottom bar's "current vehicle" tab stays reachable
+if ($id > 0) {
+    setcookie('plv2_current_id', (string) $id, time() + 31536000, '/');
+}
+$currentVehicleId = $id > 0 ? $id : (isset($_COOKIE['plv2_current_id']) ? (int) $_COOKIE['plv2_current_id'] : 0);
+
+// Bottom navigation bar — only on the browsing screens (not on the focused form/problem/success flows)
+$showBottomBar = in_array($showScreen, ['search', 'list', 'vehicle'], true);
+
+// Public list of registration certificates (cards linking to ?id=fk_lot)
+$allCertificates = [];
+if ($showScreen === 'list' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
+    $listCertificate = new RegistrationCertificateFr($db);
+    $fetchedCertificates = $listCertificate->fetchAll('ASC', 'a_registration_number', 0, 0, []);
+    if (is_array($fetchedCertificates)) {
+        $allCertificates = $fetchedCertificates;
+    }
 }
 
 $title   = $langs->trans('PublicVehicleLogBook');
@@ -533,11 +556,52 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
         </form>
     </div>
 
-<?php elseif ($showScreen === 'vehicle') : ?>
-    <!-- ===== SCREEN 2 : fiche véhicule + choix action ===== -->
+<?php elseif ($showScreen === 'list') : ?>
+    <!-- ===== SCREEN : liste des cartes grises ===== -->
     <div class="plv2-header plv2-header--dark">
         <div class="plv2-header__top">
-            <a href="<?php echo $baseUrl; ?>" class="plv2-back-btn"><i class="fas fa-arrow-left"></i></a>
+            <div class="plv2-header__logo">
+                <img src="<?php echo $logoUrl; ?>" alt="DoliCar" class="plv2-header__logo-img">
+                <div class="plv2-header__logo-text">
+                    DoliCar
+                    <small><?php echo $langs->trans('PublicVehicleLogBook'); ?></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="plv2-content">
+        <p class="plv2-section-label"><?php echo $langs->trans('RegistrationCertificatesList'); ?></p>
+        <?php if (empty($allCertificates)) : ?>
+            <p class="plv2-hint"><i class="fas fa-info-circle"></i> <?php echo $langs->trans('NoRegistrationCertificate'); ?></p>
+        <?php else : ?>
+            <div class="plv2-cg-list">
+                <?php foreach ($allCertificates as $cert) :
+                    if (empty($cert->fk_lot)) {
+                        continue;
+                    }
+                    $cgLabel = trim($cert->d1_vehicle_brand . ' ' . $cert->d3_vehicle_model);
+                    if ($cgLabel === '') {
+                        $cgLabel = $cert->a_registration_number;
+                    } ?>
+                    <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . (int) $cert->fk_lot . '&entity=' . urlencode($entity); ?>" class="plv2-cg-item">
+                        <div class="plv2-cg-item__icon"><i class="fas fa-car"></i></div>
+                        <div class="plv2-cg-item__body">
+                            <span class="plv2-cg-item__title"><?php echo dol_escape_htmltag($cgLabel); ?></span>
+                            <span class="plv2-plate-badge plv2-plate-badge--light"><?php echo dol_escape_htmltag($cert->a_registration_number); ?></span>
+                        </div>
+                        <i class="fas fa-chevron-right plv2-cg-item__chevron"></i>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+<?php elseif ($showScreen === 'vehicle') : ?>
+    <!-- ===== SCREEN 2 : fiche véhicule + choix action ===== -->
+    <!-- No back button here: navigation between vehicles is handled by the bottom bar -->
+    <div class="plv2-header plv2-header--dark">
+        <div class="plv2-header__top">
             <div class="plv2-header__logo">
                 <img src="<?php echo $logoUrl; ?>" alt="DoliCar" class="plv2-header__logo-img">
                 <div class="plv2-header__logo-text">
@@ -1015,6 +1079,29 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
         </div>
     </div>
 
+<?php endif; ?>
+
+<?php if ($showBottomBar) : ?>
+    <!-- ===== Bottom navigation bar ===== -->
+    <nav class="plv2-bottombar">
+        <a href="<?php echo $baseUrl . '&view=list'; ?>"
+           class="plv2-bottombar__item<?php echo $showScreen === 'list' ? ' plv2-bottombar__item--active' : ''; ?>">
+            <i class="fas fa-list-ul"></i>
+            <span><?php echo $langs->trans('BottomBarVehiclesList'); ?></span>
+        </a>
+        <?php if ($currentVehicleId > 0) : ?>
+            <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . $currentVehicleId . '&entity=' . urlencode($entity); ?>"
+               class="plv2-bottombar__item<?php echo $showScreen === 'vehicle' ? ' plv2-bottombar__item--active' : ''; ?>">
+                <i class="fas fa-id-card"></i>
+                <span><?php echo $langs->trans('BottomBarCurrentVehicle'); ?></span>
+            </a>
+        <?php else : ?>
+            <span class="plv2-bottombar__item plv2-bottombar__item--disabled">
+                <i class="fas fa-id-card"></i>
+                <span><?php echo $langs->trans('BottomBarCurrentVehicle'); ?></span>
+            </span>
+        <?php endif; ?>
+    </nav>
 <?php endif; ?>
 
 </div>
