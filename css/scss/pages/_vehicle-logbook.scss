@@ -1079,6 +1079,43 @@
       &--done { background: #d1fae5; color: #15803d; }
     }
 
+    // ── Search bar (vehicles list) ─────────────────────────────────────────
+    .plv2-search {
+      position: relative;
+      margin-bottom: 10px;
+
+      i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8a93a0;
+        font-size: 13px;
+        pointer-events: none;
+      }
+
+      input {
+        width: 100%;
+        margin: 0;
+        padding: 9px 12px 9px 34px;
+        border: 1px solid #d4d8de;
+        border-radius: 10px;
+        font-size: 13px;
+        font-family: inherit;
+        background: #fff;
+        color: #1d2937;
+        box-sizing: border-box;
+
+        &::placeholder { color: #9ca3af; }
+
+        &:focus {
+          outline: none;
+          border-color: #1571d3;
+          box-shadow: 0 0 0 3px rgba(21, 113, 211, 0.15);
+        }
+      }
+    }
+
     // ── Registration certificates list ────────────────────────────────────
     .plv2-cg-list {
       display: flex;

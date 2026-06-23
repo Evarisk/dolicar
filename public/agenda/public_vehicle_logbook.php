@@ -575,6 +575,10 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
         <?php if (empty($allCertificates)) : ?>
             <p class="plv2-hint"><i class="fas fa-info-circle"></i> <?php echo $langs->trans('NoRegistrationCertificate'); ?></p>
         <?php else : ?>
+            <div class="plv2-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="plv2-cg-search" placeholder="<?php echo dol_escape_htmltag($langs->trans('SearchVehicle')); ?>" autocomplete="off">
+            </div>
             <div class="plv2-cg-list">
                 <?php foreach ($allCertificates as $cert) :
                     if (empty($cert->fk_lot)) {
@@ -584,7 +588,9 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
                     if ($cgLabel === '') {
                         $cgLabel = $cert->a_registration_number;
                     } ?>
-                    <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . (int) $cert->fk_lot . '&entity=' . urlencode($entity); ?>" class="plv2-cg-item">
+                    <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . (int) $cert->fk_lot . '&entity=' . urlencode($entity); ?>"
+                       class="plv2-cg-item"
+                       data-search="<?php echo dol_escape_htmltag(dol_strtolower($cgLabel . ' ' . $cert->a_registration_number)); ?>">
                         <div class="plv2-cg-item__icon"><i class="fas fa-car"></i></div>
                         <div class="plv2-cg-item__body">
                             <span class="plv2-cg-item__title"><?php echo dol_escape_htmltag($cgLabel); ?></span>
@@ -594,6 +600,7 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
                     </a>
                 <?php endforeach; ?>
             </div>
+            <p class="plv2-hint plv2-cg-noresult" style="display: none;"><i class="fas fa-search"></i> <?php echo $langs->trans('NoVehicleFound'); ?></p>
         <?php endif; ?>
     </div>
 
@@ -1118,6 +1125,20 @@ $(document).on('change', '#driver_user_id', function () {
     if (driverId) {
         document.cookie = 'plv2_driver_id=' + encodeURIComponent(driverId) + '; path=/; max-age=31536000; SameSite=Lax';
     }
+});
+
+// Live client-side filter of the registration certificates list
+$(document).on('input', '#plv2-cg-search', function () {
+    var query   = $(this).val().toLowerCase().trim();
+    var visible = 0;
+    $('.plv2-cg-item').each(function () {
+        var match = ($(this).attr('data-search') || '').indexOf(query) !== -1;
+        $(this).toggle(match);
+        if (match) {
+            visible++;
+        }
+    });
+    $('.plv2-cg-noresult').toggle(visible === 0);
 });
 
 // Driver type toggle: internal user picker vs external third-party + contact pickers
