@@ -45,7 +45,8 @@
         <p class="plv2-hint"><i class="fas fa-info-circle"></i> <?php echo $langs->trans('NoControlSheetAvailable'); ?></p>
     </div>
 <?php else : ?>
-    <form id="public-vehicle-control-form" method="POST" action="<?php echo $vehicleUrl; ?>">
+    <!-- target="_blank": create the control and open the DigiQuali answer page in a new tab, keeping this logbook tab open -->
+    <form id="public-vehicle-control-form" method="POST" action="<?php echo $vehicleUrl; ?>" target="_blank">
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
         <input type="hidden" name="action" value="create_control">
 
