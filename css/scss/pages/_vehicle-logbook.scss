@@ -3,14 +3,68 @@
   margin: 0;
   padding: 0;
 
+  // Force light rendering even when the OS is in dark mode. This pico build follows
+  // prefers-color-scheme and uses NON-prefixed CSS variables; pin the real ones light.
+  // These live on the <body> (.page-public-card) on purpose: native select2 dropdowns are
+  // appended to <body> (no dropdownParent), so .plv2-app-scoped rules never reach them.
+  color-scheme: light;
+  --background-color:                     #f4f5f7;
+  --color:                                #1d2937;
+  --form-element-background-color:        #fff;
+  --form-element-color:                   #1d2937;
+  --form-element-active-background-color: #fff;
+  --form-element-border-color:            #d4d8de;
+
+  // select2 dropdown (appended to <body>) — keep it light and on-theme
+  .select2-dropdown {
+    background: #fff;
+    border-color: #d4d8de;
+  }
+
+  .select2-search--dropdown .select2-search__field {
+    background: #fff;
+    color: #1d2937;
+    border: 1px solid #d4d8de;
+    border-radius: 6px;
+  }
+
+  .select2-results__options {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .select2-results__option {
+    color: #1d2937;
+    list-style: none;
+  }
+
+  .select2-results__option--highlighted[aria-selected] {
+    background-color: #1571d3;
+    color: #fff;
+  }
+
   // Neutralise pico.css et styles Dolibarr globaux dans le périmètre de l'app
   .plv2-app {
+    // Force light rendering: this pico build follows the OS prefers-color-scheme, which would
+    // darken native widgets (the select2 search field, scrollbars…) even though the app is light.
+    color-scheme: light;
+
     --pico-primary:             #1571d3;
     --pico-primary-hover:       #0c447c;
     --pico-primary-focus:       rgba(21,113,211,0.25);
     --pico-form-element-color:  #1d2937;
     --pico-color:               #1d2937;
     --pico-background-color:    #f4f5f7;
+
+    // This pico build uses non-prefixed variables, so the *-prefixed overrides above are no-ops
+    // for it — pin the real ones light so dark mode can't darken inputs/backgrounds.
+    --background-color:                  #f4f5f7;
+    --color:                             #1d2937;
+    --form-element-background-color:     #fff;
+    --form-element-color:                #1d2937;
+    --form-element-active-background-color: #fff;
+    --form-element-border-color:         #d4d8de;
 
     a { color: #1571d3; }
 
@@ -119,6 +173,7 @@
     // ── Content wrapper ──────────────────────────────────────────────────
     .plv2-content {
       padding: 16px;
+      padding-bottom: 76px; // room for the fixed bottom navigation bar
     }
 
     .plv2-form {
@@ -481,9 +536,15 @@
 
       &:last-child { margin-bottom: 0; }
 
-      // Field labels hidden — only the global card titles (h3) are kept
+      // Compact field labels (small uppercase) shown above each field
       label {
-        display: none;
+        display: block;
+        font-size: 10px;
+        color: #8a93a0;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        font-weight: 600;
+        margin-bottom: 3px;
       }
 
       input[type="text"],
@@ -508,6 +569,34 @@
           border-color: #1571d3;
           box-shadow: 0 0 0 3px rgba(21, 113, 211, 0.15);
         }
+      }
+
+      // Compact height for the date & mileage fields
+      input[type="datetime-local"],
+      input.plv2-km-input {
+        padding-top: 2px;
+        padding-bottom: 2px;
+      }
+
+      // Native Dolibarr selectors (users, third party, contact) are wrapped by select2.
+      // Keep the (closed) widget full width and aligned with the plain inputs of this form.
+      // The open dropdown is appended to <body>, so it is styled under .page-public-card above.
+      .select2-container { width: 100% !important; }
+
+      .select2-container--default .select2-selection--single {
+        height: auto;
+        min-height: 29px;
+        padding: 1px 4px;
+        border: 1px solid #d4d8de;
+        border-radius: 8px;
+        background: #fff;
+
+        .select2-selection__rendered {
+          color: #1d2937;
+          line-height: 25px;
+        }
+
+        .select2-selection__arrow { height: 27px; }
       }
 
       textarea { resize: vertical; }
@@ -546,6 +635,9 @@
         width: 38px;
         min-width: 38px;
         height: 38px;
+        // Saturne forces min-height:50px on these buttons; override it so they
+        // stay square (38x38) instead of being stretched vertically.
+        min-height: 38px;
         margin: 0;
         padding: 0;
         display: inline-flex;
@@ -563,6 +655,109 @@
       gap: 10px;
 
       .plv2-form-group { margin-bottom: 0; }
+    }
+
+    // ── Compact 2-column card row (Quand / Kilométrage side by side) ───────
+    .plv2-card-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      margin-bottom: 5px;
+
+      .plv2-card { margin-bottom: 0; }
+    }
+
+    // ── Inline card: one label + field on a single row (Conducteur) ────────
+    .plv2-card--inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .plv2-inline-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #5b6470;
+        white-space: nowrap;
+
+        i { color: #1571d3; }
+      }
+
+      .plv2-inline-field {
+        flex: 1;
+        min-width: 0;
+        margin-bottom: 0;
+
+        select { width: 100%; }
+        .select2-container { width: 100% !important; }
+      }
+    }
+
+    // ── Card header with an inline action area on the right (Observation) ──
+    .plv2-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #eef0f3;
+
+      &__title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1d2937;
+
+        i { color: #1571d3; }
+      }
+
+      .dolicar-trip-media-row { flex-shrink: 0; }
+    }
+
+    // ── Segmented toggle (e.g. internal user / external driver) ───────────
+    .plv2-seg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 6px;
+
+      &__btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin: 0;
+        padding: 7px 6px;
+        background: #fff;
+        border: 1px solid #d4d8de;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        color: #5b6470;
+        cursor: pointer;
+        transition: all 0.15s;
+
+        i { font-size: 13px; }
+
+        &:hover { border-color: #93c5fd; }
+
+        &.active {
+          background: #dbeafe;
+          border-color: #1571d3;
+          color: #1e40af;
+
+          i { color: #1571d3; }
+        }
+      }
     }
 
     .plv2-req { color: #dc2626; }
@@ -882,6 +1077,154 @@
 
       &--out  { background: #fef3c7; color: #b45309; }
       &--done { background: #d1fae5; color: #15803d; }
+    }
+
+    // ── Search bar (vehicles list) ─────────────────────────────────────────
+    .plv2-search {
+      position: relative;
+      margin-bottom: 10px;
+
+      i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8a93a0;
+        font-size: 13px;
+        pointer-events: none;
+      }
+
+      input {
+        width: 100%;
+        margin: 0;
+        padding: 9px 12px 9px 34px;
+        border: 1px solid #d4d8de;
+        border-radius: 10px;
+        font-size: 13px;
+        font-family: inherit;
+        background: #fff;
+        color: #1d2937;
+        box-sizing: border-box;
+
+        &::placeholder { color: #9ca3af; }
+
+        &:focus {
+          outline: none;
+          border-color: #1571d3;
+          box-shadow: 0 0 0 3px rgba(21, 113, 211, 0.15);
+        }
+      }
+    }
+
+    // ── Registration certificates list ────────────────────────────────────
+    .plv2-cg-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .plv2-cg-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      text-decoration: none;
+      transition: transform 0.1s;
+
+      &:active { transform: scale(0.99); }
+
+      &__icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #dbeafe;
+        color: #1571d3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+
+      &__body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      &__title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1d2937;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      &__chevron {
+        color: #c0c6cd;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+    }
+
+    // Light variant of the plate badge for use on a white background (the list)
+    .plv2-plate-badge--light {
+      align-self: flex-start;
+      background: #f1f3f5;
+      color: #1d2937;
+      border-color: #d4d8de;
+    }
+
+    // ── Bottom navigation bar ──────────────────────────────────────────────
+    .plv2-bottombar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      margin: 0;
+      background: #fff;
+      border-top: 1px solid #e3e6ea;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+      z-index: 20;
+
+      &__item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        // pico.css applies a negative margin to `nav a` (nav :where(a,…)); reset it,
+        // otherwise the items are pulled up and the icons overflow above the bar.
+        margin: 0;
+        padding: 8px 4px;
+        box-sizing: border-box;
+        text-decoration: none;
+        color: #5b6470;
+        font-size: 10px;
+        line-height: 1.1;
+        font-weight: 600;
+        background: none;
+        border: none;
+
+        i { font-size: 17px; line-height: 1; }
+
+        &--active { color: #1571d3; }
+
+        &--disabled {
+          opacity: 0.4;
+          pointer-events: none;
+        }
+      }
     }
 
     // ── Forbidden ─────────────────────────────────────────────────────────

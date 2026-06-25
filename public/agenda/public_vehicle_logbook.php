@@ -160,6 +160,30 @@ $problemUploadSubDir  = 'problem_report/' . saturne_get_upload_token($problemUpl
 $tripUploadContext = 'dolicar_vehicle_trip_' . $id;
 $tripUploadSubDir  = 'vehicle_trip/' . saturne_get_upload_token($tripUploadContext);
 
+/**
+ * Grant the "view all third parties" right to the (anonymous) public user.
+ *
+ * select_thirdparty_list() and selectcontacts() restrict their lists to the third parties
+ * assigned to the current user. On this public page $user is anonymous (id 0), so without this
+ * the third-party and contact pickers would come back empty.
+ *
+ * @param  User $user Public anonymous user
+ * @return void
+ */
+function dolicarGrantThirdpartyView(User $user): void
+{
+    if (empty($user->rights)) {
+        $user->rights = new stdClass();
+    }
+    if (empty($user->rights->societe)) {
+        $user->rights->societe = new stdClass();
+    }
+    if (empty($user->rights->societe->client)) {
+        $user->rights->societe->client = new stdClass();
+    }
+    $user->rights->societe->client->voir = 1;
+}
+
 /*
  * Actions
  */
@@ -290,14 +314,46 @@ if (empty($resHook)) {
         exit;
     }
 
+    // External driver — return the native <option> list of a third party's contacts so the
+    // contact select2 can be refreshed when the third party changes (uses Form::selectcontacts).
+    if ($action == 'get_contacts') {
+        $socid = GETPOSTINT('socid');
+        if (getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE') && $socid > 0) {
+            dolicarGrantThirdpartyView($user);
+            $contactForm = new Form($db);
+            echo $contactForm->selectcontacts($socid, '', 'driver_contact_id', 1, '', '', 0, '', 1);
+        }
+        exit;
+    }
+
     if ($action == 'add') {
-        // Resolve driver full name from user ID posted by select_dolusers
-        $driverUserId = GETPOSTINT('driver_user_id');
-        $driverName   = '';
-        if ($driverUserId > 0) {
-            $driverUserObj = new User($db);
-            $driverUserObj->fetch($driverUserId);
-            $driverName = trim($driverUserObj->firstname . ' ' . $driverUserObj->lastname);
+        // Resolve driver full name: internal user (select_dolusers) or external third-party contact
+        $driverType = GETPOST('driver_type', 'aZ09');
+        $driverName = '';
+        if ($driverType === 'external') {
+            $driverContactId = GETPOSTINT('driver_contact_id');
+            if ($driverContactId > 0) {
+                require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+                $driverContact = new Contact($db);
+                $driverContact->fetch($driverContactId);
+                $driverName = trim($driverContact->firstname . ' ' . $driverContact->lastname);
+            }
+            if ($driverName === '') {
+                $driverSocid = GETPOSTINT('driver_socid');
+                if ($driverSocid > 0) {
+                    require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+                    $driverSoc = new Societe($db);
+                    $driverSoc->fetch($driverSocid);
+                    $driverName = $driverSoc->name;
+                }
+            }
+        } else {
+            $driverUserId = GETPOSTINT('driver_user_id');
+            if ($driverUserId > 0) {
+                $driverUserObj = new User($db);
+                $driverUserObj->fetch($driverUserId);
+                $driverName = trim($driverUserObj->firstname . ' ' . $driverUserObj->lastname);
+            }
         }
 
         if (empty($lastUnfinishedActionComm)) {
@@ -393,9 +449,13 @@ $form = new Form($db);
 // Pre-select driver from cookie
 $preselectedDriverId = isset($_COOKIE['plv2_driver_id']) ? (int) $_COOKIE['plv2_driver_id'] : 0;
 
+$view = GETPOST('view', 'aZ09');
+
 if ($success) {
     $showScreen  = 'success';
     $successType = $isVehicleOut ? 'depart' : 'retour';
+} elseif ($view === 'list') {
+    $showScreen = 'list';
 } elseif ($id > 0 && $registrationCertificateFR->id > 0) {
     if ($actionType === 'probleme') {
         $showScreen = 'problem';
@@ -406,9 +466,30 @@ if ($success) {
     $showScreen = 'search';
 }
 
+// Remember the last opened vehicle so the bottom bar's "current vehicle" tab stays reachable
+if ($id > 0) {
+    setcookie('plv2_current_id', (string) $id, time() + 31536000, '/');
+}
+$currentVehicleId = $id > 0 ? $id : (isset($_COOKIE['plv2_current_id']) ? (int) $_COOKIE['plv2_current_id'] : 0);
+
+// Bottom navigation bar — only on the browsing screens (not on the focused form/problem/success flows)
+$showBottomBar = in_array($showScreen, ['search', 'list', 'vehicle'], true);
+
+// Public list of registration certificates (cards linking to ?id=fk_lot)
+$allCertificates = [];
+if ($showScreen === 'list' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
+    $listCertificate = new RegistrationCertificateFr($db);
+    $fetchedCertificates = $listCertificate->fetchAll('ASC', 'a_registration_number', 0, 0, []);
+    if (is_array($fetchedCertificates)) {
+        $allCertificates = $fetchedCertificates;
+    }
+}
+
 $title   = $langs->trans('PublicVehicleLogBook');
 $moreJS  = ['/custom/saturne/js/includes/signature-pad.min.js'];
-$moreCSS = ['/custom/saturne/css/pico.min.css'];
+// select2 styling lives in the Dolibarr theme CSS, which this lightweight public page does not load.
+// Load select2's own stylesheet so the native pickers (driver / third party / contact) render correctly.
+$moreCSS = ['/custom/saturne/css/pico.min.css', '/includes/jquery/plugins/select2/dist/css/select2.min.css'];
 
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
@@ -475,11 +556,59 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
         </form>
     </div>
 
-<?php elseif ($showScreen === 'vehicle') : ?>
-    <!-- ===== SCREEN 2 : fiche véhicule + choix action ===== -->
+<?php elseif ($showScreen === 'list') : ?>
+    <!-- ===== SCREEN : liste des cartes grises ===== -->
     <div class="plv2-header plv2-header--dark">
         <div class="plv2-header__top">
-            <a href="<?php echo $baseUrl; ?>" class="plv2-back-btn"><i class="fas fa-arrow-left"></i></a>
+            <div class="plv2-header__logo">
+                <img src="<?php echo $logoUrl; ?>" alt="DoliCar" class="plv2-header__logo-img">
+                <div class="plv2-header__logo-text">
+                    DoliCar
+                    <small><?php echo $langs->trans('PublicVehicleLogBook'); ?></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="plv2-content">
+        <p class="plv2-section-label"><?php echo $langs->trans('RegistrationCertificatesList'); ?></p>
+        <?php if (empty($allCertificates)) : ?>
+            <p class="plv2-hint"><i class="fas fa-info-circle"></i> <?php echo $langs->trans('NoRegistrationCertificate'); ?></p>
+        <?php else : ?>
+            <div class="plv2-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="plv2-cg-search" placeholder="<?php echo dol_escape_htmltag($langs->trans('SearchVehicle')); ?>" autocomplete="off">
+            </div>
+            <div class="plv2-cg-list">
+                <?php foreach ($allCertificates as $cert) :
+                    if (empty($cert->fk_lot)) {
+                        continue;
+                    }
+                    $cgLabel = trim($cert->d1_vehicle_brand . ' ' . $cert->d3_vehicle_model);
+                    if ($cgLabel === '') {
+                        $cgLabel = $cert->a_registration_number;
+                    } ?>
+                    <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . (int) $cert->fk_lot . '&entity=' . urlencode($entity); ?>"
+                       class="plv2-cg-item"
+                       data-search="<?php echo dol_escape_htmltag(dol_strtolower($cgLabel . ' ' . $cert->a_registration_number)); ?>">
+                        <div class="plv2-cg-item__icon"><i class="fas fa-car"></i></div>
+                        <div class="plv2-cg-item__body">
+                            <span class="plv2-cg-item__title"><?php echo dol_escape_htmltag($cgLabel); ?></span>
+                            <span class="plv2-plate-badge plv2-plate-badge--light"><?php echo dol_escape_htmltag($cert->a_registration_number); ?></span>
+                        </div>
+                        <i class="fas fa-chevron-right plv2-cg-item__chevron"></i>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <p class="plv2-hint plv2-cg-noresult" style="display: none;"><i class="fas fa-search"></i> <?php echo $langs->trans('NoVehicleFound'); ?></p>
+        <?php endif; ?>
+    </div>
+
+<?php elseif ($showScreen === 'vehicle') : ?>
+    <!-- ===== SCREEN 2 : fiche véhicule + choix action ===== -->
+    <!-- No back button here: navigation between vehicles is handled by the bottom bar -->
+    <div class="plv2-header plv2-header--dark">
+        <div class="plv2-header__top">
             <div class="plv2-header__logo">
                 <img src="<?php echo $logoUrl; ?>" alt="DoliCar" class="plv2-header__logo-img">
                 <div class="plv2-header__logo-text">
@@ -699,64 +828,95 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
             <!-- Identité -->
             <?php if ($isDepart) : ?>
                 <div class="plv2-card">
-                    <h3><i class="fas fa-user"></i> <?php echo $langs->trans('WhoAreYou'); ?></h3>
-                    <div class="plv2-form-group">
-                        <label><?php echo $langs->trans('Driver'); ?> <span class="plv2-req">*</span></label>
+                    <h3><i class="fas fa-user"></i> <?php echo $langs->trans('Driver'); ?> <span class="plv2-req">*</span></h3>
+
+                    <div class="plv2-seg" id="plv2-driver-type">
+                        <button type="button" class="plv2-seg__btn active" data-type="internal">
+                            <i class="fas fa-user-tie"></i> <?php echo $langs->trans('DriverInternal'); ?>
+                        </button>
+                        <button type="button" class="plv2-seg__btn" data-type="external">
+                            <i class="fas fa-user-friends"></i> <?php echo $langs->trans('DriverExternal'); ?>
+                        </button>
+                    </div>
+                    <input type="hidden" name="driver_type" id="plv2-driver-type-value" value="internal">
+
+                    <!-- Conducteur interne -->
+                    <div class="plv2-form-group" id="plv2-driver-internal">
                         <?php echo $form->select_dolusers($preselectedDriverId, 'driver_user_id', 1, null, 0, '', '', (string) $conf->entity); ?>
+                    </div>
+
+                    <!-- Conducteur externe : tiers puis contact -->
+                    <div id="plv2-driver-external" style="display: none;">
+                        <div class="plv2-form-group">
+                            <label><?php echo $langs->trans('ThirdParty'); ?></label>
+                            <?php
+                            dolicarGrantThirdpartyView($user);
+                            // forcecombo=0 so Dolibarr attaches its native select2 (full list rendered inline,
+                            // no server-side autocomplete which would fail on this public page).
+                            echo $form->select_thirdparty_list(0, 'driver_socid', '', '1', 0, 0, [], '', 0, 0, '', '', false, [], 0);
+                            ?>
+                        </div>
+                        <div class="plv2-form-group">
+                            <label><?php echo $langs->trans('Contact'); ?></label>
+                            <?php echo $form->selectcontacts(-1, '', 'driver_contact_id', 1); ?>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
 
-            <!-- Date / Heure -->
-            <div class="plv2-card">
-                <h3><i class="fas fa-calendar"></i> <?php echo $langs->trans('When'); ?></h3>
-                <div class="plv2-form-group">
-                    <label><?php echo $isDepart ? $langs->trans('StartDateAndHour') : $langs->trans('EndDateAndHour'); ?></label>
-                    <input type="datetime-local"
-                           name="<?php echo $isDepart ? 'start_date_and_hour' : 'end_date_and_hour'; ?>"
-                           value="<?php echo dol_print_date(dol_now(), '%Y-%m-%dT%H:%M'); ?>"
-                           required>
+            <!-- Date / Heure + Kilométrage (compacté sur 2 colonnes) -->
+            <div class="plv2-card-row">
+                <!-- Date / Heure -->
+                <div class="plv2-card">
+                    <h3><i class="fas fa-calendar"></i> <?php echo $langs->trans('When'); ?></h3>
+                    <div class="plv2-form-group">
+                        <label><?php echo $isDepart ? $langs->trans('StartDateAndHour') : $langs->trans('EndDateAndHour'); ?></label>
+                        <input type="datetime-local"
+                               name="<?php echo $isDepart ? 'start_date_and_hour' : 'end_date_and_hour'; ?>"
+                               value="<?php echo dol_print_date(dol_now(), '%Y-%m-%dT%H:%M'); ?>"
+                               required>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Kilométrage -->
-            <div class="plv2-card">
-                <h3><i class="fas fa-gauge"></i> <?php echo $langs->trans('Mileage'); ?></h3>
-                <div class="plv2-form-group">
-                    <label>
-                        <?php echo $isDepart ? $langs->trans('StartingMileage') : $langs->trans('ArrivalMileage'); ?>
-                        <span class="plv2-req">*</span>
-                    </label>
-                    <?php if ($isDepart) :
-                        $minKm = $lastArrivalMileage ?? 0; ?>
-                        <input type="number"
-                               name="options_starting_mileage"
-                               class="plv2-km-input"
-                               min="<?php echo $minKm; ?>"
-                               placeholder="000000"
-                               required>
-                        <?php if ($minKm > 0) : ?>
-                            <div class="plv2-km-hint">
-                                <?php echo $langs->trans('LastKnownMileage'); ?> : <strong><?php echo number_format($minKm, 0, ',', ' ') . ' km'; ?></strong>
-                            </div>
+                <!-- Kilométrage -->
+                <div class="plv2-card">
+                    <h3><i class="fas fa-gauge"></i> <?php echo $langs->trans('Mileage'); ?></h3>
+                    <div class="plv2-form-group">
+                        <label>
+                            <?php echo $isDepart ? $langs->trans('StartingMileage') : $langs->trans('ArrivalMileage'); ?>
+                            <span class="plv2-req">*</span>
+                        </label>
+                        <?php if ($isDepart) :
+                            $minKm = $lastArrivalMileage ?? 0; ?>
+                            <input type="number"
+                                   name="options_starting_mileage"
+                                   class="plv2-km-input"
+                                   min="<?php echo $minKm; ?>"
+                                   placeholder="000000"
+                                   required>
+                            <?php if ($minKm > 0) : ?>
+                                <div class="plv2-km-hint">
+                                    <?php echo $langs->trans('LastKnownMileage'); ?> : <strong><?php echo number_format($minKm, 0, ',', ' ') . ' km'; ?></strong>
+                                </div>
+                            <?php endif; ?>
+                        <?php else :
+                            $startKm    = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
+                            $minKmRetour = $startKm > 0 ? $startKm + 1 : 0;
+                            $maxKmRetour = $startKm + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>
+                            <input type="number"
+                                   name="options_arrival_mileage"
+                                   class="plv2-km-input"
+                                   min="<?php echo $minKmRetour; ?>"
+                                   max="<?php echo $maxKmRetour; ?>"
+                                   placeholder="000000"
+                                   required>
+                            <?php if ($startKm > 0) : ?>
+                                <div class="plv2-km-hint">
+                                    <?php echo $langs->trans('DepartureMileage'); ?> : <strong><?php echo number_format($startKm, 0, ',', ' ') . ' km'; ?></strong>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
-                    <?php else :
-                        $startKm    = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
-                        $minKmRetour = $startKm > 0 ? $startKm + 1 : 0;
-                        $maxKmRetour = $startKm + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>
-                        <input type="number"
-                               name="options_arrival_mileage"
-                               class="plv2-km-input"
-                               min="<?php echo $minKmRetour; ?>"
-                               max="<?php echo $maxKmRetour; ?>"
-                               placeholder="000000"
-                               required>
-                        <?php if ($startKm > 0) : ?>
-                            <div class="plv2-km-hint">
-                                <?php echo $langs->trans('DepartureMileage'); ?> : <strong><?php echo number_format($startKm, 0, ',', ' ') . ' km'; ?></strong>
-                            </div>
-                        <?php endif; ?>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
 
@@ -787,18 +947,17 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
 
             <!-- Observation -->
             <div class="plv2-card">
-                <h3><i class="fas fa-comment-dots"></i> <?php echo $langs->trans('Observation'); ?></h3>
+                <div class="plv2-card-head">
+                    <span class="plv2-card-head__title"><i class="fas fa-comment-dots"></i> <?php echo $langs->trans('Observation'); ?></span>
+                    <div class="dolicar-trip-media-row">
+                        <?php print saturne_render_media_block('dolicar', $tripUploadSubDir, 'trip_', '', ['show_photo' => true, 'show_audio' => true, 'show_file' => false]); ?>
+                    </div>
+                </div>
                 <div class="plv2-form-group">
                     <label><?php echo $langs->trans('Remarks'); ?></label>
                     <textarea name="<?php echo $isDepart ? 'start_comment' : 'end_comment'; ?>"
                               rows="3"
                               placeholder="<?php echo $langs->trans('RemarksPlaceholder'); ?>"></textarea>
-                </div>
-                <div class="plv2-form-group">
-                    <label><?php echo $langs->trans('PhotoAndVoiceMemo'); ?></label>
-                    <div class="dolicar-trip-media-row">
-                        <?php print saturne_render_media_block('dolicar', $tripUploadSubDir, 'trip_', '', ['show_photo' => true, 'show_audio' => true, 'show_file' => false]); ?>
-                    </div>
                 </div>
             </div>
 
@@ -929,6 +1088,29 @@ $logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
 
 <?php endif; ?>
 
+<?php if ($showBottomBar) : ?>
+    <!-- ===== Bottom navigation bar ===== -->
+    <nav class="plv2-bottombar">
+        <a href="<?php echo $baseUrl . '&view=list'; ?>"
+           class="plv2-bottombar__item<?php echo $showScreen === 'list' ? ' plv2-bottombar__item--active' : ''; ?>">
+            <i class="fas fa-list-ul"></i>
+            <span><?php echo $langs->trans('BottomBarVehiclesList'); ?></span>
+        </a>
+        <?php if ($currentVehicleId > 0) : ?>
+            <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . $currentVehicleId . '&entity=' . urlencode($entity); ?>"
+               class="plv2-bottombar__item<?php echo $showScreen === 'vehicle' ? ' plv2-bottombar__item--active' : ''; ?>">
+                <i class="fas fa-id-card"></i>
+                <span><?php echo $langs->trans('BottomBarCurrentVehicle'); ?></span>
+            </a>
+        <?php else : ?>
+            <span class="plv2-bottombar__item plv2-bottombar__item--disabled">
+                <i class="fas fa-id-card"></i>
+                <span><?php echo $langs->trans('BottomBarCurrentVehicle'); ?></span>
+            </span>
+        <?php endif; ?>
+    </nav>
+<?php endif; ?>
+
 </div>
 
 <script>
@@ -943,6 +1125,43 @@ $(document).on('change', '#driver_user_id', function () {
     if (driverId) {
         document.cookie = 'plv2_driver_id=' + encodeURIComponent(driverId) + '; path=/; max-age=31536000; SameSite=Lax';
     }
+});
+
+// Live client-side filter of the registration certificates list
+$(document).on('input', '#plv2-cg-search', function () {
+    var query   = $(this).val().toLowerCase().trim();
+    var visible = 0;
+    $('.plv2-cg-item').each(function () {
+        var match = ($(this).attr('data-search') || '').indexOf(query) !== -1;
+        $(this).toggle(match);
+        if (match) {
+            visible++;
+        }
+    });
+    $('.plv2-cg-noresult').toggle(visible === 0);
+});
+
+// Driver type toggle: internal user picker vs external third-party + contact pickers
+$(document).on('click', '#plv2-driver-type .plv2-seg__btn', function () {
+    var type = $(this).data('type');
+    $('#plv2-driver-type .plv2-seg__btn').removeClass('active');
+    $(this).addClass('active');
+    $('#plv2-driver-type-value').val(type);
+    $('#plv2-driver-internal').toggle(type === 'internal');
+    $('#plv2-driver-external').toggle(type === 'external');
+});
+
+// When the third party changes, refresh the native contact select2 with that company's contacts
+$(document).on('change', '#driver_socid', function () {
+    var socid    = $(this).val();
+    var $contact = $('#driver_contact_id');
+    if (!socid || socid === '-1') {
+        return;
+    }
+    $.get('<?php echo dol_escape_js($_SERVER['PHP_SELF']); ?>', { action: 'get_contacts', socid: socid, entity: '<?php echo dol_escape_js((string) $entity); ?>' }, function (html) {
+        // Replace the <option>s (returned by Form::selectcontacts) and tell select2 to re-read them
+        $contact.html(html).trigger('change');
+    });
 });
 </script>
 
