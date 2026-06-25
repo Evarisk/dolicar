@@ -79,8 +79,8 @@
   .plv2-app {
     background: #f4f5f7;
     min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
+    width: 100%; // full width at any screen size (like the ReedCRM PWA), no centred 480px cap
+    margin: 0;
     font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
     font-size: 12.5px;
     color: #1d2937;
@@ -1187,10 +1187,9 @@
     .plv2-bottombar {
       position: fixed;
       bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      right: 0;
       width: 100%;
-      max-width: 480px;
       display: flex;
       margin: 0;
       background: #fff;
