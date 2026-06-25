@@ -1120,43 +1120,51 @@
 
     // ── Registration certificates list ────────────────────────────────────
     .plv2-cg-list {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr; // two columns
       gap: 8px;
     }
 
     .plv2-cg-item {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      flex-direction: column;
+      gap: 6px;
       background: #fff;
       border-radius: 12px;
-      padding: 12px 14px;
+      padding: 10px 12px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
       text-decoration: none;
       transition: transform 0.1s;
 
       &:active { transform: scale(0.99); }
 
+      &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
       &__icon {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         border-radius: 10px;
         background: #dbeafe;
         color: #1571d3;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 16px;
         flex-shrink: 0;
       }
 
-      &__body {
-        flex: 1;
-        min-width: 0;
+      // Phone: name then meta stacked (the meta sits under the name). On wider screens (PC) the
+      // meta moves to the right of the name to keep the cards short — see the media query below.
+      &__main {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 3px;
+        min-width: 0;
       }
 
       &__title {
@@ -1168,10 +1176,39 @@
         text-overflow: ellipsis;
       }
 
-      &__chevron {
-        color: #c0c6cd;
-        font-size: 14px;
-        flex-shrink: 0;
+      &__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px 10px;
+        font-size: 11px;
+        color: #5b6470;
+      }
+
+      &__meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+
+        i { color: #8a93a0; font-size: 10px; }
+      }
+
+      // PC / wide screens: put the meta to the right of the name (shorter cards)
+      @media (min-width: 768px) {
+        &__main {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+        }
+
+        &__title { flex: 1 1 auto; }
+
+        &__meta {
+          flex: 0 0 auto;
+          flex-wrap: nowrap;
+          justify-content: flex-end;
+        }
       }
     }
 

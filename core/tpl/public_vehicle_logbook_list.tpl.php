@@ -60,12 +60,26 @@
                 <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . (int) $cert->fk_lot . '&entity=' . urlencode($entity); ?>"
                    class="plv2-cg-item"
                    data-search="<?php echo dol_escape_htmltag(dol_strtolower($cgLabel . ' ' . $cert->a_registration_number)); ?>">
-                    <div class="plv2-cg-item__icon"><i class="fas fa-car"></i></div>
-                    <div class="plv2-cg-item__body">
-                        <span class="plv2-cg-item__title"><?php echo dol_escape_htmltag($cgLabel); ?></span>
+                    <div class="plv2-cg-item__top">
+                        <div class="plv2-cg-item__icon"><i class="fas fa-car"></i></div>
                         <span class="plv2-plate-badge plv2-plate-badge--light"><?php echo dol_escape_htmltag($cert->a_registration_number); ?></span>
                     </div>
-                    <i class="fas fa-chevron-right plv2-cg-item__chevron"></i>
+                    <div class="plv2-cg-item__main">
+                        <span class="plv2-cg-item__title"><?php echo dol_escape_htmltag($cgLabel); ?></span>
+                        <?php if (!empty($cert->p3_fuel_type) || !empty($cert->b_first_registration_date) || !empty($cert->p6_national_administrative_power)) : ?>
+                            <div class="plv2-cg-item__meta">
+                                <?php if (!empty($cert->p3_fuel_type)) : ?>
+                                    <span class="plv2-cg-item__meta-item"><i class="fas fa-gas-pump"></i> <?php echo dol_escape_htmltag($cert->p3_fuel_type); ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($cert->p6_national_administrative_power)) : ?>
+                                    <span class="plv2-cg-item__meta-item"><i class="fas fa-bolt"></i> <?php echo dol_escape_htmltag($cert->p6_national_administrative_power); ?> CV</span>
+                                <?php endif; ?>
+                                <?php if (!empty($cert->b_first_registration_date)) : ?>
+                                    <span class="plv2-cg-item__meta-item"><i class="fas fa-calendar"></i> <?php echo dol_print_date($cert->b_first_registration_date, '%Y'); ?></span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </a>
             <?php endforeach; ?>
         </div>
