@@ -282,6 +282,27 @@ TripInProgress               = En cours
 TripDone                     = Terminé
 ClosePublicLogBook           = Fermer
 
+# Public interface - Réparation
+Repair               = Réparation
+BottomBarRepair      = Réparation
+RepairDate           = Date de la réparation
+RepairMileage        = Kilométrage
+RepairDescription    = Description de la réparation
+RepairOnVehicle      = Réparation sur le véhicule %s
+RepairRecorded       = Réparation enregistrée !
+RepairRecordedDesc   = L'événement a été ajouté à l'historique du véhicule.
+ValidateRepair       = Enregistrer la réparation
+
+# Public interface - Contrôle DigiQuali
+Control                  = Contrôle
+BottomBarControl         = Contrôle
+ControlSheet             = Modèle de contrôle
+Controller               = Contrôleur
+ControlOnVehicle         = Contrôle - véhicule %s
+CreateAndFillControl     = Créer et remplir le contrôle
+SelectControlSheet       = Choisir un modèle de contrôle
+NoControlSheetAvailable  = Aucun modèle de contrôle applicable aux véhicules n'est disponible.
+
 
 
 #

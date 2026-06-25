@@ -152,6 +152,8 @@
       &--depart { background: #1571d3; color: #fff; }
       &--retour { background: #16a34a; color: #fff; }
       &--probleme { background: #f59e0b; color: #fff; }
+      &--reparation { background: #2563eb; color: #fff; }
+      &--control { background: #7c3aed; color: #fff; }
     }
 
     // ── Back button ──────────────────────────────────────────────────────
@@ -1242,5 +1244,42 @@
     0%   { transform: scale(0); }
     60%  { transform: scale(1.1); }
     100% { transform: scale(1); }
+  }
+}
+
+// Focused form screens (départ / retour / problème / réparation / contrôle) fill the viewport so the
+// sticky submit area sits at the very bottom instead of floating mid-screen when the form is short
+// (e.g. the control screen). Scoped to the focused-form body class so the browsing screens that carry
+// the fixed bottom navigation bar keep their normal layout (the footer stays intact).
+.page-focused-form .plv2-app {
+  display: flex;
+  flex-direction: column;
+
+  > form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    margin: 0; // pico.css adds a form margin-bottom that would leave a gap above the bottom bar
+
+    > .plv2-form { flex: 1 0 auto; }
+  }
+
+  // Empty state (e.g. no control sheet available) still pushes the rest down to the bottom.
+  > .plv2-content { flex: 1 0 auto; }
+}
+
+// Réparation / contrôle screens also show the bottom navigation bar. Put BOTH the submit button and
+// the bar into the normal flow at the bottom of the app (the bar directly under the button) instead
+// of keeping the bar fixed with the button floating above it — so there is no gap between them.
+.page-focused-form.page-with-bottombar .plv2-app {
+  .plv2-submit-area {
+    position: static;
+  }
+
+  .plv2-bottombar {
+    position: static;
+    left: auto;
+    transform: none;
+    max-width: none;
   }
 }

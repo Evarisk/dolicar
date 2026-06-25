@@ -136,6 +136,7 @@ if ($parentCategoryId <= 0) {
         $defaultChildren = [
             ['label' => 'Contrôle technique', 'color' => '5BA86E'],
             ['label' => 'Révision',           'color' => 'E8A317'],
+            ['label' => 'Réparation',         'color' => '3B82F6'],
             ['label' => 'Accident',           'color' => 'E05353'],
             ['label' => 'Autre',              'color' => '888888'],
         ];
@@ -161,6 +162,8 @@ $iconMap = [
     'Autre'              => 'fa-circle',
 ];
 $iconMap[$langs->transnoentities('ReportedProblem')] = 'fa-exclamation-triangle';
+$iconMap['Réparation']                               = 'fa-wrench';
+$iconMap[$langs->transnoentities('Repair')]          = 'fa-wrench';
 
 // Load child categories and build display structures for the TPL
 $catById   = [];
@@ -211,6 +214,13 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
             if (!$matched && !empty($evt->code) && strpos($evt->code, '_REPORT_PROBLEM') !== false) {
                 $eventsList[]               = $evt;
                 $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('ReportedProblem'), 'color' => 'F59E0B'];
+                $matched                    = true;
+            }
+
+            // Repairs from the public logbook carry no DoliCar category — surface them with a dedicated badge
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_ADD_REPAIR') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('Repair'), 'color' => '3B82F6'];
             }
         }
     }

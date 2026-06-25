@@ -144,6 +144,14 @@
   background: #f59e0b;
   color: #fff;
 }
+.page-public-card .plv2-app .plv2-action-badge--reparation {
+  background: #2563eb;
+  color: #fff;
+}
+.page-public-card .plv2-app .plv2-action-badge--control {
+  background: #7c3aed;
+  color: #fff;
+}
 .page-public-card .plv2-app .plv2-back-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -1201,6 +1209,33 @@
   100% {
     transform: scale(1);
   }
+}
+
+.page-focused-form .plv2-app {
+  display: flex;
+  flex-direction: column;
+}
+.page-focused-form .plv2-app > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  margin: 0;
+}
+.page-focused-form .plv2-app > form > .plv2-form {
+  flex: 1 0 auto;
+}
+.page-focused-form .plv2-app > .plv2-content {
+  flex: 1 0 auto;
+}
+
+.page-focused-form.page-with-bottombar .plv2-app .plv2-submit-area {
+  position: static;
+}
+.page-focused-form.page-with-bottombar .plv2-app .plv2-bottombar {
+  position: static;
+  left: auto;
+  transform: none;
+  max-width: none;
 }
 
 .dolicar-banner-links {
