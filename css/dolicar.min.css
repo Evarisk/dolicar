@@ -1211,6 +1211,11 @@
   }
 }
 
+body.page-public-card .fiche {
+  margin: 0;
+  padding: 0;
+}
+
 .page-focused-form .plv2-app {
   display: flex;
   flex-direction: column;
