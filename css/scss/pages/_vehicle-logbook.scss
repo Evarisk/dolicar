@@ -1283,12 +1283,16 @@
   }
 }
 
-// The Dolibarr theme (eldy) wraps the page in a `.fiche` content block with back-office margins
-// (margin-left/right meant for the sidebar layout). On this full-screen public PWA those margins
-// shrink the app and leave it off-centre — reset them so .plv2-app uses the full viewport width.
+// The Dolibarr theme (eldy) — and on some setups multicompany/other modules — wrap the page in a
+// `.fiche` content block with back-office side margins (meant for the sidebar layout). On this
+// full-screen public PWA those margins shrink the app and leave grey bands on the sides. Reset them
+// with !important (like the ReedCRM PWA) so the override wins regardless of the extra theme CSS, and
+// .plv2-app (header + content) uses the full viewport width.
 body.page-public-card .fiche {
-  margin: 0;
-  padding: 0;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
 }
 
 // Focused form screens (départ / retour / problème / réparation / contrôle) fill the viewport so the

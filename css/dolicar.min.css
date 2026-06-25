@@ -1244,8 +1244,10 @@
 }
 
 body.page-public-card .fiche {
-  margin: 0;
-  padding: 0;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
 }
 
 .page-focused-form .plv2-app {
