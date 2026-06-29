@@ -23,7 +23,7 @@
 
 /**
  * Rendered by public/agenda/public_vehicle_logbook.php (inherits its scope).
- * Expects: $isVehicleOut, $lastUnfinishedActionComm, $lastActionComm, $langs, $registrationCertificateFR, $vehicleUrl, $baseUrl
+ * Expects: $isVehicleOut, $lastUnfinishedActionComm, $lastActionComm, $langs, $registrationCertificateFR, $vehicleUrl
  */
 
 $problemSuccess  = GETPOSTINT('problem');
@@ -88,9 +88,6 @@ $successAction   = $successIsDepart ? ($lastUnfinishedActionComm[0] ?? null) : (
 
     <div class="plv2-success__actions">
         <a href="<?php echo $vehicleUrl; ?>" class="plv2-btn plv2-btn--primary plv2-btn--full">
-            <?php echo $langs->trans('NewEntry'); ?>
-        </a>
-        <a href="<?php echo $baseUrl; ?>" class="plv2-btn plv2-btn--ghost plv2-btn--full">
             <?php echo $langs->trans('ClosePublicLogBook'); ?>
         </a>
     </div>

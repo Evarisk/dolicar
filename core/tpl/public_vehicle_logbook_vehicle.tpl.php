@@ -198,7 +198,8 @@
                     $acPhotoCount = 0;
                     $acAudioCount = 0;
                     if (dol_is_dir($acMediaDir)) {
-                        foreach (dol_dir_list($acMediaDir, 'files', 0, '', '(\.meta|_preview.*\.png)$') as $acMediaFile) {
+                        // Recursive: trip media now live in depart/ and retour/ subfolders (issue #457)
+                        foreach (dol_dir_list($acMediaDir, 'files', 1, '', '(\.meta|_preview.*\.png)$') as $acMediaFile) {
                             if (image_format_supported($acMediaFile['name']) >= 0) {
                                 $acPhotoCount++;
                             } elseif (preg_match('/\.(wav|mp3|ogg|m4a)$/i', $acMediaFile['name'])) {
@@ -220,5 +221,8 @@
                 </div>
             <?php endforeach; ?>
         </div>
+        <a class="plv2-history-seeall" href="<?php echo $vehicleUrl . '&view=history'; ?>">
+            <i class="fas fa-history"></i> <?php echo $langs->trans('SeeAllTripHistory'); ?>
+        </a>
     <?php endif; ?>
 </div>

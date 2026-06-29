@@ -46,6 +46,18 @@
         </span>
     <?php endif; ?>
     <?php if ($currentVehicleId > 0) : ?>
+        <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . $currentVehicleId . '&entity=' . urlencode($entity) . '&view=history'; ?>"
+           class="plv2-bottombar__item<?php echo $showScreen === 'history' ? ' plv2-bottombar__item--active' : ''; ?>">
+            <i class="fas fa-history"></i>
+            <span><?php echo $langs->trans('BottomBarHistory'); ?></span>
+        </a>
+    <?php else : ?>
+        <span class="plv2-bottombar__item plv2-bottombar__item--disabled">
+            <i class="fas fa-history"></i>
+            <span><?php echo $langs->trans('BottomBarHistory'); ?></span>
+        </span>
+    <?php endif; ?>
+    <?php if ($currentVehicleId > 0) : ?>
         <a href="<?php echo $_SERVER['PHP_SELF'] . '?id=' . $currentVehicleId . '&entity=' . urlencode($entity) . '&action_type=reparation'; ?>"
            class="plv2-bottombar__item<?php echo $showScreen === 'repair' ? ' plv2-bottombar__item--active' : ''; ?>">
             <i class="fas fa-wrench"></i>

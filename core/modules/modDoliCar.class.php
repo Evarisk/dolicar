@@ -803,6 +803,13 @@ class modDoliCar extends DolibarrModules
         delDocumentModel('vehiclelogbookdocument', 'vehiclelogbookdocument');
         addDocumentModel('vehiclelogbookdocument', 'vehiclelogbookdocument', $langs->transnoentities('VehicleLogBookDocument') . '.pdf');
 
+        // Before/after state sheet and departure/return photos sheet (issue #457)
+        delDocumentModel('vehiclestatesheet', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclestatesheet', 'vehiclelogbookdocument', $langs->transnoentities('VehicleStateSheet') . '.pdf');
+
+        delDocumentModel('vehiclephotossheet', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclephotossheet', 'vehiclelogbookdocument', $langs->transnoentities('VehiclePhotosSheet') . '.pdf');
+
         return $this->_init($sql, $options);
     }
 }

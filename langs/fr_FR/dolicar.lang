@@ -282,6 +282,14 @@ TripInProgress               = En cours
 TripDone                     = Terminé
 ClosePublicLogBook           = Fermer
 
+# Public interface - Trajets (issue #457)
+BottomBarHistory             = Trajets
+VehicleTripHistory           = Trajets
+Trips                        = trajets
+NoTripRecorded               = Aucun trajet enregistré pour ce véhicule
+SeeAllTripHistory            = Voir tous les trajets
+ViewStateSheet               = Voir la fiche état
+
 # Public interface - Réparation
 Repair               = Réparation
 BottomBarRepair      = Réparation
@@ -403,6 +411,20 @@ DepartureDate                        = Date départ
 ReturnDate                           = Date retour
 Comments                             = Commentaires
 Signatures                           = Signatures
+
+# PDF fiche état avant/après et fiche photos (issue #457)
+VehicleStateSheet                    = Fiche état avant/après
+VehiclePhotosSheet                   = Fiche détails photos
+VehicleStateSheetPDFDescription      = Modèle PDF de fiche état du véhicule (départ / retour)
+VehiclePhotosSheetPDFDescription     = Modèle PDF des photos du véhicule (départ / retour)
+VehicleStateBeforeAfter              = État du véhicule — Avant / Après
+TripOf                               = Trajet du %s
+PhotosDeparture                      = Photos départ
+PhotosReturn                         = Photos retour
+TripPhotos                           = Photos du trajet
+NoPhoto                              = Aucune photo
+NoCompletedTrip                      = Aucun trajet terminé
+Signature                            = Signature
 
 # Import - Import de cartes grises
 ImportRegistrationCertificate         = Importer des cartes grises
