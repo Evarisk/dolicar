@@ -288,7 +288,7 @@ VehicleTripHistory           = Trajets
 Trips                        = trajets
 NoTripRecorded               = Aucun trajet enregistré pour ce véhicule
 SeeAllTripHistory            = Voir tous les trajets
-DownloadStateSheet           = Télécharger la fiche état
+ViewStateSheet               = Voir la fiche état
 
 # Public interface - Réparation
 Repair               = Réparation

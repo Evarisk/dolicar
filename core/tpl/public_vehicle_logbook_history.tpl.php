@@ -123,8 +123,8 @@ $historyUrl = $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . urlencode($enti
                     <?php endif; ?>
 
                     <?php if (!$acIsOpen) : ?>
-                        <a class="plv2-history-item__download" href="<?php echo $historyUrl . '&action=download_trip_pdf&trip_id=' . (int) $ac->id; ?>">
-                            <i class="fas fa-file-pdf"></i> <?php echo $langs->trans('DownloadStateSheet'); ?>
+                        <a class="plv2-history-item__download" href="<?php echo $historyUrl . '&action=view_trip_pdf&trip_id=' . (int) $ac->id; ?>" target="_blank" rel="noopener">
+                            <i class="fas fa-file-pdf"></i> <?php echo $langs->trans('ViewStateSheet'); ?>
                         </a>
                     <?php endif; ?>
                 </div>

@@ -200,8 +200,8 @@ if ($resHook < 0) {
 }
 
 if (empty($resHook)) {
-    // Download the "before/after" state sheet PDF of a single trip (issue #457 — public history list)
-    if ($action == 'download_trip_pdf' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
+    // View the "before/after" state sheet PDF of a single trip inline (issue #457 — public trips list)
+    if ($action == 'view_trip_pdf' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
         $tripId    = GETPOSTINT('trip_id');
         $tripCheck = new ActionComm($db);
         // The trip must belong to this vehicle's lot and be a public logbook trip (no cross-vehicle access)
@@ -215,8 +215,9 @@ if (empty($resHook)) {
 
             if ($genResult > 0 && !empty($stateSheet->result['fullpath']) && is_file($stateSheet->result['fullpath'])) {
                 $pdfFile = $stateSheet->result['fullpath'];
+                // inline so the browser PDF viewer opens it directly (its own toolbar still allows downloading)
                 top_httphead('application/pdf');
-                header('Content-Disposition: attachment; filename="' . basename($pdfFile) . '"');
+                header('Content-Disposition: inline; filename="' . basename($pdfFile) . '"');
                 header('Content-Length: ' . filesize($pdfFile));
                 readfile($pdfFile);
                 exit;
