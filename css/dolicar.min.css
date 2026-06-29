@@ -70,8 +70,8 @@
 .page-public-card .plv2-app {
   background: #f4f5f7;
   min-height: 100vh;
-  max-width: 480px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
   font-size: 12.5px;
   color: #1d2937;
@@ -142,6 +142,14 @@
 }
 .page-public-card .plv2-app .plv2-action-badge--probleme {
   background: #f59e0b;
+  color: #fff;
+}
+.page-public-card .plv2-app .plv2-action-badge--reparation {
+  background: #2563eb;
+  color: #fff;
+}
+.page-public-card .plv2-app .plv2-action-badge--control {
+  background: #7c3aed;
   color: #fff;
 }
 .page-public-card .plv2-app .plv2-back-btn {
@@ -1078,17 +1086,17 @@
   box-shadow: 0 0 0 3px rgba(21, 113, 211, 0.15);
 }
 .page-public-card .plv2-app .plv2-cg-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 .page-public-card .plv2-app .plv2-cg-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   background: #fff;
   border-radius: 12px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   text-decoration: none;
   transition: transform 0.1s;
@@ -1096,24 +1104,29 @@
 .page-public-card .plv2-app .plv2-cg-item:active {
   transform: scale(0.99);
 }
+.page-public-card .plv2-app .plv2-cg-item__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .page-public-card .plv2-app .plv2-cg-item__icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   background: #dbeafe;
   color: #1571d3;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   flex-shrink: 0;
 }
-.page-public-card .plv2-app .plv2-cg-item__body {
-  flex: 1;
-  min-width: 0;
+.page-public-card .plv2-app .plv2-cg-item__main {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  min-width: 0;
 }
 .page-public-card .plv2-app .plv2-cg-item__title {
   font-size: 13px;
@@ -1123,10 +1136,38 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.page-public-card .plv2-app .plv2-cg-item__chevron {
-  color: #c0c6cd;
-  font-size: 14px;
-  flex-shrink: 0;
+.page-public-card .plv2-app .plv2-cg-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  font-size: 11px;
+  color: #5b6470;
+}
+.page-public-card .plv2-app .plv2-cg-item__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.page-public-card .plv2-app .plv2-cg-item__meta-item i {
+  color: #8a93a0;
+  font-size: 10px;
+}
+@media (min-width: 768px) {
+  .page-public-card .plv2-app .plv2-cg-item__main {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .page-public-card .plv2-app .plv2-cg-item__title {
+    flex: 1 1 auto;
+  }
+  .page-public-card .plv2-app .plv2-cg-item__meta {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
 }
 .page-public-card .plv2-app .plv2-plate-badge--light {
   align-self: flex-start;
@@ -1137,10 +1178,9 @@
 .page-public-card .plv2-app .plv2-bottombar {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   width: 100%;
-  max-width: 480px;
   display: flex;
   margin: 0;
   background: #fff;
@@ -1201,6 +1241,40 @@
   100% {
     transform: scale(1);
   }
+}
+
+body.page-public-card .fiche {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+}
+
+.page-focused-form .plv2-app {
+  display: flex;
+  flex-direction: column;
+}
+.page-focused-form .plv2-app > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  margin: 0;
+}
+.page-focused-form .plv2-app > form > .plv2-form {
+  flex: 1 0 auto;
+}
+.page-focused-form .plv2-app > .plv2-content {
+  flex: 1 0 auto;
+}
+
+.page-focused-form.page-with-bottombar .plv2-app .plv2-submit-area {
+  position: static;
+}
+.page-focused-form.page-with-bottombar .plv2-app .plv2-bottombar {
+  position: static;
+  left: auto;
+  transform: none;
+  max-width: none;
 }
 
 .dolicar-banner-links {

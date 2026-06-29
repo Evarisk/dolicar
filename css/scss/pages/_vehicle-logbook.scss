@@ -79,8 +79,8 @@
   .plv2-app {
     background: #f4f5f7;
     min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
+    width: 100%; // full width at any screen size (like the ReedCRM PWA), no centred 480px cap
+    margin: 0;
     font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
     font-size: 12.5px;
     color: #1d2937;
@@ -152,6 +152,8 @@
       &--depart { background: #1571d3; color: #fff; }
       &--retour { background: #16a34a; color: #fff; }
       &--probleme { background: #f59e0b; color: #fff; }
+      &--reparation { background: #2563eb; color: #fff; }
+      &--control { background: #7c3aed; color: #fff; }
     }
 
     // ── Back button ──────────────────────────────────────────────────────
@@ -1118,43 +1120,51 @@
 
     // ── Registration certificates list ────────────────────────────────────
     .plv2-cg-list {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr; // two columns
       gap: 8px;
     }
 
     .plv2-cg-item {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      flex-direction: column;
+      gap: 6px;
       background: #fff;
       border-radius: 12px;
-      padding: 12px 14px;
+      padding: 10px 12px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
       text-decoration: none;
       transition: transform 0.1s;
 
       &:active { transform: scale(0.99); }
 
+      &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
       &__icon {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         border-radius: 10px;
         background: #dbeafe;
         color: #1571d3;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 16px;
         flex-shrink: 0;
       }
 
-      &__body {
-        flex: 1;
-        min-width: 0;
+      // Phone: name then meta stacked (the meta sits under the name). On wider screens (PC) the
+      // meta moves to the right of the name to keep the cards short — see the media query below.
+      &__main {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 3px;
+        min-width: 0;
       }
 
       &__title {
@@ -1166,10 +1176,39 @@
         text-overflow: ellipsis;
       }
 
-      &__chevron {
-        color: #c0c6cd;
-        font-size: 14px;
-        flex-shrink: 0;
+      &__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px 10px;
+        font-size: 11px;
+        color: #5b6470;
+      }
+
+      &__meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+
+        i { color: #8a93a0; font-size: 10px; }
+      }
+
+      // PC / wide screens: put the meta to the right of the name (shorter cards)
+      @media (min-width: 768px) {
+        &__main {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+        }
+
+        &__title { flex: 1 1 auto; }
+
+        &__meta {
+          flex: 0 0 auto;
+          flex-wrap: nowrap;
+          justify-content: flex-end;
+        }
       }
     }
 
@@ -1185,10 +1224,9 @@
     .plv2-bottombar {
       position: fixed;
       bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      right: 0;
       width: 100%;
-      max-width: 480px;
       display: flex;
       margin: 0;
       background: #fff;
@@ -1242,5 +1280,54 @@
     0%   { transform: scale(0); }
     60%  { transform: scale(1.1); }
     100% { transform: scale(1); }
+  }
+}
+
+// The Dolibarr theme (eldy) — and on some setups multicompany/other modules — wrap the page in a
+// `.fiche` content block with back-office side margins (meant for the sidebar layout). On this
+// full-screen public PWA those margins shrink the app and leave grey bands on the sides. Reset them
+// with !important (like the ReedCRM PWA) so the override wins regardless of the extra theme CSS, and
+// .plv2-app (header + content) uses the full viewport width.
+body.page-public-card .fiche {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+}
+
+// Focused form screens (départ / retour / problème / réparation / contrôle) fill the viewport so the
+// sticky submit area sits at the very bottom instead of floating mid-screen when the form is short
+// (e.g. the control screen). Scoped to the focused-form body class so the browsing screens that carry
+// the fixed bottom navigation bar keep their normal layout (the footer stays intact).
+.page-focused-form .plv2-app {
+  display: flex;
+  flex-direction: column;
+
+  > form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    margin: 0; // pico.css adds a form margin-bottom that would leave a gap above the bottom bar
+
+    > .plv2-form { flex: 1 0 auto; }
+  }
+
+  // Empty state (e.g. no control sheet available) still pushes the rest down to the bottom.
+  > .plv2-content { flex: 1 0 auto; }
+}
+
+// Réparation / contrôle screens also show the bottom navigation bar. Put BOTH the submit button and
+// the bar into the normal flow at the bottom of the app (the bar directly under the button) instead
+// of keeping the bar fixed with the button floating above it — so there is no gap between them.
+.page-focused-form.page-with-bottombar .plv2-app {
+  .plv2-submit-area {
+    position: static;
+  }
+
+  .plv2-bottombar {
+    position: static;
+    left: auto;
+    transform: none;
+    max-width: none;
   }
 }
