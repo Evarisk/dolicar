@@ -481,5 +481,296 @@ if (!class_exists('DolicarPdfRender')) {
             $this->mc($w, $h, '  ' . $box2Label, 'L', $this->margeGauche + $w + $gap, $y, 1, true, 'T');
             $this->pdf->SetXY($this->margeGauche, $y + $h);
         }
+
+        /**
+         * Draw a "before / after" comparison block: a header (field | left | right) then one row
+         * per field. A row is either textual (['label', 'left', 'right']) or an image row
+         * (['label', 'leftImg', 'rightImg', 'image' => true]) used for the départ/retour signatures.
+         *
+         * @param  string $leftHeader  Header of the left (departure) column
+         * @param  string $rightHeader Header of the right (return) column
+         * @param  array  $rows        List of rows (text or image)
+         * @return void
+         */
+        public function beforeAfterGrid(string $leftHeader, string $rightHeader, array $rows): void
+        {
+            $labelW = 32;
+            $colW   = ($this->usableW - $labelW) / 2;
+
+            // Header band: empty corner + the two column titles
+            $h = 7;
+            $this->checkPageBreak($h + 8);
+            $y = $this->pdf->GetY();
+            $this->pdf->SetFont('', 'B', 8.5);
+            $this->pdf->SetTextColor(...$this->white);
+            $this->pdf->SetFillColor(...$this->navy);
+            $this->pdf->SetDrawColor(...$this->navy);
+            $this->mc($labelW, $h, '', 'L', $this->margeGauche, $y);
+            $this->mc($colW, $h, $leftHeader, 'C', $this->margeGauche + $labelW, $y);
+            $this->mc($colW, $h, $rightHeader, 'C', $this->margeGauche + $labelW + $colW, $y);
+            $this->pdf->SetXY($this->margeGauche, $y + $h);
+
+            foreach ($rows as $row) {
+                $isImage = !empty($row['image']);
+                if ($isImage) {
+                    $rowH = 24;
+                } else {
+                    $this->pdf->SetFont('', '', 9);
+                    $rowH = $this->rowHeight([
+                        [$colW, (string) ($row['left'] ?? '')],
+                        [$colW, (string) ($row['right'] ?? '')],
+                    ], 6);
+                }
+
+                $this->checkPageBreak($rowH);
+                $y = $this->pdf->GetY();
+
+                // Label cell (navy text on light background)
+                $this->pdf->SetFont('', 'B', 9);
+                $this->pdf->SetTextColor(...$this->navy);
+                $this->pdf->SetFillColor(...$this->light);
+                $this->pdf->SetDrawColor(...$this->border);
+                $this->mc($labelW, $rowH, (string) ($row['label'] ?? ''), 'L', $this->margeGauche, $y);
+
+                if ($isImage) {
+                    $this->pdf->SetFillColor(...$this->white);
+                    $this->mc($colW, $rowH, '', 'C', $this->margeGauche + $labelW, $y);
+                    $this->mc($colW, $rowH, '', 'C', $this->margeGauche + $labelW + $colW, $y);
+                    if (!empty($row['leftImg'])) {
+                        $this->drawCellImages([$row['leftImg']], $this->margeGauche + $labelW, $y, $colW, $rowH);
+                    }
+                    if (!empty($row['rightImg'])) {
+                        $this->drawCellImages([$row['rightImg']], $this->margeGauche + $labelW + $colW, $y, $colW, $rowH);
+                    }
+                } else {
+                    $this->pdf->SetFont('', '', 9);
+                    $this->pdf->SetTextColor(...$this->black);
+                    $this->pdf->SetFillColor(...$this->white);
+                    $this->mc($colW, $rowH, (string) ($row['left'] ?? '') !== '' ? (string) $row['left'] : '—', 'L', $this->margeGauche + $labelW, $y);
+                    $this->mc($colW, $rowH, (string) ($row['right'] ?? '') !== '' ? (string) $row['right'] : '—', 'L', $this->margeGauche + $labelW + $colW, $y);
+                }
+                $this->pdf->SetXY($this->margeGauche, $y + $rowH);
+            }
+        }
+
+        /**
+         * Draw a grid of photos read from disk, each fitted (aspect ratio kept) inside a fixed cell.
+         *
+         * @param  array  $paths    List of absolute image file paths
+         * @param  string $emptyTxt Message shown when there is no photo
+         * @param  int    $perRow   Number of photos per row
+         * @param  float  $cellH    Height of each photo cell in mm
+         * @return void
+         */
+        public function photoGrid(array $paths, string $emptyTxt = '', int $perRow = 3, float $cellH = 42): void
+        {
+            $paths = array_values(array_filter($paths, static function ($p) {
+                return !empty($p) && is_file($p);
+            }));
+
+            if (empty($paths)) {
+                $this->checkPageBreak(7);
+                $y = $this->pdf->GetY();
+                $this->pdf->SetFont('', 'I', 8.5);
+                $this->pdf->SetTextColor(...$this->gray);
+                $this->pdf->SetFillColor(...$this->white);
+                $this->pdf->SetDrawColor(...$this->border);
+                $this->mc($this->usableW, 7, $emptyTxt, 'C', $this->margeGauche, $y);
+                $this->pdf->SetXY($this->margeGauche, $y + 7);
+                return;
+            }
+
+            $gap   = 3;
+            $cellW = ($this->usableW - $gap * ($perRow - 1)) / $perRow;
+            $pad   = 1.5;
+
+            for ($i = 0, $count = count($paths); $i < $count; $i += $perRow) {
+                $this->checkPageBreak($cellH + $gap);
+                $y = $this->pdf->GetY();
+                for ($c = 0; $c < $perRow; $c++) {
+                    if (!isset($paths[$i + $c])) {
+                        break;
+                    }
+                    $x = $this->margeGauche + $c * ($cellW + $gap);
+                    $this->pdf->SetFillColor(...$this->zebra);
+                    $this->pdf->SetDrawColor(...$this->border);
+                    $this->mc($cellW, $cellH, '', 'C', $x, $y);
+                    $this->pdf->Image($paths[$i + $c], $x + $pad, $y + $pad, $cellW - $pad * 2, $cellH - $pad * 2, '', '', '', false, 300, '', false, false, 0, 'CM');
+                }
+                $this->pdf->SetXY($this->margeGauche, $y + $cellH + $gap);
+            }
+        }
+    }
+}
+
+if (!class_exists('DolicarPdfData')) {
+    /**
+     * Shared data access for DoliCar vehicle logbook PDF models: fetch the trips of a vehicle
+     * with their driver info, mileages, comments, départ/retour signatures and départ/retour photos.
+     */
+    class DolicarPdfData
+    {
+        /**
+         * Fetch the public-logbook trips of a vehicle (RegistrationCertificateFr).
+         *
+         * Each returned trip is an associative array carrying everything the PDF models need:
+         * driver, mileages, comments, fuel, départ/retour signatures (raw PNG binary) and
+         * départ/retour photos (absolute file paths, with a legacy fallback for trips recorded
+         * before the départ/retour split of issue #457).
+         *
+         * @param  DoliDB $db            Database handler
+         * @param  object $object        RegistrationCertificateFr source object (needs fk_lot)
+         * @param  bool   $onlyCompleted Keep only finished trips (datef not empty)
+         * @param  int    $tripId        Restrict to a single trip (ActionComm id); 0 = all trips
+         * @return array                 List of trips as associative arrays, newest first
+         */
+        public static function fetchTrips($db, $object, bool $onlyCompleted = true, int $tripId = 0): array
+        {
+            global $conf;
+
+            require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+            $trips = [];
+            if (empty($object->fk_lot)) {
+                return $trips;
+            }
+
+            $actionCommHelper = new ActionComm($db);
+            $allTrips         = $actionCommHelper->getActions(
+                0,
+                (int) $object->fk_lot,
+                'productlot',
+                ' AND fk_element = ' . (int) $object->fk_lot . ' AND code = "AC_PRODUCTLOT_ADD_PUBLIC_VEHICLE_LOG_BOOK"',
+                'datep',
+                'DESC'
+            );
+            if (!is_array($allTrips)) {
+                return $trips;
+            }
+
+            $dirOutput   = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+            $imageFilter = '(\.jpg|\.jpeg|\.png|\.gif|\.webp)';
+
+            foreach ($allTrips as $trip) {
+                if ($tripId > 0 && (int) $trip->id !== $tripId) {
+                    continue;
+                }
+                if ($onlyCompleted && empty($trip->datef)) {
+                    continue;
+                }
+                $trip->fetch_optionals();
+                $json = json_decode($trip->array_options['options_json'] ?? '{}', true);
+                if (!is_array($json)) {
+                    $json = [];
+                }
+
+                $tripDir      = $dirOutput . '/vehicle_trip/' . (int) $trip->id;
+                $departPhotos = self::listImages($tripDir . '/depart', $imageFilter);
+                $returnPhotos = self::listImages($tripDir . '/retour', $imageFilter);
+                // Trips recorded before issue #457 keep their photos loose in the trip dir
+                $legacyPhotos = (empty($departPhotos) && empty($returnPhotos)) ? self::listImages($tripDir, $imageFilter) : [];
+
+                $trips[] = [
+                    'id'                => (int) $trip->id,
+                    'datep'             => $trip->datep,
+                    'datef'             => $trip->datef,
+                    'driver'            => $json['driver'] ?? '',
+                    'start_comment'     => $json['start_comment'] ?? '',
+                    'end_comment'       => $json['end_comment'] ?? '',
+                    'fuel_level'        => $json['fuel_level'] ?? '',
+                    'return_fuel_level' => $json['return_fuel_level'] ?? '',
+                    'starting_mileage'  => (int) ($trip->array_options['options_starting_mileage'] ?? 0),
+                    'arrival_mileage'   => (int) ($trip->array_options['options_arrival_mileage'] ?? 0),
+                    'depart_photos'     => $departPhotos,
+                    'return_photos'     => $returnPhotos,
+                    'legacy_photos'     => $legacyPhotos,
+                    'start_signature'   => null,
+                    'end_signature'     => null,
+                ];
+            }
+
+            self::attachSignatures($db, $trips);
+
+            return $trips;
+        }
+
+        /**
+         * Fill start_signature / end_signature for each trip from the Saturne signature table.
+         * Within a trip, signatures are ordered by rowid: the first is the départure signature,
+         * the second the return one. Exact duplicates (multiple submissions) are skipped.
+         *
+         * @param  DoliDB $db    Database handler
+         * @param  array  $trips Trips (passed by reference, mutated in place)
+         * @return void
+         */
+        private static function attachSignatures($db, array &$trips): void
+        {
+            if (empty($trips)) {
+                return;
+            }
+            $tripIds = array_map(static function ($t) {
+                return $t['id'];
+            }, $trips);
+
+            $sql  = 'SELECT fk_object, signature';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'saturne_object_signature';
+            $sql .= " WHERE object_type = 'actiocomm'";
+            $sql .= " AND module_name = 'dolicar'";
+            $sql .= ' AND status > 0';
+            $sql .= " AND signature LIKE 'data:image%'";
+            $sql .= ' AND fk_object IN (' . implode(',', $tripIds) . ')';
+            $sql .= ' ORDER BY fk_object ASC, rowid ASC';
+
+            $resql = $db->query($sql);
+            if (!$resql) {
+                return;
+            }
+
+            $byTrip = [];
+            while ($sig = $db->fetch_object($resql)) {
+                $parts = explode(',', $sig->signature, 2);
+                if (empty($parts[1])) {
+                    continue;
+                }
+                $binary = base64_decode($parts[1]);
+                if (empty($binary)) {
+                    continue;
+                }
+                $hash = md5($binary);
+                if (isset($byTrip[$sig->fk_object]['hashes'][$hash])) {
+                    continue;
+                }
+                $byTrip[$sig->fk_object]['hashes'][$hash] = true;
+                $byTrip[$sig->fk_object]['list'][]        = $binary;
+            }
+
+            foreach ($trips as &$trip) {
+                $list                   = $byTrip[$trip['id']]['list'] ?? [];
+                $trip['start_signature'] = $list[0] ?? null;
+                $trip['end_signature']   = $list[1] ?? null;
+            }
+            unset($trip);
+        }
+
+        /**
+         * List image files in a directory as absolute paths (sorted by name).
+         *
+         * @param  string $dir    Directory to scan
+         * @param  string $filter dol_dir_list name filter (regex fragment)
+         * @return array          List of absolute file paths
+         */
+        private static function listImages(string $dir, string $filter): array
+        {
+            if (!is_dir($dir)) {
+                return [];
+            }
+            $files = dol_dir_list($dir, 'files', 0, $filter, '', 'name', SORT_ASC);
+            $paths = [];
+            foreach ($files as $file) {
+                $paths[] = $file['fullname'];
+            }
+            return $paths;
+        }
     }
 }
