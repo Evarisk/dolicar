@@ -200,6 +200,32 @@ if ($resHook < 0) {
 }
 
 if (empty($resHook)) {
+    // Download the "before/after" state sheet PDF of a single trip (issue #457 — public history list)
+    if ($action == 'download_trip_pdf' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
+        $tripId    = GETPOSTINT('trip_id');
+        $tripCheck = new ActionComm($db);
+        // The trip must belong to this vehicle's lot and be a public logbook trip (no cross-vehicle access)
+        if ($tripId > 0 && $registrationCertificateFR->id > 0 && $tripCheck->fetch($tripId) > 0
+            && $tripCheck->code === 'AC_PRODUCTLOT_ADD_PUBLIC_VEHICLE_LOG_BOOK'
+            && (int) $tripCheck->fk_element === (int) $productLot->id) {
+            require_once __DIR__ . '/../../core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclestatesheet.modules.php';
+
+            $stateSheet = new pdf_vehiclestatesheet($db);
+            $genResult  = $stateSheet->write_file($registrationCertificateFR, $langs, '', 0, 0, 0, ['object' => $registrationCertificateFR, 'user' => $user, 'trip_id' => $tripId]);
+
+            if ($genResult > 0 && !empty($stateSheet->result['fullpath']) && is_file($stateSheet->result['fullpath'])) {
+                $pdfFile = $stateSheet->result['fullpath'];
+                top_httphead('application/pdf');
+                header('Content-Disposition: attachment; filename="' . basename($pdfFile) . '"');
+                header('Content-Length: ' . filesize($pdfFile));
+                readfile($pdfFile);
+                exit;
+            }
+        }
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . $entity . '&view=history');
+        exit;
+    }
+
     // Problem report — photo upload posted by the Saturne media block (issue #443)
     if ($action == 'uploadPhoto' && !empty($conf->global->MAIN_UPLOAD_DOC)) {
         $uploadSubDir = GETPOST('sub_dir', 'alpha');
@@ -506,7 +532,11 @@ if (empty($resHook)) {
         if ($tripActionId > 0) {
             $tripMediaFiles = saturne_get_media_files('dolicar', $tripUploadSubDir);
             if (!empty($tripMediaFiles)) {
-                $tripFinalDir = $conf->dolicar->dir_output . '/vehicle_trip/' . (int) $tripActionId;
+                // Issue #457: keep départ and retour media in separate subfolders so the vehicle
+                // state/photos PDF can render them apart. Creating the trip = départ, updating the
+                // unfinished trip on return = retour.
+                $tripPhase    = isset($actionCommID) ? 'depart' : 'retour';
+                $tripFinalDir = $conf->dolicar->dir_output . '/vehicle_trip/' . (int) $tripActionId . '/' . $tripPhase;
                 if (!dol_is_dir($tripFinalDir)) {
                     dol_mkdir($tripFinalDir);
                 }
@@ -552,6 +582,8 @@ if ($success) {
     $successType = $isVehicleOut ? 'depart' : 'retour';
 } elseif ($view === 'list') {
     $showScreen = 'list';
+} elseif ($view === 'history' && $id > 0 && $registrationCertificateFR->id > 0) {
+    $showScreen = 'history';
 } elseif ($id > 0 && $registrationCertificateFR->id > 0) {
     if ($actionType === 'probleme') {
         $showScreen = 'problem';
@@ -596,7 +628,19 @@ if ($currentVehicleId > 0) {
 }
 
 // Bottom navigation bar — on the browsing screens plus the repair/control tabs (not on the depart/retour/problem/success flows)
-$showBottomBar = in_array($showScreen, ['search', 'list', 'vehicle', 'repair', 'control'], true);
+$showBottomBar = in_array($showScreen, ['search', 'list', 'vehicle', 'history', 'repair', 'control'], true);
+
+// History screen — full list of this vehicle's trips (departures/returns), newest first
+$historyTrips = [];
+if ($showScreen === 'history') {
+    $historyTrips = $actionComm->getActions(0, $id, 'productlot', ' AND fk_element = ' . $id . ' AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'datep', 'DESC');
+    if (!is_array($historyTrips)) {
+        $historyTrips = [];
+    }
+    foreach ($historyTrips as $historyTrip) {
+        $historyTrip->fetch_optionals();
+    }
+}
 
 // Public list of registration certificates (cards linking to ?id=fk_lot)
 $allCertificates = [];

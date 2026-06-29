@@ -1037,6 +1037,72 @@
   margin-top: 1px;
   flex-shrink: 0;
 }
+.page-public-card .plv2-app .plv2-history-item__download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #1571d3;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.page-public-card .plv2-app .plv2-history-item__download i {
+  font-size: 14px;
+}
+.page-public-card .plv2-app .plv2-history-item__download:active {
+  background: #115cad;
+}
+.page-public-card .plv2-app .plv2-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.page-public-card .plv2-app .plv2-history-head__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5b6470;
+}
+.page-public-card .plv2-app .plv2-history-seeall {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-bottom: 14px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #d4d8de;
+  color: #1571d3;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.page-public-card .plv2-app .plv2-history-seeall i {
+  font-size: 13px;
+}
+.page-public-card .plv2-app .plv2-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #8a93a0;
+}
+.page-public-card .plv2-app .plv2-empty i {
+  font-size: 34px;
+  color: #c2c8d0;
+}
+.page-public-card .plv2-app .plv2-empty p {
+  margin: 0;
+  font-size: 13px;
+}
 .page-public-card .plv2-app .plv2-badge {
   font-size: 10px;
   font-weight: 700;
