@@ -119,6 +119,7 @@ $isDepart = ($actionType === 'depart');
                                name="options_starting_mileage"
                                class="plv2-km-input"
                                min="<?php echo $minKm; ?>"
+                               value="<?php echo $minKm > 0 ? $minKm : ''; ?>"
                                placeholder="000000"
                                required>
                         <?php if ($minKm > 0) : ?>
@@ -128,13 +129,14 @@ $isDepart = ($actionType === 'depart');
                         <?php endif; ?>
                     <?php else :
                         $startKm    = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
-                        $minKmRetour = $startKm > 0 ? $startKm + 1 : 0;
+                        $minKmRetour = $startKm > 0 ? $startKm : 0;
                         $maxKmRetour = $startKm + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>
                         <input type="number"
                                name="options_arrival_mileage"
                                class="plv2-km-input"
                                min="<?php echo $minKmRetour; ?>"
                                max="<?php echo $maxKmRetour; ?>"
+                               value="<?php echo $startKm > 0 ? $startKm : ''; ?>"
                                placeholder="000000"
                                required>
                         <?php if ($startKm > 0) : ?>
