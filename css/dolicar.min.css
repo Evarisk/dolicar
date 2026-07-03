@@ -618,6 +618,19 @@
 .page-public-card .plv2-app .dolicar-trip-media-row .saturne-upload-label i {
   font-size: 15px;
 }
+.page-public-card .plv2-app .dolicar-problem-media-row .open-media-editor-as-gallery,
+.page-public-card .plv2-app .dolicar-trip-media-row .open-media-editor-as-gallery {
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  min-height: 38px;
+  margin-left: 3px;
+  border-radius: 8px;
+}
+.page-public-card .plv2-app .dolicar-problem-media-row .open-media-editor-as-gallery img,
+.page-public-card .plv2-app .dolicar-trip-media-row .open-media-editor-as-gallery img {
+  border-radius: 8px !important;
+}
 .page-public-card .plv2-app .plv2-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
