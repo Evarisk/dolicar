@@ -213,6 +213,20 @@ class pdf_vehiclestatesheet
                     ['label' => $outputLangs->transnoentities('Signature'), 'image' => true, 'leftImg' => $trip['start_signature'], 'rightImg' => $trip['end_signature']],
                 ]
             );
+            $render->spacer(3);
+
+            // Départ / retour photos taken through the public logbook media block
+            if (!empty($trip['legacy_photos'])) {
+                // Trip recorded before the départ/retour split (issue #457): one combined section
+                $render->sectionTitle($outputLangs->transnoentities('TripPhotos'));
+                $render->photoGrid($trip['legacy_photos'], $outputLangs->transnoentities('NoPhoto'));
+            } else {
+                $render->sectionTitle($outputLangs->transnoentities('PhotosDeparture'));
+                $render->photoGrid($trip['depart_photos'], $outputLangs->transnoentities('NoPhoto'));
+                $render->spacer(3);
+                $render->sectionTitle($outputLangs->transnoentities('PhotosReturn'));
+                $render->photoGrid($trip['return_photos'], $outputLangs->transnoentities('NoPhoto'));
+            }
             $render->spacer(5);
         }
 
