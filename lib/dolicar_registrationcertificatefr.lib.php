@@ -130,6 +130,58 @@ function dolicar_vehicle_event_type_enabled(string $const): bool
 }
 
 /**
+ * Build a "magnifier" link opening a linked object's last generated PDF in the Dolibarr
+ * document preview modal (used in the vehicle history "linked documents" column).
+ *
+ * last_main_doc is stored relative to the data root, i.e. it carries the module sub-dir prefix
+ * (e.g. "propale/REF/REF.pdf" — note the module dir name may differ from the modulepart, like
+ * "propale" vs "propal"). document.php resolves the modulepart to $dirOutput, so the path handed to
+ * getAdvancedPreviewUrl() must be relative to that dir: the module output dir is stripped from the
+ * real file path. The loupe is only rendered when the physical file actually exists, so a stale
+ * last_main_doc never yields a broken "file does not exist" preview.
+ *
+ * @param  CommonObject $linkedObject Linked object carrying last_main_doc + entity (already fetched)
+ * @param  string       $modulePart   document.php modulepart matching the object type (e.g. 'facture')
+ * @param  string       $dirOutput    Absolute module output dir, i.e. $conf->{module}->dir_output
+ * @return string                     HTML <a> with a search-plus picto, or '' when nothing to preview
+ */
+function dolicar_vehicle_event_doc_preview_link($linkedObject, string $modulePart, string $dirOutput): string
+{
+    global $langs;
+
+    if (empty($linkedObject->last_main_doc) || empty($dirOutput)) {
+        return '';
+    }
+
+    // last_main_doc is relative to DOL_DATA_ROOT — no loupe when the file is gone
+    $absFile = DOL_DATA_ROOT . '/' . $linkedObject->last_main_doc;
+    if (!dol_is_file($absFile)) {
+        return '';
+    }
+
+    // Path relative to the modulepart base dir. Use the real module output dir (not a guessed name)
+    // so quirks like "propale" vs "propal" resolve correctly. Fallback to <ref>/<file> if the dir
+    // is not a prefix of the file (unexpected layout).
+    $dirOutput    = rtrim($dirOutput, '/');
+    $relativePath = (strpos($absFile, $dirOutput . '/') === 0)
+        ? substr($absFile, strlen($dirOutput) + 1)
+        : dol_sanitizeFileName($linkedObject->ref) . '/' . basename($absFile);
+
+    $preview = getAdvancedPreviewUrl($modulePart, $relativePath, 1, '&entity=' . (int) $linkedObject->entity);
+    if (empty($preview) || empty($preview['url'])) {
+        return '';
+    }
+
+    return ' <a href="' . $preview['url'] . '"'
+        . (!empty($preview['css']) ? ' class="' . $preview['css'] . '"' : '')
+        . (!empty($preview['mime']) ? ' mime="' . $preview['mime'] . '"' : '')
+        . (!empty($preview['target']) ? ' target="' . $preview['target'] . '"' : '')
+        . ' title="' . dol_escape_htmltag($langs->trans('Preview')) . '">'
+        . img_picto($langs->trans('Preview'), 'search-plus')
+        . '</a>';
+}
+
+/**
  * Normalize with regex registration number field
  *
  * @param  string $registrationNumber Registration number

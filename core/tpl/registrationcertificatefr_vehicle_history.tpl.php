@@ -143,6 +143,7 @@ if (!empty($eventsList)) {
             if ($tmpFac->fetch($facId) > 0) {
                 $linkedHtml .= '<div class="inline-block">';
                 $linkedHtml .= $tmpFac->getNomUrl(1);
+                $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpFac, 'facture', $conf->facture->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpFac->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpFac->note_public)) {
                     $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpFac->note_public, 80)) . '</span>';
@@ -158,6 +159,7 @@ if (!empty($eventsList)) {
             if ($tmpPropal->fetch($propalId) > 0) {
                 $linkedHtml .= '<div class="inline-block">';
                 $linkedHtml .= $tmpPropal->getNomUrl(1);
+                $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpPropal, 'propal', $conf->propal->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpPropal->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpPropal->note_public)) {
                     $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpPropal->note_public, 80)) . '</span>';
@@ -173,6 +175,7 @@ if (!empty($eventsList)) {
             if ($tmpExpenseReport->fetch($expenseReportId) > 0) {
                 $linkedHtml .= '<div class="inline-block">';
                 $linkedHtml .= $tmpExpenseReport->getNomUrl(1);
+                $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpExpenseReport, 'expensereport', $conf->expensereport->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpExpenseReport->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpExpenseReport->note_public)) {
                     $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpExpenseReport->note_public, 80)) . '</span>';
@@ -188,6 +191,7 @@ if (!empty($eventsList)) {
             if ($tmpSupplierOrder->fetch($supplierOrderId) > 0) {
                 $linkedHtml .= '<div class="inline-block">';
                 $linkedHtml .= $tmpSupplierOrder->getNomUrl(1);
+                $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpSupplierOrder, 'commande_fournisseur', $conf->fournisseur->commande->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpSupplierOrder->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpSupplierOrder->note_public)) {
                     $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierOrder->note_public, 80)) . '</span>';
@@ -203,6 +207,7 @@ if (!empty($eventsList)) {
             if ($tmpSupplierInvoice->fetch($supplierInvoiceId) > 0) {
                 $linkedHtml .= '<div class="inline-block">';
                 $linkedHtml .= $tmpSupplierInvoice->getNomUrl(1);
+                $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpSupplierInvoice, 'facture_fournisseur', $conf->fournisseur->facture->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpSupplierInvoice->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpSupplierInvoice->note_public)) {
                     $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierInvoice->note_public, 80)) . '</span>';
@@ -218,6 +223,7 @@ if (!empty($eventsList)) {
             if ($tmpControl->fetch($controlId) > 0) {
                 $linkedHtml .= '<div class="inline-block">';
                 $linkedHtml .= $tmpControl->getNomUrl(1);
+                $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpControl, 'digiquali', $conf->digiquali->dir_output);
                 $linkedHtml .= ' &mdash; ' . $tmpControl->getLibVerdict(4);
                 if (!empty($tmpControl->note_public)) {
                     $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpControl->note_public, 80)) . '</span>';
