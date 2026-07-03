@@ -649,6 +649,20 @@
 
         i { font-size: 15px; }
       }
+
+      // Photo thumbnail: match the 38x38 icon buttons (Saturne defaults to 50x50) and
+      // space it from the camera button. The margin lives on the thumbnail itself — not on
+      // the upload-block gap — so an empty gallery never leaves a phantom gap before a photo.
+      .open-media-editor-as-gallery {
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+        min-height: 38px;
+        margin-left: 3px;
+        border-radius: 8px;
+
+        img { border-radius: 8px !important; }
+      }
     }
 
     .plv2-form-row {
