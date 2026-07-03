@@ -754,5 +754,12 @@ $(document).on('change', '#driver_socid', function () {
 </script>
 
 <?php
+// Photo editor modal — required by saturne_render_media_block() photo uploads on the trip /
+// problem / repair screens. Its DOM (#saturne-photo-editor-modal) must exist at page load,
+// otherwise window.saturne.photoEditor.open() returns silently and selecting a photo does nothing.
+if (in_array($showScreen, ['form', 'problem', 'repair'], true)) {
+    include dol_buildpath('/saturne/core/tpl/medias/photo_editor_modal.tpl.php');
+}
+
 llxFooter('', 'public');
 $db->close();
