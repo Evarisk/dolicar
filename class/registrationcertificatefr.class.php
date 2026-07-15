@@ -24,6 +24,9 @@
 // Load Saturne libraries
 require_once __DIR__ . '/../../saturne/class/saturneobject.class.php';
 
+// Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+
 // Load DoliCar libraries
 require_once __DIR__ .'/../lib/dolicar_functions.lib.php';
 
@@ -553,7 +556,7 @@ class RegistrationCertificateFr extends SaturneObject
 
                 if (empty($xmlData) || !empty($curlError)) {
                     $this->saveApiErrorToDraft($pendingDraftId, $curlError);
-                    setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $curlError), [], 'errors');
+                    setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $searchValue), [], 'errors');
                     header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
                     exit;
                 } else {
@@ -561,7 +564,7 @@ class RegistrationCertificateFr extends SaturneObject
                     if ($xml === false || !isset($xml->vehicleJson)) {
                         dol_syslog(__METHOD__ . ' immatriculationapi.com: unexpected response (not XML or missing vehicleJson): ' . $xmlData, LOG_ERR);
                         $this->saveApiErrorToDraft($pendingDraftId, $xmlData);
-                        setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $xmlData), [], 'errors');
+                        setEventMessages($langs->trans('BadAPIUsernameOrBadLicencePlateFormat', $searchValue), [], 'errors');
                         header('Location: ' . $_SERVER['PHP_SELF'] . '?action=create&a_registration_number=' . GETPOST('registrationNumber'));
                         exit;
                     }

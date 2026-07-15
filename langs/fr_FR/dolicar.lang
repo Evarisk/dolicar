@@ -109,6 +109,25 @@ ListRegistrationcertificatefr   = Liste des cartes grises
 NewRegistrationcertificatefr    = Nouvelle carte grise
 ModifyRegistrationcertificatefr = Modifier la carte grise
 FindLicencePlateInRepertory     = Rechercher une plaque d'immatriculation
+RegistrationPlate               = Immatriculation
+QualityControlInterface         = Interface de contrôle qualité
+
+# Public vehicle logbook - Signaler un problème
+ReportProblem                   = Signaler un problème
+ReportedProblem                 = Problème signalé
+ReportProblemSub                = Photo, commentaire, vocal
+DescribeProblem                 = Décrivez le problème rencontré
+PhotoAndVoiceMemo               = Photo et mémo vocal
+SendReport                      = Envoyer le signalement
+ProblemReportSent               = Signalement envoyé
+ProblemReportSentDesc           = Le responsable a été prévenu par email.
+ProblemReportedOnVehicle        = Problème signalé sur le véhicule %s
+ProblemReportEmailSubject       = Problème signalé - véhicule %s
+ProblemReportEmailIntro         = Un problème a été signalé sur le véhicule %s via le carnet de bord public.
+AccessVehicleSheet              = Accéder à la fiche du véhicule
+ProblemReportConfig             = Signalement de problème
+ProblemReportEmail              = Email du responsable
+ProblemReportEmailDesc          = Adresse à laquelle les signalements de problème du carnet de bord public sont envoyés. Si vide, l'email de la société est utilisé.
 
 # Fiels - Champs
 RegistrationNumber            = Numéro d'immatriculation (A)
@@ -168,7 +187,7 @@ LinkedProductBatch = Numéro de lot/série lié
 ZeroApiRequestsRemaining              = Vous n'avez plus de jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
 LessThanHundredApiRequestsRemaining   = Il vous reste moins de 10 jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
 LicencePlateWasAlreadyExisting        = La plaque d'immatriculation existe déjà, vous avez été redirigé(e) sur sa page.
-BadAPIUsernameOrBadLicencePlateFormat = Erreur (<strong> %s </strong>) <br> Mauvais nom d'utilisateur ou format de plaque d'immatriculation. <br> Veuillez utiliser l'un des formats suivants pour la plaque d'immatriculation : <br><b> XX-111-XX <br>  XX111XX </b>
+BadAPIUsernameOrBadLicencePlateFormat = La plaque <strong>%s</strong> est introuvable ou son format est invalide.<br>Veuillez utiliser l'un des formats suivants : <br><b>XX-111-XX<br>XX111XX</b>
 LicencePlateInformationsCharged       = Les informations de la carte grise ont bien été récupérées
 LicencePlateInformationsFromDatabase  = Les informations ont été récupérées depuis la base de données (aucun jeton consommé)
 BadAPIUsername                        = Nom d'utilisateur pour l'API invalide
@@ -199,6 +218,7 @@ LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les c
 # Public interface - Interface publique
 PublicVehicleLogBook          = Carnet de bord publique du véhicule
 Driver                        = Conducteur
+DriverName                    = Nom du conducteur
 StartDateAndHour              = Date et heure de départ
 StartingMileage               = Kilométrage de départ
 StartComment                  = Commentaire de départ
@@ -208,6 +228,88 @@ EndComment                    = Commentaire d'arrivé
 ObjectAddPublicVehicleLogBook = Suivi Km : %s - VIN : %s
 SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
 LicencePlateNotFoundInDB      = La plaque d'immatriculation est introuvable dans la base de données des cartes grises
+
+# Public interface v2 - Nouveaux libellés
+HelloDriver                  = Bonjour
+WhichVehicleToday            = Quel véhicule prenez-vous aujourd'hui ?
+EnterPlate                   = Saisir la plaque d'immatriculation
+QRCodeMayHavePrefilled       = Le QRCode collé dans le véhicule l'a peut-être déjà préremplie
+PlateNotFound                = Plaque introuvable
+VehicleFound                 = Véhicule trouvé
+KnownMileage                 = Kilométrage connu
+VehicleCurrentlyOut          = Véhicule actuellement SORTI
+VehicleCurrentlyIn           = Véhicule disponible
+WhatDoYouWantToDo            = Que voulez-vous faire ?
+TakeVehicle                  = Je prends
+DeclareDeparture             = Déclarer un départ
+ReturnVehicle                = Je rends
+DeclareReturn                = Déclarer un retour
+ReturnExpected               = Le véhicule étant sorti, le retour est attendu
+WhoAreYou                    = Qui êtes-vous ?
+SelectDriver                 = Sélectionner un conducteur
+DriverInternal               = Utilisateur interne
+DriverExternal               = Externe
+SelectContact                = Sélectionner un contact
+SelectAThirdPartyFirst       = Choisir d'abord un tiers
+RegistrationCertificatesList = Liste des cartes grises
+NoRegistrationCertificate    = Aucune carte grise
+BottomBarVehiclesList        = Cartes grises
+BottomBarCurrentVehicle      = En cours
+SearchVehicle                = Rechercher (plaque, marque, modèle)
+NoVehicleFound               = Aucun véhicule trouvé
+When                         = Quand
+LastKnownMileage             = Dernier kilométrage connu
+DepartureMileage             = Kilométrage au départ
+FuelLevel                    = Niveau de carburant
+FuelReserve                  = Réserve
+FuelFull                     = Plein
+Observation                  = Observation
+Remarks                      = Remarques (optionnel)
+RemarksPlaceholder           = Voyants, incidents, état général, plein effectué...
+VehiclePhotos                = Photos du véhicule
+AddPhoto                     = Ajouter
+SignHere                     = Appuyer pour signer
+ValidateDeparture            = Valider le départ
+ValidateReturn               = Valider le retour
+DepartureRecorded            = Départ enregistré !
+ReturnRecorded               = Retour enregistré !
+ActionCommCreatedInAgenda    = L'événement a été ajouté à l'agenda Dolibarr et la carte grise mise à jour.
+NewEntry                     = Saisir une autre entrée
+Departure                    = Départ
+Return                       = Retour
+RecentTrips                  = Derniers trajets
+TripInProgress               = En cours
+TripDone                     = Terminé
+ClosePublicLogBook           = Fermer
+
+# Public interface - Trajets (issue #457)
+BottomBarHistory             = Trajets
+VehicleTripHistory           = Trajets
+Trips                        = trajets
+NoTripRecorded               = Aucun trajet enregistré pour ce véhicule
+SeeAllTripHistory            = Voir tous les trajets
+ViewStateSheet               = Voir la fiche état
+
+# Public interface - Réparation
+Repair               = Réparation
+BottomBarRepair      = Réparation
+RepairDate           = Date de la réparation
+RepairMileage        = Kilométrage
+RepairDescription    = Description de la réparation
+RepairOnVehicle      = Réparation sur le véhicule %s
+RepairRecorded       = Réparation enregistrée !
+RepairRecordedDesc   = L'événement a été ajouté à l'historique du véhicule.
+ValidateRepair       = Enregistrer la réparation
+
+# Public interface - Contrôle DigiQuali
+Control                  = Contrôle
+BottomBarControl         = Contrôle
+ControlSheet             = Modèle de contrôle
+Controller               = Contrôleur
+ControlOnVehicle         = Contrôle - véhicule %s
+CreateAndFillControl     = Créer et remplir le contrôle
+SelectControlSheet       = Choisir un modèle de contrôle
+NoControlSheetAvailable  = Aucun modèle de contrôle applicable aux véhicules n'est disponible.
 
 
 
@@ -249,20 +351,104 @@ UpdateCarBrandsList    = Mettre à jour la liste
 CarBrandsUpdated       = La liste des marques a été mise à jour
 
 # Documents
-LivretEntretien          = Carnet d'entretien
-GenerateLivretEntretien  = Générer le carnet d'entretien
+LivretEntretien              = Carnet d'entretien
+GenerateLivretEntretien      = Générer le carnet d'entretien
+VehicleLogBookDocument       = Carnet de bord
+GenerateVehicleLogBookDocument = Générer le carnet de bord
 
 # Vehicle history - Historique véhicule
-AddVehicleEvent            = Ajouter un événement véhicule
-VehicleEventType           = Type d'événement
-VehicleEventTypeCT         = Contrôle technique
-VehicleEventTypeRevision   = Révision
-VehicleEventTypeAccident   = Accident
-VehicleEventTypeAutre      = Autre
-VehicleHistory             = Historique du véhicule
-NoVehicleHistory           = Aucun événement enregistré
-VehicleEventAdded          = Événement véhicule ajouté avec succès
+AddVehicleEvent                = Ajouter un événement véhicule
+VehicleEventType               = Type d'événement
+VehicleHistory                 = Historique du véhicule
+NoVehicleHistory               = Aucun événement enregistré
+VehicleEventAdded              = Événement véhicule ajouté avec succès
+LinkedDocuments                = Documents liés
+Invoices                       = Factures
+Proposals                      = Devis
+ExpenseReports                 = Notes de frais
+ExpenseReportLines             = Lignes de note de frais
+SuppliersOrders                = Commandes fournisseurs
+SuppliersInvoices              = Factures fournisseurs
+Controls                       = Contrôles DigiQuali
+DolicarVehicleEventCategory    = DoliCar Véhicule Événement
+VehicleEventLinkableDocuments  = Documents liables aux événements véhicule
+VehicleEventLinkableDocumentHelp = Si activé, ce type de document peut être lié lors de l''ajout d''un événement dans l''historique du véhicule.
 ErrorUpdateCarBrandsFromApi = Erreur lors de la mise à jour des marques depuis l''API : %s
 ErrorUpdateCarBrandsFromApiBadResponse = Réponse invalide de l''API lors de la mise à jour des marques
 ErrorUpdateCarBrandsFromApiNoData = Aucune donnée de marque trouvée dans la réponse de l''API
 ErrorUpdateCarBrandsFile = Impossible d''écrire le fichier car_brands.txt
+
+# PDF documents - Documents PDF (livret d'entretien / carnet de bord)
+LivretEntretienPDFDescription        = Modèle PDF de carnet d''entretien du véhicule
+VehicleLogBookDocumentPDFDescription = Modèle PDF de carnet de bord du véhicule
+EditedOn                             = Édité le
+RegistrationCardReference            = Référence carte grise
+LicensePlate                         = Plaque d''immatriculation
+BrandAndModel                        = Marque et modèle
+Energy                               = Énergie
+OwnerThirdParty                      = Tiers / Propriétaire
+CurrentMileage                       = Kilométrage actuel
+MaintenanceSynthesis                 = Synthèse de l''entretien
+Interventions                        = Interventions
+TotalCostInclTax                     = Coût total TTC
+LastIntervention                     = Dernière intervention
+InterventionsJournal                 = Journal des interventions
+InterventionType                     = Type
+Comment                              = Commentaire
+CostInclTax                          = Coût TTC
+TotalMaintenance                     = Total entretien
+Validation                           = Validation
+DocumentEditedBy                     = Document édité le %s par %s pour la société %s.
+FleetManager                         = Responsable du parc
+CompanyStamp                         = Tampon société
+Fuel                                 = Carburant
+VinOrLotNumber                       = VIN / N° de lot
+TripsSynthesis                       = Synthèse des trajets
+TotalTrips                           = Total trajets
+CompletedTrips                       = Trajets terminés
+TripsHistory                         = Historique des trajets
+DepartureDate                        = Date départ
+ReturnDate                           = Date retour
+Comments                             = Commentaires
+Signatures                           = Signatures
+
+# PDF fiche état avant/après et fiche photos (issue #457)
+VehicleStateSheet                    = Fiche état avant/après
+VehiclePhotosSheet                   = Fiche détails photos
+VehicleStateSheetPDFDescription      = Modèle PDF de fiche état du véhicule (départ / retour)
+VehiclePhotosSheetPDFDescription     = Modèle PDF des photos du véhicule (départ / retour)
+VehicleStateBeforeAfter              = État du véhicule — Avant / Après
+TripOf                               = Trajet du %s
+PhotosDeparture                      = Photos départ
+PhotosReturn                         = Photos retour
+TripPhotos                           = Photos du trajet
+NoPhoto                              = Aucune photo
+NoCompletedTrip                      = Aucun trajet terminé
+Signature                            = Signature
+
+# Import - Import de cartes grises
+ImportRegistrationCertificate         = Importer des cartes grises
+ImportRegistrationCertificateDesc     = Importez vos cartes grises depuis un fichier CSV. Chaque ligne est créée via la logique métier du module (normalisation de la plaque, produit/lot et déclencheurs).
+ImportFromCSV                         = Import depuis un fichier CSV
+CSVFile                               = Fichier CSV
+UpdateExistingRecords                 = Mettre à jour les fiches existantes
+UpdateExistingRecordsHelp             = Si une carte grise avec la même immatriculation existe déjà, elle est mise à jour. Sinon la ligne est ignorée.
+DownloadCSVTemplate                   = Télécharger le modèle CSV
+LaunchImport                          = Lancer l'import
+ImportResults                         = Résultats de l'import
+RecognizedColumns                     = Colonnes reconnues
+CSVColumn                             = Colonne CSV
+FieldName                             = Champ
+ImportStatusCreated                   = Créée
+ImportStatusUpdated                   = Mise à jour
+ImportStatusSkipped                   = Ignorée
+ImportStatusError                     = Erreur
+ImportLineAlreadyExists               = Une carte grise existe déjà pour cette immatriculation
+ImportErrorEmptyPlate                 = Numéro d'immatriculation manquant
+ImportThirdPartyNotFound              = Tiers « %s » introuvable
+ImportProductNotFound                 = Produit « %s » introuvable
+ImportProjectNotFound                 = Projet « %s » introuvable
+ImportSummaryMessage                  = Import terminé : %s créée(s), %s mise(s) à jour, %s ignorée(s), %s en erreur.
+ErrorNoFileUploaded                   = Aucun fichier n'a été envoyé
+ErrorEmptyCSVFile                     = Le fichier CSV est vide ou ne contient aucune donnée
+ErrorMissingRegistrationNumberColumn  = La colonne « immatriculation » est obligatoire et n'a pas été trouvée dans le fichier

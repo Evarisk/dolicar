@@ -44,13 +44,20 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
 // Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 require_once __DIR__ . '/../../class/dolicardocuments/livretentretien.class.php';
+require_once __DIR__ . '/../../class/dolicardocuments/vehiclelogbookdocument.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
+if (isModEnabled('digiquali')) {
+    require_once __DIR__ . '/../../../digiquali/class/sheet.class.php';
+}
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs(['propal', 'interventions']);
+if (isModEnabled('digiquali')) {
+    $langs->load('digiquali@digiquali');
+}
 
 // Get parameters
 $id                  = GETPOST('id', 'int');
@@ -104,6 +111,18 @@ $permissiontoadd    = $user->rights->dolicar->registrationcertificatefr->write;
 $permissiontodelete = $user->rights->dolicar->registrationcertificatefr->delete;
 saturne_check_access($permissionToRead);
 
+// Build the list of DigiQuali sheets linked to productlot (used in quick-control creator widget)
+$digiQualiSheets = [];
+if (isModEnabled('digiquali') && !empty($object->fk_lot) && $object->fk_lot > 0) {
+    $digiQualiSheetObj = new Sheet($db);
+    $result            = $digiQualiSheetObj->fetchAll('', '', 0, 0, [
+        'customsql' => "t.status = " . Sheet::STATUS_LOCKED . " AND t.element_linked LIKE '%\"productlot\"%' AND t.type = 'control'",
+    ]);
+    if (is_array($result)) {
+        $digiQualiSheets = $result;
+    }
+}
+
 /*
  * Actions
  */
@@ -142,8 +161,31 @@ if (empty($resHook)) {
     // Actions builddoc, forcebuilddoc, remove_file
     $upload_dir = '';
     if ($id > 0) {
-        $dirOutput  = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
-        $upload_dir = $dirOutput . '/livretentretien/' . dol_sanitizeFileName($object->ref);
+        $dirOutput = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+
+        if ($action === 'remove_file_vlb' && $permissiontodelete) {
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            $fileToDelete  = GETPOST('file', 'alpha');
+            $file          = $dirOutput . '/vehiclelogbookdocument/' . dol_sanitizeFileName($object->ref) . '/' . $fileToDelete;
+            $result        = dol_delete_file($file, 0, 0, 0, $object);
+            if ($result > 0) {
+                setEventMessages($langs->trans('FileWasRemoved', $fileToDelete), []);
+            } else {
+                setEventMessages($langs->trans('ErrorFailToDeleteFile', $fileToDelete), [], 'errors');
+            }
+            $urlToRedirect = preg_replace('/#builddoc$/', '', $_SERVER['REQUEST_URI']);
+            $urlToRedirect = preg_replace('/action=remove_file_vlb&?/', '', $urlToRedirect);
+            header('Location: ' . $urlToRedirect);
+            exit;
+        }
+
+        $requestedModel = GETPOST('model', 'alpha');
+        if (($action === 'builddoc' || GETPOST('forcebuilddoc')) && strpos($requestedModel, 'vehiclelogbookdocument') !== false) {
+            $document   = new VehicleLogBookDocument($db);
+            $upload_dir = $dirOutput . '/vehiclelogbookdocument/' . dol_sanitizeFileName($object->ref);
+        } else {
+            $upload_dir = $dirOutput . '/livretentretien/' . dol_sanitizeFileName($object->ref);
+        }
 
         $moreParams = [
             'object'           => $object,
@@ -410,6 +452,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     $formConfirm = '';
 
+    // Confirmation to delete
+    if ($action == 'delete') {
+        $formConfirm .= $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('Delete'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
+    }
+
     // Call Hook formConfirm
     $parameters = ['formConfirm' => $formConfirm];
     $resHook    = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
@@ -471,8 +518,43 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
                 });
             }
         }
+
     </script>
     <?php
+
+    if (isModEnabled('digiquali') && !empty($object->fk_lot) && $object->fk_lot > 0 && !empty($digiQualiSheets)) {
+        $controlCardUrl = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1);
+        $backToPage     = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
+        $logoUrl        = dol_buildpath('/custom/digiquali/img/digiquali_color.svg', 1);
+
+        $sheetsForJs = [];
+        foreach ($digiQualiSheets as $digiQualiSheet) {
+            $sheetsForJs[] = ['id' => (int) $digiQualiSheet->id, 'text' => $digiQualiSheet->label];
+        }
+
+        print '<div id="dolicar-quick-control-widget" data-sheets="' . dol_escape_htmltag(json_encode($sheetsForJs)) . '">';
+        print '<div class="dolicar-control-inline-creator">';
+        print '<img src="' . dol_escape_htmltag($logoUrl) . '" alt="DigiQuali" class="dolicar-control-logo">';
+        print '<span class="dolicar-control-separator">|</span>';
+        print '<select id="dolicar_quick_control_sheet" class="dolicar-control-model-select">';
+        print '</select>';
+        print ajax_combobox('dolicar_quick_control_sheet', [], 0, 0, 'resolve', '-1', 'dolicar-control-model-select');
+        print '<button type="button" class="dolicar-control-add-btn button-disable" disabled title="' . dol_escape_htmltag($langs->transnoentities('NewControl')) . '">';
+        print '<i class="fas fa-plus-circle"></i>';
+        print '</button>';
+        print '</div>';
+        print '</div>';
+
+        print '<form id="dolicar-quick-control-form" method="POST" action="' . dol_escape_htmltag($controlCardUrl) . '" style="display:none">';
+        print '<input type="hidden" name="token" value="' . newToken() . '">';
+        print '<input type="hidden" name="action" value="add">';
+        print '<input type="hidden" name="label" value="">';
+        print '<input type="hidden" name="fk_user_controller" value="' . (int) $user->id . '">';
+        print '<input type="hidden" name="fk_productlot" value="' . (int) $object->fk_lot . '">';
+        print '<input type="hidden" name="fk_sheet" value="">';
+        print '<input type="hidden" name="backtopage" value="' . dol_escape_htmltag($backToPage) . '">';
+        print '</form>';
+    }
 
     print '<div class="clearboth"></div>';
 
@@ -505,6 +587,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
                 $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-ambulance"></i>' . ' ' . $langs->trans('NewIntervention') : '<i class="fas fa-ambulance fa-2x"></i>';
                 print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
             }
+
+            $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-trash pictofixedwidth"></i>' . $langs->trans('Delete') : '<i class="fas fa-trash fa-2x"></i>';
+            print dolGetButtonAction($displayButton, '', 'delete', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=delete&token=' . newToken(), '', $permissiontodelete);
         }
         print '</div>';
     }
@@ -512,17 +597,27 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     // Linked objects section
     require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
 
-    // Documents section
+    // Documents and actions section
     if ($action != 'presend') {
-        $dirOutput = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
-        $dirFiles  = 'livretentretien/' . dol_sanitizeFileName($object->ref);
-        $fileDir   = $dirOutput . '/' . $dirFiles;
-        $urlSource = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
+        $dirOutput   = !empty($conf->dolicar->multidir_output[$conf->entity]) ? $conf->dolicar->multidir_output[$conf->entity] : $conf->dolicar->dir_output;
+        $urlSource   = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
+
+        $dirFilesLe  = 'livretentretien/' . dol_sanitizeFileName($object->ref);
+        $fileDirLe   = $dirOutput . '/' . $dirFilesLe;
+        $dirFilesVlb = 'vehiclelogbookdocument/' . dol_sanitizeFileName($object->ref);
+        $fileDirVlb  = $dirOutput . '/' . $dirFilesVlb;
 
         print '<div class="fichecenter">';
+
         print '<div class="fichehalfleft">';
-        print saturne_show_documents('dolicar:Livretentretien', $dirFiles, $fileDir, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object);
+        print saturne_show_documents('dolicar:Livretentretien', $dirFilesLe, $fileDirLe, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object);
+        print saturne_show_documents('dolicar:VehicleLogBookDocument', $dirFilesVlb, $fileDirVlb, $urlSource, $permissiontoadd, $permissiontodelete, getDolGlobalString('DOLICAR_VEHICLELOGBOOKDOCUMENT_DEFAULT_MODEL'), 1, 0, 0, 0, 0, '', '', $langs->defaultlang, '', $object, 0, 'remove_file_vlb');
         print '</div>';
+
+        print '<div class="fichehalfright">';
+        require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_actioncom.tpl.php';
+        print '</div>';
+
         print '</div>';
     }
 }

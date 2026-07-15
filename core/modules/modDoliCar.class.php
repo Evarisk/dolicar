@@ -78,7 +78,7 @@ class modDoliCar extends DolibarrModules
         $this->editor_url  = 'https://www.evarisk.com';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '22.0.0';
+        $this->version = '23.0.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -214,7 +214,11 @@ class modDoliCar extends DolibarrModules
 
             // CONST LIVRET ENTRETIEN
             $i++ => ['DOLICAR_LIVRETENTRETIEN_ADDON', 'chaine', 'mod_livretentretien_standard', '', 0, 'current'],
-            $i++ => ['DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH', 'chaine', 'DOL_DOCUMENT_ROOT/custom/dolicar/documents/doctemplates/livretentretien/', '', 0, 'current'],
+            $i++ => ['DOLICAR_LIVRETENTRETIEN_DEFAULT_MODEL', 'chaine', 'livretentretien', '', 0, 'current'],
+
+            // CONST VEHICLE LOGBOOK DOCUMENT
+            $i++ => ['DOLICAR_VEHICLELOGBOOKDOCUMENT_ADDON', 'chaine', 'mod_vehiclelogbookdocument_standard', '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLELOGBOOKDOCUMENT_DEFAULT_MODEL', 'chaine', 'vehiclelogbookdocument', '', 0, 'current'],
         ];
 
         if (!isset($conf->dolicar) || !isset($conf->dolicar->enabled)) {
@@ -336,7 +340,7 @@ class modDoliCar extends DolibarrModules
         ];
 
         $this->menu[$r++] = [
-            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'fk_menu'  => 'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',
             'type'     => 'left',
             'titre'    => $langs->transnoentities('QuickCreation'),
             'prefix'   => '<i class="fas fa-plus-circle pictofixedwidth"></i>',
@@ -345,8 +349,24 @@ class modDoliCar extends DolibarrModules
             'url'      => '/dolicar/view/registrationcertificatefr/quickcreation.php',
             'langs'    => 'dolicar@dolicar',
             'position' => 1000 + $r,
-            'enabled'  => '$conf->reedcrm->enabled',
+            'enabled'  => '$conf->dolicar->enabled',
             'perms'    => '$user->rights->dolicar->read',
+            'target'   => '',
+            'user'     => 0
+        ];
+
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('ImportRegistrationCertificate'),
+            'prefix'   => '<i class="fas fa-file-import pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'registrationcertificatefr_import',
+            'url'      => '/dolicar/view/registrationcertificatefr/registrationcertificatefr_import.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->registrationcertificatefr->write',
             'target'   => '',
             'user'     => 0
         ];
@@ -454,11 +474,11 @@ class modDoliCar extends DolibarrModules
             'prefix'   => '<i class="fas fa-globe pictofixedwidth"></i>',
             'mainmenu' => 'dolicar',
             'leftmenu' => 'public_interface',
-            'url'      => '/custom/dolicar/public/agenda/public_vehicle_logbook.php?entity=' . $conf->entity,
+            'url'      => '/custom/dolicar/admin/publicinterface.php',
             'langs'    => 'dolicar@dolicar',
             'position' => 1000 + $r,
-            'enabled'  => '$conf->dolicar->enabled && $conf->global->SATURNE_ENABLE_PUBLIC_INTERFACE',
-            'perms'    => 1,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->adminpage->read',
             'target'   => '',
             'user'     => 0
         ];
@@ -690,7 +710,105 @@ class modDoliCar extends DolibarrModules
             }
         }
 
-        addDocumentModel('livretentretien_odt', 'livretentretien', 'ODT templates', 'DOLICAR_LIVRETENTRETIEN_ADDON_ODT_PATH');
+        // Vehicle event categories backward compatibility: migrate old code-based events to the category system
+        if (getDolGlobalInt('DOLICAR_VEHICLE_EVENT_BACKWARD_COMPAT') == 0) {
+            require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+
+            // Find or create the parent category
+            $vehicleEventParentId = getDolGlobalInt('DOLICAR_VEHICLE_EVENT_CATEGORY_ID');
+            $parentCat            = new Categorie($this->db);
+
+            if ($vehicleEventParentId <= 0 || $parentCat->fetch($vehicleEventParentId) <= 0) {
+                $findParent = new Categorie($this->db);
+                if ($findParent->fetch(0, 'DoliCar Véhicule Événement', Categorie::TYPE_ACTIONCOMM) > 0) {
+                    $vehicleEventParentId = $findParent->id;
+                    $parentCat            = $findParent;
+                } else {
+                    $newParent            = new Categorie($this->db);
+                    $newParent->label     = 'DoliCar Véhicule Événement';
+                    $newParent->type      = Categorie::TYPE_ACTIONCOMM;
+                    $newParent->fk_parent = 0;
+                    $newParent->visible   = 1;
+                    $vehicleEventParentId = $newParent->create($user);
+                    if ($vehicleEventParentId > 0) {
+                        $parentCat->fetch($vehicleEventParentId);
+                    }
+                }
+                if ($vehicleEventParentId > 0) {
+                    dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_EVENT_CATEGORY_ID', $vehicleEventParentId, 'chaine', 0, '', $conf->entity);
+                }
+            }
+
+            if ($vehicleEventParentId > 0) {
+                $childCatDefs = [
+                    'AC_DOLICAR_CT'       => ['label' => 'Contrôle technique', 'color' => '5BA86E'],
+                    'AC_DOLICAR_REVISION' => ['label' => 'Révision',           'color' => 'E8A317'],
+                    'AC_DOLICAR_ACCIDENT' => ['label' => 'Accident',           'color' => 'E05353'],
+                    'AC_DOLICAR_AUTRE'    => ['label' => 'Autre',              'color' => '888888'],
+                ];
+
+                // Build label→id map from existing children to avoid duplicate creation
+                $labelToId    = [];
+                $existingKids = $parentCat->get_filles();
+                if (is_array($existingKids)) {
+                    foreach ($existingKids as $kid) {
+                        $labelToId[$kid->label] = $kid->id;
+                    }
+                }
+
+                // Ensure all children exist and collect old-code→category-id mapping
+                $codeToCatId = [];
+                foreach ($childCatDefs as $oldCode => $childDef) {
+                    if (isset($labelToId[$childDef['label']])) {
+                        $codeToCatId[$oldCode] = $labelToId[$childDef['label']];
+                    } else {
+                        $child            = new Categorie($this->db);
+                        $child->label     = $childDef['label'];
+                        $child->type      = Categorie::TYPE_ACTIONCOMM;
+                        $child->fk_parent = $vehicleEventParentId;
+                        $child->color     = $childDef['color'];
+                        $child->visible   = 1;
+                        $newId = $child->create($user);
+                        if ($newId > 0) {
+                            $codeToCatId[$oldCode] = $newId;
+                        }
+                    }
+                }
+
+                // Assign the matching category to each old-style event
+                if (!empty($codeToCatId)) {
+                    $oldCodes         = "'" . implode("','", array_keys($codeToCatId)) . "'";
+                    $codeFilter       = ' AND a.code IN (' . $oldCodes . ')';
+                    $actionCommHelper = new ActionComm($this->db);
+                    $oldEvents        = $actionCommHelper->getActions(0, 0, '', $codeFilter);
+                    if (is_array($oldEvents) && !empty($oldEvents)) {
+                        foreach ($oldEvents as $evt) {
+                            if (isset($codeToCatId[$evt->code])) {
+                                $evt->setCategories([$codeToCatId[$evt->code]]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            dolibarr_set_const($this->db, 'DOLICAR_VEHICLE_EVENT_BACKWARD_COMPAT', 1, 'integer', 0, '', $conf->entity);
+        }
+
+        // Livret d'entretien and carnet de bord are now generated as PDF (TCPDF), ODT models removed
+        delDocumentModel('livretentretien_odt', 'livretentretien');
+        delDocumentModel('livretentretien', 'livretentretien');
+        addDocumentModel('livretentretien', 'livretentretien', $langs->transnoentities('LivretEntretien') . '.pdf');
+
+        delDocumentModel('vehiclelogbookdocument_odt', 'vehiclelogbookdocument');
+        delDocumentModel('vehiclelogbookdocument', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclelogbookdocument', 'vehiclelogbookdocument', $langs->transnoentities('VehicleLogBookDocument') . '.pdf');
+
+        // Before/after state sheet and departure/return photos sheet (issue #457)
+        delDocumentModel('vehiclestatesheet', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclestatesheet', 'vehiclelogbookdocument', $langs->transnoentities('VehicleStateSheet') . '.pdf');
+
+        delDocumentModel('vehiclephotossheet', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclephotossheet', 'vehiclelogbookdocument', $langs->transnoentities('VehiclePhotosSheet') . '.pdf');
 
         return $this->_init($sql, $options);
     }

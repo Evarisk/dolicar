@@ -49,6 +49,7 @@ window.dolicar.registrationcertificate = {};
 window.dolicar.registrationcertificate.init = function() {
   window.dolicar.registrationcertificate.event();
   window.dolicar.registrationcertificate.reorderFieldsOnCreate();
+  window.dolicar.registrationcertificate.initQuickControlCreator();
 };
 
 /**
@@ -61,6 +62,7 @@ window.dolicar.registrationcertificate.init = function() {
  */
 window.dolicar.registrationcertificate.event = function() {
   $(document).on('change', '#fk_product', window.dolicar.registrationcertificate.reloadFields);
+  $(document).on('click', '.dolicar-control-add-btn', window.dolicar.registrationcertificate.submitQuickControl);
   $('#public-vehicle-log-book-form').on('submit', function(event) {
     event.preventDefault();
     if (!$(this).find('.public-vehicle-log-book-validate').hasClass('button-disable')) {
@@ -146,6 +148,82 @@ window.dolicar.registrationcertificate.reloadFields = function() {
 };
 
 /**
+ * Move the quick DigiQuali control creator widget into the fk_lot row
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.dolicar.registrationcertificate.initQuickControlCreator = function() {
+  var $widget   = $('#dolicar-quick-control-widget');
+  var $fkLotRow = $('.tableforfield').find('tr.field_fk_lot');
+
+  if ($widget.length === 0 || $fkLotRow.length === 0) {
+    return;
+  }
+
+  var $creator = $widget.children('.dolicar-control-inline-creator').first();
+  $fkLotRow.find('td:last').append($creator);
+
+  var $select = $creator.find('.dolicar-control-model-select');
+
+  var sheetsData      = $widget.data('sheets') || [];
+  var placeholderText = '-- Modèle --';
+
+  $select.empty().append($('<option>').val('').text(placeholderText));
+  $.each(sheetsData, function(i, item) {
+    $select.append($('<option>').val(item.id).text(item.text));
+  });
+
+  $select.on('change', window.dolicar.registrationcertificate.updateQuickControlButton);
+
+  window.dolicar.registrationcertificate.updateQuickControlButton.call($select[0]);
+};
+
+/**
+ * Enable or disable the add button based on the model select value
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.dolicar.registrationcertificate.updateQuickControlButton = function() {
+  var $select  = $(this);
+  var $creator = $select.closest('.dolicar-control-inline-creator');
+  var $btn     = $creator.find('.dolicar-control-add-btn');
+  var val      = $select.val();
+
+  if (val && val !== '') {
+    $btn.prop('disabled', false).removeClass('button-disable');
+  } else {
+    $btn.prop('disabled', true).addClass('button-disable');
+  }
+};
+
+/**
+ * Submit the hidden quick-control form with the selected sheet id
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.dolicar.registrationcertificate.submitQuickControl = function() {
+  var $btn    = $(this);
+  var sheetId = $btn.closest('.dolicar-control-inline-creator').find('.dolicar-control-model-select').val();
+
+  if (!sheetId || sheetId === '') {
+    return;
+  }
+
+  var $form = $('#dolicar-quick-control-form');
+  $form.find('[name="fk_sheet"]').val(sheetId);
+  $form.submit();
+};
+
+/**
  * Create public vehicle log book entry
  *
  * @memberof DoliCar_RegistrationCertificate
@@ -158,6 +236,13 @@ window.dolicar.registrationcertificate.reloadFields = function() {
 window.dolicar.registrationcertificate.createPublicVehicleLogBook = function() {
   let token          = window.saturne.toolbox.getToken();
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  // Avoid duplicate entries when the button is clicked several times before the request completes
+  let $validateButton = $('.public-vehicle-log-book-validate');
+  if ($validateButton.hasClass('button-disable')) {
+    return;
+  }
+  $validateButton.addClass('button-disable');
 
   const formData = new FormData($('#public-vehicle-log-book-form')[0]);
   if (window.saturne.signature.canvas) {
@@ -172,12 +257,11 @@ window.dolicar.registrationcertificate.createPublicVehicleLogBook = function() {
     contentType: false,
     data: formData,
     success: function() {
-      $('.public-vehicle-log-book-confirmation-close').closest('.card__confirmation').css('display', 'flex');
-      $('.public-vehicle-log-book-confirmation-close').on('click', function() {
-        $('.public-vehicle-log-book-confirmation-close').closest('.card__confirmation').css('display', 'none');
-        window.location.reload();
-      });
+      // Redirect to the dedicated confirmation screen so the user gets a clear feedback
+      window.location.href = document.URL + querySeparator + 'success=1';
     },
-    error: function() {}
+    error: function() {
+      $validateButton.removeClass('button-disable');
+    }
   });
 };

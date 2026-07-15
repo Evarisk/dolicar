@@ -210,6 +210,10 @@ class ActionsDoliCar
             }
         }
 
+        if (preg_match('/propalcard|invoicecard/', $parameters['context'])) {
+            $extrafields->attributes[$object->element]['list']['registration_number'] = 0;
+        }
+
         return 0; // or return 1 to replace standard code
     }
 
@@ -224,7 +228,7 @@ class ActionsDoliCar
     {
         global $extrafields, $langs;
 
-        if (preg_match('/propallist|orderlist|invoicelist/', $parameters['context'])) {
+        if (preg_match('/(^|:)(propallist|orderlist|invoicelist)(:|$)/', $parameters['context']) && is_object($object)) {
             $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
             $extraFieldsNames = ['registration_number', 'vehicle_model', 'VIN_number', 'first_registration_date', 'mileage', 'registrationcertificatefr', 'linked_product', 'linked_lot'];
             foreach ($extraFieldsNames as $extraFieldsName) {
@@ -244,6 +248,8 @@ class ActionsDoliCar
      */
     public function formDolBanner(array $parameters, $object): int
     {
+        global $conf, $langs;
+
         if (strpos($parameters['context'], 'productlotcard') !== false) {
             $registrationCertificateFr = new RegistrationCertificateFr($this->db);
             $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 1, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
@@ -254,6 +260,25 @@ class ActionsDoliCar
                 $this->resprints .= $registrationCertificateFr->getNomUrl(1);
                 $this->resprints .= '</div>';
             }
+        }
+
+        if (strpos($parameters['context'], 'registrationcertificatefrcard') !== false && !empty($object->fk_lot)) {
+            $publicLogbookUrl = dol_buildpath('/custom/dolicar/public/agenda/public_vehicle_logbook.php', 1) . '?id=' . (int) $object->fk_lot . '&entity=' . (int) $conf->entity;
+            $this->resprints  = '<div class="refidno dolicar-banner-links">';
+            $this->resprints .= '<a href="' . dol_escape_htmltag($publicLogbookUrl) . '" target="_blank" class="dolicar-banner-link dolicar-public-logbook-link">';
+            $this->resprints .= img_picto('', 'dolicar_color@dolicar', 'class="dolicar-banner-logo"') . $langs->transnoentities('PublicVehicleLogBook');
+            $this->resprints .= '</a>';
+
+            // Link to the DigiQuali public quality-control interface for the linked vehicle lot
+            if (isModEnabled('digiquali')) {
+                $trackId          = base64_encode(json_encode(['type' => 'productlot', 'id' => (int) $object->fk_lot]));
+                $publicControlUrl = dol_buildpath('/custom/digiquali/public/control/public_control_history.php', 1) . '?track_id=' . urlencode($trackId) . '&entity=' . (int) $conf->entity;
+                $this->resprints .= '<a href="' . dol_escape_htmltag($publicControlUrl) . '" target="_blank" class="dolicar-banner-link dolicar-public-control-link">';
+                $this->resprints .= img_picto('', 'digiquali_color@digiquali', 'class="dolicar-banner-logo"') . $langs->transnoentities('QualityControlInterface');
+                $this->resprints .= '</a>';
+            }
+
+            $this->resprints .= '</div>';
         }
 
         return 0; // or return 1 to replace standard code
@@ -417,6 +442,47 @@ class ActionsDoliCar
     }
 
     /**
+     * Overloading the printPublicControlLinkedObjectIdentity function : replacing the parent's function with the one below
+     *
+     * Replaces the linked object identity block of the public control card to show the vehicle
+     * registration plate prominently, keeping the lot/serial (VIN) as a secondary line.
+     *
+     * @param  array  $parameters Hook metadata (context, etc...)
+     * @param  object $object     Linked object (productlot expected)
+     * @return int                0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function printPublicControlLinkedObjectIdentity(array $parameters, $object): int
+    {
+        global $langs;
+
+        if (strpos($parameters['context'], 'publiccontrol') === false || !is_object($object) || $object->element != 'productlot') {
+            return 0;
+        }
+
+        $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+        $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 1, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
+        if (!is_array($registrationCertificates) || empty($registrationCertificates)) {
+            return 0;
+        }
+        $registrationCertificateFr = reset($registrationCertificates);
+
+        $langs->load('dolicar@dolicar');
+
+        $lotTitle = $parameters['linkedObjectInfoArray']['linkedObject']['title'] ?? '';
+        $lotValue = $parameters['linkedObjectInfoArray']['linkedObject']['name_field'] ?? '';
+
+        $out  = '<div class="information-type">' . $langs->transnoentities('RegistrationPlate') . '</div>';
+        $out .= '<div class="information-label size-l">' . dol_escape_htmltag($registrationCertificateFr->ref) . '</div>';
+        $out .= '<div class="information-type">' . $lotTitle . '</div>';
+        $out .= '<div class="information-label">' . $lotValue . '</div>';
+
+        $this->resprints = $out;
+
+        return 1; // replace standard code
+    }
+
+    /**
      * Overloading the saturneSetVarsFromFetchObj function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadata (context, etc...)
@@ -431,7 +497,7 @@ class ActionsDoliCar
             $conf->cache['control']  = null;
             $conf->cache['controls'] = [];
             $object->fetchObjectLinked(null, '', '', 'digiquali_control');
-            if (!is_array($object->linkedObjects['digiquali_control']) || empty($object->linkedObjects['digiquali_control'])) {
+            if (empty($object->linkedObjects['digiquali_control']) || !is_array($object->linkedObjects['digiquali_control'])) {
                 return 0;
             }
 
