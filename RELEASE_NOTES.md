@@ -1,132 +1,110 @@
-# [DoliCar] [22.0.0] - Carte grise via API - Création rapide assistée - Tableau de bord
+# [DoliCar] [23.0.0] - Carnet de bord véhicule public (PWA) - Historique véhicule enrichi - PDF natifs - Import CSV
 
-Description : Cette version intègre l'API `apiplaqueimmatriculation.com` pour récupérer automatiquement les données d'un véhicule depuis sa plaque ou son VIN, introduit un assistant de création rapide complet pour le certificat d'immatriculation, ajoute un livret d'entretien généré dynamiquement, refond le tableau de bord avec des widgets dédiés et expose l'API REST CRUD du certificat.
+Description : Cette version fait entrer DoliCar dans le suivi terrain avec une **PWA publique de carnet de bord** (prise/restitution de véhicule, photos, commentaires vocaux, signatures, signalement de problème) accessible sans compte Dolibarr. L'historique véhicule est considérablement enrichi (notes de frais, documents fournisseurs, contrôles DigiQuali, rapports de problème), les documents livret d'entretien et carnet de bord passent du modèle ODT à une **génération PDF native**, et un **import CSV des cartes grises** est ajouté.
 
 ## Nouvelles fonctionnalités et innovations
 
-### Carte grise via API `apiplaqueimmatriculation.com`
+### Carnet de bord véhicule public (PWA)
 
-* Implémentation de l'API : récupération automatique des données véhicule depuis la plaque d'immatriculation ou le VIN.
-* Recherche véhicule par VIN.
-* Mise à jour des marques de voiture (`car brands`) via l'API.
-* Nouveaux champs gérés (carrosserie, énergie, etc. selon la réponse API).
-* Configuration de la clé API dans `setup.php`.
-* Affichage des messages d'erreur de l'API à l'utilisateur.
-* Sauvegarde des `vin` & `plate_number` postés en cas d'erreur API (formulaire pré-rempli au retry).
-* `curl` utilisé en remplacement de `file_get_contents` pour `immatriculationapi`.
-* Statut **brouillon** introduit pour préserver les données API en cas d'échec de traitement.
-
-<!-- 📸 Ajouter une screenshot ici -->
-
-### Assistant de création rapide (QuickCreation)
-
-* Wizard complet de création rapide pour le certificat d'immatriculation (`#399`).
-* Pré-remplissage produit + lot quand on crée depuis un `productlot`.
+* Nouvelle application publique (PWA) accessible sans authentification pour la prise et la restitution de véhicule.
+* Liste publique des véhicules : barre de recherche, affichage 2 colonnes avec plus d'informations, barre de navigation basse.
+* Carte véhicule publique compacte + sélecteur de conducteur interne / externe.
+* États **avant / après** avec photos, générés en fiches PDF.
+* Écran des trajets : téléchargement du PDF par trajet, ouverture du PDF en ligne, photos départ / retour.
+* Pré-remplissage du kilométrage avec la dernière valeur connue.
+* Commentaires **photo et vocaux** lors de la prise / restitution du véhicule.
+* Signatures des conducteurs intégrées au PDF du carnet de bord.
+* **Signaler un problème** (commentaire, photo, message vocal) avec envoi d'un e-mail au gestionnaire.
+* PWA forcée en pleine largeur sur mobile et sur tous les écrans.
+* Création de réparation et de contrôle DigiQuali depuis le pied de page, ouverture du contrôle dans un nouvel onglet.
 
 <!-- 📸 Ajouter une screenshot ici -->
 
-### Livret d'entretien
+### Historique véhicule enrichi
 
-* Nouveau document `template_livret_entretien.odt` généré sur le certificat d'immatriculation.
-
-<!-- 📸 Ajouter une screenshot ici -->
-
-### Tableau de bord enrichi
-
-* Nouveau dashboard avec :
-  * Statistiques des entrepôts (warehouse stats)
-  * Activités récentes
-  * Widget des contrôles techniques (CT) en retard
-* Refonte des activités récentes et de l'UX de la liste des entrepôts.
+* Liaison de **lignes de note de frais** spécifiques (type, projet, commentaire) à un événement véhicule.
+* Liaison des **documents fournisseurs et notes de frais** aux événements véhicule, avec configuration dans l'admin.
+* Affichage dans l'historique des **rapports de problème** remontés depuis le carnet de bord public.
+* Type d'événement rendu optionnel (repli sur « Autre ») pour pouvoir rattacher documents et lignes sans en choisir un.
+* Aperçu PDF (loupe / magnifier) sur les documents liés d'un événement.
 
 <!-- 📸 Ajouter une screenshot ici -->
 
-### Onglet historique véhicule
+### Documents : passage au PDF natif
 
-* Nouvel onglet « Historique véhicule » sur la fiche carte grise.
-* Vue dédiée `registrationcertificatefr_vehiclehistory.php`.
+* Migration du **livret d'entretien** et du **carnet de bord** du modèle ODT vers une génération **PDF native**.
+* Fiches d'état avant / après et photos intégrées au PDF.
+* Libellé de catégorie et coût de facture ajoutés au livret d'entretien.
 
-### Liaisons et objets liés
+<!-- 📸 Ajouter une screenshot ici -->
 
-* Affichage des contrôles **DigiQuali** liés au certificat d'immatriculation (`#363`).
-* Libellé du modèle de fiche affiché dans les objets liés (contrôles et surveys).
-* Contrôles supprimés masqués dans la liste des objets liés.
-* Bannière du `productlot` enrichie : affichage du certificat d'immatriculation lié.
+### Import CSV des cartes grises
 
-### API REST CRUD
+* Nouvel import CSV des cartes grises (certificats d'immatriculation).
 
-* Nouveaux endpoints REST CRUD complets pour `RegistrationCertificateFr` (`#356`).
+<!-- 📸 Ajouter une screenshot ici -->
 
----
+### Carte grise / certificat d'immatriculation
+
+* Bannière refondue : liens stylés avec logos des modules (carnet de bord + contrôle qualité), logo DoliCar et lien vers l'interface de contrôle qualité.
+* Objets liés : colonne **montant** avec total et filtre recherche / verdict, ligne de recherche par colonne façon listes natives Dolibarr.
+* Bouton de **suppression** avec confirmation sur la fiche.
+* Affichage de la plaque d'immatriculation sur la carte de contrôle public.
 
 ## Améliorations & corrections
 
-### Carte d'immatriculation
+### Carnet de bord public
 
-* Champs « carte grise » groupés dans une section repliable (collapsible).
-* Brouillon sauvegardé avant l'appel API + gestion d'erreur pour retry.
-* `vin` manquant et erreur de champ dans le fallback de fetch lot — corrigés.
-* Picto entrepôt ajouté avant le champ « entrepôt de destination ».
-* Bouton de recherche aligné, ordre du champ entrepôt revu.
-* `Categorie` initialisé pour éviter un fatal sur fetch (`#383`).
-* `Categorie` retiré au save pour ne plus provoquer d'erreur SQL.
-* Lecture du VIN depuis le batch du `productlot` dans la note de propal.
-* Lien de création de `productlot` invalide et classe `Categorie` manquante — corrigés.
-* Flag `showinpwa` ajouté sur les champs de liste.
-* Fichier de langue chargé dans `getTooltipContentArray`.
-* Fatal `getRegistrationCertificateData` corrigé.
-* Fatal lié à un `redirect` avant `db->commit` corrigé (2 occurrences).
-* Erreur sur `productlot` précédemment créé corrigée.
+* Densification du formulaire prise / restitution : réduction des marges, paddings et tailles pour limiter le défilement.
+* Labels des champs masqués au profit des seuls titres de carte, inputs kilométrage / date réduits.
+* Bloc carburant resserré, pad de signature agrandi pour le mobile.
+* Alignement et taille homogènes des boutons média (photo / audio), neutralisation du style pico.css sur le bloc média Saturne.
+* Icônes de la barre basse ne débordant plus du pied de page.
 
-### Stock / entrepôt
+### Historique / événements véhicule
 
-* `warehouse_id` sélectionné utilisé lors de la création du batch de stock.
-* Outil `dolicartools` créé pour réparer la quantité de stock par lot (`#374`).
-* Migration de stock à l'init du module corrigée.
-* Increment de stock évité quand le lot VIN existe déjà.
-* Liste des certificats d'immatriculation avec liens dans l'outil de réparation.
-* Entrée de menu « Outils » ajoutée au module DoliCar.
+* Lecture directe des liens de lignes de note de frais (`fetchObjectLinked` ignorait le type hors module).
+* Libellé du type de frais traduit via son code (langue « trips »), usage de `transnoentities` pour éviter les entités HTML.
+* Affichage de la note à la place de la date dans le sélecteur de ligne de note de frais.
+* Rendu des sauts de ligne des notes au lieu du `<br>` littéral.
+* Suppression de l'adresse IP dans la note de rapport de problème.
 
-### Admin
+### Documents
 
-* Domaine de langue admin chargé pour les traductions manquantes (`#380`).
-* Paramètre `action` lu correctement → boutons « tout / aucun » fonctionnels (`#393`).
+* Livret d'entretien : suppression de la colonne garage, repack de l'ODT avec le `mimetype` en première entrée, `dol_print_date` en remplacement de `dolOutputDates`.
+* Suppression du modèle de document avant réajout pour éviter les doublons à la réinstallation.
 
-### SCSS
+### Divers
 
-* Migration `@import` → `@use` dans toutes les feuilles de style DoliCar (`#388`).
+* `printFieldListOption` : ancrage de la regex de contexte pour éviter un objet null (`#430`).
+* Numéro d'immatriculation masqué sur les cartes proposition et facture (`#411`).
+* Sous-menu de création rapide rattaché au certificat d'immatriculation (`#419`).
+* Recompilation de `dolicar.min.css` depuis les sources SCSS.
 
-### Module / classes
+## Comparaison des versions [22.0.0](https://github.com/Evarisk/dolicar/compare/22.0.0...23.0.0) et 23.0.0
 
-* Plusieurs passes de nettoyage de code (`[Class] core: clean code`, 5 commits).
-
-## Comparaison des versions [21.0.0](https://github.com/Evarisk/dolicar/compare/21.0.0...22.0.0) et 22.0.0
-
-* [#404] [LivretEntretien] feat: maintenance booklet document generation [`5192294`](https://github.com/Evarisk/dolicar/commit/5192294)
-* [#399] [QuickCreation] feat: full quickcreation wizard [`05df48b`](https://github.com/Evarisk/dolicar/commit/05df48b)
-* [#395] [RegistrationCertificateFr] rework: replace file_get_contents with curl [`75c2e6f`](https://github.com/Evarisk/dolicar/commit/75c2e6f)
-* [#394] [RegistrationCertificateFr] fix: handle missing vin and wrong field in lot fetch fallback [`3e50260`](https://github.com/Evarisk/dolicar/commit/3e50260)
-* [#393] [Admin] fix: read action parameter so all/none buttons work [`8101020`](https://github.com/Evarisk/dolicar/commit/8101020)
-* [#392] [RegistrationCertificateFr] feat: save draft before api call and handle error retry [`73d8e2d`](https://github.com/Evarisk/dolicar/commit/73d8e2d)
-* [#389] [Dashboard] feat/rework: warehouse stats, recent activities, overdue CT widgets [`3a40ae9`](https://github.com/Evarisk/dolicar/commit/3a40ae9) [`00641a1`](https://github.com/Evarisk/dolicar/commit/00641a1)
-* [#388] [SCSS/RegCertif] rework: @import → @use, collapsible carte grise section [`b7b0652`](https://github.com/Evarisk/dolicar/commit/b7b0652) [`df9565e`](https://github.com/Evarisk/dolicar/commit/df9565e)
-* [#387] [RegistrationCertificateFr] add: warehouse picto before destination warehouse field [`205363e`](https://github.com/Evarisk/dolicar/commit/205363e)
-* [#383] [RegistrationCertificateFr] fix: initialize Categorie object to prevent fatal [`7c703f9`](https://github.com/Evarisk/dolicar/commit/7c703f9)
-* [#382] [RegistrationCertificateFr] fix: align search button and reorder warehouse field [`184f92c`](https://github.com/Evarisk/dolicar/commit/184f92c)
-* [#380] [Admin] fix: load admin lang domain for missing translations [`19e6924`](https://github.com/Evarisk/dolicar/commit/19e6924)
-* [#377] [LinkedObjects] fix: hide deleted controls in linked objects list [`28a62bc`](https://github.com/Evarisk/dolicar/commit/28a62bc)
-* [#374] [Tools/RegistrationCertificate] add: dolicartools page, fix stock batch [`5005698`](https://github.com/Evarisk/dolicar/commit/5005698) [`736af04`](https://github.com/Evarisk/dolicar/commit/736af04) [`4a79e85`](https://github.com/Evarisk/dolicar/commit/4a79e85) [`f6471d3`](https://github.com/Evarisk/dolicar/commit/f6471d3) [`e66d810`](https://github.com/Evarisk/dolicar/commit/e66d810) [`313e633`](https://github.com/Evarisk/dolicar/commit/313e633)
-* [#363] [LinkedObjects] feat: show linked objects and digiquali controls on registration cert card [`5ec04e4`](https://github.com/Evarisk/dolicar/commit/5ec04e4)
-* [#362] [RegistrationCertificateFr] fix: invalid productlot create link, missing Categorie [`fcf149a`](https://github.com/Evarisk/dolicar/commit/fcf149a)
-* [#361] [DoliCar] fix: read vin from product lot batch in propal note [`a086068`](https://github.com/Evarisk/dolicar/commit/a086068)
-* [#359] [RegistrationCertificateFr] fix: remove category on save causing sql error [`b184473`](https://github.com/Evarisk/dolicar/commit/b184473)
-* [#358] [ProductLot/RegCertif] feat: linked registration cert in banner, lang in tooltip [`f59fe64`](https://github.com/Evarisk/dolicar/commit/f59fe64) [`fbfceca`](https://github.com/Evarisk/dolicar/commit/fbfceca)
-* [#357] [RegistrationCertificateFr] fix: add showinpwa flag on list fields [`aa2fe95`](https://github.com/Evarisk/dolicar/commit/aa2fe95)
-* [#356] [API] add: REST CRUD endpoints for RegistrationCertificateFr [`1da1a48`](https://github.com/Evarisk/dolicar/commit/1da1a48)
-* [#353] [RegistrationCertificateFr] feat: draft status to preserve API data on process failure [`b9b6e53`](https://github.com/Evarisk/dolicar/commit/b9b6e53)
-* [#351] [RegistrationCertificateFr] fix: pre-fill product and lot when creating from productlot [`5992b25`](https://github.com/Evarisk/dolicar/commit/5992b25)
-* [#347] [Api] add: api key config, brands update, vin search, new fields, save vin/plate post-error [`cb495bf`](https://github.com/Evarisk/dolicar/commit/cb495bf) [`ac3eeb9`](https://github.com/Evarisk/dolicar/commit/ac3eeb9) [`8057d35`](https://github.com/Evarisk/dolicar/commit/8057d35) [`2f83ccc`](https://github.com/Evarisk/dolicar/commit/2f83ccc) [`dec9dec`](https://github.com/Evarisk/dolicar/commit/dec9dec) [`d0fc577`](https://github.com/Evarisk/dolicar/commit/d0fc577) [`590db73`](https://github.com/Evarisk/dolicar/commit/590db73)
-* [#345] [RegistrationCertificate] add/fix: apiplaqueimmatriculation.com implementation, curl, fatal redirect, getRegistrationCertificateData [`9c013fc`](https://github.com/Evarisk/dolicar/commit/9c013fc) [`0845d38`](https://github.com/Evarisk/dolicar/commit/0845d38) [`7746391`](https://github.com/Evarisk/dolicar/commit/7746391) [`8fe9f6b`](https://github.com/Evarisk/dolicar/commit/8fe9f6b) [`704583d`](https://github.com/Evarisk/dolicar/commit/704583d)
-* [#2366] [RegistrationCertificateFr] feat: display sheet model label in linked objects [`e3c826c`](https://github.com/Evarisk/dolicar/commit/e3c826c)
-* [Vehicle History] feat: vehicle history tab on carte grise card [`35daff6`](https://github.com/Evarisk/dolicar/commit/35daff6)
-* [Class] core: clean code (5 commits) [`e6e884b`](https://github.com/Evarisk/dolicar/commit/e6e884b) [`b458264`](https://github.com/Evarisk/dolicar/commit/b458264) [`054ac05`](https://github.com/Evarisk/dolicar/commit/054ac05) [`4b2459f`](https://github.com/Evarisk/dolicar/commit/4b2459f) [`229a8c9`](https://github.com/Evarisk/dolicar/commit/229a8c9)
+* [#464] [VehicleHistory] feat: pdf preview magnifier on linked documents [`5972e7b`](https://github.com/Evarisk/dolicar/commit/5972e7b)
+* [#466] [VehicleLogBook] departure/return photos in state sheet PDF, prefill mileage, photo editor modal, thumbnail sizing [`ec324c0`](https://github.com/Evarisk/dolicar/commit/ec324c0) [`4e8b034`](https://github.com/Evarisk/dolicar/commit/4e8b034) [`12efdb0`](https://github.com/Evarisk/dolicar/commit/12efdb0) [`8ea9eed`](https://github.com/Evarisk/dolicar/commit/8ea9eed)
+* [#457] [VehicleLogBook] public trips screen with per-trip PDF & depart/return photos, before/after state PDF sheets, success screen [`32014ff`](https://github.com/Evarisk/dolicar/commit/32014ff) [`780e374`](https://github.com/Evarisk/dolicar/commit/780e374) [`9b4cee4`](https://github.com/Evarisk/dolicar/commit/9b4cee4) [`a51deba`](https://github.com/Evarisk/dolicar/commit/a51deba)
+* [#456] [VehicleLogBook] bottom nav bar + public vehicles list, search bar, 2-column list, driver picker, repair/DigiQuali from footer, full-width PWA [`54b670b`](https://github.com/Evarisk/dolicar/commit/54b670b) [`f4f9001`](https://github.com/Evarisk/dolicar/commit/f4f9001) [`0baa676`](https://github.com/Evarisk/dolicar/commit/0baa676) [`c9fc272`](https://github.com/Evarisk/dolicar/commit/c9fc272) [`f776e04`](https://github.com/Evarisk/dolicar/commit/f776e04) [`6e736a8`](https://github.com/Evarisk/dolicar/commit/6e736a8) [`07fa80e`](https://github.com/Evarisk/dolicar/commit/07fa80e) [`7f6ac1e`](https://github.com/Evarisk/dolicar/commit/7f6ac1e) [`caf79ce`](https://github.com/Evarisk/dolicar/commit/caf79ce) [`80f9edb`](https://github.com/Evarisk/dolicar/commit/80f9edb)
+* [#452] [VehicleEvent] link specific expense report lines (type, project, comment), optional event type, fee label fixes [`9847084`](https://github.com/Evarisk/dolicar/commit/9847084) [`3a9fe22`](https://github.com/Evarisk/dolicar/commit/3a9fe22) [`c512781`](https://github.com/Evarisk/dolicar/commit/c512781) [`9a34b86`](https://github.com/Evarisk/dolicar/commit/9a34b86) [`960c9ac`](https://github.com/Evarisk/dolicar/commit/960c9ac) [`9a40338`](https://github.com/Evarisk/dolicar/commit/9a40338) [`4b889a6`](https://github.com/Evarisk/dolicar/commit/4b889a6)
+* [#448] [RegistrationCertificate] styled banner links with module logos, amount column with total/filter, per-column search row [`e0239bc`](https://github.com/Evarisk/dolicar/commit/e0239bc) [`29986c8`](https://github.com/Evarisk/dolicar/commit/29986c8) [`ce68d6c`](https://github.com/Evarisk/dolicar/commit/ce68d6c) [`b00b1fb`](https://github.com/Evarisk/dolicar/commit/b00b1fb) [`a3970d6`](https://github.com/Evarisk/dolicar/commit/a3970d6) [`258ea39`](https://github.com/Evarisk/dolicar/commit/258ea39)
+* [#446] [PublicVehicleLogBook] photo & voice comments on pickup/return, densified form [`cf5af41`](https://github.com/Evarisk/dolicar/commit/cf5af41) [`6ea43fd`](https://github.com/Evarisk/dolicar/commit/6ea43fd) [`2448e57`](https://github.com/Evarisk/dolicar/commit/2448e57) [`a609119`](https://github.com/Evarisk/dolicar/commit/a609119) [`0c3f1a6`](https://github.com/Evarisk/dolicar/commit/0c3f1a6) [`a953efb`](https://github.com/Evarisk/dolicar/commit/a953efb)
+* [#443] [PublicVehicleLogBook] report a problem (comment, photo, voice) with email to manager, show reports in history [`7ffabfa`](https://github.com/Evarisk/dolicar/commit/7ffabfa) [`829613d`](https://github.com/Evarisk/dolicar/commit/829613d) [`611bdc1`](https://github.com/Evarisk/dolicar/commit/611bdc1) [`46d700b`](https://github.com/Evarisk/dolicar/commit/46d700b) [`9515fa1`](https://github.com/Evarisk/dolicar/commit/9515fa1) [`382cfce`](https://github.com/Evarisk/dolicar/commit/382cfce) [`63e5f88`](https://github.com/Evarisk/dolicar/commit/63e5f88) [`58bb194`](https://github.com/Evarisk/dolicar/commit/58bb194)
+* [#442] [PublicControl] add: show vehicle registration plate on public control card [`aafd105`](https://github.com/Evarisk/dolicar/commit/aafd105)
+* [#439] [VehicleLogBook] add: driver signatures in logbook pdf, save public signature + submit feedback [`a862674`](https://github.com/Evarisk/dolicar/commit/a862674) [`1d6daa0`](https://github.com/Evarisk/dolicar/commit/1d6daa0)
+* [#437] [VehicleHistory] feat: link supplier docs/expense reports to vehicle events + admin config [`c48d00f`](https://github.com/Evarisk/dolicar/commit/c48d00f)
+* [#432] [LivretEntretien] rework: switch maintenance booklet and logbook from ODT to native PDF [`1888468`](https://github.com/Evarisk/dolicar/commit/1888468)
+* [#430] [ExtraField] fix: anchor printFieldListOption context regex to avoid null object [`f90ac02`](https://github.com/Evarisk/dolicar/commit/f90ac02)
+* [#424] [LivretEntretien] feat: add category label and invoice cost to livret [`e6f6376`](https://github.com/Evarisk/dolicar/commit/e6f6376)
+* [#419] [Menu] fix: make quickcreation submenu of registrationcertificatefr [`6e71193`](https://github.com/Evarisk/dolicar/commit/6e71193)
+* [#418] [VehicleHistory] feat: manage event types via actioncomm categories + backward compat migration [`fed63a5`](https://github.com/Evarisk/dolicar/commit/fed63a5) [`cef210e`](https://github.com/Evarisk/dolicar/commit/cef210e)
+* [#416] [VehicleHistory] feat: link invoices, proposals and digiquali controls to vehicle events [`123a8d9`](https://github.com/Evarisk/dolicar/commit/123a8d9)
+* [#415] [LivretEntretien] fix: odt mimetype repack, remove garage column, dol_print_date [`830362e`](https://github.com/Evarisk/dolicar/commit/830362e) [`9c54663`](https://github.com/Evarisk/dolicar/commit/9c54663) [`935aebd`](https://github.com/Evarisk/dolicar/commit/935aebd)
+* [#413] [RegistrationCertificateFr] inline digiquali control creator widget on fk_lot row, api error messages, css [`d9d2b6f`](https://github.com/Evarisk/dolicar/commit/d9d2b6f) [`ca60654`](https://github.com/Evarisk/dolicar/commit/ca60654) [`ec26b11`](https://github.com/Evarisk/dolicar/commit/ec26b11) [`cdf5a67`](https://github.com/Evarisk/dolicar/commit/cdf5a67) [`cc61993`](https://github.com/Evarisk/dolicar/commit/cc61993)
+* [#411] [ExtraField] fix: hide registration_number on propal and invoice card [`c298b73`](https://github.com/Evarisk/dolicar/commit/c298b73)
+* [#410] [RegistrationCertificateFr] feat: merged actioncom list from card and vehicle history [`b679fb8`](https://github.com/Evarisk/dolicar/commit/b679fb8) [`a06c827`](https://github.com/Evarisk/dolicar/commit/a06c827)
+* [#343] [Import] feat: import csv des cartes grises [`f025219`](https://github.com/Evarisk/dolicar/commit/f025219)
+* [#336] [RegistrationCertificateFr] add: delete button and confirmation on card [`8fa9a7f`](https://github.com/Evarisk/dolicar/commit/8fa9a7f)
+* [#266] [VehicleLogBookDocument] feat: add ODT document generation for vehicle logbook [`44324f0`](https://github.com/Evarisk/dolicar/commit/44324f0)
+* [CSS] build: recompile dolicar.min.css from scss sources [`e701f0b`](https://github.com/Evarisk/dolicar/commit/e701f0b)
