@@ -483,6 +483,70 @@ class ActionsDoliCar
     }
 
     /**
+     * Overloading the digiqualiLinkedObjectDocumentation function : replacing the parent's function with the one below
+     *
+     * Adds the shared files and links of the registration certificates bound to the lot to the public control
+     * documentation tab, which otherwise only exposes those of the lot and of its parent product.
+     *
+     * @param  array  $parameters Hook metadata (context, etc...)
+     * @param  object $object     Linked object (productlot expected)
+     * @return int                0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function digiqualiLinkedObjectDocumentation(array $parameters, $object): int
+    {
+        global $langs;
+
+        if (strpos($parameters['context'], 'publiccontrol') === false || !is_object($object) || $object->element != 'productlot') {
+            return 0;
+        }
+
+        $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+        $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 0, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
+        if (!is_array($registrationCertificates) || empty($registrationCertificates)) {
+            return 0;
+        }
+
+        // Load Dolibarr libraries
+        require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
+
+        $langs->load('dolicar@dolicar');
+
+        $link     = new Link($this->db);
+        $ecmFiles = new EcmFiles($this->db);
+
+        // Only files shared through a link are downloadable from the public interface
+        $ecmFiles->fetchAll('', '', 0, 0, 't.share:isnot:null');
+
+        $files = [];
+        $links = [];
+        foreach ($registrationCertificates as $registrationCertificate) {
+            $nameField = img_picto('', 'fontawesome_fa-car_fas_#d35968', 'class="pictofixedwidth"') . dol_escape_htmltag($registrationCertificate->ref);
+
+            if (is_array($ecmFiles->lines)) {
+                foreach ($ecmFiles->lines as $ecmFilesLine) {
+                    if ($ecmFilesLine->src_object_type == $registrationCertificate->table_element && $ecmFilesLine->src_object_id == $registrationCertificate->id) {
+                        $ecmFilesLine->name_field = $nameField;
+                        $files[]                  = $ecmFilesLine;
+                    }
+                }
+            }
+
+            $certificateLinks = [];
+            $link->fetchAll($certificateLinks, $registrationCertificate->element, $registrationCertificate->id);
+            foreach ($certificateLinks as $certificateLink) {
+                $certificateLink->name_field = $nameField;
+                $links[]                     = $certificateLink;
+            }
+        }
+
+        $this->results = ['files' => $files, 'links' => $links];
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
      * Overloading the saturneSetVarsFromFetchObj function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadata (context, etc...)
