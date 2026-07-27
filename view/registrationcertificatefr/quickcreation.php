@@ -36,16 +36,18 @@ require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 // Global variables definitions
-global $conf, $db, $hookmanager, $langs, $user;
+global $conf, $db, $hookmanager, $langs, $mysoc, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['companies']);
 
 // Get parameters
 $action       = GETPOST('action', 'aZ09');
@@ -58,6 +60,10 @@ $confirmRetry = GETPOST('confirm_retry', 'int') == 1;
 $object      = new RegistrationCertificateFr($db);
 $form        = new Form($db);
 $formproduct = new FormProduct($db);
+$formcompany = new FormCompany($db);
+
+// Third party quick-creation of a new linked company is only offered when the config is enabled
+$thirdpartyQuickCreation = isModEnabled('societe') && getDolGlobalInt('DOLICAR_THIRDPARTY_QUICK_CREATION') && !empty($user->rights->societe->creer);
 
 $hookmanager->initHooks(['dolicar_quickcreation']);
 
@@ -286,7 +292,30 @@ if (empty($resHook)) {
             $object->fetch($existingDraftId);
         }
 
+        // Third party — an existing selection takes priority; otherwise create a new one from the typed name
+        $fkSoc = GETPOSTINT('fk_soc');
+        if ($fkSoc <= 0 && $thirdpartyQuickCreation) {
+            $thirdpartyName = trim(GETPOST('name', 'alphanohtml'));
+            if (!empty($thirdpartyName)) {
+                $thirdparty              = new Societe($db);
+                $thirdparty->name        = $thirdpartyName;
+                $thirdparty->code_client = -1;
+                $thirdparty->client      = GETPOSTINT('client');
+                $thirdparty->phone       = GETPOST('phone', 'alpha');
+                $thirdparty->email       = trim(GETPOST('email_thirdparty', 'custom', 0, FILTER_SANITIZE_EMAIL));
+                $thirdparty->country_id  = $mysoc->country_id;
+
+                $newSocId = $thirdparty->create($user);
+                if ($newSocId > 0) {
+                    $fkSoc = $newSocId;
+                } else {
+                    setEventMessages($thirdparty->error, $thirdparty->errors, 'errors');
+                }
+            }
+        }
+
         $object->a_registration_number           = strtoupper(GETPOST('a_registration_number', 'alphanohtml'));
+        $object->fk_soc                          = $fkSoc;
         $object->fk_product                      = GETPOSTINT('fk_product');
         $object->fk_lot                          = GETPOSTINT('fk_lot');
         $object->b_first_registration_date       = dol_mktime(0, 0, 0, GETPOST('b_first_registration_datemonth', 'int'), GETPOST('b_first_registration_dateday', 'int'), GETPOST('b_first_registration_dateyear', 'int'));
@@ -496,6 +525,77 @@ if ($step === 'search') {
     print '</div>';
     print '</div>'; // .qc-form-row
 
+    print '</div>'; // .qc-section-body
+
+    // ---- Section: Client / Tiers ----
+    if (isModEnabled('societe')) {
+        $fkSoc = GETPOSTINT('fk_soc') ?: (int) $object->fk_soc;
+
+        print '<div class="qc-section-header">';
+        print '<div class="qc-section-title">';
+        print '<i class="fas fa-user-tie"></i>';
+        print $langs->trans('LinkedThirdParty');
+        print '</div>';
+        print '</div>';
+
+        print '<div class="qc-section-body">';
+
+        // Existing third party selector (always shown)
+        print '<div class="qc-form-row">';
+        print '<label>' . $langs->trans('ExistingThirdParty') . '</label>';
+        print '<div class="qc-field-wrapper qc-select-wrapper">';
+        print $form->select_company($fkSoc, 'fk_soc', '', 'SelectThirdParty', 0, 0, [], 0, 'minwidth300 maxwidth500 widthcentpercentminusx');
+        print '</div>';
+        print '</div>';
+
+        // New third party fields — greyed out (via JS) as soon as an existing third party is selected
+        if ($thirdpartyQuickCreation) {
+            print '<div class="qc-tier-divider"><span>' . $langs->trans('OrCreateNewThirdParty') . '</span></div>';
+
+            print '<div class="qc-tier-new" data-tier-new>';
+
+            // Name (required to trigger creation)
+            print '<div class="qc-form-row">';
+            print '<label>' . $langs->trans('ThirdPartyName') . '</label>';
+            print '<div class="qc-field-wrapper">';
+            print '<i class="fas fa-building qc-field-icon"></i>';
+            print '<input type="text" name="name" maxlength="128" value="' . dol_escape_htmltag(GETPOST('name', 'alphanohtml')) . '" autocomplete="off">';
+            print '</div>';
+            print '</div>';
+
+            // Prospect / customer type
+            print '<div class="qc-form-row">';
+            print '<label>' . $langs->trans('ProspectCustomer') . '</label>';
+            print '<div class="qc-field-wrapper qc-select-wrapper">';
+            print $formcompany->selectProspectCustomerType(GETPOSTISSET('client') ? GETPOSTINT('client') : 2, 'client', 'customerprospect', 'form', 'minwidth300 maxwidth500 widthcentpercentminusx');
+            print '</div>';
+            print '</div>';
+
+            // Phone
+            print '<div class="qc-form-row">';
+            print '<label>' . $langs->trans('Phone') . '</label>';
+            print '<div class="qc-field-wrapper">';
+            print '<i class="fas fa-phone qc-field-icon"></i>';
+            print '<input type="text" name="phone" value="' . dol_escape_htmltag(GETPOST('phone', 'alpha')) . '" autocomplete="off">';
+            print '</div>';
+            print '</div>';
+
+            // Email
+            print '<div class="qc-form-row">';
+            print '<label>' . $langs->trans('Email') . '</label>';
+            print '<div class="qc-field-wrapper">';
+            print '<i class="fas fa-envelope qc-field-icon"></i>';
+            print '<input type="text" name="email_thirdparty" value="' . dol_escape_htmltag(GETPOST('email_thirdparty', 'alpha')) . '" autocomplete="off">';
+            print '</div>';
+            print '</div>';
+
+            print '</div>'; // .qc-tier-new
+        }
+
+        print '</div>'; // .qc-section-body (tiers)
+    }
+
+    // Primary action at the very bottom so the user completes the whole form (plate + third party) before searching
     print '<button type="submit" class="qc-search-btn">';
     print '<i class="fas fa-magnifying-glass"></i>';
     print ' ' . $langs->trans('LaunchSearch');
@@ -507,7 +607,6 @@ if ($step === 'search') {
     print $langs->trans('CreateEmptyRegistrationCertificate') . '</a>';
     print '</div>';
 
-    print '</div>'; // .qc-section-body
     print '</div>'; // .qc-inner
 }
 
@@ -572,6 +671,17 @@ if ($step === 'edit') {
     print '</div>';
 
     print '</div>'; // .qc-section-body
+
+    // ---- Third party — values are captured on step 1, carried forward here so action=add receives them ----
+    if (isModEnabled('societe')) {
+        print '<input type="hidden" name="fk_soc" value="' . (GETPOSTINT('fk_soc') ?: (int) $object->fk_soc) . '">';
+        if ($thirdpartyQuickCreation) {
+            print '<input type="hidden" name="name" value="' . dol_escape_htmltag(GETPOST('name', 'alphanohtml')) . '">';
+            print '<input type="hidden" name="client" value="' . GETPOSTINT('client') . '">';
+            print '<input type="hidden" name="phone" value="' . dol_escape_htmltag(GETPOST('phone', 'alphanohtml')) . '">';
+            print '<input type="hidden" name="email_thirdparty" value="' . dol_escape_htmltag(GETPOST('email_thirdparty', 'alphanohtml')) . '">';
+        }
+    }
 
     // ---- Section: Caractéristiques (collapsible) ----
     $sectionCollapsed = 'collapsed';

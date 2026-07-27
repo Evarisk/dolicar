@@ -1961,6 +1961,39 @@ body.page-public-card .fiche {
 .quickcreation-page .qc-warehouse-pill .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
   border-color: transparent transparent #5b6470;
 }
+.quickcreation-page .qc-tier-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  margin: 18px 0 14px;
+  color: #8a93a0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.quickcreation-page .qc-tier-divider::before, .quickcreation-page .qc-tier-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e3e6eb;
+}
+.quickcreation-page .qc-tier-new {
+  transition: opacity 0.15s;
+}
+.quickcreation-page .qc-tier-new.qc-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+.quickcreation-page .qc-required {
+  color: #dc2626;
+  font-weight: 700;
+}
+.quickcreation-page .qc-select-wrapper .select2-container {
+  flex: 1;
+}
 .quickcreation-page .qc-form-actions {
   display: flex;
   gap: 10px;
