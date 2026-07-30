@@ -97,6 +97,43 @@ if ($action == 'update_repair_service') {
     $action = 'edit';
 }
 
+if ($action == 'generate_repair_services') {
+    require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+    require_once __DIR__ . '/../lib/dolicar_functions.lib.php';
+
+    if (getDolGlobalInt('DOLICAR_VEHICLE_REPAIR_SERVICE_ENABLED') <= 0) {
+        setEventMessages($langs->transnoentities('VehicleRepairServiceDisabled'), null, 'warnings');
+    } else {
+        $registrationCertificateFr = new RegistrationCertificateFr($db);
+
+        // Vehicles only: a draft is an API answer waiting to be promoted, a deleted one is gone
+        $registrationCertificates = $registrationCertificateFr->fetchAll('', '', 0, 0, ['customsql' => 't.status NOT IN (' . RegistrationCertificateFr::STATUS_DRAFT . ', ' . RegistrationCertificateFr::STATUS_DELETED . ')']);
+
+        $createdServices = 0;
+        $failedServices  = 0;
+        if (is_array($registrationCertificates)) {
+            foreach ($registrationCertificates as $registrationCertificate) {
+                $registrationCertificate->fetch_optionals();
+                $hadService = !empty($registrationCertificate->array_options['options_repair_service']);
+
+                $serviceID = dolicar_create_vehicle_repair_service($registrationCertificate);
+                if ($serviceID < 0) {
+                    $failedServices++;
+                } elseif ($serviceID > 0 && !$hadService) {
+                    $createdServices++;
+                }
+            }
+        }
+
+        setEventMessages($langs->transnoentities('VehicleRepairServicesGenerated', $createdServices, is_array($registrationCertificates) ? count($registrationCertificates) : 0), null);
+        if ($failedServices > 0) {
+            setEventMessages($langs->transnoentities('VehicleRepairServicesGenerationErrors', $failedServices), null, 'errors');
+        }
+    }
+
+    $action = 'edit';
+}
+
 if ($action == 'update_problem_report') {
     $email = GETPOST('DOLICAR_PROBLEM_REPORT_EMAIL', 'alphanohtml');
     dolibarr_set_const($db, 'DOLICAR_PROBLEM_REPORT_EMAIL', $email, 'chaine', 0, '', $conf->entity);
@@ -326,6 +363,17 @@ print '<br><div class="center">';
 print '<input class="button button-save" type="submit" value="' . $langs->trans('Save') . '">';
 print '</div>';
 print '</form>';
+
+// The service is created by the vehicle triggers, a fleet registered before the setting was
+// enabled needs this catch up (issue #475)
+print '<div class="center">';
+print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="generate_repair_services">';
+print '<input class="button" type="submit" value="' . $langs->trans('GenerateMissingRepairServices') . '">';
+print '<br><span class="opacitymedium">' . $langs->transnoentities('GenerateMissingRepairServicesDesc') . '</span>';
+print '</form>';
+print '</div>';
 
 // Problem report email section (issue #443)
 print '<br>';

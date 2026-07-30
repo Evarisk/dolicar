@@ -468,6 +468,11 @@ VehicleRepairServiceMaskDesc            = Champs disponibles : {PLAQUE} (immatri
 VehicleRepairServiceVATRate             = Taux de TVA du service
 VehicleRepairServiceAccountancyCodeBuy  = Code comptable d'achat
 VehicleRepairServiceAccountancyCodeSell = Code comptable de vente
+GenerateMissingRepairServices           = Générer les services manquants
+GenerateMissingRepairServicesDesc       = Crée le service des véhicules enregistrés avant l'activation du réglage. Sans effet sur ceux qui en ont déjà un.
+VehicleRepairServicesGenerated          = %s service(s) créé(s) sur %s véhicule(s) traité(s)
+VehicleRepairServicesGenerationErrors   = %s service(s) n'ont pas pu être créés, voir les logs
+VehicleRepairServiceDisabled            = Activez d'abord la création du service de réparation par véhicule
 
 # Médias des événements véhicule (issue #475)
 PhotosAndFiles                          = Photos et fichiers
