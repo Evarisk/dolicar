@@ -120,6 +120,7 @@ class modDoliCar extends DolibarrModules
                 'data' => [
                     'productlotcard',
                     'invoicecard',
+                    'invoicesuppliercard',
                     'propalcard',
                     'ordercard',
                     'paiementcard',
@@ -549,7 +550,7 @@ class modDoliCar extends DolibarrModules
 
             // Warranties of an invoice, stored as a JSON array so a single invoice can carry several of them (issue #475).
             // Hidden from the standard card ('list' => 0): the raw JSON is rendered as a table by the DoliCar hook.
-            'warranty_end'              => ['Label' => 'Warranties',                'type' => 'text',                     'elementtype' => ['facture'],                       'position' => $this->numero . 90, 'list' => 0, 'alwayseditable' => 1],
+            'warranty_end'              => ['Label' => 'Warranties',                'type' => 'text',                     'elementtype' => ['facture', 'facture_fourn'],      'position' => $this->numero . 90, 'list' => 0, 'alwayseditable' => 1],
 
             'starting_mileage' => ['Label' => 'StartingMileage', 'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 10, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'arrival_mileage'  => ['Label' => 'ArrivalMileage',  'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 20, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],

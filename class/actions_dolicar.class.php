@@ -92,7 +92,7 @@ class ActionsDoliCar
      */
     public function addHtmlHeader(array $parameters): int
     {
-        if (strpos($parameters['context'], 'invoicecard') === false) {
+        if (!preg_match('/invoicecard|invoicesuppliercard/', $parameters['context'])) {
             return 0;
         }
 
@@ -218,15 +218,18 @@ class ActionsDoliCar
         }
 
         // Warranties recorded on an invoice (issue #475)
-        if (strpos($parameters['context'], 'invoicecard') !== false && is_object($object) && $object->element == 'facture' && $object->id > 0
-            && $user->hasRight('facture', 'creer')) {
+        if (preg_match('/invoicecard|invoicesuppliercard/', $parameters['context']) && is_object($object) && $object->id > 0) {
             require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
             require_once __DIR__ . '/../../saturne/lib/medias.lib.php';
             require_once __DIR__ . '/../lib/dolicar_functions.lib.php';
 
+            if (!dolicar_is_warranty_invoice($object) || !dolicar_can_edit_invoice_warranties($object)) {
+                return 0;
+            }
+
             // Certificates are attached before the warranty exists: they wait in a temp dir keyed by
             // an upload token, and move next to the invoice once the warranty is saved
-            $warrantyUploadContext = 'dolicar_invoice_warranty_' . $object->id;
+            $warrantyUploadContext = 'dolicar_invoice_warranty_' . $object->element . '_' . $object->id;
             $warrantyUploadSubDir  = 'invoice_warranty/' . saturne_get_upload_token($warrantyUploadContext);
 
             // Upload and deletion posted by the Saturne media block of the warranty form
@@ -337,7 +340,8 @@ class ActionsDoliCar
                     }
                 }
 
-                header('Location: ' . $_SERVER['PHP_SELF'] . '?facid=' . $object->id);
+                // Both invoice cards read 'id', the supplier one does not know 'facid'
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
                 exit;
             }
         }
@@ -371,8 +375,13 @@ class ActionsDoliCar
 
         // Warranties recorded on an invoice (issue #475). This hook runs from extrafields_view.tpl.php,
         // inside the card table, which is the only spot where the block lands in the card itself
-        if (strpos($parameters['context'], 'invoicecard') !== false && is_object($object) && $object->element == 'facture' && $object->id > 0) {
+        if (preg_match('/invoicecard|invoicesuppliercard/', $parameters['context']) && is_object($object) && $object->id > 0) {
             require_once __DIR__ . '/../../saturne/lib/medias.lib.php';
+            require_once __DIR__ . '/../lib/dolicar_functions.lib.php';
+
+            if (!dolicar_is_warranty_invoice($object)) {
+                return 0;
+            }
 
             $langs->load('dolicar@dolicar');
 
@@ -383,12 +392,14 @@ class ActionsDoliCar
             }
 
             $warrantyColspan      = !empty($parameters['cols']) ? (int) $parameters['cols'] : 2;
-            $warrantyUploadSubDir = 'invoice_warranty/' . saturne_get_upload_token('dolicar_invoice_warranty_' . $object->id);
+            $warrantyUploadSubDir = 'invoice_warranty/' . saturne_get_upload_token('dolicar_invoice_warranty_' . $object->element . '_' . $object->id);
 
-            // The TPL prints its row, buffer it so the hook manager places it where it belongs
+            // The TPL prints its row, buffer it so the hook manager places it where it belongs.
+            // Assign, never append: the hook manager reuses this instance across hook methods and
+            // never clears the property, so appending would replay the output of a previous hook.
             ob_start();
             require __DIR__ . '/../core/tpl/facture_warranty.tpl.php';
-            $this->resprints .= ob_get_clean();
+            $this->resprints = ob_get_clean();
         }
 
         return 0; // or return 1 to replace standard code

@@ -201,31 +201,43 @@ function dolicar_get_vehicle_event_media_html(int $actionCommId): string
  * Collect the warranties covering a vehicle.
  *
  * A warranty is recorded on the invoice that grants it, so the vehicle card gathers them through
- * the invoices linked to the events of its history. One query resolves those invoices — walking
+ * the invoices linked to the events of its history — customer invoices for what the garage grants,
+ * supplier invoices for what it received on the parts. One query resolves those invoices: walking
  * the events one by one to read their links would cost a query per event.
  *
  * @param  RegistrationCertificateFr $registrationCertificate Registration certificate of the vehicle
- * @return array                                              [['warranty' => array, 'invoice' => Facture]], longest running first
+ * @return array                                              [['warranty' => array, 'invoice' => Facture|FactureFournisseur]], longest running first
  */
 function dolicar_get_vehicle_warranties(RegistrationCertificateFr $registrationCertificate): array
 {
     global $db;
 
-    if (!isModEnabled('facture') || empty($registrationCertificate->fk_lot)) {
+    if (empty($registrationCertificate->fk_lot)) {
         return [];
     }
-
-    // Load Dolibarr libraries
-    require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 
     // Load DoliCar libraries
     require_once __DIR__ . '/dolicar_functions.lib.php';
 
+    $invoiceClasses = [];
+    if (isModEnabled('facture')) {
+        require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+        $invoiceClasses['facture'] = 'Facture';
+    }
+    if (isModEnabled('supplier_invoice') || isModEnabled('fournisseur')) {
+        require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
+        $invoiceClasses['invoice_supplier'] = 'FactureFournisseur';
+    }
+
+    if (empty($invoiceClasses)) {
+        return [];
+    }
+
     // A vehicle event links its invoice as the source of the link and itself as the target
-    $sql  = 'SELECT DISTINCT ee.fk_source AS invoice_id';
+    $sql  = 'SELECT DISTINCT ee.fk_source AS invoice_id, ee.sourcetype';
     $sql .= ' FROM ' . MAIN_DB_PREFIX . 'element_element AS ee';
     $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . "actioncomm AS a ON a.id = ee.fk_target AND ee.targettype = 'action'";
-    $sql .= " WHERE ee.sourcetype = 'facture'";
+    $sql .= " WHERE ee.sourcetype IN ('" . implode("', '", array_keys($invoiceClasses)) . "')";
     $sql .= ' AND a.fk_element = ' . (int) $registrationCertificate->fk_lot;
     $sql .= " AND a.elementtype = 'productlot'";
 
@@ -237,7 +249,9 @@ function dolicar_get_vehicle_warranties(RegistrationCertificateFr $registrationC
 
     $vehicleWarranties = [];
     while ($obj = $db->fetch_object($resql)) {
-        $invoice = new Facture($db);
+        $invoiceClass = $invoiceClasses[$obj->sourcetype];
+
+        $invoice = new $invoiceClass($db);
         if ($invoice->fetch((int) $obj->invoice_id) <= 0) {
             continue;
         }

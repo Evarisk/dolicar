@@ -355,6 +355,49 @@ function dolicar_set_invoice_warranties(CommonObject $invoice, array $warranties
 }
 
 /**
+ * Tell whether an object is an invoice able to carry warranties.
+ *
+ * Both the customer invoice and the supplier one do: a garage grants warranties to its client and
+ * receives some from its parts supplier.
+ *
+ * @param  mixed $invoice Object to test
+ * @return bool           True for a customer or supplier invoice
+ */
+function dolicar_is_warranty_invoice($invoice): bool
+{
+    return is_object($invoice) && in_array($invoice->element, ['facture', 'invoice_supplier'], true);
+}
+
+/**
+ * Get the document.php modulepart of an invoice.
+ *
+ * @param  CommonObject $invoice Invoice carrying the warranties
+ * @return string                Modulepart to hand to document.php / getAdvancedPreviewUrl()
+ */
+function dolicar_get_invoice_warranty_modulepart(CommonObject $invoice): string
+{
+    return $invoice->element == 'invoice_supplier' ? 'facture_fournisseur' : 'facture';
+}
+
+/**
+ * Get the warranty directory of an invoice, relative to its modulepart output dir.
+ *
+ * Supplier invoices spread their documents over a two level directory hierarchy, customer invoices
+ * do not — get_exdir() answers for both.
+ *
+ * @param  CommonObject $invoice Invoice carrying the warranties
+ * @return string                Relative path of the warranty directory
+ */
+function dolicar_get_invoice_warranty_relative_dir(CommonObject $invoice): string
+{
+    $subDir = $invoice->element == 'invoice_supplier'
+        ? get_exdir($invoice->id, 2, 0, 0, $invoice, 'invoice_supplier')
+        : '';
+
+    return $subDir . dol_sanitizeFileName($invoice->ref) . '/warranty';
+}
+
+/**
  * Get the directory holding the warranty certificates of an invoice.
  *
  * The files live in the invoice's own document directory, so Dolibarr moves them along when the
@@ -368,9 +411,31 @@ function dolicar_get_invoice_warranty_dir(CommonObject $invoice): string
     // Global variables definitions
     global $conf;
 
-    $dirOutput = !empty($conf->facture->multidir_output[$invoice->entity]) ? $conf->facture->multidir_output[$invoice->entity] : $conf->facture->dir_output;
+    if ($invoice->element == 'invoice_supplier') {
+        $dirOutput = !empty($conf->fournisseur->facture->multidir_output[$invoice->entity]) ? $conf->fournisseur->facture->multidir_output[$invoice->entity] : $conf->fournisseur->facture->dir_output;
+    } else {
+        $dirOutput = !empty($conf->facture->multidir_output[$invoice->entity]) ? $conf->facture->multidir_output[$invoice->entity] : $conf->facture->dir_output;
+    }
 
-    return $dirOutput . '/' . dol_sanitizeFileName($invoice->ref) . '/warranty';
+    return $dirOutput . '/' . dolicar_get_invoice_warranty_relative_dir($invoice);
+}
+
+/**
+ * Tell whether the current user may add or remove the warranties of an invoice.
+ *
+ * @param  CommonObject $invoice Invoice carrying the warranties
+ * @return bool                  True when the user can write on that invoice
+ */
+function dolicar_can_edit_invoice_warranties(CommonObject $invoice): bool
+{
+    // Global variables definitions
+    global $user;
+
+    if ($invoice->element == 'invoice_supplier') {
+        return $user->hasRight('fournisseur', 'facture', 'creer') || $user->hasRight('supplier_invoice', 'creer');
+    }
+
+    return (bool) $user->hasRight('facture', 'creer');
 }
 
 /**
@@ -386,7 +451,7 @@ function dolicar_get_invoice_warranty_file_url(CommonObject $invoice, string $fi
         return '';
     }
 
-    return DOL_URL_ROOT . '/document.php?modulepart=facture&entity=' . (int) $invoice->entity . '&file=' . urlencode(dol_sanitizeFileName($invoice->ref) . '/warranty/' . $fileName);
+    return DOL_URL_ROOT . '/document.php?modulepart=' . dolicar_get_invoice_warranty_modulepart($invoice) . '&entity=' . (int) $invoice->entity . '&file=' . urlencode(dolicar_get_invoice_warranty_relative_dir($invoice) . '/' . $fileName);
 }
 
 /**
@@ -408,8 +473,8 @@ function dolicar_get_invoice_warranty_preview_link(CommonObject $invoice, string
         return '';
     }
 
-    $relativePath = dol_sanitizeFileName($invoice->ref) . '/warranty/' . $fileName;
-    $preview      = getAdvancedPreviewUrl('facture', $relativePath, 1, '&entity=' . (int) $invoice->entity);
+    $relativePath = dolicar_get_invoice_warranty_relative_dir($invoice) . '/' . $fileName;
+    $preview      = getAdvancedPreviewUrl(dolicar_get_invoice_warranty_modulepart($invoice), $relativePath, 1, '&entity=' . (int) $invoice->entity);
 
     if (empty($preview) || empty($preview['url'])) {
         return '<a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($invoice, $fileName)) . '" target="_blank" title="' . dol_escape_htmltag($fileName) . '">' . img_picto($fileName, 'file') . '</a>';

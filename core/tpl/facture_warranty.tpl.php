@@ -40,8 +40,8 @@ require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
 require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
 
 $warranties      = dolicar_get_invoice_warranties($object);
-$permissionToAdd = $user->hasRight('facture', 'creer');
-$backToPage      = $_SERVER['PHP_SELF'] . '?facid=' . $object->id;
+$permissionToAdd = dolicar_can_edit_invoice_warranties($object);
+$backToPage      = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
 $warrantyColspan = !empty($warrantyColspan) ? (int) $warrantyColspan : 2;
 
 print '<tr class="dolicar-invoice-warranties">';
