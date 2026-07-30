@@ -334,6 +334,22 @@ function dolicar_get_invoice_warranty_dir(CommonObject $invoice): string
 }
 
 /**
+ * Build the download URL of a warranty certificate.
+ *
+ * @param  CommonObject $invoice  Invoice carrying the warranty
+ * @param  string       $fileName Name of the certificate file
+ * @return string                 Download URL, empty when the warranty has no certificate
+ */
+function dolicar_get_invoice_warranty_file_url(CommonObject $invoice, string $fileName): string
+{
+    if (empty($fileName)) {
+        return '';
+    }
+
+    return DOL_URL_ROOT . '/document.php?modulepart=facture&entity=' . (int) $invoice->entity . '&file=' . urlencode(dol_sanitizeFileName($invoice->ref) . '/warranty/' . $fileName);
+}
+
+/**
  * Get vehicle brand name with product ID
  *
  * @param  int    $productID Product ID

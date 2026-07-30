@@ -54,7 +54,7 @@ if (isModEnabled('digiquali')) {
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs(['propal', 'interventions']);
+saturne_load_langs(['propal', 'interventions', 'bills']);
 if (isModEnabled('digiquali')) {
     $langs->load('digiquali@digiquali');
 }
@@ -596,6 +596,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     // Linked objects section
     require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
+
+    // Warranties carried by the invoices linked to the vehicle history (issue #475)
+    if (isModEnabled('facture')) {
+        require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_warranties.tpl.php';
+    }
 
     // Documents and actions section
     if ($action != 'presend') {

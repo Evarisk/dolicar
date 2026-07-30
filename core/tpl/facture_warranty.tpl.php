@@ -27,6 +27,9 @@
  * Variable : $object (Facture)
  */
 
+// Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
 
@@ -67,8 +70,7 @@ if (!empty($warranties)) {
         print '</td>';
         print '<td>';
         if (!empty($warranty['file'])) {
-            $warrantyFileUrl = DOL_URL_ROOT . '/document.php?modulepart=facture&entity=' . (int) $object->entity . '&file=' . urlencode(dol_sanitizeFileName($object->ref) . '/warranty/' . $warranty['file']);
-            print '<a href="' . dol_escape_htmltag($warrantyFileUrl) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warranty['file']) . '</a>';
+            print '<a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($object, $warranty['file'])) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warranty['file']) . '</a>';
         }
         print '</td>';
         print '<td class="right">';

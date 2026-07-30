@@ -195,6 +195,66 @@ function dolicar_get_vehicle_event_media_html(int $actionCommId): string
 }
 
 /**
+ * Collect the warranties covering a vehicle.
+ *
+ * A warranty is recorded on the invoice that grants it, so the vehicle card gathers them through
+ * the invoices linked to the events of its history. One query resolves those invoices — walking
+ * the events one by one to read their links would cost a query per event.
+ *
+ * @param  RegistrationCertificateFr $registrationCertificate Registration certificate of the vehicle
+ * @return array                                              [['warranty' => array, 'invoice' => Facture]], longest running first
+ */
+function dolicar_get_vehicle_warranties(RegistrationCertificateFr $registrationCertificate): array
+{
+    global $db;
+
+    if (!isModEnabled('facture') || empty($registrationCertificate->fk_lot)) {
+        return [];
+    }
+
+    // Load Dolibarr libraries
+    require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+
+    // Load DoliCar libraries
+    require_once __DIR__ . '/dolicar_functions.lib.php';
+
+    // A vehicle event links its invoice as the source of the link and itself as the target
+    $sql  = 'SELECT DISTINCT ee.fk_source AS invoice_id';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'element_element AS ee';
+    $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . "actioncomm AS a ON a.id = ee.fk_target AND ee.targettype = 'action'";
+    $sql .= " WHERE ee.sourcetype = 'facture'";
+    $sql .= ' AND a.fk_element = ' . (int) $registrationCertificate->fk_lot;
+    $sql .= " AND a.elementtype = 'productlot'";
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        dol_syslog('dolicar_get_vehicle_warranties: ' . $db->lasterror(), LOG_ERR);
+        return [];
+    }
+
+    $vehicleWarranties = [];
+    while ($obj = $db->fetch_object($resql)) {
+        $invoice = new Facture($db);
+        if ($invoice->fetch((int) $obj->invoice_id) <= 0) {
+            continue;
+        }
+        $invoice->fetch_optionals();
+
+        foreach (dolicar_get_invoice_warranties($invoice) as $warranty) {
+            $vehicleWarranties[] = ['warranty' => $warranty, 'invoice' => $invoice];
+        }
+    }
+    $db->free($resql);
+
+    // Latest end dates first, warranties without one last
+    usort($vehicleWarranties, static function (array $first, array $second) {
+        return strcmp((string) ($second['warranty']['date_end'] ?? ''), (string) ($first['warranty']['date_end'] ?? ''));
+    });
+
+    return $vehicleWarranties;
+}
+
+/**
  * Build a "magnifier" link opening a linked object's last generated PDF in the Dolibarr
  * document preview modal (used in the vehicle history "linked documents" column).
  *
