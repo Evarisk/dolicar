@@ -203,9 +203,6 @@ class modDoliCar extends DolibarrModules
             $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_ENABLED', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_REF_MASK', 'chaine', 'DIVREP-{PLAQUE}-{VIN}', '', 0, 'current'],
             $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', 'chaine', 'Divers réparation sur le véhicule : {PLAQUE} {VIN}', '', 0, 'current'],
-            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', 'chaine', '20', '', 0, 'current'],
-            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY', 'chaine', '', '', 0, 'current'],
-            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL', 'chaine', '', '', 0, 'current'],
 
             // CONST PUBLIC INTERFACE
             $i++ => ['DOLICAR_PUBLIC_INTERFACE_USE_SIGNATORY', 'integer', 0, '', 0, 'current'],
@@ -567,6 +564,10 @@ class modDoliCar extends DolibarrModules
         // their certificates live in the document directory of the source invoice (issue #475).
         // saturne_manage_extrafields() stops before the emptyonclone argument of addExtraField().
         $sql[] = 'UPDATE ' . MAIN_DB_PREFIX . "extrafields SET emptyonclone = 1 WHERE name = 'warranty_end' AND elementtype IN ('facture', 'facture_fourn')";
+
+        // The repair service now takes the default VAT rate of the company country and the accounting
+        // codes of the Comptabilité module, these settings are gone
+        $sql[] = 'DELETE FROM ' . MAIN_DB_PREFIX . "const WHERE name IN ('DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', 'DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY', 'DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL')";
 
         if (getDolGlobalInt('DOLICAR_EXTRAFIELDS_BACKWARD_COMPATIBILITY') == 0) {
             require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';

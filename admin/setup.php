@@ -75,23 +75,9 @@ if ($action == 'update_warehouse') {
 if ($action == 'update_repair_service') {
     $refMask         = GETPOST('DOLICAR_VEHICLE_REPAIR_SERVICE_REF_MASK', 'alphanohtml');
     $descriptionMask = GETPOST('DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', 'alphanohtml');
-    $vatRate         = price2num(GETPOST('DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', 'alpha'));
-
-    // The accounting selects post -1 when nothing is picked
-    $accountancyCodeBuy  = GETPOST('DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY', 'alpha');
-    $accountancyCodeSell = GETPOST('DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL', 'alpha');
-    if ($accountancyCodeBuy == '-1') {
-        $accountancyCodeBuy = '';
-    }
-    if ($accountancyCodeSell == '-1') {
-        $accountancyCodeSell = '';
-    }
 
     dolibarr_set_const($db, 'DOLICAR_VEHICLE_REPAIR_SERVICE_REF_MASK', $refMask, 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, 'DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', $descriptionMask, 'chaine', 0, '', $conf->entity);
-    dolibarr_set_const($db, 'DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', $vatRate, 'chaine', 0, '', $conf->entity);
-    dolibarr_set_const($db, 'DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY', $accountancyCodeBuy, 'chaine', 0, '', $conf->entity);
-    dolibarr_set_const($db, 'DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL', $accountancyCodeSell, 'chaine', 0, '', $conf->entity);
 
     setEventMessages($langs->trans('SetupSaved'), null, 'mesgs');
     $action = 'edit';
@@ -326,36 +312,6 @@ print '<td class="center">';
 print '<input class="flat minwidth300" type="text" name="DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK" value="' . dol_escape_htmltag(getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', 'Divers réparation sur le véhicule : {PLAQUE} {VIN}')) . '">';
 print '</td>';
 print '</tr>';
-
-print '<tr class="oddeven">';
-print '<td class="nowraponall">' . $langs->transnoentities('VehicleRepairServiceVATRate') . '</td>';
-print '<td class="center">';
-print '<input class="flat maxwidth75" type="text" name="DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE" value="' . dol_escape_htmltag(getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', '20')) . '"> %';
-print '</td>';
-print '</tr>';
-
-$accountancyCodes = [
-    'DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY'  => 'VehicleRepairServiceAccountancyCodeBuy',
-    'DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL' => 'VehicleRepairServiceAccountancyCodeSell'
-];
-
-if (isModEnabled('accounting')) {
-    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formaccounting.class.php';
-    $formAccounting = new FormAccounting($db);
-}
-
-foreach ($accountancyCodes as $accountancyCodeConst => $accountancyCodeLabel) {
-    print '<tr class="oddeven">';
-    print '<td class="nowraponall">' . $langs->transnoentities($accountancyCodeLabel) . '</td>';
-    print '<td class="center">';
-    if (isModEnabled('accounting')) {
-        print $formAccounting->select_account(getDolGlobalString($accountancyCodeConst), $accountancyCodeConst, 1, [], 1, 1, 'minwidth200 maxwidth300', '1');
-    } else {
-        print '<input class="flat minwidth200" type="text" name="' . $accountancyCodeConst . '" value="' . dol_escape_htmltag(getDolGlobalString($accountancyCodeConst)) . '">';
-    }
-    print '</td>';
-    print '</tr>';
-}
 
 print '</table>';
 

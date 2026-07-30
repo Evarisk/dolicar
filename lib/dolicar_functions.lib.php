@@ -206,7 +206,7 @@ function dolicar_apply_vehicle_repair_service_mask(string $mask, string $registr
 function dolicar_create_vehicle_repair_service(RegistrationCertificateFr $registrationCertificate): int
 {
     // Global variables definitions
-    global $conf, $db, $user;
+    global $conf, $db, $mysoc, $user;
 
     // Load Dolibarr libraries
     require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
@@ -281,16 +281,17 @@ function dolicar_create_vehicle_repair_service(RegistrationCertificateFr $regist
     // In order to avoid product creation error when an automatic barcode numbering is enabled
     $conf->global->BARCODE_PRODUCT_ADDON_NUM = 0;
 
-    $service                        = new Product($db);
-    $service->ref                   = $ref;
-    $service->label                 = $description !== '' ? $description : $ref;
-    $service->description           = $description;
-    $service->type                  = Product::TYPE_SERVICE;
-    $service->status                = 1;
-    $service->status_buy            = 1;
-    $service->tva_tx                = (float) price2num(getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', '20'));
-    $service->accountancy_code_buy  = getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY');
-    $service->accountancy_code_sell = getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL');
+    $service              = new Product($db);
+    $service->ref         = $ref;
+    $service->label       = $description !== '' ? $description : $ref;
+    $service->description = $description;
+    $service->type        = Product::TYPE_SERVICE;
+    $service->status      = 1;
+    $service->status_buy  = 1;
+
+    // Same rate as a service created by hand: Product::create() would store 0 % if left empty.
+    // The accounting codes are left to the Comptabilité module defaults for services.
+    $service->tva_tx = (float) get_default_tva($mysoc, $mysoc);
 
     $serviceID = $service->create($user);
     if ($serviceID <= 0) {
