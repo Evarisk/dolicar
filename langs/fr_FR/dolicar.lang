@@ -459,6 +459,7 @@ ErrorMissingRegistrationNumberColumn  = La colonne « immatriculation » est obl
 
 # Service de réparation par véhicule (issue #475)
 VehicleRepairServiceConfig              = Service de réparation par véhicule
+VehicleRepairService                    = Service de réparation
 VehicleRepairServiceEnabled             = Créer un service de réparation par véhicule
 VehicleRepairServiceEnabledDesc         = À la création d'une carte grise, un service dédié au véhicule est créé automatiquement pour porter les réparations dans les commandes fournisseur.
 VehicleRepairServiceRefMask             = Référence du service

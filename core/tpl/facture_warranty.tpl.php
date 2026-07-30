@@ -63,8 +63,12 @@ print '<td class="right"></td>';
 print '</tr>';
 
 if (!empty($warranties)) {
+    $today = dol_print_date(dol_now(), '%Y-%m-%d');
+
     foreach ($warranties as $warranty) {
         $warrantyEndDate = !empty($warranty['date_end']) ? dol_stringtotime($warranty['date_end']) : 0;
+        // Compared as stored, day against day: a warranty runs until the end of its last day
+        $isExpired       = !empty($warranty['date_end']) && $warranty['date_end'] < $today;
 
         print '<tr class="oddeven">';
         print '<td>' . dol_escape_htmltag($warranty['label'] ?? '') . '</td>';
@@ -72,7 +76,7 @@ if (!empty($warranties)) {
         if ($warrantyEndDate > 0) {
             print dol_print_date($warrantyEndDate, 'day');
             // An expired warranty must not read like a valid one
-            if ($warrantyEndDate < dol_now()) {
+            if ($isExpired) {
                 print ' ' . img_picto($langs->transnoentities('WarrantyExpired'), 'warning');
             }
         }

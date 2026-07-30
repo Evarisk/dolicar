@@ -181,7 +181,9 @@ function dolicar_get_vehicle_event_media_html(int $actionCommId): string
     foreach (dolicar_get_vehicle_event_media_sub_dirs($actionCommId) as $subDir) {
         $out .= saturne_render_media_block('dolicar', $subDir, 'evt' . $actionCommId . '-' . str_replace('/', '-', $subDir), '', ['show_photo' => true, 'show_file' => false, 'show_audio' => false, 'show_upload' => false]);
 
-        foreach (saturne_get_media_files('dolicar', $subDir) as $mediaFile) {
+        // dolicar_get_upload_temp_files(), not saturne_get_media_files(): the latter drops
+        // everything that is neither an image nor an audio record, so documents would never show up
+        foreach (dolicar_get_upload_temp_files($subDir) as $mediaFile) {
             if (image_format_supported($mediaFile['name']) >= 0) {
                 continue;
             }

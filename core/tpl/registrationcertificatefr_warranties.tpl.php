@@ -50,11 +50,14 @@ print '<tr class="liste_titre">';
 print '<td colspan="2">' . img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"') . $langs->transnoentities('VehicleWarranties') . ' <span class="badge marginleftonlyshort">' . count($vehicleWarranties) . '</span></td>';
 print '</tr>';
 
+$today = dol_print_date(dol_now(), '%Y-%m-%d');
+
 foreach ($vehicleWarranties as $vehicleWarranty) {
     $warranty        = $vehicleWarranty['warranty'];
     $invoice         = $vehicleWarranty['invoice'];
     $warrantyEndDate = !empty($warranty['date_end']) ? dol_stringtotime($warranty['date_end']) : 0;
-    $isExpired       = $warrantyEndDate > 0 && $warrantyEndDate < dol_now();
+    // Compared as stored, day against day: a warranty runs until the end of its last day
+    $isExpired       = !empty($warranty['date_end']) && $warranty['date_end'] < $today;
 
     print '<tr class="oddeven' . ($isExpired ? ' opacitymedium' : '') . '">';
 

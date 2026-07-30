@@ -195,10 +195,10 @@ function dolicar_apply_vehicle_repair_service_mask(string $mask, string $registr
 /**
  * Create, once, the repair service dedicated to a vehicle.
  *
- * A garage buys its repairs through supplier orders: giving each vehicle its own service
- * keeps the cost of a repair attached to the vehicle it was made for. The reference is built
- * from the configured mask, which is what makes this function idempotent — the service of a
- * vehicle is found back from its reference, no extra column is needed to remember it.
+ * A garage buys its repairs through supplier orders: giving each vehicle its own service keeps the
+ * cost of a repair attached to the vehicle it was made for. The service is remembered on the
+ * certificate, so completing the VIN of a vehicle registered on its plate alone renames the
+ * existing service instead of creating a second one next to the orders already placed on the first.
  *
  * @param  RegistrationCertificateFr $registrationCertificate Registration certificate of the vehicle
  * @return int                                                0 if nothing to do, > 0 service product ID, < 0 if KO
@@ -216,22 +216,21 @@ function dolicar_create_vehicle_repair_service(RegistrationCertificateFr $regist
     }
 
     // A draft only caches an API answer waiting to be promoted, it describes no vehicle yet
-    if ($registrationCertificate->status == RegistrationCertificateFr::STATUS_DRAFT) {
+    if (empty($registrationCertificate->id) || $registrationCertificate->status == RegistrationCertificateFr::STATUS_DRAFT) {
         return 0;
     }
 
     $registrationNumber = trim((string) $registrationCertificate->a_registration_number);
-    $vin                = trim((string) $registrationCertificate->e_vehicle_serial_number);
 
-    // The lot batch carries the VIN when the certificate field was left empty
-    if ($vin === '' && !empty($registrationCertificate->fk_lot)) {
-        require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
-
-        $productLot = new Productlot($db);
-        if ($productLot->fetch($registrationCertificate->fk_lot) > 0) {
-            $vin = trim((string) $productLot->batch);
-        }
+    // normalize_registration_number() answers -1 for a vehicle saved without a plate: that sentinel
+    // must not end up in the reference, where it would read as a plate of its own
+    if ($registrationNumber === '-1') {
+        $registrationNumber = '';
     }
+
+    // Only the certificate carries the VIN: the lot batch falls back to a random identifier when
+    // the vehicle was created without one, which would end up in the reference of the service
+    $vin = trim((string) $registrationCertificate->e_vehicle_serial_number);
 
     if ($registrationNumber === '' && $vin === '') {
         return 0;
@@ -242,19 +241,42 @@ function dolicar_create_vehicle_repair_service(RegistrationCertificateFr $regist
         return 0;
     }
 
-    // Product::create() sanitizes the reference, so look the sanitized form up first: it is the
-    // one already stored by a previous call
-    $existingService = new Product($db);
-    if ($existingService->fetch(0, dol_sanitizeFileName(dol_string_nospecial($ref))) > 0) {
-        return $existingService->id;
+    $description  = dolicar_apply_vehicle_repair_service_mask(getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', 'Divers réparation sur le véhicule : {PLAQUE} {VIN}'), $registrationNumber, $vin);
+    $sanitizedRef = dol_sanitizeFileName(dol_string_nospecial($ref));
+
+    // The service already known for this vehicle wins over any reference lookup: its reference may
+    // be the one built before the VIN was filled in
+    $registrationCertificate->fetch_optionals();
+    $knownServiceID = (int) ($registrationCertificate->array_options['options_repair_service'] ?? 0);
+
+    $service = new Product($db);
+    if ($knownServiceID > 0 && $service->fetch($knownServiceID) > 0) {
+        if ($service->ref != $sanitizedRef) {
+            $service->ref         = $ref;
+            $service->label       = $description !== '' ? $description : $ref;
+            $service->description = $description;
+
+            if ($service->update($service->id, $user) <= 0) {
+                dol_syslog('dolicar_create_vehicle_repair_service: cannot rename service ' . $service->ref . ' to ' . $ref . ' - ' . $service->error, LOG_ERR);
+            }
+        }
+
+        return $knownServiceID;
     }
 
+    // Product::create() sanitizes the reference, so look the sanitized form up first: it is the one
+    // stored by a previous call, from before the service was remembered on the certificate
     $existingService = new Product($db);
-    if ($existingService->fetch(0, $ref) > 0) {
-        return $existingService->id;
+    if ($existingService->fetch(0, $sanitizedRef) <= 0) {
+        $existingService = new Product($db);
+        $existingService->fetch(0, $ref);
     }
 
-    $description = dolicar_apply_vehicle_repair_service_mask(getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', 'Divers réparation sur le véhicule : {PLAQUE} {VIN}'), $registrationNumber, $vin);
+    if ($existingService->id > 0) {
+        dolicar_remember_vehicle_repair_service($registrationCertificate, (int) $existingService->id);
+
+        return (int) $existingService->id;
+    }
 
     // In order to avoid product creation error when an automatic barcode numbering is enabled
     $conf->global->BARCODE_PRODUCT_ADDON_NUM = 0;
@@ -276,7 +298,24 @@ function dolicar_create_vehicle_repair_service(RegistrationCertificateFr $regist
         return -1;
     }
 
+    dolicar_remember_vehicle_repair_service($registrationCertificate, $serviceID);
+
     return $serviceID;
+}
+
+/**
+ * Remember on a vehicle which service carries its repairs.
+ *
+ * @param  RegistrationCertificateFr $registrationCertificate Registration certificate of the vehicle
+ * @param  int                       $serviceID               Repair service product ID
+ * @return void
+ */
+function dolicar_remember_vehicle_repair_service(RegistrationCertificateFr $registrationCertificate, int $serviceID): void
+{
+    // The other extrafields must be reloaded first, insertExtraFields() writes them all
+    $registrationCertificate->fetch_optionals();
+    $registrationCertificate->array_options['options_repair_service'] = $serviceID;
+    $registrationCertificate->insertExtraFields();
 }
 
 /**
@@ -329,15 +368,26 @@ function dolicar_get_invoice_warranties(CommonObject $invoice): array
         return [];
     }
 
-    // A warranty may carry several certificates, normalize so callers only ever read 'files'
-    foreach ($warranties as $key => $warranty) {
-        if (!isset($warranty['files']) || !is_array($warranty['files'])) {
-            $warranties[$key]['files'] = !empty($warranty['file']) ? [$warranty['file']] : [];
+    // A warranty may carry several certificates, normalize so callers only ever read 'files'.
+    // The JSON is writable through the API, so anything that is not shaped like a warranty is
+    // dropped rather than trusted — it would otherwise take the invoice card down.
+    $normalizedWarranties = [];
+    foreach ($warranties as $warranty) {
+        if (!is_array($warranty)) {
+            continue;
         }
-        unset($warranties[$key]['file']);
+
+        if (!isset($warranty['files']) || !is_array($warranty['files'])) {
+            $warranty['files'] = !empty($warranty['file']) && is_string($warranty['file']) ? [$warranty['file']] : [];
+        }
+        $warranty['files'] = array_values(array_filter($warranty['files'], 'is_string'));
+
+        unset($warranty['file']);
+
+        $normalizedWarranties[] = $warranty;
     }
 
-    return $warranties;
+    return $normalizedWarranties;
 }
 
 /**
@@ -382,8 +432,12 @@ function dolicar_get_invoice_warranty_modulepart(CommonObject $invoice): string
 /**
  * Get the warranty directory of an invoice, relative to its modulepart output dir.
  *
- * Supplier invoices spread their documents over a two level directory hierarchy, customer invoices
- * do not — get_exdir() answers for both.
+ * The certificates sit in the invoice document directory itself, not in a sub directory of it:
+ * dol_check_secure_access_document() reads the owning reference from the parent directory name of
+ * the requested file, so a sub directory would leave external users unfiltered on those files.
+ *
+ * Supplier invoices spread their documents over a two level hierarchy, customer invoices do not —
+ * get_exdir() answers for both.
  *
  * @param  CommonObject $invoice Invoice carrying the warranties
  * @return string                Relative path of the warranty directory
@@ -394,7 +448,7 @@ function dolicar_get_invoice_warranty_relative_dir(CommonObject $invoice): strin
         ? get_exdir($invoice->id, 2, 0, 0, $invoice, 'invoice_supplier')
         : '';
 
-    return $subDir . dol_sanitizeFileName($invoice->ref) . '/warranty';
+    return $subDir . dol_sanitizeFileName($invoice->ref);
 }
 
 /**

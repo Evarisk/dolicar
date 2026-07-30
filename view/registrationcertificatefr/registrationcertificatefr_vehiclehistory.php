@@ -245,8 +245,17 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
 if (in_array($action, ['uploadPhoto', 'uploadFile', 'deletePhoto', 'deleteFile'], true) && !empty($permissiontoadd)) {
     $uploadSubDir = GETPOST('sub_dir', 'alpha');
 
-    // Only the temp dir of the event being created may be written to
-    if ($uploadSubDir === $eventUploadSubDir) {
+    // The temp dir of the event being created, or the media dir of an event already attached to
+    // this vehicle: the gallery of a saved event edits and deletes its photos through the same actions
+    $allowedSubDir = $uploadSubDir === $eventUploadSubDir;
+    if (!$allowedSubDir && preg_match('#^(vehicle_event|vehicle_repair|problem_report)/([0-9]+)$#', $uploadSubDir, $uploadSubDirParts)) {
+        $eventOfThisVehicle = new ActionComm($db);
+        $allowedSubDir      = $eventOfThisVehicle->fetch((int) $uploadSubDirParts[2]) > 0
+            && $eventOfThisVehicle->elementtype == 'productlot'
+            && (int) $eventOfThisVehicle->fk_element === (int) $object->fk_lot;
+    }
+
+    if ($allowedSubDir) {
         $uploadDir = $conf->dolicar->dir_output . '/' . $uploadSubDir;
 
         if (($action == 'uploadPhoto' || $action == 'uploadFile') && !empty($conf->global->MAIN_UPLOAD_DOC)) {
@@ -373,7 +382,8 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
                     dol_mkdir($eventFinalDir);
                 }
                 foreach ($eventMediaFiles as $eventMediaFile) {
-                    dol_move($eventMediaFile['fullname'], $eventFinalDir . '/' . $eventMediaFile['name'], 0, 1, 0, 0);
+                    // Index the move, dol_add_file_process() has recorded the temp path in llx_ecm_files
+                    dol_move($eventMediaFile['fullname'], $eventFinalDir . '/' . $eventMediaFile['name'], 0, 1, 0, 1);
                 }
             }
             saturne_invalidate_upload_token($eventUploadContext, 'dolicar', 'vehicle_event');

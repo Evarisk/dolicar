@@ -102,6 +102,8 @@ class ActionsDoliCar
         $out  = '<!-- Includes CSS added by module dolicar -->';
         $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath('/custom/saturne/css/saturne.min.css', 1) . '">';
         $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath('/custom/dolicar/css/dolicar.min.css', 1) . '">';
+        // Last: undoes the Saturne layout rules that must not reach a native Dolibarr card
+        $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath('/custom/dolicar/css/dolicar_native_card.min.css', 1) . '">';
         $out .= '<!-- Includes JS added by module dolicar -->';
         $out .= '<script src="' . $saturneJsUrl . '"></script>';
 
@@ -286,7 +288,8 @@ class ActionsDoliCar
                                     $warrantyFileName = dol_sanitizeFileName(pathinfo($warrantyFileName, PATHINFO_FILENAME) . '_' . dol_print_date(dol_now(), 'dayhourlog') . '.' . pathinfo($warrantyFileName, PATHINFO_EXTENSION));
                                 }
 
-                                if (dol_move($warrantyTempFile['fullname'], $warrantyDir . '/' . $warrantyFileName, 0, 1, 0, 0)) {
+                                // Index the move, dol_add_file_process() has recorded the temp path in llx_ecm_files
+                                if (dol_move($warrantyTempFile['fullname'], $warrantyDir . '/' . $warrantyFileName, 0, 1, 0, 1)) {
                                     $warrantyFileNames[] = $warrantyFileName;
                                 }
                             }
@@ -395,8 +398,8 @@ class ActionsDoliCar
             $warrantyUploadSubDir = 'invoice_warranty/' . saturne_get_upload_token('dolicar_invoice_warranty_' . $object->element . '_' . $object->id);
 
             // The TPL prints its row, buffer it so the hook manager places it where it belongs.
-            // Assign, never append: the hook manager reuses this instance across hook methods and
-            // never clears the property, so appending would replay the output of a previous hook.
+            // Assign, never append: $resprints is a typed property left uninitialized until a hook
+            // writes it, and appending to it raises a fatal error on the first hook of the page.
             ob_start();
             require __DIR__ . '/../core/tpl/facture_warranty.tpl.php';
             $this->resprints = ob_get_clean();

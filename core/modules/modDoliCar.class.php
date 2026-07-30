@@ -552,12 +552,21 @@ class modDoliCar extends DolibarrModules
             // Hidden from the standard card ('list' => 0): the raw JSON is rendered as a table by the DoliCar hook.
             'warranty_end'              => ['Label' => 'Warranties',                'type' => 'text',                     'elementtype' => ['facture', 'facture_fourn'],      'position' => $this->numero . 90, 'list' => 0, 'alwayseditable' => 1],
 
+            // Repair service of the vehicle: remembering it lets a reference change rename the
+            // service instead of creating a second one (issue #475)
+            'repair_service'            => ['Label' => 'VehicleRepairService',      'type' => 'int',                      'elementtype' => ['dolicar_registrationcertificatefr'], 'position' => $this->numero . 100, 'list' => 0],
+
             'starting_mileage' => ['Label' => 'StartingMileage', 'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 10, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'arrival_mileage'  => ['Label' => 'ArrivalMileage',  'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 20, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'json'             => ['Label' => 'JSON',            'type' => 'text', 'elementtype' => ['actioncomm'], 'position' => 30, 'alwayseditable' => 1, 'list' => 0, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"]
         ];
 
         saturne_manage_extrafields($extraFieldsArrays, $commonExtraFieldsValue);
+
+        // Cloning an invoice must not carry its warranties over: the clone grants none of them, and
+        // their certificates live in the document directory of the source invoice (issue #475).
+        // saturne_manage_extrafields() stops before the emptyonclone argument of addExtraField().
+        $sql[] = 'UPDATE ' . MAIN_DB_PREFIX . "extrafields SET emptyonclone = 1 WHERE name = 'warranty_end' AND elementtype IN ('facture', 'facture_fourn')";
 
         if (getDolGlobalInt('DOLICAR_EXTRAFIELDS_BACKWARD_COMPATIBILITY') == 0) {
             require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
