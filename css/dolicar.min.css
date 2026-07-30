@@ -1390,8 +1390,16 @@ body.page-public-card .fiche {
   font-weight: bold;
   margin-bottom: 6px;
 }
-.dolicar-invoice-warranties > td input[type=file] {
-  max-width: 100%;
+.dolicar-invoice-warranties > td .dolicar-warranty-media-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dolicar-invoice-warranties > td .dolicar-warranty-media-row .linked-medias {
+  margin: 0;
+}
+.dolicar-invoice-warranties > td .dolicar-warranty-media-row .fast-upload-options {
+  display: none;
 }
 
 .dolicar-banner-links {

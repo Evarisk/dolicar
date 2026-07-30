@@ -280,6 +280,35 @@ function dolicar_create_vehicle_repair_service(RegistrationCertificateFr $regist
 }
 
 /**
+ * List every file waiting in an upload temp directory.
+ *
+ * saturne_get_media_files() drops everything that is neither an image nor an audio record, so a
+ * document attached through the media block would never leave the temp dir. This one keeps them all.
+ *
+ * @param  string $subDir Temp sub directory, relative to the DoliCar output dir
+ * @return array          Files, as returned by dol_dir_list()
+ */
+function dolicar_get_upload_temp_files(string $subDir): array
+{
+    // Global variables definitions
+    global $conf;
+
+    // Load Dolibarr libraries
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+    if (empty($subDir)) {
+        return [];
+    }
+
+    $uploadDir = $conf->dolicar->dir_output . '/' . $subDir;
+    if (!dol_is_dir($uploadDir)) {
+        return [];
+    }
+
+    return dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'name', SORT_ASC);
+}
+
+/**
  * Read the warranties recorded on an invoice.
  *
  * They live as a JSON array inside a single extrafield: a repair invoice often carries several
@@ -296,8 +325,19 @@ function dolicar_get_invoice_warranties(CommonObject $invoice): array
     }
 
     $warranties = json_decode($rawWarranties, true);
+    if (!is_array($warranties)) {
+        return [];
+    }
 
-    return is_array($warranties) ? $warranties : [];
+    // A warranty may carry several certificates, normalize so callers only ever read 'files'
+    foreach ($warranties as $key => $warranty) {
+        if (!isset($warranty['files']) || !is_array($warranty['files'])) {
+            $warranties[$key]['files'] = !empty($warranty['file']) ? [$warranty['file']] : [];
+        }
+        unset($warranties[$key]['file']);
+    }
+
+    return $warranties;
 }
 
 /**

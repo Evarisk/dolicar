@@ -24,13 +24,17 @@
 /**
  * The following vars must be defined:
  * Global   : $conf, $form, $langs, $user
- * Variable : $object (Facture), $warrantyColspan (int, columns of the hosting card table)
+ * Variable : $object (Facture), $warrantyColspan (int, columns of the hosting card table),
+ *            $warrantyUploadSubDir (string, temp media dir of the warranty being created)
  *
  * Prints a row of the invoice card table, so it must stay a <tr>
  */
 
 // Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+
+// Load Saturne libraries
+require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
@@ -74,8 +78,8 @@ if (!empty($warranties)) {
         }
         print '</td>';
         print '<td class="tdoverflowmax200">';
-        if (!empty($warranty['file'])) {
-            print '<a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($object, $warranty['file'])) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warranty['file']) . '</a>';
+        foreach ($warranty['files'] as $warrantyFileName) {
+            print '<div class="inline-block"><a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($object, $warrantyFileName)) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warrantyFileName) . '</a></div><br>';
         }
         print '</td>';
         print '<td class="right">';
@@ -93,7 +97,8 @@ if ($permissionToAdd) {
     print '<tr class="oddeven">';
     print '<td><input type="text" class="flat minwidth100 maxwidth200" name="warranty_label" value="' . dol_escape_htmltag(GETPOST('warranty_label', 'alphanohtml')) . '"></td>';
     print '<td class="center nowraponall">' . $form->selectDate(-1, 'warranty_end', 0, 0, 1, '', 1, 0) . '</td>';
-    print '<td><input type="file" class="flat maxwidth200" name="userfile"></td>';
+    // Certificates are uploaded right away to a temp dir, they move next to the invoice once the warranty is saved
+    print '<td><div class="dolicar-warranty-media-row">' . saturne_render_media_block('dolicar', $warrantyUploadSubDir, 'warranty_', '', ['show_photo' => false, 'show_file' => true, 'show_audio' => false]) . '</div></td>';
     print '<td class="right"><input type="submit" class="button button-add small" value="' . $langs->trans('Add') . '"></td>';
     print '</tr>';
 }

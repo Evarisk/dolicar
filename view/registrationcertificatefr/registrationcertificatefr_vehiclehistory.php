@@ -31,6 +31,7 @@ if (file_exists('../dolicar.main.inc.php')) {
 }
 
 // Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
@@ -44,6 +45,7 @@ require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
 require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
 
 // Load DoliCar libraries
+require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 
@@ -364,7 +366,7 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
             }
 
             // Move the uploaded photos/files from the temp dir to their permanent location keyed by the event
-            $eventMediaFiles = saturne_get_media_files('dolicar', $eventUploadSubDir);
+            $eventMediaFiles = dolicar_get_upload_temp_files($eventUploadSubDir);
             if (!empty($eventMediaFiles)) {
                 $eventFinalDir = $conf->dolicar->dir_output . '/vehicle_event/' . (int) $actionComm->id;
                 if (!dol_is_dir($eventFinalDir)) {

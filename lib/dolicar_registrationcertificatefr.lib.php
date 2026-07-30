@@ -143,6 +143,9 @@ function dolicar_get_vehicle_event_media_sub_dirs(int $actionCommId): array
 {
     global $conf;
 
+    // Load Dolibarr libraries
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
     if ($actionCommId <= 0) {
         return [];
     }

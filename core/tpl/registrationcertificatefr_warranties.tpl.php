@@ -66,8 +66,8 @@ if (!empty($vehicleWarranties)) {
         print '</td>';
         print '<td class="nowraponall">' . $invoice->getNomUrl(1) . '</td>';
         print '<td>';
-        if (!empty($warranty['file'])) {
-            print '<a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($invoice, $warranty['file'])) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warranty['file']) . '</a>';
+        foreach ($warranty['files'] as $warrantyFileName) {
+            print '<div class="inline-block"><a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($invoice, $warrantyFileName)) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warrantyFileName) . '</a></div><br>';
         }
         print '</td>';
         print '</tr>';
