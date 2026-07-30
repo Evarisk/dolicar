@@ -79,7 +79,10 @@ if (!empty($warranties)) {
         print '</td>';
         print '<td class="tdoverflowmax200">';
         foreach ($warranty['files'] as $warrantyFileName) {
-            print '<div class="inline-block"><a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($object, $warrantyFileName)) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warrantyFileName) . '</a></div><br>';
+            print '<div class="inline-block">';
+            print '<a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($object, $warrantyFileName)) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warrantyFileName) . '</a>';
+            print ' ' . dolicar_get_invoice_warranty_preview_link($object, $warrantyFileName);
+            print '</div><br>';
         }
         print '</td>';
         print '<td class="right">';

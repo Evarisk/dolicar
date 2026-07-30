@@ -484,6 +484,14 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     print '</table>';
     print '</div>';
+
+    // Warranties carried by the invoices linked to the vehicle history (issue #475)
+    if (isModEnabled('facture')) {
+        print '<div class="fichehalfright">';
+        require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_warranties.tpl.php';
+        print '</div>';
+    }
+
     print '</div>';
 
     ?>
@@ -596,11 +604,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     // Linked objects section
     require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
-
-    // Warranties carried by the invoices linked to the vehicle history (issue #475)
-    if (isModEnabled('facture')) {
-        require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_warranties.tpl.php';
-    }
 
     // Documents and actions section
     if ($action != 'presend') {

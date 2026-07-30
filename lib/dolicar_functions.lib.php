@@ -390,6 +390,41 @@ function dolicar_get_invoice_warranty_file_url(CommonObject $invoice, string $fi
 }
 
 /**
+ * Build a "magnifier" link opening a warranty certificate in the Dolibarr document preview modal.
+ *
+ * Falls back to a plain download link for the file types the preview cannot handle, and returns
+ * nothing when the file is gone, so a stale entry never yields a broken preview.
+ *
+ * @param  CommonObject $invoice  Invoice carrying the warranty
+ * @param  string       $fileName Name of the certificate file
+ * @return string                 HTML <a>, empty when the file no longer exists
+ */
+function dolicar_get_invoice_warranty_preview_link(CommonObject $invoice, string $fileName): string
+{
+    // Load Dolibarr libraries
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+    if (empty($fileName) || !dol_is_file(dolicar_get_invoice_warranty_dir($invoice) . '/' . $fileName)) {
+        return '';
+    }
+
+    $relativePath = dol_sanitizeFileName($invoice->ref) . '/warranty/' . $fileName;
+    $preview      = getAdvancedPreviewUrl('facture', $relativePath, 1, '&entity=' . (int) $invoice->entity);
+
+    if (empty($preview) || empty($preview['url'])) {
+        return '<a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($invoice, $fileName)) . '" target="_blank" title="' . dol_escape_htmltag($fileName) . '">' . img_picto($fileName, 'file') . '</a>';
+    }
+
+    return '<a href="' . $preview['url'] . '"'
+        . (!empty($preview['css']) ? ' class="' . $preview['css'] . '"' : '')
+        . (!empty($preview['mime']) ? ' mime="' . $preview['mime'] . '"' : '')
+        . (!empty($preview['target']) ? ' target="' . $preview['target'] . '"' : '')
+        . ' title="' . dol_escape_htmltag($fileName) . '">'
+        . img_picto($fileName, 'search-plus')
+        . '</a>';
+}
+
+/**
  * Get vehicle brand name with product ID
  *
  * @param  int    $productID Product ID

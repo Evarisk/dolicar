@@ -36,45 +36,44 @@ require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 $vehicleWarranties = dolicar_get_vehicle_warranties($object);
 
-print load_fiche_titre($langs->transnoentities('VehicleWarranties'), '', 'dolicar_color@dolicar');
+// Nothing to say about a vehicle without warranty: no empty block eating the card space
+if (empty($vehicleWarranties)) {
+    return;
+}
 
-print '<div class="div-table-responsive-no-min">';
-print '<table class="noborder centpercent">';
+print '<div class="underbanner clearboth"></div>';
+
+// No tableforfield class here: the card script collapses the vehicle data rows by scanning that class
+print '<table class="border centpercent dolicar-vehicle-warranties">';
+
 print '<tr class="liste_titre">';
-print '<td>' . $langs->transnoentities('WarrantyLabel') . '</td>';
-print '<td class="center">' . $langs->transnoentities('WarrantyEndDate') . '</td>';
-print '<td>' . $langs->transnoentities('Invoice') . '</td>';
-print '<td>' . $langs->transnoentities('WarrantyAttachment') . '</td>';
+print '<td colspan="2">' . img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"') . $langs->transnoentities('VehicleWarranties') . ' <span class="badge marginleftonlyshort">' . count($vehicleWarranties) . '</span></td>';
 print '</tr>';
 
-if (!empty($vehicleWarranties)) {
-    foreach ($vehicleWarranties as $vehicleWarranty) {
-        $warranty        = $vehicleWarranty['warranty'];
-        $invoice         = $vehicleWarranty['invoice'];
-        $warrantyEndDate = !empty($warranty['date_end']) ? dol_stringtotime($warranty['date_end']) : 0;
-        $isExpired       = $warrantyEndDate > 0 && $warrantyEndDate < dol_now();
+foreach ($vehicleWarranties as $vehicleWarranty) {
+    $warranty        = $vehicleWarranty['warranty'];
+    $invoice         = $vehicleWarranty['invoice'];
+    $warrantyEndDate = !empty($warranty['date_end']) ? dol_stringtotime($warranty['date_end']) : 0;
+    $isExpired       = $warrantyEndDate > 0 && $warrantyEndDate < dol_now();
 
-        print '<tr class="oddeven">';
-        print '<td' . ($isExpired ? ' class="opacitymedium"' : '') . '>' . dol_escape_htmltag($warranty['label'] ?? '') . '</td>';
-        print '<td class="center nowraponall">';
-        if ($warrantyEndDate > 0) {
-            print dol_print_date($warrantyEndDate, 'day');
-            print $isExpired
-                ? ' ' . img_picto($langs->transnoentities('WarrantyExpired'), 'warning')
-                : ' ' . img_picto($langs->transnoentities('WarrantyRunning'), 'tick');
-        }
-        print '</td>';
-        print '<td class="nowraponall">' . $invoice->getNomUrl(1) . '</td>';
-        print '<td>';
-        foreach ($warranty['files'] as $warrantyFileName) {
-            print '<div class="inline-block"><a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($invoice, $warrantyFileName)) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warrantyFileName) . '</a></div><br>';
-        }
-        print '</td>';
-        print '</tr>';
+    print '<tr class="oddeven' . ($isExpired ? ' opacitymedium' : '') . '">';
+
+    // The invoice granting the warranty stays one click away, as a picto to keep the block narrow
+    print '<td class="tdoverflowmax200">' . $invoice->getNomUrl(2) . ' ' . dol_escape_htmltag($warranty['label'] ?? '') . '</td>';
+
+    print '<td class="right nowraponall">';
+    if ($warrantyEndDate > 0) {
+        print $isExpired
+            ? img_picto($langs->transnoentities('WarrantyExpired'), 'warning')
+            : img_picto($langs->transnoentities('WarrantyRunning'), 'tick');
+        print ' ' . dol_print_date($warrantyEndDate, 'day');
     }
-} else {
-    print '<tr class="oddeven"><td colspan="4"><span class="opacitymedium">' . $langs->transnoentities('NoVehicleWarranty') . '</span></td></tr>';
+    foreach ($warranty['files'] as $warrantyFileName) {
+        print ' ' . dolicar_get_invoice_warranty_preview_link($invoice, $warrantyFileName);
+    }
+    print '</td>';
+
+    print '</tr>';
 }
 
 print '</table>';
-print '</div>';
