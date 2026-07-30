@@ -187,6 +187,93 @@ class ActionsDoliCar
             }
         }
 
+        // Warranties recorded on an invoice (issue #475)
+        if (strpos($parameters['context'], 'invoicecard') !== false && is_object($object) && $object->id > 0
+            && in_array($action, ['add_warranty', 'delete_warranty'], true) && $user->hasRight('facture', 'creer')) {
+            require_once __DIR__ . '/../lib/dolicar_functions.lib.php';
+
+            $langs->load('dolicar@dolicar');
+
+            $object->fetch_optionals();
+            $warranties = dolicar_get_invoice_warranties($object);
+
+            if ($action == 'add_warranty') {
+                $warrantyLabel   = GETPOST('warranty_label', 'alphanohtml');
+                $warrantyEndDate = dol_mktime(12, 0, 0, GETPOSTINT('warranty_endmonth'), GETPOSTINT('warranty_endday'), GETPOSTINT('warranty_endyear'));
+                $uploadedFile    = isset($_FILES['userfile']) ? $_FILES['userfile'] : [];
+
+                if (empty($warrantyLabel) && empty($warrantyEndDate) && empty($uploadedFile['name'])) {
+                    setEventMessages($langs->transnoentities('ErrorFieldRequired', $langs->transnoentities('WarrantyEndDate')), null, 'errors');
+                } else {
+                    $warrantyFileName = '';
+                    if (!empty($uploadedFile['name']) && !empty($conf->global->MAIN_UPLOAD_DOC)) {
+                        $warrantyDir = dolicar_get_invoice_warranty_dir($object);
+                        if (!dol_is_dir($warrantyDir)) {
+                            dol_mkdir($warrantyDir);
+                        }
+
+                        $warrantyFileName = dol_sanitizeFileName($uploadedFile['name']);
+                        // Two warranties may come with a certificate sharing the same name
+                        if (dol_is_file($warrantyDir . '/' . $warrantyFileName)) {
+                            $warrantyFileName = dol_sanitizeFileName(pathinfo($warrantyFileName, PATHINFO_FILENAME) . '_' . dol_print_date(dol_now(), 'dayhourlog') . '.' . pathinfo($warrantyFileName, PATHINFO_EXTENSION));
+                        }
+
+                        if (dol_move_uploaded_file($uploadedFile['tmp_name'], $warrantyDir . '/' . $warrantyFileName, 0, 0, $uploadedFile['error'], 0, 'userfile') <= 0) {
+                            $warrantyFileName = '';
+                            setEventMessages($langs->transnoentities('ErrorFailedToSaveFile'), null, 'errors');
+                        }
+                    }
+
+                    // Ids are only there to target a warranty on deletion, so a simple increment is enough
+                    $nextWarrantyId = 1;
+                    foreach ($warranties as $warranty) {
+                        $nextWarrantyId = max($nextWarrantyId, (int) ($warranty['id'] ?? 0) + 1);
+                    }
+
+                    $warranties[] = [
+                        'id'       => $nextWarrantyId,
+                        'label'    => $warrantyLabel,
+                        'date_end' => $warrantyEndDate > 0 ? dol_print_date($warrantyEndDate, '%Y-%m-%d') : '',
+                        'file'     => $warrantyFileName
+                    ];
+
+                    if (dolicar_set_invoice_warranties($object, $warranties) > 0) {
+                        setEventMessages($langs->transnoentities('WarrantyAdded'), null);
+                    } else {
+                        setEventMessages($object->error, $object->errors, 'errors');
+                    }
+                }
+            }
+
+            if ($action == 'delete_warranty') {
+                $warrantyIdToDelete = GETPOSTINT('warranty_id');
+
+                foreach ($warranties as $key => $warranty) {
+                    if ((int) ($warranty['id'] ?? 0) !== $warrantyIdToDelete) {
+                        continue;
+                    }
+
+                    if (!empty($warranty['file'])) {
+                        $warrantyFilePath = dolicar_get_invoice_warranty_dir($object) . '/' . dol_sanitizeFileName($warranty['file']);
+                        if (dol_is_file($warrantyFilePath)) {
+                            dol_delete_file($warrantyFilePath);
+                        }
+                    }
+
+                    unset($warranties[$key]);
+                }
+
+                if (dolicar_set_invoice_warranties($object, $warranties) > 0) {
+                    setEventMessages($langs->transnoentities('WarrantyDeleted'), null);
+                } else {
+                    setEventMessages($object->error, $object->errors, 'errors');
+                }
+            }
+
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?facid=' . $object->id);
+            exit;
+        }
+
         return 0; // or return 1 to replace standard code
     }
 
@@ -293,11 +380,32 @@ class ActionsDoliCar
      */
     public function printCommonFooter(array $parameters): int
     {
-        global $db, $langs; // // $db/$langs mandatory for TPL
+        global $conf, $db, $form, $langs, $user; // // $conf/$db/$form/$langs/$user mandatory for TPL
 
         if ((strpos($parameters['context'], 'productlotcard') !== false) && GETPOST('action', 'aZ09') != 'create') {
             $fromProductLot = 1;
             require_once __DIR__ . '/../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
+        }
+
+        // Warranties recorded on an invoice (issue #475)
+        if (strpos($parameters['context'], 'invoicecard') !== false && !in_array(GETPOST('action', 'aZ09'), ['create', 'presend'], true)) {
+            require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+
+            $langs->load('dolicar@dolicar');
+
+            // printCommonFooter is called without the page object, rebuild it from the request
+            $invoiceId = GETPOSTINT('id') > 0 ? GETPOSTINT('id') : GETPOSTINT('facid');
+            $object    = new Facture($this->db);
+
+            if ($invoiceId > 0 && $object->fetch($invoiceId) > 0) {
+                $object->fetch_optionals();
+
+                if (!is_object($form)) {
+                    $form = new Form($this->db);
+                }
+
+                require_once __DIR__ . '/../core/tpl/facture_warranty.tpl.php';
+            }
         }
 
         return 0; // or return 1 to replace standard code

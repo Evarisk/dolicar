@@ -170,6 +170,170 @@ function dolicar_get_or_create_vehicle_product_lot(string $brand, string $model,
 }
 
 /**
+ * Replace the tokens of a vehicle repair service mask.
+ *
+ * Supported tokens: {PLAQUE} (registration number) and {VIN} (vehicle serial number).
+ * A token resolving to an empty string leaves its separator behind, so the separators
+ * are collapsed afterwards: a vehicle without VIN gives "DIVREP-AB-123-CD", not
+ * "DIVREP-AB-123-CD-".
+ *
+ * @param  string $mask               Mask holding the {PLAQUE} / {VIN} tokens
+ * @param  string $registrationNumber Vehicle registration number (A)
+ * @param  string $vin                Vehicle serial number (E)
+ * @return string                     Mask with its tokens replaced
+ */
+function dolicar_apply_vehicle_repair_service_mask(string $mask, string $registrationNumber, string $vin): string
+{
+    $value = str_replace(['{PLAQUE}', '{VIN}'], [$registrationNumber, $vin], $mask);
+
+    $value = preg_replace('/-{2,}/', '-', $value);
+    $value = preg_replace('/[ \t]{2,}/', ' ', $value);
+
+    return trim($value, " -\t\n\r");
+}
+
+/**
+ * Create, once, the repair service dedicated to a vehicle.
+ *
+ * A garage buys its repairs through supplier orders: giving each vehicle its own service
+ * keeps the cost of a repair attached to the vehicle it was made for. The reference is built
+ * from the configured mask, which is what makes this function idempotent — the service of a
+ * vehicle is found back from its reference, no extra column is needed to remember it.
+ *
+ * @param  RegistrationCertificateFr $registrationCertificate Registration certificate of the vehicle
+ * @return int                                                0 if nothing to do, > 0 service product ID, < 0 if KO
+ */
+function dolicar_create_vehicle_repair_service(RegistrationCertificateFr $registrationCertificate): int
+{
+    // Global variables definitions
+    global $conf, $db, $user;
+
+    // Load Dolibarr libraries
+    require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+
+    if (!isModEnabled('service') || getDolGlobalInt('DOLICAR_VEHICLE_REPAIR_SERVICE_ENABLED') <= 0) {
+        return 0;
+    }
+
+    // A draft only caches an API answer waiting to be promoted, it describes no vehicle yet
+    if ($registrationCertificate->status == RegistrationCertificateFr::STATUS_DRAFT) {
+        return 0;
+    }
+
+    $registrationNumber = trim((string) $registrationCertificate->a_registration_number);
+    $vin                = trim((string) $registrationCertificate->e_vehicle_serial_number);
+
+    // The lot batch carries the VIN when the certificate field was left empty
+    if ($vin === '' && !empty($registrationCertificate->fk_lot)) {
+        require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+
+        $productLot = new Productlot($db);
+        if ($productLot->fetch($registrationCertificate->fk_lot) > 0) {
+            $vin = trim((string) $productLot->batch);
+        }
+    }
+
+    if ($registrationNumber === '' && $vin === '') {
+        return 0;
+    }
+
+    $ref = dolicar_apply_vehicle_repair_service_mask(getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_REF_MASK', 'DIVREP-{PLAQUE}-{VIN}'), $registrationNumber, $vin);
+    if ($ref === '') {
+        return 0;
+    }
+
+    // Product::create() sanitizes the reference, so look the sanitized form up first: it is the
+    // one already stored by a previous call
+    $existingService = new Product($db);
+    if ($existingService->fetch(0, dol_sanitizeFileName(dol_string_nospecial($ref))) > 0) {
+        return $existingService->id;
+    }
+
+    $existingService = new Product($db);
+    if ($existingService->fetch(0, $ref) > 0) {
+        return $existingService->id;
+    }
+
+    $description = dolicar_apply_vehicle_repair_service_mask(getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', 'Divers réparation sur le véhicule : {PLAQUE} {VIN}'), $registrationNumber, $vin);
+
+    // In order to avoid product creation error when an automatic barcode numbering is enabled
+    $conf->global->BARCODE_PRODUCT_ADDON_NUM = 0;
+
+    $service                        = new Product($db);
+    $service->ref                   = $ref;
+    $service->label                 = $description !== '' ? $description : $ref;
+    $service->description           = $description;
+    $service->type                  = Product::TYPE_SERVICE;
+    $service->status                = 1;
+    $service->status_buy            = 1;
+    $service->tva_tx                = (float) price2num(getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', '20'));
+    $service->accountancy_code_buy  = getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY');
+    $service->accountancy_code_sell = getDolGlobalString('DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL');
+
+    $serviceID = $service->create($user);
+    if ($serviceID <= 0) {
+        dol_syslog('dolicar_create_vehicle_repair_service: cannot create service ' . $ref . ' - ' . $service->error, LOG_ERR);
+        return -1;
+    }
+
+    return $serviceID;
+}
+
+/**
+ * Read the warranties recorded on an invoice.
+ *
+ * They live as a JSON array inside a single extrafield: a repair invoice often carries several
+ * warranties (engine, bodywork, part...), each with its own end date and certificate.
+ *
+ * @param  CommonObject $invoice Invoice carrying the warranties
+ * @return array                 Warranties, as [['id' => int, 'label' => string, 'date_end' => 'YYYY-MM-DD', 'file' => string]]
+ */
+function dolicar_get_invoice_warranties(CommonObject $invoice): array
+{
+    $rawWarranties = $invoice->array_options['options_warranty_end'] ?? '';
+    if (empty($rawWarranties)) {
+        return [];
+    }
+
+    $warranties = json_decode($rawWarranties, true);
+
+    return is_array($warranties) ? $warranties : [];
+}
+
+/**
+ * Save the warranties of an invoice.
+ *
+ * @param  CommonObject $invoice    Invoice carrying the warranties
+ * @param  array        $warranties Warranties to store
+ * @return int                      0 < if KO, > 0 if OK
+ */
+function dolicar_set_invoice_warranties(CommonObject $invoice, array $warranties): int
+{
+    $invoice->array_options['options_warranty_end'] = !empty($warranties) ? json_encode(array_values($warranties), JSON_UNESCAPED_UNICODE) : '';
+
+    return $invoice->insertExtraFields();
+}
+
+/**
+ * Get the directory holding the warranty certificates of an invoice.
+ *
+ * The files live in the invoice's own document directory, so Dolibarr moves them along when the
+ * invoice reference changes on validation.
+ *
+ * @param  CommonObject $invoice Invoice carrying the warranties
+ * @return string                Absolute path of the warranty directory
+ */
+function dolicar_get_invoice_warranty_dir(CommonObject $invoice): string
+{
+    // Global variables definitions
+    global $conf;
+
+    $dirOutput = !empty($conf->facture->multidir_output[$invoice->entity]) ? $conf->facture->multidir_output[$invoice->entity] : $conf->facture->dir_output;
+
+    return $dirOutput . '/' . dol_sanitizeFileName($invoice->ref) . '/warranty';
+}
+
+/**
  * Get vehicle brand name with product ID
  *
  * @param  int    $productID Product ID

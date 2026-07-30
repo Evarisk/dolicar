@@ -40,6 +40,9 @@ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
 
+// Load Saturne libraries
+require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
+
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
@@ -68,6 +71,11 @@ require_once DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be
 $permissionToRead = $user->rights->dolicar->registrationcertificatefr->read;
 $permissiontoadd  = $user->rights->dolicar->registrationcertificatefr->write;
 saturne_check_access($permissionToRead);
+
+// Photos and files of the event being created are uploaded before it exists: they go to a per-session
+// temp dir keyed by an upload token, then move next to the event once it is saved (issue #475)
+$eventUploadContext = 'dolicar_vehicle_event_' . $object->id;
+$eventUploadSubDir  = 'vehicle_event/' . saturne_get_upload_token($eventUploadContext);
 
 // AJAX: return the lines of an expense report for the vehicle-event form (issue #452)
 if ($action == 'get_expensereport_lines') {
@@ -230,6 +238,58 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
  * Actions
  */
 
+// Photo/file upload and deletion posted by the Saturne media block of the add-event form (issue #475).
+// The block reloads itself from the HTML of this page, so these actions only touch the filesystem.
+if (in_array($action, ['uploadPhoto', 'uploadFile', 'deletePhoto', 'deleteFile'], true) && !empty($permissiontoadd)) {
+    $uploadSubDir = GETPOST('sub_dir', 'alpha');
+
+    // Only the temp dir of the event being created may be written to
+    if ($uploadSubDir === $eventUploadSubDir) {
+        $uploadDir = $conf->dolicar->dir_output . '/' . $uploadSubDir;
+
+        if (($action == 'uploadPhoto' || $action == 'uploadFile') && !empty($conf->global->MAIN_UPLOAD_DOC)) {
+            if (!dol_is_dir($uploadDir)) {
+                dol_mkdir($uploadDir);
+            }
+
+            $invalidFile   = false;
+            $uploadedFiles = isset($_FILES['userfile']) ? $_FILES['userfile'] : [];
+
+            // The photo button must not become a way to store any file type
+            if ($action == 'uploadPhoto' && !empty($uploadedFiles['tmp_name'])) {
+                $tmpNames = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
+                foreach ($tmpNames as $tmpName) {
+                    if (empty($tmpName)) {
+                        continue;
+                    }
+                    $finfo    = new finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($tmpName);
+                    if (strpos($mimeType, 'image/') !== 0) {
+                        $invalidFile = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($invalidFile) {
+                setEventMessages($langs->trans('ErrorFileNotAnImage'), null, 'errors');
+            } else {
+                dol_add_file_process($uploadDir, GETPOSTINT('overwrite') ? 1 : 0, 1, 'userfile', '', null, '', 1);
+            }
+        }
+
+        if ($action == 'deletePhoto' || $action == 'deleteFile') {
+            $fileName = dol_sanitizeFileName(GETPOST('filename', 'alpha'));
+            $filePath = $uploadDir . '/' . $fileName;
+            if (!empty($fileName) && dol_is_file($filePath)) {
+                dol_delete_file($filePath);
+            }
+        }
+    }
+
+    $action = '';
+}
+
 if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object->fk_lot) && $object->fk_lot > 0) {
     $error           = 0;
     $eventCategoryId = GETPOSTINT('event_category_id');
@@ -303,6 +363,19 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
                 $actionComm->add_object_linked('control', $fkControl);
             }
 
+            // Move the uploaded photos/files from the temp dir to their permanent location keyed by the event
+            $eventMediaFiles = saturne_get_media_files('dolicar', $eventUploadSubDir);
+            if (!empty($eventMediaFiles)) {
+                $eventFinalDir = $conf->dolicar->dir_output . '/vehicle_event/' . (int) $actionComm->id;
+                if (!dol_is_dir($eventFinalDir)) {
+                    dol_mkdir($eventFinalDir);
+                }
+                foreach ($eventMediaFiles as $eventMediaFile) {
+                    dol_move($eventMediaFile['fullname'], $eventFinalDir . '/' . $eventMediaFile['name'], 0, 1, 0, 0);
+                }
+            }
+            saturne_invalidate_upload_token($eventUploadContext, 'dolicar', 'vehicle_event');
+
             setEventMessages($langs->transnoentities('VehicleEventAdded'), null, 'mesgs');
             header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
             exit;
@@ -330,6 +403,10 @@ if ($id > 0 || !empty($ref)) {
     print '</div>';
 
     print dol_get_fiche_end();
+
+    // Photo editor modal — its DOM must exist at page load, otherwise selecting a photo in the
+    // media block of the add-event form does nothing
+    require_once __DIR__ . '/../../../saturne/core/tpl/medias/photo_editor_modal.tpl.php';
 }
 
 // End of page

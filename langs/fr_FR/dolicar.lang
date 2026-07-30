@@ -456,3 +456,27 @@ ImportSummaryMessage                  = Import terminé : %s créée(s), %s mise
 ErrorNoFileUploaded                   = Aucun fichier n'a été envoyé
 ErrorEmptyCSVFile                     = Le fichier CSV est vide ou ne contient aucune donnée
 ErrorMissingRegistrationNumberColumn  = La colonne « immatriculation » est obligatoire et n'a pas été trouvée dans le fichier
+
+# Service de réparation par véhicule (issue #475)
+VehicleRepairServiceConfig              = Service de réparation par véhicule
+VehicleRepairServiceEnabled             = Créer un service de réparation par véhicule
+VehicleRepairServiceEnabledDesc         = À la création d'une carte grise, un service dédié au véhicule est créé automatiquement pour porter les réparations dans les commandes fournisseur.
+VehicleRepairServiceRefMask             = Référence du service
+VehicleRepairServiceDescriptionMask     = Description du service
+VehicleRepairServiceMaskDesc            = Champs disponibles : {PLAQUE} (immatriculation) et {VIN} (numéro de série)
+VehicleRepairServiceVATRate             = Taux de TVA du service
+VehicleRepairServiceAccountancyCodeBuy  = Code comptable d'achat
+VehicleRepairServiceAccountancyCodeSell = Code comptable de vente
+
+# Médias des événements véhicule (issue #475)
+PhotosAndFiles                          = Photos et fichiers
+
+# Garanties des factures (issue #475)
+Warranties                              = Garanties
+WarrantyLabel                           = Libellé
+WarrantyEndDate                         = Fin de garantie
+WarrantyAttachment                      = Pièce jointe
+WarrantyExpired                         = Garantie expirée
+WarrantyAdded                           = Garantie ajoutée
+WarrantyDeleted                         = Garantie supprimée
+NoWarranty                              = Aucune garantie

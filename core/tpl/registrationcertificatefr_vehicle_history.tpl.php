@@ -25,11 +25,12 @@
  * The following vars must be defined:
  * Global   : $conf, $db, $form, $langs
  * Variable : $object (RegistrationCertificateFr), $permissiontoadd
- *            $iconMap   (array label => FA class)
- *            $catById   (array id => Categorie)
- *            $catLabels (array id => ['label' => string, 'data-html' => string])
- *            $eventsList (array of ActionComm)
- *            $evtCatById (array evtId => Categorie)
+ *            $iconMap            (array label => FA class)
+ *            $catById            (array id => Categorie)
+ *            $catLabels          (array id => ['label' => string, 'data-html' => string])
+ *            $eventsList         (array of ActionComm)
+ *            $evtCatById         (array evtId => Categorie)
+ *            $eventUploadSubDir  (string, temp media dir of the event being created)
  */
 
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -39,6 +40,7 @@ require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
+require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 if (empty($object->fk_lot) || $object->fk_lot <= 0) {
@@ -75,6 +77,12 @@ if (!empty($permissiontoadd)) {
     $out .= '<tr>';
     $out .= '<td>' . $langs->transnoentities('Note') . '</td>';
     $out .= '<td><textarea name="event_note" class="flat minwidth400" rows="2">' . dol_escape_htmltag(GETPOST('event_note', 'restricthtml')) . '</textarea></td>';
+    $out .= '</tr>';
+
+    // Photos and files are uploaded right away to a temp dir, they move next to the event once it is saved (issue #475)
+    $out .= '<tr>';
+    $out .= '<td>' . $langs->transnoentities('PhotosAndFiles') . '</td>';
+    $out .= '<td><div class="dolicar-event-media-row">' . saturne_render_media_block('dolicar', $eventUploadSubDir, 'event_', '', ['show_photo' => true, 'show_file' => true, 'show_audio' => false]) . '</div></td>';
     $out .= '</tr>';
 
     foreach (dolicar_get_vehicle_event_linkable_types() as $typeKey => $linkableType) {
@@ -119,6 +127,7 @@ $out .= '<td class="center">' . $langs->transnoentities('Mileage') . '</td>';
 $out .= '<td>' . $langs->transnoentities('Note') . '</td>';
 $out .= '<td class="center">' . $langs->transnoentities('UserAuthor') . '</td>';
 $out .= '<td>' . $langs->transnoentities('LinkedDocuments') . '</td>';
+$out .= '<td class="center">' . $langs->transnoentities('PhotosAndFiles') . '</td>';
 $out .= '</tr>';
 
 if (!empty($eventsList)) {
@@ -286,10 +295,11 @@ if (!empty($eventsList)) {
         $out .= '<td>' . nl2br(dol_escape_htmltag((string) $evt->note_private)) . '</td>';
         $out .= '<td class="center nowraponall">' . $userStr . '</td>';
         $out .= '<td>' . $linkedHtml . '</td>';
+        $out .= '<td class="center"><div class="dolicar-event-media-cell">' . dolicar_get_vehicle_event_media_html((int) $evt->id) . '</div></td>';
         $out .= '</tr>';
     }
 } else {
-    $out .= '<tr><td colspan="6"><em>' . $langs->transnoentities('NoVehicleHistory') . '</em></td></tr>';
+    $out .= '<tr><td colspan="7"><em>' . $langs->transnoentities('NoVehicleHistory') . '</em></td></tr>';
 }
 
 $out .= '</table>';

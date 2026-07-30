@@ -130,6 +130,71 @@ function dolicar_vehicle_event_type_enabled(string $const): bool
 }
 
 /**
+ * Return the sub directories holding the medias of a vehicle history event.
+ *
+ * Events are created from three places, each storing its medias in its own directory: the
+ * back-office add-event form, the public logbook repair form and the public logbook problem
+ * report. Only existing directories are returned, so an event without media renders nothing.
+ *
+ * @param  int      $actionCommId Vehicle history event ID
+ * @return string[]               Sub directories, relative to the DoliCar output dir
+ */
+function dolicar_get_vehicle_event_media_sub_dirs(int $actionCommId): array
+{
+    global $conf;
+
+    if ($actionCommId <= 0) {
+        return [];
+    }
+
+    $subDirs = [];
+    foreach (['vehicle_event', 'vehicle_repair', 'problem_report'] as $subDirPrefix) {
+        $subDir = $subDirPrefix . '/' . $actionCommId;
+        if (dol_is_dir($conf->dolicar->dir_output . '/' . $subDir)) {
+            $subDirs[] = $subDir;
+        }
+    }
+
+    return $subDirs;
+}
+
+/**
+ * Build the medias cell of a vehicle history event.
+ *
+ * Photos go through the Saturne gallery so a click opens the media viewer, while documents and
+ * voice memos — which the gallery ignores — are listed as plain links.
+ *
+ * @param  int    $actionCommId Vehicle history event ID
+ * @return string               HTML of the medias attached to the event, empty when it has none
+ */
+function dolicar_get_vehicle_event_media_html(int $actionCommId): string
+{
+    global $conf;
+
+    // Load Saturne libraries
+    require_once __DIR__ . '/../../saturne/lib/medias.lib.php';
+
+    $out = '';
+    foreach (dolicar_get_vehicle_event_media_sub_dirs($actionCommId) as $subDir) {
+        $out .= saturne_render_media_block('dolicar', $subDir, 'evt' . $actionCommId . '-' . str_replace('/', '-', $subDir), '', ['show_photo' => true, 'show_file' => false, 'show_audio' => false, 'show_upload' => false]);
+
+        foreach (saturne_get_media_files('dolicar', $subDir) as $mediaFile) {
+            if (image_format_supported($mediaFile['name']) >= 0) {
+                continue;
+            }
+
+            $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=dolicar&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $mediaFile['name']);
+
+            $out .= '<div class="inline-block">';
+            $out .= '<a href="' . dol_escape_htmltag($fileUrl) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($mediaFile['name']) . '</a>';
+            $out .= '</div><br>';
+        }
+    }
+
+    return $out;
+}
+
+/**
  * Build a "magnifier" link opening a linked object's last generated PDF in the Dolibarr
  * document preview modal (used in the vehicle history "linked documents" column).
  *

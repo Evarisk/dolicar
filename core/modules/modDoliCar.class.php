@@ -198,6 +198,14 @@ class modDoliCar extends DolibarrModules
             $i++ => ['DOLICAR_S1_SEATING_CAPACITY_VISIBLE', 'integer', 1, '', 0, 'current'],
             $i++ => ['DOLICAR_V7_CO2_EMISSION_VISIBLE', 'integer', 1, '', 0, 'current'],
 
+            // CONST VEHICLE REPAIR SERVICE
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_ENABLED', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_REF_MASK', 'chaine', 'DIVREP-{PLAQUE}-{VIN}', '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', 'chaine', 'Divers réparation sur le véhicule : {PLAQUE} {VIN}', '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', 'chaine', '20', '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY', 'chaine', '', '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL', 'chaine', '', '', 0, 'current'],
+
             // CONST PUBLIC INTERFACE
             $i++ => ['DOLICAR_PUBLIC_INTERFACE_USE_SIGNATORY', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 'integer', 1000, '', 0, 'current'],
@@ -538,6 +546,10 @@ class modDoliCar extends DolibarrModules
             'registrationcertificatefr' => ['Label' => 'RegistrationCertificateFr', 'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 60, 'list' => 1, 'alwayseditable' => 1, 'params' => ['RegistrationCertificateFr:dolicar/class/registrationcertificatefr.class.php' => NULL]],
             'linked_product'            => ['Label' => 'LinkedProduct',             'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 70, 'list' => 5,                        'params' => ['Product:product/class/product.class.php:0:(t.entity:=:__ENTITY__) AND (t.fk_product_type:=:0)' => NULL]],
             'linked_lot'                => ['Label' => 'LinkedProductBatch',        'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 80, 'list' => 5,                        'params' => ['ProductLot:product/stock/class/productlot.class.php:0:(t.entity:=:__ENTITY__)' => NULL]],
+
+            // Warranties of an invoice, stored as a JSON array so a single invoice can carry several of them (issue #475).
+            // Hidden from the standard card ('list' => 0): the raw JSON is rendered as a table by the DoliCar hook.
+            'warranty_end'              => ['Label' => 'Warranties',                'type' => 'text',                     'elementtype' => ['facture'],                       'position' => $this->numero . 90, 'list' => 0, 'alwayseditable' => 1],
 
             'starting_mileage' => ['Label' => 'StartingMileage', 'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 10, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'arrival_mileage'  => ['Label' => 'ArrivalMileage',  'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 20, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],

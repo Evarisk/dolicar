@@ -118,6 +118,14 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
                     $lotActionComm->percentage  = -1;
                     $lotActionComm->create($user);
                 }
+                // no break — the vehicle also gets its dedicated repair service
+            case 'REGISTRATIONCERTIFICATEFR_MODIFY':
+                // The quick creation wizard stores a draft first and only fills the vehicle data on
+                // update, so MODIFY is the only moment where its service can be created
+                require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
+                require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
+
+                dolicar_create_vehicle_repair_service($object);
                 break;
             case 'PROPAL_CREATE' :
             case 'ORDER_CREATE' :
