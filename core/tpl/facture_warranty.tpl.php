@@ -18,13 +18,15 @@
 /**
  * \file    core/tpl/facture_warranty.tpl.php
  * \ingroup dolicar
- * \brief   Template for the warranties block of an invoice card
+ * \brief   Template for the warranties row of an invoice card
  */
 
 /**
  * The following vars must be defined:
  * Global   : $conf, $form, $langs, $user
- * Variable : $object (Facture)
+ * Variable : $object (Facture), $warrantyColspan (int, columns of the hosting card table)
+ *
+ * Prints a row of the invoice card table, so it must stay a <tr>
  */
 
 // Load Dolibarr libraries
@@ -36,15 +38,18 @@ require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
 $warranties      = dolicar_get_invoice_warranties($object);
 $permissionToAdd = $user->hasRight('facture', 'creer');
 $backToPage      = $_SERVER['PHP_SELF'] . '?facid=' . $object->id;
+$warrantyColspan = !empty($warrantyColspan) ? (int) $warrantyColspan : 2;
 
-print '<div class="fichecenter dolicar-invoice-warranties">';
+print '<tr class="dolicar-invoice-warranties">';
+print '<td colspan="' . $warrantyColspan . '">';
 
-print load_fiche_titre(img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"') . $langs->transnoentities('Warranties'), '', '');
+print '<div class="dolicar-invoice-warranties-title">' . img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"') . $langs->transnoentities('Warranties') . '</div>';
 
 print '<form method="POST" action="' . dol_escape_htmltag($backToPage) . '" enctype="multipart/form-data">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="add_warranty">';
 
+print '<div class="div-table-responsive-no-min">';
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->transnoentities('WarrantyLabel') . '</td>';
@@ -68,7 +73,7 @@ if (!empty($warranties)) {
             }
         }
         print '</td>';
-        print '<td>';
+        print '<td class="tdoverflowmax200">';
         if (!empty($warranty['file'])) {
             print '<a href="' . dol_escape_htmltag(dolicar_get_invoice_warranty_file_url($object, $warranty['file'])) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($warranty['file']) . '</a>';
         }
@@ -86,14 +91,17 @@ if (!empty($warranties)) {
 
 if ($permissionToAdd) {
     print '<tr class="oddeven">';
-    print '<td><input type="text" class="flat minwidth200" name="warranty_label" value="' . dol_escape_htmltag(GETPOST('warranty_label', 'alphanohtml')) . '"></td>';
-    print '<td class="center">' . $form->selectDate(-1, 'warranty_end', 0, 0, 1, '', 1, 0) . '</td>';
-    print '<td><input type="file" class="flat" name="userfile"></td>';
+    print '<td><input type="text" class="flat minwidth100 maxwidth200" name="warranty_label" value="' . dol_escape_htmltag(GETPOST('warranty_label', 'alphanohtml')) . '"></td>';
+    print '<td class="center nowraponall">' . $form->selectDate(-1, 'warranty_end', 0, 0, 1, '', 1, 0) . '</td>';
+    print '<td><input type="file" class="flat maxwidth200" name="userfile"></td>';
     print '<td class="right"><input type="submit" class="button button-add small" value="' . $langs->trans('Add') . '"></td>';
     print '</tr>';
 }
 
 print '</table>';
+print '</div>';
+
 print '</form>';
 
-print '</div>';
+print '</td>';
+print '</tr>';

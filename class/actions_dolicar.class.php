@@ -287,7 +287,7 @@ class ActionsDoliCar
      */
     public function formObjectOptions(array $parameters, $object): int
     {
-        global $extrafields, $langs;
+        global $conf, $extrafields, $form, $langs, $user; // $conf/$form/$langs/$user mandatory for TPL
 
         if (preg_match('/propalcard|ordercard|invoicecard/', $parameters['context'])) {
             $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
@@ -299,6 +299,25 @@ class ActionsDoliCar
 
         if (preg_match('/propalcard|invoicecard/', $parameters['context'])) {
             $extrafields->attributes[$object->element]['list']['registration_number'] = 0;
+        }
+
+        // Warranties recorded on an invoice (issue #475). This hook runs from extrafields_view.tpl.php,
+        // inside the card table, which is the only spot where the block lands in the card itself
+        if (strpos($parameters['context'], 'invoicecard') !== false && is_object($object) && $object->element == 'facture' && $object->id > 0) {
+            $langs->load('dolicar@dolicar');
+
+            $object->fetch_optionals();
+
+            if (!is_object($form)) {
+                $form = new Form($this->db);
+            }
+
+            $warrantyColspan = !empty($parameters['cols']) ? (int) $parameters['cols'] : 2;
+
+            // The TPL prints its row, buffer it so the hook manager places it where it belongs
+            ob_start();
+            require __DIR__ . '/../core/tpl/facture_warranty.tpl.php';
+            $this->resprints .= ob_get_clean();
         }
 
         return 0; // or return 1 to replace standard code
@@ -380,32 +399,11 @@ class ActionsDoliCar
      */
     public function printCommonFooter(array $parameters): int
     {
-        global $conf, $db, $form, $langs, $user; // // $conf/$db/$form/$langs/$user mandatory for TPL
+        global $db, $langs; // // $db/$langs mandatory for TPL
 
         if ((strpos($parameters['context'], 'productlotcard') !== false) && GETPOST('action', 'aZ09') != 'create') {
             $fromProductLot = 1;
             require_once __DIR__ . '/../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
-        }
-
-        // Warranties recorded on an invoice (issue #475)
-        if (strpos($parameters['context'], 'invoicecard') !== false && !in_array(GETPOST('action', 'aZ09'), ['create', 'presend'], true)) {
-            require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
-
-            $langs->load('dolicar@dolicar');
-
-            // printCommonFooter is called without the page object, rebuild it from the request
-            $invoiceId = GETPOSTINT('id') > 0 ? GETPOSTINT('id') : GETPOSTINT('facid');
-            $object    = new Facture($this->db);
-
-            if ($invoiceId > 0 && $object->fetch($invoiceId) > 0) {
-                $object->fetch_optionals();
-
-                if (!is_object($form)) {
-                    $form = new Form($this->db);
-                }
-
-                require_once __DIR__ . '/../core/tpl/facture_warranty.tpl.php';
-            }
         }
 
         return 0; // or return 1 to replace standard code

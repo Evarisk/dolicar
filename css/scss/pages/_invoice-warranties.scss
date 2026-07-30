@@ -1,0 +1,14 @@
+// Warranties block of the invoice card. It is printed as a row of the card table by the
+// formObjectOptions hook, so the spacing is set here rather than inside the block itself.
+.dolicar-invoice-warranties > td {
+  padding-top: 12px;
+
+  .dolicar-invoice-warranties-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  input[type="file"] {
+    max-width: 100%;
+  }
+}
