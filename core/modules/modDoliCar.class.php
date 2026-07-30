@@ -244,6 +244,10 @@ class modDoliCar extends DolibarrModules
         $this->tabs[] = ['data' => 'product:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product'];
         $this->tabs[] = ['data' => 'project:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project'];
 
+        // Warranties granted by an invoice, on their own tab (issue #475)
+        $this->tabs[] = ['data' => 'invoice:+dolicarwarranty:' . $pictoModule . ucfirst($langs->trans('Warranties')) . ':dolicar@dolicar:$user->hasRight("facture", "lire"):/custom/dolicar/view/facture_warranty.php?id=__ID__'];
+        $this->tabs[] = ['data' => 'supplier_invoice:+dolicarwarranty:' . $pictoModule . ucfirst($langs->trans('Warranties')) . ':dolicar@dolicar:$user->hasRight("fournisseur", "facture", "lire") || $user->hasRight("supplier_invoice", "lire"):/custom/dolicar/view/facture_warranty.php?id=__ID__&element=invoice_supplier'];
+
         // Dictionaries
         $this->dictionaries = [];
 

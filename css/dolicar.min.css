@@ -1383,22 +1383,15 @@ body.page-public-card .fiche {
   max-height: 60px;
 }
 
-.dolicar-invoice-warranties > td {
-  padding-top: 12px;
-}
-.dolicar-invoice-warranties > td .dolicar-invoice-warranties-title {
-  font-weight: bold;
-  margin-bottom: 6px;
-}
-.dolicar-invoice-warranties > td .dolicar-warranty-media-row {
+.dolicar-warranty-media-row {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.dolicar-invoice-warranties > td .dolicar-warranty-media-row .linked-medias {
+.dolicar-warranty-media-row .linked-medias {
   margin: 0;
 }
-.dolicar-invoice-warranties > td .dolicar-warranty-media-row .fast-upload-options {
+.dolicar-warranty-media-row .fast-upload-options {
   display: none;
 }
 

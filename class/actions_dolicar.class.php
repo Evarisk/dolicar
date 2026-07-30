@@ -81,38 +81,6 @@ class ActionsDoliCar
     }
 
     /**
-     * Overloading the addHtmlHeader function : replacing the parent's function with the one below
-     *
-     * The invoice card is a Dolibarr page, it goes through llxHeader() and therefore loads neither
-     * the Saturne assets nor the DoliCar ones. The warranties block needs both: the Saturne media
-     * block is driven by saturne.min.js and styled by saturne.min.css (issue #475).
-     *
-     * @param  array $parameters Hook metadata (context, etc...)
-     * @return int               0 < on error, 0 on success, 1 to replace standard code
-     */
-    public function addHtmlHeader(array $parameters): int
-    {
-        if (!preg_match('/invoicecard|invoicesuppliercard/', $parameters['context'])) {
-            return 0;
-        }
-
-        $saturneJsPath  = dol_buildpath('/custom/saturne/js/saturne.min.js', 0);
-        $saturneJsUrl   = DOL_URL_ROOT . '/custom/saturne/js/saturne.min.js?v=' . (file_exists($saturneJsPath) ? filemtime($saturneJsPath) : 1);
-
-        $out  = '<!-- Includes CSS added by module dolicar -->';
-        $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath('/custom/saturne/css/saturne.min.css', 1) . '">';
-        $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath('/custom/dolicar/css/dolicar.min.css', 1) . '">';
-        // Last: undoes the Saturne layout rules that must not reach a native Dolibarr card
-        $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath('/custom/dolicar/css/dolicar_native_card.min.css', 1) . '">';
-        $out .= '<!-- Includes JS added by module dolicar -->';
-        $out .= '<script src="' . $saturneJsUrl . '"></script>';
-
-        $this->resprints = $out;
-
-        return 0; // or return 1 to replace standard code
-    }
-
-    /**
      * Overloading the doActions function : replacing the parent's function with the one below
      *
      * @param  array        $parameters Hook metadatas (context, etc...)
@@ -219,136 +187,6 @@ class ActionsDoliCar
             }
         }
 
-        // Warranties recorded on an invoice (issue #475)
-        if (preg_match('/invoicecard|invoicesuppliercard/', $parameters['context']) && is_object($object) && $object->id > 0) {
-            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-            require_once __DIR__ . '/../../saturne/lib/medias.lib.php';
-            require_once __DIR__ . '/../lib/dolicar_functions.lib.php';
-
-            if (!dolicar_is_warranty_invoice($object) || !dolicar_can_edit_invoice_warranties($object)) {
-                return 0;
-            }
-
-            // Certificates are attached before the warranty exists: they wait in a temp dir keyed by
-            // an upload token, and move next to the invoice once the warranty is saved
-            $warrantyUploadContext = 'dolicar_invoice_warranty_' . $object->element . '_' . $object->id;
-            $warrantyUploadSubDir  = 'invoice_warranty/' . saturne_get_upload_token($warrantyUploadContext);
-
-            // Upload and deletion posted by the Saturne media block of the warranty form
-            if (in_array($action, ['uploadFile', 'deleteFile'], true)) {
-                // Only the temp dir of the warranty being created may be written to
-                if (GETPOST('sub_dir', 'alpha') === $warrantyUploadSubDir) {
-                    $warrantyUploadDir = $conf->dolicar->dir_output . '/' . $warrantyUploadSubDir;
-
-                    if ($action == 'uploadFile' && !empty($conf->global->MAIN_UPLOAD_DOC)) {
-                        if (!dol_is_dir($warrantyUploadDir)) {
-                            dol_mkdir($warrantyUploadDir);
-                        }
-                        dol_add_file_process($warrantyUploadDir, 0, 1, 'userfile', '', null, '', 1);
-                    }
-
-                    if ($action == 'deleteFile') {
-                        $warrantyFileName = dol_sanitizeFileName(GETPOST('filename', 'alpha'));
-                        if (!empty($warrantyFileName) && dol_is_file($warrantyUploadDir . '/' . $warrantyFileName)) {
-                            dol_delete_file($warrantyUploadDir . '/' . $warrantyFileName);
-                        }
-                    }
-                }
-
-                // The media block reloads itself from the HTML of this page, so no redirect here
-                return 0;
-            }
-
-            if (in_array($action, ['add_warranty', 'delete_warranty'], true)) {
-                $langs->load('dolicar@dolicar');
-
-                $object->fetch_optionals();
-                $warranties = dolicar_get_invoice_warranties($object);
-
-                if ($action == 'add_warranty') {
-                    $warrantyLabel     = GETPOST('warranty_label', 'alphanohtml');
-                    $warrantyEndDate   = dol_mktime(12, 0, 0, GETPOSTINT('warranty_endmonth'), GETPOSTINT('warranty_endday'), GETPOSTINT('warranty_endyear'));
-                    $warrantyTempFiles = dolicar_get_upload_temp_files($warrantyUploadSubDir);
-
-                    if (empty($warrantyLabel) && empty($warrantyEndDate) && empty($warrantyTempFiles)) {
-                        setEventMessages($langs->transnoentities('ErrorFieldRequired', $langs->transnoentities('WarrantyEndDate')), null, 'errors');
-                    } else {
-                        $warrantyDir       = dolicar_get_invoice_warranty_dir($object);
-                        $warrantyFileNames = [];
-
-                        if (!empty($warrantyTempFiles)) {
-                            if (!dol_is_dir($warrantyDir)) {
-                                dol_mkdir($warrantyDir);
-                            }
-
-                            foreach ($warrantyTempFiles as $warrantyTempFile) {
-                                $warrantyFileName = dol_sanitizeFileName($warrantyTempFile['name']);
-                                // Two warranties may come with a certificate sharing the same name
-                                if (dol_is_file($warrantyDir . '/' . $warrantyFileName)) {
-                                    $warrantyFileName = dol_sanitizeFileName(pathinfo($warrantyFileName, PATHINFO_FILENAME) . '_' . dol_print_date(dol_now(), 'dayhourlog') . '.' . pathinfo($warrantyFileName, PATHINFO_EXTENSION));
-                                }
-
-                                // Index the move, dol_add_file_process() has recorded the temp path in llx_ecm_files
-                                if (dol_move($warrantyTempFile['fullname'], $warrantyDir . '/' . $warrantyFileName, 0, 1, 0, 1)) {
-                                    $warrantyFileNames[] = $warrantyFileName;
-                                }
-                            }
-
-                            saturne_invalidate_upload_token($warrantyUploadContext, 'dolicar', 'invoice_warranty');
-                        }
-
-                        // Ids are only there to target a warranty on deletion, so a simple increment is enough
-                        $nextWarrantyId = 1;
-                        foreach ($warranties as $warranty) {
-                            $nextWarrantyId = max($nextWarrantyId, (int) ($warranty['id'] ?? 0) + 1);
-                        }
-
-                        $warranties[] = [
-                            'id'       => $nextWarrantyId,
-                            'label'    => $warrantyLabel,
-                            'date_end' => $warrantyEndDate > 0 ? dol_print_date($warrantyEndDate, '%Y-%m-%d') : '',
-                            'files'    => $warrantyFileNames
-                        ];
-
-                        if (dolicar_set_invoice_warranties($object, $warranties) > 0) {
-                            setEventMessages($langs->transnoentities('WarrantyAdded'), null);
-                        } else {
-                            setEventMessages($object->error, $object->errors, 'errors');
-                        }
-                    }
-                }
-
-                if ($action == 'delete_warranty') {
-                    $warrantyIdToDelete = GETPOSTINT('warranty_id');
-
-                    foreach ($warranties as $key => $warranty) {
-                        if ((int) ($warranty['id'] ?? 0) !== $warrantyIdToDelete) {
-                            continue;
-                        }
-
-                        foreach ($warranty['files'] as $warrantyFileName) {
-                            $warrantyFilePath = dolicar_get_invoice_warranty_dir($object) . '/' . dol_sanitizeFileName($warrantyFileName);
-                            if (dol_is_file($warrantyFilePath)) {
-                                dol_delete_file($warrantyFilePath);
-                            }
-                        }
-
-                        unset($warranties[$key]);
-                    }
-
-                    if (dolicar_set_invoice_warranties($object, $warranties) > 0) {
-                        setEventMessages($langs->transnoentities('WarrantyDeleted'), null);
-                    } else {
-                        setEventMessages($object->error, $object->errors, 'errors');
-                    }
-                }
-
-                // Both invoice cards read 'id', the supplier one does not know 'facid'
-                header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
-                exit;
-            }
-        }
-
         return 0; // or return 1 to replace standard code
     }
 
@@ -362,7 +200,7 @@ class ActionsDoliCar
      */
     public function formObjectOptions(array $parameters, $object): int
     {
-        global $conf, $extrafields, $form, $langs, $user; // $conf/$form/$langs/$user mandatory for TPL
+        global $extrafields, $langs;
 
         if (preg_match('/propalcard|ordercard|invoicecard/', $parameters['context'])) {
             $picto            = img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"');
@@ -374,35 +212,6 @@ class ActionsDoliCar
 
         if (preg_match('/propalcard|invoicecard/', $parameters['context'])) {
             $extrafields->attributes[$object->element]['list']['registration_number'] = 0;
-        }
-
-        // Warranties recorded on an invoice (issue #475). This hook runs from extrafields_view.tpl.php,
-        // inside the card table, which is the only spot where the block lands in the card itself
-        if (preg_match('/invoicecard|invoicesuppliercard/', $parameters['context']) && is_object($object) && $object->id > 0) {
-            require_once __DIR__ . '/../../saturne/lib/medias.lib.php';
-            require_once __DIR__ . '/../lib/dolicar_functions.lib.php';
-
-            if (!dolicar_is_warranty_invoice($object)) {
-                return 0;
-            }
-
-            $langs->load('dolicar@dolicar');
-
-            $object->fetch_optionals();
-
-            if (!is_object($form)) {
-                $form = new Form($this->db);
-            }
-
-            $warrantyColspan      = !empty($parameters['cols']) ? (int) $parameters['cols'] : 2;
-            $warrantyUploadSubDir = 'invoice_warranty/' . saturne_get_upload_token('dolicar_invoice_warranty_' . $object->element . '_' . $object->id);
-
-            // The TPL prints its row, buffer it so the hook manager places it where it belongs.
-            // Assign, never append: $resprints is a typed property left uninitialized until a hook
-            // writes it, and appending to it raises a fatal error on the first hook of the page.
-            ob_start();
-            require __DIR__ . '/../core/tpl/facture_warranty.tpl.php';
-            $this->resprints = ob_get_clean();
         }
 
         return 0; // or return 1 to replace standard code

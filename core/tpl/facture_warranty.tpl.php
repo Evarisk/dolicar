@@ -24,10 +24,8 @@
 /**
  * The following vars must be defined:
  * Global   : $conf, $form, $langs, $user
- * Variable : $object (Facture), $warrantyColspan (int, columns of the hosting card table),
- *            $warrantyUploadSubDir (string, temp media dir of the warranty being created)
- *
- * Prints a row of the invoice card table, so it must stay a <tr>
+ * Variable : $object (Facture or FactureFournisseur), $backToPage (string),
+ *            $permissionToAdd (bool), $warrantyUploadSubDir (string, temp media dir)
  */
 
 // Load Dolibarr libraries
@@ -39,15 +37,9 @@ require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
 
-$warranties      = dolicar_get_invoice_warranties($object);
-$permissionToAdd = dolicar_can_edit_invoice_warranties($object);
-$backToPage      = $_SERVER['PHP_SELF'] . '?id=' . $object->id;
-$warrantyColspan = !empty($warrantyColspan) ? (int) $warrantyColspan : 2;
+$warranties = dolicar_get_invoice_warranties($object);
 
-print '<tr class="dolicar-invoice-warranties">';
-print '<td colspan="' . $warrantyColspan . '">';
-
-print '<div class="dolicar-invoice-warranties-title">' . img_picto('', 'dolicar_color@dolicar', 'class="pictofixedwidth"') . $langs->transnoentities('Warranties') . '</div>';
+print load_fiche_titre($langs->transnoentities('Warranties'), '', 'dolicar_color@dolicar');
 
 print '<form method="POST" action="' . dol_escape_htmltag($backToPage) . '" enctype="multipart/form-data">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -114,6 +106,3 @@ print '</table>';
 print '</div>';
 
 print '</form>';
-
-print '</td>';
-print '</tr>';

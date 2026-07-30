@@ -7,9 +7,8 @@ const uglify = require('gulp-uglify');
 const concat = require('gulp-concat');
 
 const paths = {
-  scssCore      : ['css/scss/**/*.scss', 'css/'],
-  scssNativeCard: ['css/scss-native-card/style.scss', 'css/'],
-  jsBackend     : ['js/dolicar.js', 'js/modules/*.js']
+  scssCore : ['css/scss/**/*.scss', 'css/'],
+  jsBackend: ['js/dolicar.js', 'js/modules/*.js']
 };
 
 /** Core */
@@ -18,17 +17,6 @@ gulp.task('scssCore', function() {
     .pipe(sass({outputStyle: 'compressed'}, '').on('error', sass.logError))
     .pipe(rename('./dolicar.min.css'))
     .pipe(gulp.dest(paths.scssCore[1]));
-});
-
-/**
- * Styles loaded on native Dolibarr cards hosting a DoliCar block. Kept out of dolicar.min.css on
- * purpose: they undo Saturne layout rules that are wanted on Saturne pages only.
- */
-gulp.task('scssNativeCard', function() {
-  return gulp.src(paths.scssNativeCard[0])
-    .pipe(sass({outputStyle: 'compressed'}, '').on('error', sass.logError))
-    .pipe(rename('./dolicar_native_card.min.css'))
-    .pipe(gulp.dest(paths.scssNativeCard[1]));
 });
 
 gulp.task('jsBackend', function () {
@@ -41,6 +29,5 @@ gulp.task('jsBackend', function () {
 /** Watch */
 gulp.task('default', function() {
   gulp.watch(paths.scssCore[0], gulp.series('scssCore'));
-  gulp.watch(paths.scssNativeCard[0], gulp.series('scssNativeCard'));
   gulp.watch(paths.jsBackend[1], gulp.series('jsBackend'));
 });

@@ -406,20 +406,6 @@ function dolicar_set_invoice_warranties(CommonObject $invoice, array $warranties
 }
 
 /**
- * Tell whether an object is an invoice able to carry warranties.
- *
- * Both the customer invoice and the supplier one do: a garage grants warranties to its client and
- * receives some from its parts supplier.
- *
- * @param  mixed $invoice Object to test
- * @return bool           True for a customer or supplier invoice
- */
-function dolicar_is_warranty_invoice($invoice): bool
-{
-    return is_object($invoice) && in_array($invoice->element, ['facture', 'invoice_supplier'], true);
-}
-
-/**
  * Get the document.php modulepart of an invoice.
  *
  * @param  CommonObject $invoice Invoice carrying the warranties
