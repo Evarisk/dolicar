@@ -161,9 +161,10 @@ $iconMap = [
     'Accident'           => 'fa-exclamation-triangle',
     'Autre'              => 'fa-circle',
 ];
-$iconMap[$langs->transnoentities('ReportedProblem')] = 'fa-exclamation-triangle';
-$iconMap['Réparation']                               = 'fa-wrench';
-$iconMap[$langs->transnoentities('Repair')]          = 'fa-wrench';
+$iconMap[$langs->transnoentities('ReportedProblem')]     = 'fa-exclamation-triangle';
+$iconMap['Réparation']                                   = 'fa-wrench';
+$iconMap[$langs->transnoentities('Repair')]              = 'fa-wrench';
+$iconMap[$langs->transnoentities('VehicleInvoiceEvent')] = 'fa-file-invoice-dollar';
 
 // Load child categories and build display structures for the TPL
 $catById   = [];
@@ -221,6 +222,13 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
             if (!$matched && !empty($evt->code) && strpos($evt->code, '_ADD_REPAIR') !== false) {
                 $eventsList[]               = $evt;
                 $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('Repair'), 'color' => '3B82F6'];
+                $matched                    = true;
+            }
+
+            // Invoices pushed automatically on validation carry no DoliCar category either (issue #464)
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_VEHICLE_INVOICE') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('VehicleInvoiceEvent'), 'color' => '8B5CF6'];
             }
         }
     }

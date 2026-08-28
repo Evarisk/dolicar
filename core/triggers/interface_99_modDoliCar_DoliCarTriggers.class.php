@@ -138,6 +138,13 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
                     $object->setValueFrom('note_public', $object->note_public);
                 }
                 break;
+            case 'BILL_VALIDATE':
+                // An invoice counts as work done on a vehicle once it is validated: that is when it
+                // goes up into the history of the vehicle it carries (issue #464)
+                require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
+
+                dolicar_push_invoice_to_vehicle_history($object, $user);
+                break;
         }
 
         return 0;
