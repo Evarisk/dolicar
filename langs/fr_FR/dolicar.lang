@@ -462,3 +462,25 @@ ImportSummaryMessage                  = Import terminé : %s créée(s), %s mise
 ErrorNoFileUploaded                   = Aucun fichier n'a été envoyé
 ErrorEmptyCSVFile                     = Le fichier CSV est vide ou ne contient aucune donnée
 ErrorMissingRegistrationNumberColumn  = La colonne « immatriculation » est obligatoire et n'a pas été trouvée dans le fichier
+
+# Warehouse fleet - Parc par entrepôt
+WarehouseFleet                    = Parc par entrepôt
+VehiclesByWarehouse               = Véhicules par entrepôt
+Vehicles                          = véhicule(s)
+TotalVehicles                     = Véhicules au total
+VehiclesWithoutWarehouse          = Véhicules sans entrepôt
+NoVehicleInWarehouse              = Aucun véhicule dans cet entrepôt
+NoVehicleInFleet                  = Aucun véhicule en stock
+Transfer                          = Transférer
+TransferToWarehouse               = Transférer vers
+VehicleTransferred                = Véhicule %s transféré
+VehicleWarehouseTransferLabel     = Transfert d'entrepôt DoliCar - %s
+ErrorVehicleTransferFailed        = Le transfert du véhicule %s a échoué
+ErrorVehicleTransferSameWarehouse = Choisissez un entrepôt de destination différent de l'entrepôt actuel
+WarehouseMap                      = Carte des entrepôts
+Latitude                          = Latitude
+Longitude                         = Longitude
+GeocodeWarehouses                 = Géolocaliser les entrepôts
+WarehousesGeocoded                = %s entrepôt(s) géolocalisé(s) depuis leur adresse
+NoWarehouseGeocoded               = Aucun entrepôt n'a pu être géolocalisé : vérifiez que leur adresse postale est renseignée et que le serveur accède à Internet
+NoWarehouseCoordinates            = Aucun entrepôt géolocalisé. Renseignez la latitude et la longitude sur la fiche de l'entrepôt, ou lancez la géolocalisation depuis leur adresse postale.
