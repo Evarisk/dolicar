@@ -119,6 +119,20 @@ elseif ($action == 'update_car_brands') {
     // Always stay on setup page; messages are already set in the method
     $action = 'edit';
 }
+elseif ($action == 'push_invoices_to_vehicle_history') {
+    require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
+
+    // CSRF token check (Dolibarr standard: compare with session newtoken)
+    $token = GETPOST('token', 'alphanohtml');
+    if (empty($_SESSION['newtoken']) || $token !== $_SESSION['newtoken']) {
+        accessforbidden('Bad token');
+    }
+
+    // Catch up on the invoices validated before the automatic push existed (issue #464)
+    $pushedCount = dolicar_push_all_invoices_to_vehicle_history($user);
+    setEventMessages($langs->trans('InvoicesPushedToVehicleHistory', $pushedCount), null, 'mesgs');
+    $action = 'edit';
+}
 
 $current_api = getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API', 'immatriculationapi.com');
 $current_api_key = getDolGlobalString('DOLICAR_APIIMMATRICULATION_API_KEY', '');
@@ -298,6 +312,30 @@ print '<input type="hidden" name="action" value="update_car_brands">';
 print '<input class="button" type="submit" value="' . $langs->trans('UpdateCarBrandsList') . '">';
 print '</form>';
 print '</div>';
+
+// Vehicle history configuration section
+print '<br>';
+print load_fiche_titre($langs->transnoentities('VehicleHistory'), '', '');
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities('Parameters') . '</td>';
+print '<td class="center">' . $langs->transnoentities('Value') . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '<td>' . $langs->transnoentities('PushInvoicesToVehicleHistory') . '</td>';
+print '<td class="center">';
+print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="push_invoices_to_vehicle_history">';
+print '<input class="button" type="submit" value="' . $langs->trans('PushInvoicesToVehicleHistoryButton') . '">';
+print '</form>';
+print '</td></tr>';
+
+print '<tr class="oddeven"><td colspan="2" class="opacitymedium">' . $langs->transnoentities('PushInvoicesToVehicleHistoryHelp') . '</td></tr>';
+
+print '</table>';
 
 print dol_get_fiche_end();
 llxFooter();

@@ -182,6 +182,150 @@ function dolicar_vehicle_event_doc_preview_link($linkedObject, string $modulePar
 }
 
 /**
+ * Find the vehicle history event an invoice is already attached to.
+ *
+ * The automatic push and a manual link from the add-event form land in the same element_element row,
+ * so an invoice already linked by hand is never pushed a second time.
+ *
+ * @param  int $invoiceId Invoice ID
+ * @param  int $lotId     Product lot ID of the vehicle
+ * @return int            0 when the invoice is not in the history of this vehicle, event ID otherwise
+ */
+function dolicar_get_vehicle_history_event_of_invoice(int $invoiceId, int $lotId): int
+{
+    global $db;
+
+    if ($invoiceId <= 0 || $lotId <= 0) {
+        return 0;
+    }
+
+    // ActionComm->element is 'action', which is what add_object_linked() stores as targettype
+    $sql  = 'SELECT ee.fk_target FROM ' . MAIN_DB_PREFIX . 'element_element ee';
+    $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'actioncomm a ON a.id = ee.fk_target';
+    $sql .= " WHERE ee.sourcetype = 'facture' AND ee.fk_source = " . $invoiceId;
+    $sql .= " AND ee.targettype = 'action'";
+    $sql .= " AND a.elementtype = 'productlot' AND a.fk_element = " . $lotId;
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        return 0;
+    }
+
+    $obj = $db->fetch_object($resql);
+    $db->free($resql);
+
+    return !empty($obj) ? (int) $obj->fk_target : 0;
+}
+
+/**
+ * Push an invoice issued for a vehicle into the history of that vehicle (issue #464).
+ *
+ * Creates the event on the product lot of the vehicle, carries the mileage of the invoice over to
+ * the event and links the invoice to it, so the history line shows the reference, the amount and the
+ * PDF preview exactly like a manually linked invoice does.
+ *
+ * The event carries no DoliCar category: like the public logbook ones it is recognized by its code,
+ * which keeps it visible even before the event categories are initialized by the history page.
+ *
+ * @param  Facture $invoice Invoice already fetched, its extrafields are loaded when missing
+ * @param  User    $user    User the event is created for
+ * @return int              < 0 if KO, 0 when the invoice carries no vehicle or is already in the history, event ID otherwise
+ */
+function dolicar_push_invoice_to_vehicle_history(Facture $invoice, User $user): int
+{
+    global $db, $langs;
+
+    require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+    require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
+
+    // Called from the invoice validation, where the DoliCar translations are not loaded
+    $langs->load('dolicar@dolicar');
+
+    if (empty($invoice->array_options)) {
+        $invoice->fetch_optionals();
+    }
+
+    $registrationCertificateId = (int) ($invoice->array_options['options_registrationcertificatefr'] ?? 0);
+    if ($registrationCertificateId <= 0) {
+        return 0;
+    }
+
+    // The history hangs on the product lot of the vehicle, not on the carte grise itself
+    $registrationCertificate = new RegistrationCertificateFr($db);
+    if ($registrationCertificate->fetch($registrationCertificateId) <= 0 || (int) $registrationCertificate->fk_lot <= 0) {
+        return 0;
+    }
+
+    if (dolicar_get_vehicle_history_event_of_invoice((int) $invoice->id, (int) $registrationCertificate->fk_lot) > 0) {
+        return 0;
+    }
+
+    $event              = new ActionComm($db);
+    $event->code        = 'AC_DOLICAR_VEHICLE_INVOICE';
+    $event->type_code   = 'AC_OTH_AUTO';
+    $event->fk_element  = (int) $registrationCertificate->fk_lot;
+    $event->elementtype = 'productlot';
+    $event->label       = $langs->transnoentities('VehicleInvoiceEventLabel', $invoice->ref);
+    $event->datep       = $invoice->date ?: dol_now();
+    $event->userownerid = $user->id;
+    $event->percentage  = -1;
+
+    $eventId = $event->create($user);
+    if ($eventId <= 0) {
+        return -1;
+    }
+
+    // The mileage entered on the invoice becomes the mileage of the history line
+    $invoiceMileage = (int) ($invoice->array_options['options_mileage'] ?? 0);
+    if ($invoiceMileage > 0) {
+        $event->array_options['options_starting_mileage'] = $invoiceMileage;
+        $event->insertExtraFields();
+    }
+
+    $event->add_object_linked('facture', $invoice->id);
+
+    return $eventId;
+}
+
+/**
+ * Push every non draft invoice carrying a vehicle into the history of that vehicle (issue #464).
+ *
+ * Catches up on the invoices issued before the automatic push existed. Safe to run again, the push
+ * itself skips the invoices already present in a history.
+ *
+ * @param  User $user User the events are created for
+ * @return int        Number of invoices added to a vehicle history
+ */
+function dolicar_push_all_invoices_to_vehicle_history(User $user): int
+{
+    global $db;
+
+    require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+
+    $sql  = 'SELECT f.rowid FROM ' . MAIN_DB_PREFIX . 'facture f';
+    $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fe ON fe.fk_object = f.rowid';
+    $sql .= ' WHERE f.entity IN (' . getEntity('invoice') . ')';
+    $sql .= ' AND f.fk_statut > ' . Facture::STATUS_DRAFT;
+    $sql .= ' AND fe.registrationcertificatefr > 0';
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        return 0;
+    }
+
+    $pushedCount = 0;
+    while ($obj = $db->fetch_object($resql)) {
+        $invoice = new Facture($db);
+        if ($invoice->fetch((int) $obj->rowid) > 0 && dolicar_push_invoice_to_vehicle_history($invoice, $user) > 0) {
+            $pushedCount++;
+        }
+    }
+    $db->free($resql);
+
+    return $pushedCount;
+}
+
+/**
  * Normalize with regex registration number field
  *
  * @param  string $registrationNumber Registration number
