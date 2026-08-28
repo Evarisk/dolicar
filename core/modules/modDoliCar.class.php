@@ -374,6 +374,22 @@ class modDoliCar extends DolibarrModules
         $this->menu[$r++] = [
             'fk_menu'  => 'fk_mainmenu=dolicar',
             'type'     => 'left',
+            'titre'    => $langs->transnoentities('WarehouseFleet'),
+            'prefix'   => '<i class="fas fa-warehouse pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'warehousefleet',
+            'url'      => '/dolicar/view/dolicarwarehouse.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => 'isModEnabled("dolicar") && isModEnabled("stock")',
+            'perms'    => '$user->rights->dolicar->registrationcertificatefr->read',
+            'target'   => '',
+            'user'     => 0
+        ];
+
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
             'titre'    => $langs->transnoentities('ThirdParty'),
             'prefix'   => '<i class="fas fa-building pictofixedwidth" style=" color: #6c6aa8;"></i>',
             'mainmenu' => 'dolicar',
@@ -538,6 +554,10 @@ class modDoliCar extends DolibarrModules
             'registrationcertificatefr' => ['Label' => 'RegistrationCertificateFr', 'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 60, 'list' => 1, 'alwayseditable' => 1, 'params' => ['RegistrationCertificateFr:dolicar/class/registrationcertificatefr.class.php' => NULL]],
             'linked_product'            => ['Label' => 'LinkedProduct',             'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 70, 'list' => 5,                        'params' => ['Product:product/class/product.class.php:0:(t.entity:=:__ENTITY__) AND (t.fk_product_type:=:0)' => NULL]],
             'linked_lot'                => ['Label' => 'LinkedProductBatch',        'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 80, 'list' => 5,                        'params' => ['ProductLot:product/stock/class/productlot.class.php:0:(t.entity:=:__ENTITY__)' => NULL]],
+
+            // Position of a warehouse on the fleet map, filled by hand or by its geocoding action (issue #445)
+            'dolicar_latitude'  => ['Label' => 'Latitude',  'type' => 'varchar', 'length' => 32, 'elementtype' => ['entrepot'], 'position' => $this->numero . 90, 'list' => 1, 'alwayseditable' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('stock')"],
+            'dolicar_longitude' => ['Label' => 'Longitude', 'type' => 'varchar', 'length' => 32, 'elementtype' => ['entrepot'], 'position' => $this->numero . 91, 'list' => 1, 'alwayseditable' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('stock')"],
 
             'starting_mileage' => ['Label' => 'StartingMileage', 'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 10, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'arrival_mileage'  => ['Label' => 'ArrivalMileage',  'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 20, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
