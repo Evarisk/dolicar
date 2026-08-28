@@ -56,6 +56,14 @@ $backtopage   = GETPOST('backtopage', 'alpha');
 $step         = GETPOST('step', 'aZ09') ?: 'search';
 $confirmRetry = GETPOST('confirm_retry', 'int') == 1;
 
+// API source of the plate search: value picked in the wizard dropdown, defaulting to the API set in the module settings
+$apiSourceMap  = [
+    'immatriculationapi'       => 'immatriculationapi.com',
+    'apiplaqueimmatriculation' => 'apiplaqueimmatriculation.com',
+];
+$defaultSource = array_search(getDolGlobalString('DOLICAR_REGISTRATION_CERTIFICATE_API', 'immatriculationapi.com'), $apiSourceMap) ?: 'immatriculationapi';
+$apiSource     = GETPOST('api_source', 'alphanohtml') ?: $defaultSource;
+
 // Initialize technical objects
 $object      = new RegistrationCertificateFr($db);
 $form        = new Form($db);
@@ -90,16 +98,11 @@ if (empty($resHook)) {
 
     if ($action === 'search_plate' && $permissiontoadd) {
         $searchPlate = strtoupper(trim(GETPOST('a_registration_number', 'alphanohtml')));
-        $apiSource   = GETPOST('api_source', 'alphanohtml') ?: 'immatriculationapi';
 
         if (empty($searchPlate)) {
             setEventMessages($langs->trans('PleaseEnterRegistrationNumber'), [], 'warnings');
         } else {
             // Override API for this request only, based on user's dropdown selection
-            $apiSourceMap = [
-                'immatriculationapi'      => 'immatriculationapi.com',
-                'apiplaqueimmatriculation' => 'apiplaqueimmatriculation.com',
-            ];
             if (isset($apiSourceMap[$apiSource])) {
                 $conf->global->DOLICAR_REGISTRATION_CERTIFICATE_API = $apiSourceMap[$apiSource];
             }
@@ -382,9 +385,6 @@ if (!isset($plateFound)) {
 }
 if (!isset($draftId)) {
     $draftId = GETPOSTINT('draft_id');
-}
-if (!isset($apiSource)) {
-    $apiSource = GETPOST('api_source', 'alphanohtml') ?: 'immatriculationapi';
 }
 
 // API-prefilled fields — set by action=search_plate above, or from POST on failed action=add
