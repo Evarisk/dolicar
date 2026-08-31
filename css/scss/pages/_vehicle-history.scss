@@ -1,0 +1,31 @@
+// Vehicle history tab — Saturne media blocks of the add-event form and of the history rows.
+// The blocks are laid out inline here: the spacing belongs to this page, not to the component.
+.dolicar-event-media-row,
+.dolicar-event-media-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+
+  .linked-medias {
+    margin: 0;
+  }
+
+  // Data-only holder: collapse so it does not introduce a flex gap
+  .fast-upload-options {
+    display: none;
+  }
+
+  // An empty gallery placeholder otherwise pushes the upload buttons away
+  .saturne-media-gallery:empty {
+    display: none;
+  }
+}
+
+.dolicar-event-media-cell {
+  justify-content: center;
+
+  .open-media-editor-as-gallery img {
+    max-height: 60px;
+  }
+}

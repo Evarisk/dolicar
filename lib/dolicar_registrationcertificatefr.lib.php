@@ -130,6 +130,150 @@ function dolicar_vehicle_event_type_enabled(string $const): bool
 }
 
 /**
+ * Return the sub directories holding the medias of a vehicle history event.
+ *
+ * Events are created from three places, each storing its medias in its own directory: the
+ * back-office add-event form, the public logbook repair form and the public logbook problem
+ * report. Only existing directories are returned, so an event without media renders nothing.
+ *
+ * @param  int      $actionCommId Vehicle history event ID
+ * @return string[]               Sub directories, relative to the DoliCar output dir
+ */
+function dolicar_get_vehicle_event_media_sub_dirs(int $actionCommId): array
+{
+    global $conf;
+
+    // Load Dolibarr libraries
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+    if ($actionCommId <= 0) {
+        return [];
+    }
+
+    $subDirs = [];
+    foreach (['vehicle_event', 'vehicle_repair', 'problem_report'] as $subDirPrefix) {
+        $subDir = $subDirPrefix . '/' . $actionCommId;
+        if (dol_is_dir($conf->dolicar->dir_output . '/' . $subDir)) {
+            $subDirs[] = $subDir;
+        }
+    }
+
+    return $subDirs;
+}
+
+/**
+ * Build the medias cell of a vehicle history event.
+ *
+ * Photos go through the Saturne gallery so a click opens the media viewer, while documents and
+ * voice memos — which the gallery ignores — are listed as plain links.
+ *
+ * @param  int    $actionCommId Vehicle history event ID
+ * @return string               HTML of the medias attached to the event, empty when it has none
+ */
+function dolicar_get_vehicle_event_media_html(int $actionCommId): string
+{
+    global $conf;
+
+    // Load Saturne libraries
+    require_once __DIR__ . '/../../saturne/lib/medias.lib.php';
+
+    $out = '';
+    foreach (dolicar_get_vehicle_event_media_sub_dirs($actionCommId) as $subDir) {
+        $out .= saturne_render_media_block('dolicar', $subDir, 'evt' . $actionCommId . '-' . str_replace('/', '-', $subDir), '', ['show_photo' => true, 'show_file' => false, 'show_audio' => false, 'show_upload' => false]);
+
+        // dolicar_get_upload_temp_files(), not saturne_get_media_files(): the latter drops
+        // everything that is neither an image nor an audio record, so documents would never show up
+        foreach (dolicar_get_upload_temp_files($subDir) as $mediaFile) {
+            if (image_format_supported($mediaFile['name']) >= 0) {
+                continue;
+            }
+
+            $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=dolicar&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $mediaFile['name']);
+
+            $out .= '<div class="inline-block">';
+            $out .= '<a href="' . dol_escape_htmltag($fileUrl) . '" target="_blank"><i class="fas fa-paperclip paddingright"></i>' . dol_escape_htmltag($mediaFile['name']) . '</a>';
+            $out .= '</div><br>';
+        }
+    }
+
+    return $out;
+}
+
+/**
+ * Collect the warranties covering a vehicle.
+ *
+ * A warranty is recorded on the invoice that grants it, so the vehicle card gathers them through
+ * the invoices linked to the events of its history — customer invoices for what the garage grants,
+ * supplier invoices for what it received on the parts. One query resolves those invoices: walking
+ * the events one by one to read their links would cost a query per event.
+ *
+ * @param  RegistrationCertificateFr $registrationCertificate Registration certificate of the vehicle
+ * @return array                                              [['warranty' => array, 'invoice' => Facture|FactureFournisseur]], longest running first
+ */
+function dolicar_get_vehicle_warranties(RegistrationCertificateFr $registrationCertificate): array
+{
+    global $db;
+
+    if (empty($registrationCertificate->fk_lot)) {
+        return [];
+    }
+
+    // Load DoliCar libraries
+    require_once __DIR__ . '/dolicar_functions.lib.php';
+
+    $invoiceClasses = [];
+    if (isModEnabled('facture')) {
+        require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+        $invoiceClasses['facture'] = 'Facture';
+    }
+    if (isModEnabled('supplier_invoice') || isModEnabled('fournisseur')) {
+        require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
+        $invoiceClasses['invoice_supplier'] = 'FactureFournisseur';
+    }
+
+    if (empty($invoiceClasses)) {
+        return [];
+    }
+
+    // A vehicle event links its invoice as the source of the link and itself as the target
+    $sql  = 'SELECT DISTINCT ee.fk_source AS invoice_id, ee.sourcetype';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'element_element AS ee';
+    $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . "actioncomm AS a ON a.id = ee.fk_target AND ee.targettype = 'action'";
+    $sql .= " WHERE ee.sourcetype IN ('" . implode("', '", array_keys($invoiceClasses)) . "')";
+    $sql .= ' AND a.fk_element = ' . (int) $registrationCertificate->fk_lot;
+    $sql .= " AND a.elementtype = 'productlot'";
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        dol_syslog('dolicar_get_vehicle_warranties: ' . $db->lasterror(), LOG_ERR);
+        return [];
+    }
+
+    $vehicleWarranties = [];
+    while ($obj = $db->fetch_object($resql)) {
+        $invoiceClass = $invoiceClasses[$obj->sourcetype];
+
+        $invoice = new $invoiceClass($db);
+        if ($invoice->fetch((int) $obj->invoice_id) <= 0) {
+            continue;
+        }
+        $invoice->fetch_optionals();
+
+        foreach (dolicar_get_invoice_warranties($invoice) as $warranty) {
+            $vehicleWarranties[] = ['warranty' => $warranty, 'invoice' => $invoice];
+        }
+    }
+    $db->free($resql);
+
+    // Latest end dates first, warranties without one last
+    usort($vehicleWarranties, static function (array $first, array $second) {
+        return strcmp((string) ($second['warranty']['date_end'] ?? ''), (string) ($first['warranty']['date_end'] ?? ''));
+    });
+
+    return $vehicleWarranties;
+}
+
+/**
  * Build a "magnifier" link opening a linked object's last generated PDF in the Dolibarr
  * document preview modal (used in the vehicle history "linked documents" column).
  *

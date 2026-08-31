@@ -462,3 +462,32 @@ ImportSummaryMessage                  = Import terminé : %s créée(s), %s mise
 ErrorNoFileUploaded                   = Aucun fichier n'a été envoyé
 ErrorEmptyCSVFile                     = Le fichier CSV est vide ou ne contient aucune donnée
 ErrorMissingRegistrationNumberColumn  = La colonne « immatriculation » est obligatoire et n'a pas été trouvée dans le fichier
+
+# Service de réparation par véhicule (issue #475)
+VehicleRepairServiceConfig              = Service de réparation par véhicule
+VehicleRepairService                    = Service de réparation
+VehicleRepairServiceEnabled             = Créer un service de réparation par véhicule
+VehicleRepairServiceEnabledDesc         = À la création d'une carte grise, un service dédié au véhicule est créé automatiquement pour porter les réparations dans les commandes fournisseur.
+VehicleRepairServiceRefMask             = Référence du service
+VehicleRepairServiceDescriptionMask     = Description du service
+VehicleRepairServiceMaskDesc            = Champs disponibles : {PLAQUE} (immatriculation) et {VIN} (numéro de série)
+GenerateMissingRepairServices           = Générer les services manquants
+GenerateMissingRepairServicesDesc       = Crée le service des véhicules enregistrés avant l'activation du réglage. Sans effet sur ceux qui en ont déjà un.
+VehicleRepairServicesGenerated          = %s service(s) créé(s) sur %s véhicule(s) traité(s)
+VehicleRepairServicesGenerationErrors   = %s service(s) n'ont pas pu être créés, voir les logs
+VehicleRepairServiceDisabled            = Activez d'abord la création du service de réparation par véhicule
+
+# Médias des événements véhicule (issue #475)
+PhotosAndFiles                          = Photos et fichiers
+
+# Garanties des factures (issue #475)
+Warranties                              = Garanties
+WarrantyLabel                           = Libellé
+WarrantyEndDate                         = Fin de garantie
+WarrantyAttachment                      = Pièce jointe
+WarrantyExpired                         = Garantie expirée
+WarrantyRunning                         = Garantie en cours
+WarrantyAdded                           = Garantie ajoutée
+WarrantyDeleted                         = Garantie supprimée
+NoWarranty                              = Aucune garantie
+VehicleWarranties                       = Garanties du véhicule

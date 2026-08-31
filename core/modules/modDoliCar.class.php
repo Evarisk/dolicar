@@ -120,6 +120,7 @@ class modDoliCar extends DolibarrModules
                 'data' => [
                     'productlotcard',
                     'invoicecard',
+                    'invoicesuppliercard',
                     'propalcard',
                     'ordercard',
                     'paiementcard',
@@ -198,6 +199,11 @@ class modDoliCar extends DolibarrModules
             $i++ => ['DOLICAR_S1_SEATING_CAPACITY_VISIBLE', 'integer', 1, '', 0, 'current'],
             $i++ => ['DOLICAR_V7_CO2_EMISSION_VISIBLE', 'integer', 1, '', 0, 'current'],
 
+            // CONST VEHICLE REPAIR SERVICE
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_ENABLED', 'integer', 0, '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_REF_MASK', 'chaine', 'DIVREP-{PLAQUE}-{VIN}', '', 0, 'current'],
+            $i++ => ['DOLICAR_VEHICLE_REPAIR_SERVICE_DESCRIPTION_MASK', 'chaine', 'Divers réparation sur le véhicule : {PLAQUE} {VIN}', '', 0, 'current'],
+
             // CONST PUBLIC INTERFACE
             $i++ => ['DOLICAR_PUBLIC_INTERFACE_USE_SIGNATORY', 'integer', 0, '', 0, 'current'],
             $i++ => ['DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 'integer', 1000, '', 0, 'current'],
@@ -237,6 +243,10 @@ class modDoliCar extends DolibarrModules
         $this->tabs[] = ['data' => 'thirdparty:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty'];
         $this->tabs[] = ['data' => 'product:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product'];
         $this->tabs[] = ['data' => 'project:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project'];
+
+        // Warranties granted by an invoice, on their own tab (issue #475)
+        $this->tabs[] = ['data' => 'invoice:+dolicarwarranty:' . $pictoModule . ucfirst($langs->trans('Warranties')) . ':dolicar@dolicar:$user->hasRight("facture", "lire"):/custom/dolicar/view/facture_warranty.php?id=__ID__'];
+        $this->tabs[] = ['data' => 'supplier_invoice:+dolicarwarranty:' . $pictoModule . ucfirst($langs->trans('Warranties')) . ':dolicar@dolicar:$user->hasRight("fournisseur", "facture", "lire") || $user->hasRight("supplier_invoice", "lire"):/custom/dolicar/view/facture_warranty.php?id=__ID__&element=invoice_supplier'];
 
         // Dictionaries
         $this->dictionaries = [];
@@ -539,12 +549,29 @@ class modDoliCar extends DolibarrModules
             'linked_product'            => ['Label' => 'LinkedProduct',             'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 70, 'list' => 5,                        'params' => ['Product:product/class/product.class.php:0:(t.entity:=:__ENTITY__) AND (t.fk_product_type:=:0)' => NULL]],
             'linked_lot'                => ['Label' => 'LinkedProductBatch',        'type' => 'link',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 80, 'list' => 5,                        'params' => ['ProductLot:product/stock/class/productlot.class.php:0:(t.entity:=:__ENTITY__)' => NULL]],
 
+            // Warranties of an invoice, stored as a JSON array so a single invoice can carry several of them (issue #475).
+            // Hidden from the standard card ('list' => 0): the raw JSON is rendered as a table by the DoliCar hook.
+            'warranty_end'              => ['Label' => 'Warranties',                'type' => 'text',                     'elementtype' => ['facture', 'facture_fourn'],      'position' => $this->numero . 90, 'list' => 0, 'alwayseditable' => 1],
+
+            // Repair service of the vehicle: remembering it lets a reference change rename the
+            // service instead of creating a second one (issue #475)
+            'repair_service'            => ['Label' => 'VehicleRepairService',      'type' => 'int',                      'elementtype' => ['dolicar_registrationcertificatefr'], 'position' => $this->numero . 100, 'list' => 0],
+
             'starting_mileage' => ['Label' => 'StartingMileage', 'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 10, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'arrival_mileage'  => ['Label' => 'ArrivalMileage',  'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 20, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'json'             => ['Label' => 'JSON',            'type' => 'text', 'elementtype' => ['actioncomm'], 'position' => 30, 'alwayseditable' => 1, 'list' => 0, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"]
         ];
 
         saturne_manage_extrafields($extraFieldsArrays, $commonExtraFieldsValue);
+
+        // Cloning an invoice must not carry its warranties over: the clone grants none of them, and
+        // their certificates live in the document directory of the source invoice (issue #475).
+        // saturne_manage_extrafields() stops before the emptyonclone argument of addExtraField().
+        $sql[] = 'UPDATE ' . MAIN_DB_PREFIX . "extrafields SET emptyonclone = 1 WHERE name = 'warranty_end' AND elementtype IN ('facture', 'facture_fourn')";
+
+        // The repair service now takes the default VAT rate of the company country and the accounting
+        // codes of the Comptabilité module, these settings are gone
+        $sql[] = 'DELETE FROM ' . MAIN_DB_PREFIX . "const WHERE name IN ('DOLICAR_VEHICLE_REPAIR_SERVICE_VAT_RATE', 'DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_BUY', 'DOLICAR_VEHICLE_REPAIR_SERVICE_ACCOUNTANCY_CODE_SELL')";
 
         if (getDolGlobalInt('DOLICAR_EXTRAFIELDS_BACKWARD_COMPATIBILITY') == 0) {
             require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';

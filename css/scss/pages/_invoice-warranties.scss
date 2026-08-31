@@ -1,0 +1,16 @@
+// Warranties tab of an invoice: the Saturne media block used to attach the certificates of the
+// warranty being created sits in a table cell, lay it out inline there.
+.dolicar-warranty-media-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .linked-medias {
+    margin: 0;
+  }
+
+  // Data-only holder: collapse so it does not introduce a flex gap
+  .fast-upload-options {
+    display: none;
+  }
+}

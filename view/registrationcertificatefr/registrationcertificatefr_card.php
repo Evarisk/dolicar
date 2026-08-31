@@ -54,7 +54,7 @@ if (isModEnabled('digiquali')) {
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs(['propal', 'interventions']);
+saturne_load_langs(['propal', 'interventions', 'bills']);
 if (isModEnabled('digiquali')) {
     $langs->load('digiquali@digiquali');
 }
@@ -484,6 +484,14 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     print '</table>';
     print '</div>';
+
+    // Warranties carried by the customer and supplier invoices linked to the vehicle history (issue #475)
+    if (isModEnabled('facture') || isModEnabled('supplier_invoice') || isModEnabled('fournisseur')) {
+        print '<div class="fichehalfright">';
+        require_once __DIR__ . '/../../core/tpl/registrationcertificatefr_warranties.tpl.php';
+        print '</div>';
+    }
+
     print '</div>';
 
     ?>
