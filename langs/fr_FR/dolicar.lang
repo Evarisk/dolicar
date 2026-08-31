@@ -217,6 +217,7 @@ LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les c
 
 # Public interface - Interface publique
 PublicVehicleLogBook          = Carnet de bord publique du véhicule
+PublicVehicleLogBookShort     = Carnet de bord
 Driver                        = Conducteur
 DriverName                    = Nom du conducteur
 StartDateAndHour              = Date et heure de départ
