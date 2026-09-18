@@ -282,6 +282,8 @@ print '<tr class="oddeven">';
 print '<td>';
 print '<span class="nowraponall">' . $langs->transnoentities('ProblemReportEmailTemplate') . '</span>';
 print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('ProblemReportEmailTemplateDesc') . '</span>';
+// Straight to the email templates list, already filtered on this module's type
+print '<br><a href="' . dolBuildUrl(DOL_URL_ROOT . '/admin/mails_templates.php', ['search_type_template' => 'dolicar_problem_report']) . '" target="_blank" rel="noopener">' . img_picto('', 'email', 'class="pictofixedwidth"') . $langs->transnoentities('SeeEmailTemplates') . '</a>';
 print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('AvailableSubstitutions') . ' : __VEHICLE_PLATE__, __VEHICLE_LABEL__, __PROBLEM_DATE__, __PROBLEM_COMMENT__, __VEHICLE_URL__</span>';
 print '</td>';
 print '<td class="center">';
