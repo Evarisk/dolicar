@@ -254,8 +254,9 @@ print '<td class="center">' . $langs->transnoentities('Value') . '</td>';
 print '</tr>';
 
 print '<tr class="oddeven">';
-print '<td class="nowraponall">';
-print $langs->transnoentities('ProblemReportEmail') . '<br><span class="opacitymedium">' . $langs->transnoentities('ProblemReportEmailDesc') . '</span>';
+print '<td>';
+print '<span class="nowraponall">' . $langs->transnoentities('ProblemReportEmail') . '</span>';
+print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('ProblemReportEmailDesc') . '</span>';
 print '</td>';
 print '<td class="center">';
 print '<input class="flat minwidth300" type="email" name="DOLICAR_PROBLEM_REPORT_EMAIL" value="' . dol_escape_htmltag(getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL')) . '" placeholder="responsable@example.com">';
@@ -275,9 +276,13 @@ if ($resqlProblemTemplates) {
     }
 }
 
+// No nowraponall on this cell: its help text and the list of tokens are long, and a cell that
+// cannot wrap stretches the whole setup page well past the window width.
 print '<tr class="oddeven">';
-print '<td class="nowraponall">';
-print $langs->transnoentities('ProblemReportEmailTemplate') . '<br><span class="opacitymedium">' . $langs->transnoentities('ProblemReportEmailTemplateDesc', '__VEHICLE_PLATE__, __VEHICLE_LABEL__, __PROBLEM_DATE__, __PROBLEM_COMMENT__, __VEHICLE_URL__') . '</span>';
+print '<td>';
+print '<span class="nowraponall">' . $langs->transnoentities('ProblemReportEmailTemplate') . '</span>';
+print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('ProblemReportEmailTemplateDesc') . '</span>';
+print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('AvailableSubstitutions') . ' : __VEHICLE_PLATE__, __VEHICLE_LABEL__, __PROBLEM_DATE__, __PROBLEM_COMMENT__, __VEHICLE_URL__</span>';
 print '</td>';
 print '<td class="center">';
 $problemEmailForm = new Form($db);
