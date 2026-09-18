@@ -564,6 +564,7 @@
 
       input[type="text"],
       input[type="number"],
+      input[type="tel"],
       input[type="datetime-local"],
       select,
       textarea {
@@ -585,6 +586,10 @@
           box-shadow: 0 0 0 3px rgba(21, 113, 211, 0.15);
         }
       }
+
+      // The Dolibarr theme pins a height on text inputs but leaves tel ones alone, where pico's own
+      // 50px height then wins: size the phone field from its padding, like the fields next to it.
+      input[type="tel"] { height: auto; }
 
       // Compact height for the date & mileage fields
       input[type="datetime-local"],
