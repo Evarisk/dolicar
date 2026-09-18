@@ -59,24 +59,7 @@ window.dolicar.vehicleLogbook.init = function() {
  * @return {void}
  */
 window.dolicar.vehicleLogbook.event = function() {
-  $(document).on('input change', '.plv2-km-input[data-warning-mileage]', window.dolicar.vehicleLogbook.checkMileageWarning);
-};
-
-/**
- * Show a non blocking warning when the arrival mileage goes over the configured trip length.
- * The driver can still submit: the threshold only asks for a second look at the typed value.
- *
- * @memberof DoliCar_VehicleLogbook
- *
- * @since   1.5.0
- * @version 1.5.0
- *
- * @return {void}
- */
-window.dolicar.vehicleLogbook.checkMileageWarning = function() {
-  var $input   = $(this);
-  var warnFrom = parseInt($input.data('warning-mileage'), 10);
-  var mileage  = parseInt($input.val(), 10);
-
-  $('#plv2-km-warning').toggleClass('is-visible', !isNaN(warnFrom) && !isNaN(mileage) && mileage > warnFrom);
+  // The arrival mileage warning this module was written for has been dropped. The module stays as
+  // the home of the public logbook form handlers rather than being deleted, PR #491 moving the
+  // driver picker of the page into it.
 };

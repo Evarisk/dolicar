@@ -226,13 +226,13 @@ LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les c
 # Public interface - Interface publique
 PublicVehicleLogBook          = Carnet de bord publique du véhicule
 Driver                        = Conducteur
+ReturnedBy                    = Rendu par
 DriverName                    = Nom du conducteur
 StartDateAndHour              = Date et heure de départ
 StartingMileage               = Kilométrage de départ
 StartComment                  = Commentaire de départ
 EndDateAndHour                = Date et heure de retour
 ArrivalMileage                = Kilométrage d'arrivé
-ArrivalMileageWarning         = Attention : plus de %s km parcourus depuis le départ. Vérifiez le kilométrage saisi avant de valider.
 EndComment                    = Commentaire d'arrivé
 ObjectAddPublicVehicleLogBook = Suivi Km : %s - VIN : %s
 SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré

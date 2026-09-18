@@ -519,13 +519,18 @@ if (empty($resHook)) {
 
             $actionCommID = $actionComm->create($user);
         } else {
-            $lastUnfinishedActionComm[0]->datef         = dol_stringtotime(GETPOST('end_date_and_hour'));
+            $lastUnfinishedActionComm[0]->datef = dol_stringtotime(GETPOST('end_date_and_hour'));
+
+            // Whoever brings the vehicle back is not always the one who took it: the return screen
+            // asks again, and the answer is kept beside the departure driver rather than over it.
+            $lastUnfinishedActionComm[0]->note_private .= !empty($driverName) ? '<br>' . $langs->transnoentities('ReturnedBy') . ' : ' . $driverName : '';
             $lastUnfinishedActionComm[0]->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? '<br>' . $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
 
             $lastUnfinishedActionComm[0]->array_options['options_arrival_mileage'] = GETPOST('options_arrival_mileage');
             $lastUnfinishedActionComm[0]->updateExtraField('arrival_mileage');
 
             $existingJson = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'] ?? '{}', true);
+            $existingJson['return_driver']     = $driverName;
             $existingJson['return_fuel_level'] = GETPOST('options_fuel_level', 'alpha');
             $existingJson['end_comment']       = GETPOST('end_comment', 'restricthtml');
             $lastUnfinishedActionComm[0]->array_options['options_json'] = json_encode($existingJson);
@@ -537,7 +542,9 @@ if (empty($resHook)) {
         if ($publicInterfaceUseSignatory && (isset($actionCommID) || isset($lastUnfinishedActionComm[0]))) {
             $signatory->status    = SaturneSignature::STATUS_SIGNED;
             $signatory->role      = $langs->transnoentities('Driver');
-            $signatory->firstname = $lastUnfinishedActionCommJSON['driver'] ?? $driverName;
+            // The signature belongs to whoever is standing there: on a return that is the person
+            // bringing the vehicle back, who is not always the one the departure recorded
+            $signatory->firstname = !empty($driverName) ? $driverName : ($lastUnfinishedActionCommJSON['driver'] ?? '');
 
             $signatory->signature_date = dol_now();
             // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,
