@@ -304,6 +304,27 @@ class ActionsDoliCar
     }
 
     /**
+     * Overloading the emailElementlist function : replacing the parent's function with the one below
+     *
+     * Declare the problem report template type so it can be picked in the email templates admin page
+     *
+     * @param  array $parameters Hook metadatas (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function emailElementlist(array $parameters): int
+    {
+        global $langs, $user;
+
+        if (strpos($parameters['context'], 'emailtemplates') !== false && $user->hasRight('dolicar', 'adminpage', 'read')) {
+            $langs->load('dolicar@dolicar');
+
+            $this->results = ['dolicar_problem_report' => img_picto('', 'fontawesome_fa-car_fas_#d35968', 'class="pictofixedwidth"') . dol_escape_htmltag($langs->trans('ProblemReportConfig'))];
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
      * Overloading the saturneExtendGetObjectsMetadata function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadata (context, etc...)

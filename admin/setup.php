@@ -75,6 +75,7 @@ if ($action == 'update_warehouse') {
 if ($action == 'update_problem_report') {
     $email = GETPOST('DOLICAR_PROBLEM_REPORT_EMAIL', 'alphanohtml');
     dolibarr_set_const($db, 'DOLICAR_PROBLEM_REPORT_EMAIL', $email, 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'DOLICAR_PROBLEM_REPORT_EMAIL_TEMPLATE', GETPOSTINT('DOLICAR_PROBLEM_REPORT_EMAIL_TEMPLATE'), 'integer', 0, '', $conf->entity);
     setEventMessages($langs->trans('SetupSaved'), null, 'mesgs');
     $action = 'edit';
 }
@@ -253,11 +254,41 @@ print '<td class="center">' . $langs->transnoentities('Value') . '</td>';
 print '</tr>';
 
 print '<tr class="oddeven">';
-print '<td class="nowraponall">';
-print $langs->transnoentities('ProblemReportEmail') . '<br><span class="opacitymedium">' . $langs->transnoentities('ProblemReportEmailDesc') . '</span>';
+print '<td>';
+print '<span class="nowraponall">' . $langs->transnoentities('ProblemReportEmail') . '</span>';
+print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('ProblemReportEmailDesc') . '</span>';
 print '</td>';
 print '<td class="center">';
 print '<input class="flat minwidth300" type="email" name="DOLICAR_PROBLEM_REPORT_EMAIL" value="' . dol_escape_htmltag(getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL')) . '" placeholder="responsable@example.com">';
+print '</td>';
+print '</tr>';
+
+// Email template used for that mail — the templates themselves are edited in the Dolibarr email
+// templates page, under the type declared by the emailElementlist hook of this module.
+$problemEmailTemplates = ['0' => $langs->transnoentities('None')];
+$sqlProblemTemplates   = 'SELECT rowid, label FROM ' . MAIN_DB_PREFIX . "c_email_templates WHERE type_template = 'dolicar_problem_report' AND active = 1";
+$sqlProblemTemplates  .= ' AND entity IN (' . getEntity('c_email_templates') . ') ORDER BY position ASC, label ASC';
+$resqlProblemTemplates = $db->query($sqlProblemTemplates);
+if ($resqlProblemTemplates) {
+    while ($objProblemTemplate = $db->fetch_object($resqlProblemTemplates)) {
+        // Labels of the shipped templates are translation keys wrapped in parentheses, as Dolibarr does
+        $problemEmailTemplates[$objProblemTemplate->rowid] = preg_match('/^\((.*)\)$/', $objProblemTemplate->label, $labelKey) ? $langs->transnoentities($labelKey[1]) : $objProblemTemplate->label;
+    }
+}
+
+// No nowraponall on this cell: its help text and the list of tokens are long, and a cell that
+// cannot wrap stretches the whole setup page well past the window width.
+print '<tr class="oddeven">';
+print '<td>';
+print '<span class="nowraponall">' . $langs->transnoentities('ProblemReportEmailTemplate') . '</span>';
+print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('ProblemReportEmailTemplateDesc') . '</span>';
+// Straight to the email templates list, already filtered on this module's type
+print '<br><a href="' . dolBuildUrl(DOL_URL_ROOT . '/admin/mails_templates.php', ['search_type_template' => 'dolicar_problem_report']) . '" target="_blank" rel="noopener">' . img_picto('', 'email', 'class="pictofixedwidth"') . $langs->transnoentities('SeeEmailTemplates') . '</a>';
+print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('AvailableSubstitutions') . ' : __VEHICLE_PLATE__, __VEHICLE_LABEL__, __PROBLEM_DATE__, __PROBLEM_COMMENT__, __VEHICLE_URL__</span>';
+print '</td>';
+print '<td class="center">';
+$problemEmailForm = new Form($db);
+print $problemEmailForm->selectarray('DOLICAR_PROBLEM_REPORT_EMAIL_TEMPLATE', $problemEmailTemplates, getDolGlobalInt('DOLICAR_PROBLEM_REPORT_EMAIL_TEMPLATE'), 0, 0, 0, '', 0, 0, 0, '', 'minwidth300');
 print '</td>';
 print '</tr>';
 print '</table>';
