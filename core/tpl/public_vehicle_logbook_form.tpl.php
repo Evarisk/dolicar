@@ -128,20 +128,28 @@ $isDepart = ($actionType === 'depart');
                             </div>
                         <?php endif; ?>
                     <?php else :
-                        $startKm    = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
+                        $startKm     = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
                         $minKmRetour = $startKm > 0 ? $startKm : 0;
-                        $maxKmRetour = $startKm + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>
+                        // The configured trip length is only a warning threshold, not a hard limit: a driver
+                        // who really did a long trip must still be able to submit it, so no max attribute here.
+                        // vehicleLogbook.js reveals the warning below when the typed value goes over it.
+                        $maxTripKm   = getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000);
+                        $maxKmRetour = $startKm + $maxTripKm; ?>
                         <input type="number"
                                name="options_arrival_mileage"
                                class="plv2-km-input"
                                min="<?php echo $minKmRetour; ?>"
-                               max="<?php echo $maxKmRetour; ?>"
+                               <?php echo $startKm > 0 ? 'data-warning-mileage="' . $maxKmRetour . '"' : ''; ?>
                                value="<?php echo $startKm > 0 ? $startKm : ''; ?>"
                                placeholder="000000"
                                required>
                         <?php if ($startKm > 0) : ?>
                             <div class="plv2-km-hint">
                                 <?php echo $langs->trans('DepartureMileage'); ?> : <strong><?php echo number_format($startKm, 0, ',', ' ') . ' km'; ?></strong>
+                            </div>
+                            <div class="plv2-km-warning" id="plv2-km-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span><?php echo $langs->trans('ArrivalMileageWarning', number_format($maxTripKm, 0, ',', ' ')); ?></span>
                             </div>
                         <?php endif; ?>
                     <?php endif; ?>
