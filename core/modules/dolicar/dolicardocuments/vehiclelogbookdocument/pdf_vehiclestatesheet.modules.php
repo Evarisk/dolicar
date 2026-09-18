@@ -206,7 +206,7 @@ class pdf_vehiclestatesheet
                 $outputLangs->transnoentities('Return'),
                 [
                     ['label' => $outputLangs->transnoentities('Date'),     'left' => dol_print_date($trip['datep'], 'dayhour'),                 'right' => dol_print_date($trip['datef'], 'dayhour')],
-                    ['label' => $outputLangs->transnoentities('Driver'),   'left' => $trip['driver'],                                          'right' => $trip['driver']],
+                    ['label' => $outputLangs->transnoentities('Driver'),   'left' => $trip['driver'],                                          'right' => $trip['return_driver'] ?? $trip['driver']],
                     ['label' => $outputLangs->transnoentities('Mileage'),  'left' => $kmStart,                                                 'right' => $kmEnd],
                     ['label' => $outputLangs->transnoentities('Fuel'),     'left' => $fuelLabels[$trip['fuel_level']] ?? '',                   'right' => $fuelLabels[$trip['return_fuel_level']] ?? ''],
                     ['label' => $outputLangs->transnoentities('Comments'), 'left' => $trip['start_comment'],                                   'right' => $trip['end_comment']],
