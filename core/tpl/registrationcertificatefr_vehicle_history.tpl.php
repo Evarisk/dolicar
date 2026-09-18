@@ -24,7 +24,7 @@
 /**
  * The following vars must be defined:
  * Global   : $conf, $db, $form, $langs
- * Variable : $object (RegistrationCertificateFr), $permissiontoadd
+ * Variable : $object (RegistrationCertificateFr), $permissiontoadd, $action
  *            $iconMap   (array label => FA class)
  *            $catById   (array id => Categorie)
  *            $catLabels (array id => ['label' => string, 'data-html' => string])
@@ -134,6 +134,11 @@ if (!empty($eventsList)) {
         $icon    = $evtCat ? ($iconMap[$evtCat->label] ?? 'fa-circle') : 'fa-circle';
         $km      = (int) ($evt->array_options['options_starting_mileage'] ?? 0);
         $userStr = $ownerUser->getNomUrl(1);
+
+        // A trip holds a mileage at each end, any other event only the one it was recorded at
+        $isTrip    = !empty($evt->code) && strpos($evt->code, '_ADD_PUBLIC_VEHICLE_LOG_BOOK') !== false;
+        $kmArrival = (int) ($evt->array_options['options_arrival_mileage'] ?? 0);
+        $editingKm = ($action == 'edit_mileage' && GETPOSTINT('event_id') === (int) $evt->id);
         $badge   = '<span style="color:' . $color . ';font-weight:bold;"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';
 
         $evt->fetchObjectLinked(null, null, null, null, 'OR', 1, 'sourcetype', 0);
@@ -282,7 +287,39 @@ if (!empty($eventsList)) {
         $out .= '<tr class="oddeven">';
         $out .= '<td class="nowrap">' . $badge . '</td>';
         $out .= '<td class="center nowraponall">' . dol_print_date($evt->datep, 'day') . '</td>';
-        $out .= '<td class="center">' . ($km > 0 ? price($km, 0, '', 1, 0) . ' km' : '') . '</td>';
+        // Mileage cell: read only, or the correction form once its pencil has been clicked
+        if ($editingKm && !empty($permissiontoadd)) {
+            $out .= '<td class="center">';
+            $out .= '<form method="POST" action="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id) . '">';
+            $out .= '<input type="hidden" name="token" value="' . newToken() . '">';
+            $out .= '<input type="hidden" name="action" value="save_mileage">';
+            $out .= '<input type="hidden" name="mileage_event_id" value="' . (int) $evt->id . '">';
+            $out .= '<div class="nowraponall">' . $langs->transnoentities($isTrip ? 'StartingMileage' : 'Mileage') . '<br>';
+            $out .= '<input type="number" name="mileage_starting_mileage" class="maxwidth100" value="' . ($km > 0 ? $km : '') . '" min="0"> km</div>';
+            if ($isTrip) {
+                $out .= '<div class="nowraponall">' . $langs->transnoentities('ArrivalMileage') . '<br>';
+                $out .= '<input type="number" name="mileage_arrival_mileage" class="maxwidth100" value="' . ($kmArrival > 0 ? $kmArrival : '') . '" min="0"> km</div>';
+            }
+            // Required: a corrected mileage without a reason leaves the next reader guessing
+            $out .= '<div>' . $langs->transnoentities('MileageCorrectionReason') . ' <span class="fieldrequired">*</span><br>';
+            $out .= '<textarea name="mileage_reason" class="maxwidth150" rows="2" required></textarea></div>';
+            $out .= '<input type="submit" class="button small" value="' . dol_escape_htmltag($langs->transnoentities('Save')) . '">';
+            $out .= ' <a class="button button-cancel small" href="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id) . '">' . $langs->transnoentities('Cancel') . '</a>';
+            $out .= '</form></td>';
+        } else {
+            $kmText = $km > 0 ? price($km, 0, '', 1, 0) . ' km' : '';
+            if ($isTrip && $kmArrival > 0) {
+                $kmText = ($km > 0 ? price($km, 0, '', 1, 0) : '?') . ' → ' . price($kmArrival, 0, '', 1, 0) . ' km';
+            }
+            $out .= '<td class="center nowraponall">' . $kmText;
+            if (!empty($permissiontoadd)) {
+                // Token carried even though the link only opens the form: at MAIN_SECURITY_CSRF_WITH_TOKEN 3
+                // every GET action but a short allow list is refused without one
+                $out .= ' <a href="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=edit_mileage&token=' . newToken() . '&event_id=' . (int) $evt->id) . '"';
+                $out .= ' title="' . dol_escape_htmltag($langs->transnoentities('CorrectMileage')) . '">' . img_edit() . '</a>';
+            }
+            $out .= '</td>';
+        }
         $out .= '<td>' . nl2br(dol_escape_htmltag((string) $evt->note_private)) . '</td>';
         $out .= '<td class="center nowraponall">' . $userStr . '</td>';
         $out .= '<td>' . $linkedHtml . '</td>';
