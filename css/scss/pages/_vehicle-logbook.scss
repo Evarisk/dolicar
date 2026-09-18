@@ -379,6 +379,19 @@
         strong { display: block; font-weight: 600; }
         span   { opacity: 0.75; font-size: 11px; }
 
+        // Phone of a free driver: own line under the name, tappable on a phone
+        .plv2-driver-phone {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin-top: 2px;
+          font-size: 11px;
+          font-weight: 600;
+          text-decoration: none;
+
+          i { font-size: 11px; }
+        }
+
         &--out {
           background: #eff6ff;
           color: #1e3a8a;
@@ -683,6 +696,13 @@
       .plv2-card { margin-bottom: 0; }
     }
 
+    // Two fields side by side inside a single card (free driver name / first name)
+    .plv2-field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
     // ── Inline card: one label + field on a single row (Conducteur) ────────
     .plv2-card--inline {
       display: flex;
@@ -744,6 +764,23 @@
       grid-template-columns: 1fr 1fr;
       gap: 6px;
       margin-bottom: 6px;
+
+      // Driver picker: three choices (internal / external / free identity). Labels are stacked
+      // under the icon, and min-width lets a column shrink under its label (a grid item defaults
+      // to min-content, which would push the third button off a phone screen).
+      &--three {
+        grid-template-columns: repeat(3, 1fr);
+
+        .plv2-seg__btn {
+          flex-direction: column;
+          gap: 3px;
+          min-width: 0;
+          padding-inline: 2px;
+          text-align: center;
+          line-height: 1.15;
+          overflow-wrap: anywhere;
+        }
+      }
 
       &__btn {
         display: flex;
