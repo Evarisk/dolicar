@@ -795,6 +795,26 @@
       strong { color: #1571d3; }
     }
 
+    // Non blocking warning shown by vehicleLogbook.js when the arrival mileage goes over the
+    // configured trip length: the form stays submittable, the driver is only asked to double check.
+    .plv2-km-warning {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      padding: 6px 8px;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      background: #fffbeb;
+      font-size: 11px;
+      line-height: 1.3;
+      color: #92400e;
+
+      &.is-visible { display: flex; }
+
+      i { color: #d97706; }
+    }
+
     // ── Fuel selector ─────────────────────────────────────────────────────
     .plv2-fuel-btns {
       display: grid;

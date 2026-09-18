@@ -81,8 +81,8 @@ ProjectQuickCreationDescription     = Cette option permet de créer rapidement u
 
 # Public interface - Interface publique
 OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
-MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
-MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
+MaxArrivalMileage            = Seuil d'alerte du kilométrage d'arrivée
+MaxArrivalMileageDescription = Cette option permet de configurer le nombre de kilomètres parcourus à partir duquel un avertissement est affiché au conducteur lors de l'enregistrement d'un retour dans le carnet de bord d'un véhicule. La saisie reste possible au-delà de ce seuil. <br> (par défaut 1000 km)
 
 # Setup - Réglages
 ImmatriculationAPIConfig          = Configuration de l'API
@@ -224,6 +224,7 @@ StartingMileage               = Kilométrage de départ
 StartComment                  = Commentaire de départ
 EndDateAndHour                = Date et heure de retour
 ArrivalMileage                = Kilométrage d'arrivé
+ArrivalMileageWarning         = Attention : plus de %s km parcourus depuis le départ. Vérifiez le kilométrage saisi avant de valider.
 EndComment                    = Commentaire d'arrivé
 ObjectAddPublicVehicleLogBook = Suivi Km : %s - VIN : %s
 SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
