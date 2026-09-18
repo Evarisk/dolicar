@@ -440,10 +440,15 @@ if (empty($resHook)) {
     }
 
     if ($action == 'add') {
-        // Resolve driver full name: internal user (select_dolusers) or external third-party contact
-        $driverType = GETPOST('driver_type', 'aZ09');
-        $driverName = '';
-        if ($driverType === 'external') {
+        // Resolve driver full name: internal user (select_dolusers), external third-party contact,
+        // or a free identity typed on the spot by someone who is in neither list (issue #487).
+        $driverType  = GETPOST('driver_type', 'aZ09');
+        $driverName  = '';
+        $driverPhone = '';
+        if ($driverType === 'free') {
+            $driverName  = trim(GETPOST('driver_free_firstname', 'alphanohtml') . ' ' . GETPOST('driver_free_lastname', 'alphanohtml'));
+            $driverPhone = GETPOST('driver_free_phone', 'alphanohtml');
+        } elseif ($driverType === 'external') {
             $driverContactId = GETPOSTINT('driver_contact_id');
             if ($driverContactId > 0) {
                 require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
@@ -482,11 +487,12 @@ if (empty($resHook)) {
             // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user
             $actionComm->note_private  = (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . '<br>' : $langs->transnoentities('NoData'));
             $actionComm->note_private .= $langs->transnoentities('Driver') . ' : ' . $driverName . '<br>';
+            $actionComm->note_private .= !empty($driverPhone) ? $langs->transnoentities('DriverPhone') . ' : ' . $driverPhone . '<br>' : '';
             $actionComm->note_private .= GETPOSTISSET('start_comment') && !empty(GETPOST('start_comment', 'restricthtml')) ? $langs->transnoentities('StartComment') . ' : ' . GETPOST('start_comment', 'restricthtml') . '<br>' : '';
             $actionComm->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
             $actionComm->label         = $langs->transnoentities('ObjectAddPublicVehicleLogBook', $registrationCertificateFR->a_registration_number, $productLot->batch);
 
-            $actionComm->array_options['json'] = json_encode(['driver' => $driverName, 'fuel_level' => GETPOST('options_fuel_level', 'alpha'), 'start_comment' => GETPOST('start_comment', 'restricthtml'), 'end_comment' => GETPOST('end_comment', 'restricthtml')]);
+            $actionComm->array_options['json'] = json_encode(['driver' => $driverName, 'driver_phone' => $driverPhone, 'fuel_level' => GETPOST('options_fuel_level', 'alpha'), 'start_comment' => GETPOST('start_comment', 'restricthtml'), 'end_comment' => GETPOST('end_comment', 'restricthtml')]);
 
             $extraFields->setOptionalsFromPost([], $actionComm);
 
@@ -565,6 +571,12 @@ $form = new Form($db);
 
 // Pre-select driver from cookie
 $preselectedDriverId = isset($_COOKIE['plv2_driver_id']) ? (int) $_COOKIE['plv2_driver_id'] : 0;
+
+// Same idea for the free driver identity (issue #487): a driver who is neither a user nor a known
+// contact types name and phone once, and finds them pre-filled on the next departure.
+$preselectedDriverLastname  = dol_string_nohtmltag($_COOKIE['plv2_driver_lastname'] ?? '');
+$preselectedDriverFirstname = dol_string_nohtmltag($_COOKIE['plv2_driver_firstname'] ?? '');
+$preselectedDriverPhone     = dol_string_nohtmltag($_COOKIE['plv2_driver_phone'] ?? '');
 
 // This NOLOGIN page never loads $user, but a Dolibarr session may still be active (e.g. a manager
 // opening the page while logged in). Default the control "controller" picker to that session user.
@@ -708,12 +720,6 @@ function plv2SelectFuel(btn) {
     $('#plv2-fuel-value').val($(btn).data('value'));
 }
 
-$(document).on('change', '#driver_user_id', function () {
-    var driverId = $(this).val();
-    if (driverId) {
-        document.cookie = 'plv2_driver_id=' + encodeURIComponent(driverId) + '; path=/; max-age=31536000; SameSite=Lax';
-    }
-});
 
 // Live client-side filter of the registration certificates list
 $(document).on('input', '#plv2-cg-search', function () {
@@ -729,15 +735,7 @@ $(document).on('input', '#plv2-cg-search', function () {
     $('.plv2-cg-noresult').toggle(visible === 0);
 });
 
-// Driver type toggle: internal user picker vs external third-party + contact pickers
-$(document).on('click', '#plv2-driver-type .plv2-seg__btn', function () {
-    var type = $(this).data('type');
-    $('#plv2-driver-type .plv2-seg__btn').removeClass('active');
-    $(this).addClass('active');
-    $('#plv2-driver-type-value').val(type);
-    $('#plv2-driver-internal').toggle(type === 'internal');
-    $('#plv2-driver-external').toggle(type === 'external');
-});
+// Driver type toggle (internal / external / free identity) lives in js/modules/vehicleLogbook.js
 
 // When the third party changes, refresh the native contact select2 with that company's contacts
 $(document).on('change', '#driver_socid', function () {
