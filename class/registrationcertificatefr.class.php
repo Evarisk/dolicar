@@ -356,6 +356,21 @@ class RegistrationCertificateFr extends SaturneObject
     }
 
     /**
+     * Delete object in database
+     *
+     * Registration certificate deletion must be definitive (hard delete) so no soft-deleted row is kept in database.
+     *
+     * @param  User      $user       User that deletes
+     * @param  int<0,1>  $noTrigger  0 = launch triggers after, 1 = disable triggers
+     * @param  bool      $softDelete Keep object in database with a deleted status instead of removing it
+     * @return int<-1,1>             Return integer 0 < if KO, > 0 if OK
+     */
+    public function delete(User $user, int $noTrigger = 0, bool $softDelete = false): int
+    {
+        return parent::delete($user, $noTrigger, $softDelete);
+    }
+
+    /**
      * Return tooltip content array
      *
      * @param  array $params Tooltip params
