@@ -321,7 +321,7 @@ if (empty($resHook)) {
         $object->fk_soc                          = $fkSoc;
         $object->fk_product                      = GETPOSTINT('fk_product');
         $object->fk_lot                          = GETPOSTINT('fk_lot');
-        $object->b_first_registration_date       = dol_mktime(0, 0, 0, GETPOST('b_first_registration_datemonth', 'int'), GETPOST('b_first_registration_dateday', 'int'), GETPOST('b_first_registration_dateyear', 'int'));
+        $object->b_first_registration_date       = dol_mktime(0, 0, 0, GETPOSTINT('b_first_registration_datemonth'), GETPOSTINT('b_first_registration_dateday'), GETPOSTINT('b_first_registration_dateyear'));
         $object->d1_vehicle_brand                = GETPOST('d1_vehicle_brand', 'alphanohtml');
         $object->d2_vehicle_type                 = GETPOST('d2_vehicle_type', 'alphanohtml');
         $object->d21_vehicle_cnit                = GETPOST('d21_vehicle_cnit', 'alphanohtml');
