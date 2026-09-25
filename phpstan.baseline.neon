@@ -1103,3 +1103,8 @@ parameters:
 			identifier: booleanAnd.alwaysFalse
 			count: 1
 			path: view/registrationcertificatefr/registrationcertificatefr_list.php
+		-
+			message: '#^Property DolibarrModules\:\:\$menu \(1\|array\<array\{commentgroup\?\: string, mainmenu\: string, leftmenu\: string, langs\: string, enabled\: int\|string, target\: string, titre\: string, user\: int, \.\.\.\}\>\) does not accept non\-empty\-array\<array\{commentgroup\?\: string, mainmenu\: string, leftmenu\: string, langs\: string, enabled\: int\|string, target\: string, titre\: string, user\: int, \.\.\.\}\|array\{fk_menu\: '''', type\: ''top'', titre\: ''DoliCar'', prefix\: ''\<i class\="fas fa…'', mainmenu\: ''dolicar'', leftmenu\: '''', url\: ''/dolicar…'', langs\: ''dolicar@dolicar'', \.\.\.\}\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: core/modules/modDoliCar.class.php
