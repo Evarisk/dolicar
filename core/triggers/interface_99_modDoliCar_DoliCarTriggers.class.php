@@ -35,6 +35,11 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
     protected $db;
 
     /**
+     * @var string Trigger version.
+     */
+    public $version;
+
+    /**
      * Constructor
      *
      * @param DoliDB $db Database handler
@@ -46,7 +51,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'DoliCar triggers.';
-        $this->version     = '23.0.0';
+        $this->version     = '23.1.0';
         $this->picto       = 'dolicar@dolicar';
     }
 
