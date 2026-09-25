@@ -70,6 +70,7 @@ parameters:
         - ../../cron/class/
         - ../../ecm/class/
         - ../../expedition/class/
+        - ../../expensereport/class/
         - ../../fichinter/class/
         - ../../fourn/class/
         - ../../holiday/class/

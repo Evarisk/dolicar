@@ -1109,27 +1109,3 @@ parameters:
 			identifier: booleanAnd.alwaysFalse
 			count: 1
 			path: view/registrationcertificatefr/registrationcertificatefr_list.php
-
-		-
-			message: '#^Access to property \$lines on an unknown class ExpenseReport\.$#'
-			identifier: class.notFound
-			count: 2
-			path: view/registrationcertificatefr/registrationcertificatefr_vehiclehistory.php
-
-		-
-			message: '#^Call to method fetch\(\) on an unknown class ExpenseReport\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/registrationcertificatefr/registrationcertificatefr_vehiclehistory.php
-
-		-
-			message: '#^Call to method fetch_lines\(\) on an unknown class ExpenseReport\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/registrationcertificatefr/registrationcertificatefr_vehiclehistory.php
-
-		-
-			message: '#^Instantiated class ExpenseReport not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/registrationcertificatefr/registrationcertificatefr_vehiclehistory.php
