@@ -38,7 +38,7 @@ require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
-require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
+dol_include_once('/digiquali/class/control.class.php');
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
