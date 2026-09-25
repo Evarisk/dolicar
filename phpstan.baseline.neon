@@ -817,12 +817,6 @@ parameters:
 			path: core/triggers/interface_99_modDoliCar_DoliCarTriggers.class.php
 
 		-
-			message: '#^Property DolibarrTriggers\:\:\$version \(''''\|''development''\|''dolibarr''\|''experimental''\) does not accept ''23\.0\.0''\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: core/triggers/interface_99_modDoliCar_DoliCarTriggers.class.php
-
-		-
 			message: '#^PHPDoc tag @return has invalid value \(int              \< 0 if KO, 0 when the invoice carries no vehicle or is already in the history, event ID otherwise\)\: Unexpected token "if", expected ''\>'' at offset 741 on line 13$#'
 			identifier: phpDoc.parseError
 			count: 1
