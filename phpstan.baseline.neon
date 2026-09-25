@@ -1,0 +1,1105 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: admin/setup.php
+
+		-
+			message: '#^Access to constant STATUS_LOCKED on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: class/actions_dolicar.class.php
+
+		-
+			message: '#^Access to an undefined property User\:\:\$login\.$#'
+			identifier: property.notFound
+			count: 4
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:lasterror\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:num_rows\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:order\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:plimit\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Call to an undefined method User\:\:hasRight\(\)\.$#'
+			identifier: method.notFound
+			count: 6
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: class/dolicardashboard.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:jdate\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/dolicardashboard.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: class/dolicardashboard.class.php
+
+		-
+			message: '#^Call to an undefined method User\:\:fetch\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/dolicardashboard.class.php
+
+		-
+			message: '#^Call to an undefined method User\:\:getNomUrl\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: class/dolicardashboard.class.php
+
+		-
+			message: '#^Class User constructor invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: class/dolicardashboard.class.php
+
+		-
+			message: '#^Access to constant STATUS_LOCKED on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Binary operation "\+" between string and 1 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Binary operation "\-" between string and 1 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Method RegistrationCertificateFr\:\:getRegistrationCertificateData\(\) has parameter \$confirmRetry with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Method RegistrationCertificateFr\:\:getRegistrationCertificateData\(\) has parameter \$searchType with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Method RegistrationCertificateFr\:\:getRegistrationCertificateData\(\) has parameter \$searchValue with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Method RegistrationCertificateFr\:\:load_dashboard\(\) with return type void returns array\<string, mixed\> but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^PHPDoc type array of property RegistrationCertificateFr\:\:\$fields is not covariant with PHPDoc type array\<string, array\{type\: string, label\: string, langfile\?\: string, enabled\: int\<0, 2\>\|string, position\: int, notnull\?\: int, visible\: int\<\-6, 6\>\|string, alwayseditable\?\: int\<0, 1\>\|string, \.\.\.\}\> of overridden property CommonObject\:\:\$fields\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^PHPDoc type int of property RegistrationCertificateFr\:\:\$isCategoryManaged is not covariant with PHPDoc type int\<0, 1\> of overridden property SaturneObject\:\:\$isCategoryManaged\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^PHPDoc type int of property RegistrationCertificateFr\:\:\$isextrafieldmanaged is not covariant with PHPDoc type int\<0, 1\> of overridden property SaturneObject\:\:\$isextrafieldmanaged\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^PHPDoc type int of property RegistrationCertificateFr\:\:\$ismultientitymanaged is not covariant with PHPDoc type int\<0, 1\>\|string of overridden property SaturneObject\:\:\$ismultientitymanaged\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^PHPDoc type int\|string of property RegistrationCertificateFr\:\:\$date_creation is not covariant with PHPDoc type ''''\|int\|null of overridden property CommonObject\:\:\$date_creation\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^PHPDoc type int\|string of property RegistrationCertificateFr\:\:\$tms is not covariant with PHPDoc type int of overridden property CommonObject\:\:\$tms\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$a_registration_number has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$b_first_registration_date has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$c1_owner_fullname has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$c3_registration_address has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$c41_ownerNumber has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$c41_second_owner_name has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$c4a_owner_vehicle has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$c4a_vehicle_owner has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$d1_vehicle_brand has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$d21_vehicle_cnit has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$d2_vehicle_type has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$d3_vehicle_model has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$e_vehicle_serial_number has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$f1_techincal_ptac has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$f2_ptac has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$f3_ptra has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$fk_lot has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$fk_product has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$fk_soc has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$g1_vehicle_empty_weight has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$g_vehicle_weight has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$h_validity_period has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$i_vehicle_registration_date has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$j1_national_type has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$j2_european_bodywork has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$j3_national_bodywork has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$j_vehicle_category has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$json has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$k_type_approval_number has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$p1_cylinder_capacity has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$p2_maximum_net_power has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$p3_fuel_type has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$p6_national_administrative_power has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$q_power_to_weight_ratio has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$s1_seatingCapacity has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$s2_standing_capacity has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$u1_stationary_noise_level has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$u2_motor_speed has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$v7_co2_emission has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$v9_environmental_category has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$x1_first_technical_inspection_date has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$y1_regional_tax has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$y2_professional_tax has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$y3_ecological_tax has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$y4_management_tax has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$y5_forwarding_expenses_tax has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$y6_total_price_vehicle_registration has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$z1_specific_details has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$z2_specific_details has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$z3_specific_details has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$z4_specific_details has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: class/registrationcertificatefr.class.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Property DolicarPdfRender\:\:\$black has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Property DolicarPdfRender\:\:\$border has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Property DolicarPdfRender\:\:\$gray has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Property DolicarPdfRender\:\:\$light has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Property DolicarPdfRender\:\:\$navy has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Property DolicarPdfRender\:\:\$white has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Property DolicarPdfRender\:\:\$zebra has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
+
+		-
+			message: '#^Call to an undefined method Translate\:\:loadLangs\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/livretentretien/pdf_livretentretien.modules.php
+
+		-
+			message: '#^Parameter \#2 \$sourcetype of method CommonObject\:\:fetchObjectLinked\(\) expects string, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/livretentretien/pdf_livretentretien.modules.php
+
+		-
+			message: '#^Parameter \#4 \$targettype of method CommonObject\:\:fetchObjectLinked\(\) expects string, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/livretentretien/pdf_livretentretien.modules.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclelogbookdocument.modules.php
+
+		-
+			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclelogbookdocument.modules.php
+
+		-
+			message: '#^Call to an undefined method Translate\:\:loadLangs\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclelogbookdocument.modules.php
+
+		-
+			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclelogbookdocument.modules.php
+
+		-
+			message: '#^Call to an undefined method Translate\:\:loadLangs\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclephotossheet.modules.php
+
+		-
+			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclephotossheet.modules.php
+
+		-
+			message: '#^Call to an undefined method Translate\:\:loadLangs\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclestatesheet.modules.php
+
+		-
+			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclestatesheet.modules.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$boxes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$config_page_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$conflictwith\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$const\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$const_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$cronjobs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$db\.$#'
+			identifier: property.notFound
+			count: 28
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$depends\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$descriptionlong\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$dictionaries\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$dirs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$editor_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$error\.$#'
+			identifier: property.notFound
+			count: 2
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$errors\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$family\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$familyinfo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$hidden\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$langfiles\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$max_dolibarr_version\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$menu\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$module_parts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$module_position\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$need_dolibarr_version\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$phpmin\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$picto\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$requiredby\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$rights\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$rights_class\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$tabs\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$warnings_activation\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Access to an undefined property modDoliCar\:\:\$warnings_activation_ext\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Call to an undefined method modDoliCar\:\:_init\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Call to an undefined method modDoliCar\:\:_load_tables\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Parameter \#1 \$invoice of function dolicar_push_invoice_to_vehicle_history expects Facture, CommonObject given\.$#'
+			identifier: argument.type
+			count: 1
+			path: core/triggers/interface_99_modDoliCar_DoliCarTriggers.class.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(int              \< 0 if KO, 0 when the invoice carries no vehicle or is already in the history, event ID otherwise\)\: Unexpected token "if", expected ''\>'' at offset 741 on line 13$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: lib/dolicar_registrationcertificatefr.lib.php
+
+		-
+			message: '#^Access to an undefined property User\:\:\$firstname\.$#'
+			identifier: property.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to an undefined property User\:\:\$lastname\.$#'
+			identifier: property.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to constant STATUS_DRAFT on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to constant STATUS_LOCKED on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to constant STATUS_LOCKED on an unknown class Sheet\.$#'
+			identifier: class.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$control_date on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 2
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$entity on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 2
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$error on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$errors on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$fk_sheet on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 2
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$fk_user_controller on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 2
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$label on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 2
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$status on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 2
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Access to property \$track_id on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Call to an undefined method User\:\:fetch\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Call to method add_object_linked\(\) on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Call to method create\(\) on an unknown class Control\.$#'
+			identifier: class.notFound
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Class User constructor invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 4
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Instantiated class Control not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Parameter \#1 \$extralabels of method ExtraFields\:\:setOptionalsFromPost\(\) expects null, array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Parameter \#1 \$objectDocument of method pdf_vehiclestatesheet\:\:write_file\(\) expects SaturneDocuments, RegistrationCertificateFr given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Parameter \#3 \$newmask of function dol_move expects string, int given\.$#'
+			identifier: argument.type
+			count: 3
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Property User\:\:\$rights \(stdClass\) in empty\(\) is not falsy\.$#'
+			identifier: empty.property
+			count: 1
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Variable \$signatory might not be defined\.$#'
+			identifier: variable.undefined
+			count: 12
+			path: public/agenda/public_vehicle_logbook.php
+
+		-
+			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: view/dolicartools.php
+
+		-
+			message: '#^Property Societe\:\:\$code_client \(string\|null\) does not accept int\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: view/registrationcertificatefr/quickcreation.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: view/registrationcertificatefr/quickcreation.php
+
+		-
+			message: '#^Access to constant STATUS_LOCKED on an unknown class Sheet\.$#'
+			identifier: class.notFound
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Call to method fetchAll\(\) on an unknown class Sheet\.$#'
+			identifier: class.notFound
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Instantiated class Sheet not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Parameter \#10 \$disabled of static method Form\:\:selectarray\(\) expects int\<0, 1\>, '''' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Parameter \#12 \$param of function saturne_show_documents expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Parameter \#5 \$key_in_label of static method Form\:\:selectarray\(\) expects int\<0, 1\>, '''' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Parameter \#6 \$value_as_key of static method Form\:\:selectarray\(\) expects int\<0, 1\>, '''' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Parameter \#8 \$translate of static method Form\:\:selectarray\(\) expects int\<0, 1\>, '''' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Parameter \#9 \$maxlen of static method Form\:\:selectarray\(\) expects int\<0, max\>, '''' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_card.php
+
+		-
+			message: '#^Offset ''a_registration…''\|''b_first…''\|''c1_owner_fullname''\|''d1_vehicle_brand''\|''d21_vehicle_cnit''\|''d2_vehicle_type''\|''d3_vehicle_model''\|''e_vehicle_serial…''\|''fk_product''\|''fk_project''\|''fk_soc''\|''i_vehicle…''\|''p1_cylinder_capacity''\|''p3_fuel_type''\|''p6_national…''\|''s1_seating_capacity''\|''status''\|''v7_co2_emission'' on array\{a_registration_number\: array\{type\: ''plate'', required\: true, label\: ''RegistrationNumber'', csvheader\: ''immatriculation'', aliases\: array\{''plaque'', ''registrationnumber'', ''ref''\}\}, d1_vehicle_brand\: array\{type\: ''string'', required\: false, label\: ''VehicleBrand'', csvheader\: ''marque'', aliases\: array\{''brand'', ''d1''\}\}, d2_vehicle_type\: array\{type\: ''string'', required\: false, label\: ''VehicleType'', csvheader\: ''type'', aliases\: array\{''d2''\}\}, d21_vehicle_cnit\: array\{type\: ''string'', required\: false, label\: ''VehicleCNIT'', csvheader\: ''cnit'', aliases\: array\{''d21''\}\}, d3_vehicle_model\: array\{type\: ''string'', required\: false, label\: ''VehicleModel'', csvheader\: ''modele'', aliases\: array\{''model'', ''d3''\}\}, e_vehicle_serial_number\: array\{type\: ''string'', required\: false, label\: ''VehicleSerialNumber'', csvheader\: ''vin'', aliases\: array\{''numerodeserie'', ''serial'', ''chassis''\}\}, b_first_registration_date\: array\{type\: ''date'', required\: false, label\: ''FirstRegistrationDa…'', csvheader\: ''date_premiere…'', aliases\: array\{''date1ereimmatricula…'', ''datepremierecircula…''\}\}, i_vehicle_registration_date\: array\{type\: ''date'', required\: false, label\: ''VehicleRegistration…'', csvheader\: ''date_immatriculation'', aliases\: array\{''datecartegrise''\}\}, \.\.\.\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_import.php
+
+		-
+			message: '#^Offset ''created''\|''error''\|''skipped''\|''updated'' on array\{created\: non\-falsy\-string, updated\: non\-falsy\-string, skipped\: non\-falsy\-string, error\: non\-falsy\-string\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_import.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$fk_project \(int\|null\) does not accept float\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_import.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$fk_project \(int\|null\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_import.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$status \(int\) does not accept float\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_import.php
+
+		-
+			message: '#^Property RegistrationCertificateFr\:\:\$status \(int\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_import.php
+
+		-
+			message: '#^Loose comparison using \=\= between '''' and ''pwa'' will always evaluate to false\.$#'
+			identifier: equal.alwaysFalse
+			count: 2
+			path: view/registrationcertificatefr/registrationcertificatefr_list.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 2
+			path: view/registrationcertificatefr/registrationcertificatefr_list.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: view/registrationcertificatefr/registrationcertificatefr_list.php

@@ -38,7 +38,7 @@ require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
-require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
+dol_include_once('/digiquali/class/control.class.php');
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
@@ -161,9 +161,11 @@ $iconMap = [
     'Accident'           => 'fa-exclamation-triangle',
     'Autre'              => 'fa-circle',
 ];
-$iconMap[$langs->transnoentities('ReportedProblem')] = 'fa-exclamation-triangle';
-$iconMap['Réparation']                               = 'fa-wrench';
-$iconMap[$langs->transnoentities('Repair')]          = 'fa-wrench';
+$iconMap[$langs->transnoentities('ReportedProblem')]     = 'fa-exclamation-triangle';
+$iconMap['Réparation']                                   = 'fa-wrench';
+$iconMap[$langs->transnoentities('Repair')]              = 'fa-wrench';
+$iconMap[$langs->transnoentities('VehicleInvoiceEvent')] = 'fa-file-invoice-dollar';
+$iconMap[$langs->transnoentities('Trip')]               = 'fa-route';
 
 // Load child categories and build display structures for the TPL
 $catById   = [];
@@ -221,6 +223,22 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
             if (!$matched && !empty($evt->code) && strpos($evt->code, '_ADD_REPAIR') !== false) {
                 $eventsList[]               = $evt;
                 $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('Repair'), 'color' => '3B82F6'];
+                $matched                    = true;
+            }
+
+            // Invoices pushed automatically on validation carry no DoliCar category either (issue #464)
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_VEHICLE_INVOICE') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('VehicleInvoiceEvent'), 'color' => '8B5CF6'];
+                $matched                    = true;
+            }
+
+            // Trips recorded from the public logbook. They were left out of this tab, which made the
+            // mileage they carry unreachable from the back office: correcting a typo meant editing the
+            // event by hand in the agenda.
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_ADD_PUBLIC_VEHICLE_LOG_BOOK') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('Trip'), 'color' => '10B981'];
             }
         }
     }
@@ -229,6 +247,68 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
 /*
  * Actions
  */
+
+// Correct a mileage that was mistyped, on a trip as on any other event of this vehicle. A
+// correction is never silent: the reason is required and written into the note of the event, with
+// who did it and what the figure was before, so the history explains itself later.
+if ($action == 'save_mileage' && !empty($permissiontoadd) && !empty($object->fk_lot) && $object->fk_lot > 0) {
+    $mileageEventId = GETPOSTINT('mileage_event_id');
+    $mileageReason  = trim(GETPOST('mileage_reason', 'restricthtml'));
+
+    $mileageEvent = new ActionComm($db);
+    if ($mileageEventId <= 0 || $mileageEvent->fetch($mileageEventId) <= 0
+        || $mileageEvent->elementtype !== 'productlot' || (int) $mileageEvent->fk_element !== (int) $object->fk_lot) {
+        // An event of another vehicle must not be reachable by typing its id in the URL
+        setEventMessages($langs->transnoentities('ErrorRecordNotFound'), null, 'errors');
+    } elseif ($mileageReason === '') {
+        setEventMessages($langs->transnoentities('MileageCorrectionReasonRequired'), null, 'errors');
+    } else {
+        $mileageEvent->fetch_optionals();
+
+        // A trip carries both figures, any other event only the first one
+        $changes = [];
+        foreach (['starting_mileage' => 'StartingMileage', 'arrival_mileage' => 'ArrivalMileage'] as $field => $labelKey) {
+            if (!GETPOSTISSET('mileage_' . $field)) {
+                continue;
+            }
+            $oldValue = (int) ($mileageEvent->array_options['options_' . $field] ?? 0);
+            $newValue = GETPOSTINT('mileage_' . $field);
+            if ($newValue === $oldValue) {
+                continue;
+            }
+            $mileageEvent->array_options['options_' . $field] = $newValue;
+            $changes[] = $langs->transnoentities($labelKey) . ' : '
+                . ($oldValue > 0 ? price($oldValue, 0, '', 1, 0) . ' km' : '-') . ' → '
+                . ($newValue > 0 ? price($newValue, 0, '', 1, 0) . ' km' : '-');
+        }
+
+        if (empty($changes)) {
+            setEventMessages($langs->transnoentities('MileageUnchanged'), null, 'warnings');
+        } else {
+            $trace  = '<br><strong>' . dol_print_date(dol_now(), 'dayhour') . ' - ' . dol_escape_htmltag($user->getFullName($langs)) . '</strong>';
+            $trace .= '<br>' . $langs->transnoentities('MileageCorrected') . ' : ' . implode(' / ', $changes);
+            $trace .= '<br>' . $langs->transnoentities('MileageCorrectionReason') . ' : ' . dol_escape_htmltag($mileageReason);
+
+            $mileageEvent->note_private = (string) $mileageEvent->note_private . $trace;
+
+            $db->begin();
+            $saved = true;
+            foreach (['starting_mileage', 'arrival_mileage'] as $field) {
+                if (GETPOSTISSET('mileage_' . $field) && $mileageEvent->updateExtraField($field) < 0) {
+                    $saved = false;
+                }
+            }
+            if ($saved && $mileageEvent->update($user) > 0) {
+                $db->commit();
+                setEventMessages($langs->transnoentities('MileageCorrectedConfirm'), []);
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
+                exit;
+            }
+            $db->rollback();
+            setEventMessages($mileageEvent->error, $mileageEvent->errors, 'errors');
+        }
+    }
+}
 
 if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object->fk_lot) && $object->fk_lot > 0) {
     $error           = 0;

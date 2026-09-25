@@ -81,8 +81,8 @@ ProjectQuickCreationDescription     = Cette option permet de créer rapidement u
 
 # Public interface - Interface publique
 OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
-MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
-MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
+MaxArrivalMileage            = Seuil d'alerte du kilométrage d'arrivée
+MaxArrivalMileageDescription = Cette option permet de configurer le nombre de kilomètres parcourus à partir duquel un avertissement est affiché au conducteur lors de l'enregistrement d'un retour dans le carnet de bord d'un véhicule. La saisie reste possible au-delà de ce seuil. <br> (par défaut 1000 km)
 
 # Setup - Réglages
 ImmatriculationAPIConfig          = Configuration de l'API
@@ -128,6 +128,14 @@ AccessVehicleSheet              = Accéder à la fiche du véhicule
 ProblemReportConfig             = Signalement de problème
 ProblemReportEmail              = Email du responsable
 ProblemReportEmailDesc          = Adresse à laquelle les signalements de problème du carnet de bord public sont envoyés. Si vide, l'email de la société est utilisé.
+ProblemReportEmailTemplate      = Modèle d'email
+ProblemReportEmailTemplateDesc  = Modèle utilisé pour le mail envoyé au responsable. Si aucun modèle n'est choisi, le message par défaut du module est envoyé.
+SeeEmailTemplates               = Voir les modèles d'emails
+AvailableSubstitutions          = Substitutions disponibles
+ProblemReportEmailTemplateLabel = Signalement de problème (carnet de bord public)
+# Sans %s : ces deux cles alimentent le modele d'email, ou la substitution __(Cle)__ ne passe pas d'argument
+ProblemReportEmailSubjectTemplate = Problème signalé - véhicule
+ProblemReportEmailIntroTemplate   = Un problème a été signalé sur ce véhicule via le carnet de bord public.
 
 # Fiels - Champs
 RegistrationNumber            = Numéro d'immatriculation (A)
@@ -218,6 +226,7 @@ LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les c
 # Public interface - Interface publique
 PublicVehicleLogBook          = Carnet de bord publique du véhicule
 Driver                        = Conducteur
+ReturnedBy                    = Rendu par
 DriverName                    = Nom du conducteur
 StartDateAndHour              = Date et heure de départ
 StartingMileage               = Kilométrage de départ
@@ -251,6 +260,10 @@ DriverInternal               = Utilisateur interne
 DriverExternal               = Externe
 SelectContact                = Sélectionner un contact
 SelectAThirdPartyFirst       = Choisir d'abord un tiers
+LinkedThirdParty             = Client / Tiers
+ExistingThirdParty           = Tiers existant
+NewThirdParty                = Nouveau tiers
+OrCreateNewThirdParty        = Ou créer un nouveau tiers
 RegistrationCertificatesList = Liste des cartes grises
 NoRegistrationCertificate    = Aucune carte grise
 BottomBarVehiclesList        = Cartes grises
@@ -372,6 +385,21 @@ SuppliersInvoices              = Factures fournisseurs
 Controls                       = Contrôles DigiQuali
 DolicarVehicleEventCategory    = DoliCar Véhicule Événement
 VehicleEventLinkableDocuments  = Documents liables aux événements véhicule
+VehicleInvoiceEvent            = Facture
+VehicleInvoiceEventLabel       = Facture %s établie sur le véhicule
+Trip                           = Trajet
+
+# Correction de kilométrage depuis l'historique du véhicule
+CorrectMileage                  = Corriger le kilométrage
+MileageCorrectionReason         = Motif de la correction
+MileageCorrectionReasonRequired = Indiquez le motif de la correction du kilométrage
+MileageCorrected                = Kilométrage corrigé
+MileageCorrectedConfirm         = Kilométrage corrigé, le motif a été ajouté à la note de l'événement
+MileageUnchanged                = Le kilométrage n'a pas changé, rien n'a été enregistré
+PushInvoicesToVehicleHistory       = Remontée des factures dans l'historique
+PushInvoicesToVehicleHistoryButton = Remonter les factures existantes
+PushInvoicesToVehicleHistoryHelp   = À la validation d'une facture, celle-ci est ajoutée automatiquement à l'historique du véhicule renseigné dessus, avec son kilométrage. Ce bouton traite les factures déjà validées avant l'activation de cette remontée.
+InvoicesPushedToVehicleHistory     = %s facture(s) remontée(s) dans l'historique des véhicules
 VehicleEventLinkableDocumentHelp = Si activé, ce type de document peut être lié lors de l''ajout d''un événement dans l''historique du véhicule.
 ErrorUpdateCarBrandsFromApi = Erreur lors de la mise à jour des marques depuis l''API : %s
 ErrorUpdateCarBrandsFromApiBadResponse = Réponse invalide de l''API lors de la mise à jour des marques

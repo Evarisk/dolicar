@@ -786,8 +786,9 @@
       letter-spacing: 0.5px;
     }
 
+    // Sits above the field, so its spacing goes underneath it
     .plv2-km-hint {
-      margin-top: 6px;
+      margin-bottom: 6px;
       font-size: 11px;
       color: #5b6470;
       text-align: center;

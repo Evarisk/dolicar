@@ -317,17 +317,44 @@ if (empty($resHook)) {
         }
         if (!empty($sendTo)) {
             $from        = getDolGlobalString('MAIN_MAIL_EMAIL_FROM');
+            $vehicleLabel = trim($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model);
             $vehicleLink = dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 2) . '?id=' . (int) $registrationCertificateFR->id;
             $subject     = $langs->transnoentities('ProblemReportEmailSubject', $registrationCertificateFR->a_registration_number);
 
             $body  = '<p>' . $langs->transnoentities('ProblemReportEmailIntro', $registrationCertificateFR->a_registration_number) . '</p>';
             $body .= '<ul>';
             $body .= '<li>' . $langs->transnoentities('RegistrationPlate') . ' : <strong>' . dol_escape_htmltag($registrationCertificateFR->a_registration_number) . '</strong></li>';
-            $body .= '<li>' . $langs->transnoentities('Vehicle') . ' : ' . dol_escape_htmltag($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model) . '</li>';
+            $body .= '<li>' . $langs->transnoentities('Vehicle') . ' : ' . dol_escape_htmltag($vehicleLabel) . '</li>';
             $body .= '<li>' . $langs->transnoentities('Date') . ' : ' . dol_print_date(dol_now(), 'dayhour') . '</li>';
             $body .= '<li>' . $langs->transnoentities('Comment') . ' : ' . dol_escape_htmltag($comment) . '</li>';
             $body .= '</ul>';
             $body .= '<p><a href="' . $vehicleLink . '">' . $langs->transnoentities('AccessVehicleSheet') . '</a></p>';
+
+            // An email template chosen in the module setup wins over the message above (issue #492).
+            // Its topic and content go through the standard Dolibarr substitutions, so a template can
+            // also use __(TranslationKey)__ and __[CONSTANT]__ on top of the tokens added here.
+            $problemTemplateId = getDolGlobalInt('DOLICAR_PROBLEM_REPORT_EMAIL_TEMPLATE');
+            if ($problemTemplateId > 0) {
+                // Read the row directly: CEmailTemplate::fetch() adds "AND t.label = ''" to its where
+                // clause when called without a label, so fetching by id alone never returns anything.
+                $sqlTemplate  = 'SELECT topic, content FROM ' . MAIN_DB_PREFIX . 'c_email_templates';
+                $sqlTemplate .= ' WHERE rowid = ' . ((int) $problemTemplateId) . " AND type_template = 'dolicar_problem_report' AND active = 1";
+                $sqlTemplate .= ' AND entity IN (' . getEntity('c_email_templates') . ')';
+
+                $resqlTemplate   = $db->query($sqlTemplate);
+                $problemTemplate = $resqlTemplate ? $db->fetch_object($resqlTemplate) : null;
+                if (!empty($problemTemplate)) {
+                    $substitutions = getCommonSubstitutionArray($langs);
+                    $substitutions['__VEHICLE_PLATE__']   = dol_escape_htmltag($registrationCertificateFR->a_registration_number);
+                    $substitutions['__VEHICLE_LABEL__']   = dol_escape_htmltag($vehicleLabel);
+                    $substitutions['__PROBLEM_DATE__']    = dol_print_date(dol_now(), 'dayhour');
+                    $substitutions['__PROBLEM_COMMENT__'] = dol_escape_htmltag($comment);
+                    $substitutions['__VEHICLE_URL__']     = $vehicleLink;
+
+                    $subject = make_substitutions($problemTemplate->topic, $substitutions, $langs);
+                    $body    = make_substitutions($problemTemplate->content, $substitutions, $langs);
+                }
+            }
 
             $mailFile = new CMailFile($subject, $sendTo, $from, $body, $attachmentPaths, $attachmentMimes, $attachmentNames, '', '', 0, 1);
             $mailFile->sendfile();
@@ -492,13 +519,18 @@ if (empty($resHook)) {
 
             $actionCommID = $actionComm->create($user);
         } else {
-            $lastUnfinishedActionComm[0]->datef         = dol_stringtotime(GETPOST('end_date_and_hour'));
+            $lastUnfinishedActionComm[0]->datef = dol_stringtotime(GETPOST('end_date_and_hour'));
+
+            // Whoever brings the vehicle back is not always the one who took it: the return screen
+            // asks again, and the answer is kept beside the departure driver rather than over it.
+            $lastUnfinishedActionComm[0]->note_private .= !empty($driverName) ? '<br>' . $langs->transnoentities('ReturnedBy') . ' : ' . $driverName : '';
             $lastUnfinishedActionComm[0]->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? '<br>' . $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
 
             $lastUnfinishedActionComm[0]->array_options['options_arrival_mileage'] = GETPOST('options_arrival_mileage');
             $lastUnfinishedActionComm[0]->updateExtraField('arrival_mileage');
 
             $existingJson = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'] ?? '{}', true);
+            $existingJson['return_driver']     = $driverName;
             $existingJson['return_fuel_level'] = GETPOST('options_fuel_level', 'alpha');
             $existingJson['end_comment']       = GETPOST('end_comment', 'restricthtml');
             $lastUnfinishedActionComm[0]->array_options['options_json'] = json_encode($existingJson);
@@ -510,7 +542,9 @@ if (empty($resHook)) {
         if ($publicInterfaceUseSignatory && (isset($actionCommID) || isset($lastUnfinishedActionComm[0]))) {
             $signatory->status    = SaturneSignature::STATUS_SIGNED;
             $signatory->role      = $langs->transnoentities('Driver');
-            $signatory->firstname = $lastUnfinishedActionCommJSON['driver'] ?? $driverName;
+            // The signature belongs to whoever is standing there: on a return that is the person
+            // bringing the vehicle back, who is not always the one the departure recorded
+            $signatory->firstname = !empty($driverName) ? $driverName : ($lastUnfinishedActionCommJSON['driver'] ?? '');
 
             $signatory->signature_date = dol_now();
             // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,

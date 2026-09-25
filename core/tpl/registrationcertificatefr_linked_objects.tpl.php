@@ -36,9 +36,9 @@ require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
 // Load DigiQuali libraries if enabled
 $digiqualiEnabled = isModEnabled('digiquali');
 if ($digiqualiEnabled) {
-    require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
-    require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/survey.class.php';
-    require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/sheet.class.php';
+    dol_include_once('/digiquali/class/control.class.php');
+    dol_include_once('/digiquali/class/survey.class.php');
+    dol_include_once('/digiquali/class/sheet.class.php');
 }
 
 // Load commercial document classes to list linked invoices/proposals and sum their amounts

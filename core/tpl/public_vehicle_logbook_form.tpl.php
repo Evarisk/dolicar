@@ -52,44 +52,43 @@ $isDepart = ($actionType === 'depart');
     <input type="hidden" name="action_type" value="<?php echo dol_escape_htmltag($actionType); ?>">
 
     <div class="plv2-form">
-        <!-- Identité -->
-        <?php if ($isDepart) : ?>
-            <div class="plv2-card">
-                <h3><i class="fas fa-user"></i> <?php echo $langs->trans('Driver'); ?> <span class="plv2-req">*</span></h3>
+        <!-- Identité : au départ celui qui prend le véhicule, au retour celui qui le rend, qui
+             n'est pas toujours le même. Les deux écrans postent les mêmes champs. -->
+        <div class="plv2-card">
+            <h3><i class="fas fa-user"></i> <?php echo $isDepart ? $langs->trans('Driver') : $langs->trans('ReturnedBy'); ?> <span class="plv2-req">*</span></h3>
 
-                <div class="plv2-seg" id="plv2-driver-type">
-                    <button type="button" class="plv2-seg__btn active" data-type="internal">
-                        <i class="fas fa-user-tie"></i> <?php echo $langs->trans('DriverInternal'); ?>
-                    </button>
-                    <button type="button" class="plv2-seg__btn" data-type="external">
-                        <i class="fas fa-user-friends"></i> <?php echo $langs->trans('DriverExternal'); ?>
-                    </button>
+            <div class="plv2-seg" id="plv2-driver-type">
+                <button type="button" class="plv2-seg__btn active" data-type="internal">
+                    <i class="fas fa-user-tie"></i> <?php echo $langs->trans('DriverInternal'); ?>
+                </button>
+                <button type="button" class="plv2-seg__btn" data-type="external">
+                    <i class="fas fa-user-friends"></i> <?php echo $langs->trans('DriverExternal'); ?>
+                </button>
+            </div>
+            <input type="hidden" name="driver_type" id="plv2-driver-type-value" value="internal">
+
+            <!-- Conducteur interne -->
+            <div class="plv2-form-group" id="plv2-driver-internal">
+                <?php echo $form->select_dolusers($preselectedDriverId, 'driver_user_id', 1, null, 0, '', '', (string) $conf->entity); ?>
+            </div>
+
+            <!-- Conducteur externe : tiers puis contact -->
+            <div id="plv2-driver-external" style="display: none;">
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('ThirdParty'); ?></label>
+                    <?php
+                    dolicarGrantThirdpartyView($user);
+                    // forcecombo=0 so Dolibarr attaches its native select2 (full list rendered inline,
+                    // no server-side autocomplete which would fail on this public page).
+                    echo $form->select_thirdparty_list(0, 'driver_socid', '', '1', 0, 0, [], '', 0, 0, '', '', false, [], 0);
+                    ?>
                 </div>
-                <input type="hidden" name="driver_type" id="plv2-driver-type-value" value="internal">
-
-                <!-- Conducteur interne -->
-                <div class="plv2-form-group" id="plv2-driver-internal">
-                    <?php echo $form->select_dolusers($preselectedDriverId, 'driver_user_id', 1, null, 0, '', '', (string) $conf->entity); ?>
-                </div>
-
-                <!-- Conducteur externe : tiers puis contact -->
-                <div id="plv2-driver-external" style="display: none;">
-                    <div class="plv2-form-group">
-                        <label><?php echo $langs->trans('ThirdParty'); ?></label>
-                        <?php
-                        dolicarGrantThirdpartyView($user);
-                        // forcecombo=0 so Dolibarr attaches its native select2 (full list rendered inline,
-                        // no server-side autocomplete which would fail on this public page).
-                        echo $form->select_thirdparty_list(0, 'driver_socid', '', '1', 0, 0, [], '', 0, 0, '', '', false, [], 0);
-                        ?>
-                    </div>
-                    <div class="plv2-form-group">
-                        <label><?php echo $langs->trans('Contact'); ?></label>
-                        <?php echo $form->selectcontacts(-1, '', 'driver_contact_id', 1); ?>
-                    </div>
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('Contact'); ?></label>
+                    <?php echo $form->selectcontacts(-1, '', 'driver_contact_id', 1); ?>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
 
         <!-- Date / Heure + Kilométrage (compacté sur 2 colonnes) -->
         <div class="plv2-card-row">
@@ -113,8 +112,15 @@ $isDepart = ($actionType === 'depart');
                         <?php echo $isDepart ? $langs->trans('StartingMileage') : $langs->trans('ArrivalMileage'); ?>
                         <span class="plv2-req">*</span>
                     </label>
+                    <?php // The mileage to beat is read before typing, not after: it sits above the field,
+                          // where the eye already is when the keyboard covers the bottom of the screen ?>
                     <?php if ($isDepart) :
                         $minKm = $lastArrivalMileage ?? 0; ?>
+                        <?php if ($minKm > 0) : ?>
+                            <div class="plv2-km-hint">
+                                <?php echo $langs->trans('LastKnownMileage'); ?> : <strong><?php echo number_format($minKm, 0, ',', ' ') . ' km'; ?></strong>
+                            </div>
+                        <?php endif; ?>
                         <input type="number"
                                name="options_starting_mileage"
                                class="plv2-km-input"
@@ -122,28 +128,21 @@ $isDepart = ($actionType === 'depart');
                                value="<?php echo $minKm > 0 ? $minKm : ''; ?>"
                                placeholder="000000"
                                required>
-                        <?php if ($minKm > 0) : ?>
-                            <div class="plv2-km-hint">
-                                <?php echo $langs->trans('LastKnownMileage'); ?> : <strong><?php echo number_format($minKm, 0, ',', ' ') . ' km'; ?></strong>
-                            </div>
-                        <?php endif; ?>
                     <?php else :
-                        $startKm    = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
-                        $minKmRetour = $startKm > 0 ? $startKm : 0;
-                        $maxKmRetour = $startKm + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>
-                        <input type="number"
-                               name="options_arrival_mileage"
-                               class="plv2-km-input"
-                               min="<?php echo $minKmRetour; ?>"
-                               max="<?php echo $maxKmRetour; ?>"
-                               value="<?php echo $startKm > 0 ? $startKm : ''; ?>"
-                               placeholder="000000"
-                               required>
+                        $startKm     = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
+                        $minKmRetour = $startKm > 0 ? $startKm : 0; ?>
                         <?php if ($startKm > 0) : ?>
                             <div class="plv2-km-hint">
                                 <?php echo $langs->trans('DepartureMileage'); ?> : <strong><?php echo number_format($startKm, 0, ',', ' ') . ' km'; ?></strong>
                             </div>
                         <?php endif; ?>
+                        <input type="number"
+                               name="options_arrival_mileage"
+                               class="plv2-km-input"
+                               min="<?php echo $minKmRetour; ?>"
+                               value="<?php echo $startKm > 0 ? $startKm : ''; ?>"
+                               placeholder="000000"
+                               required>
                     <?php endif; ?>
                 </div>
             </div>

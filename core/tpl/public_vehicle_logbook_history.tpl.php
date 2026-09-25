@@ -64,6 +64,10 @@ $historyUrl = $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . urlencode($enti
                 $acKmEnd           = $ac->array_options['options_arrival_mileage'] ?? null;
                 $acFuelLevel       = $acJson['fuel_level'] ?? null;
                 $acReturnFuelLevel = $acJson['return_fuel_level'] ?? null;
+                // Only named when it is not the driver of the departure: repeating the same name
+                // on both rows would say nothing
+                $acReturnDriver    = $acJson['return_driver'] ?? '';
+                $acReturnDriver    = ($acReturnDriver !== '' && $acReturnDriver !== $acDriver) ? $acReturnDriver : '';
                 $acStartComment    = $acJson['start_comment'] ?? null;
                 $acEndComment      = $acJson['end_comment'] ?? null;
             ?>
@@ -111,6 +115,11 @@ $historyUrl = $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . urlencode($enti
                                 <span class="plv2-history-item__fuel">
                                     <i class="fas <?php echo $fuelIcons[$acReturnFuelLevel]; ?>"></i>
                                     <?php echo $fuelLabels[$acReturnFuelLevel]; ?>
+                                </span>
+                            <?php endif; ?>
+                            <?php if (!empty($acReturnDriver)) : ?>
+                                <span class="plv2-history-item__driver">
+                                    <i class="fas fa-user-circle"></i> <?php echo dol_escape_htmltag($acReturnDriver); ?>
                                 </span>
                             <?php endif; ?>
                         </div>
