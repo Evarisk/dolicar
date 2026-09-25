@@ -103,9 +103,7 @@ if ($action == 'update') {
 	if (!$error) {
 		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
-	if ($action == 'update') {
-		$action = 'edit';
-	}
+	$action = 'edit';
 }
 elseif ($action == 'update_car_brands') {
     require_once __DIR__ . '/../class/registrationcertificatefr.class.php';
