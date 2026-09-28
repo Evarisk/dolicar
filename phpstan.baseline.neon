@@ -1103,3 +1103,38 @@ parameters:
 			identifier: booleanAnd.alwaysFalse
 			count: 1
 			path: view/registrationcertificatefr/registrationcertificatefr_list.php
+		-
+			message: '#^Loose comparison using \=\= between ''update'' and ''update'' will always evaluate to true\.$#'
+			identifier: equal.alwaysTrue
+			count: 1
+			path: admin/setup.php
+
+		-
+			message: '#^Cannot access property \$rowid on object\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: class/api_dolicar.class.php
+
+		-
+			message: '#^Property DolibarrModules\:\:\$menu \(1\|array\<array\{commentgroup\?\: string, mainmenu\: string, leftmenu\: string, langs\: string, enabled\: int\|string, target\: string, titre\: string, user\: int, \.\.\.\}\>\) does not accept non\-empty\-array\<array\{commentgroup\?\: string, mainmenu\: string, leftmenu\: string, langs\: string, enabled\: int\|string, target\: string, titre\: string, user\: int, \.\.\.\}\|array\{fk_menu\: '''', type\: ''top'', titre\: ''DoliCar'', prefix\: ''\<i class\="fas fa…'', mainmenu\: ''dolicar'', leftmenu\: '''', url\: ''/dolicar…'', langs\: ''dolicar@dolicar'', \.\.\.\}\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: core/modules/modDoliCar.class.php
+
+		-
+			message: '#^Parameter \#4 \$month of function dol_mktime expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: view/registrationcertificatefr/quickcreation.php
+
+		-
+			message: '#^Parameter \#5 \$day of function dol_mktime expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: view/registrationcertificatefr/quickcreation.php
+
+		-
+			message: '#^Parameter \#6 \$year of function dol_mktime expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: view/registrationcertificatefr/quickcreation.php
