@@ -1,100 +1,10 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: admin/setup.php
-
-		-
 			message: '#^Access to constant STATUS_LOCKED on an unknown class Control\.$#'
 			identifier: class.notFound
 			count: 1
 			path: class/actions_dolicar.class.php
-
-		-
-			message: '#^Access to an undefined property User\:\:\$login\.$#'
-			identifier: property.notFound
-			count: 4
-			path: class/api_dolicar.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/api_dolicar.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:lasterror\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/api_dolicar.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:num_rows\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/api_dolicar.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:order\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/api_dolicar.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:plimit\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/api_dolicar.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/api_dolicar.class.php
-
-		-
-			message: '#^Call to an undefined method User\:\:hasRight\(\)\.$#'
-			identifier: method.notFound
-			count: 6
-			path: class/api_dolicar.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: class/dolicardashboard.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:jdate\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/dolicardashboard.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: class/dolicardashboard.class.php
-
-		-
-			message: '#^Call to an undefined method User\:\:fetch\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/dolicardashboard.class.php
-
-		-
-			message: '#^Call to an undefined method User\:\:getNomUrl\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/dolicardashboard.class.php
-
-		-
-			message: '#^Class User constructor invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: class/dolicardashboard.class.php
 
 		-
 			message: '#^Access to constant STATUS_LOCKED on an unknown class Control\.$#'
@@ -481,18 +391,6 @@ parameters:
 			path: class/registrationcertificatefr.class.php
 
 		-
-			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
-
-		-
 			message: '#^Property DolicarPdfRender\:\:\$black has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -535,12 +433,6 @@ parameters:
 			path: core/modules/dolicar/dolicardocuments/dolicar_pdf_document.php
 
 		-
-			message: '#^Call to an undefined method Translate\:\:loadLangs\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/dolicar/dolicardocuments/livretentretien/pdf_livretentretien.modules.php
-
-		-
 			message: '#^Parameter \#2 \$sourcetype of method CommonObject\:\:fetchObjectLinked\(\) expects string, null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -553,34 +445,10 @@ parameters:
 			path: core/modules/dolicar/dolicardocuments/livretentretien/pdf_livretentretien.modules.php
 
 		-
-			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclelogbookdocument.modules.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclelogbookdocument.modules.php
-
-		-
-			message: '#^Call to an undefined method Translate\:\:loadLangs\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclelogbookdocument.modules.php
-
-		-
 			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclelogbookdocument.modules.php
-
-		-
-			message: '#^Call to an undefined method Translate\:\:loadLangs\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclephotossheet.modules.php
 
 		-
 			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
@@ -589,226 +457,10 @@ parameters:
 			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclephotossheet.modules.php
 
 		-
-			message: '#^Call to an undefined method Translate\:\:loadLangs\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclestatesheet.modules.php
-
-		-
 			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: core/modules/dolicar/dolicardocuments/vehiclelogbookdocument/pdf_vehiclestatesheet.modules.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$boxes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$config_page_url\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$conflictwith\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$const\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$const_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$cronjobs\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$db\.$#'
-			identifier: property.notFound
-			count: 28
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$depends\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$description\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$descriptionlong\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$dictionaries\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$dirs\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$editor_url\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$error\.$#'
-			identifier: property.notFound
-			count: 2
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$errors\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$family\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$familyinfo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$hidden\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$langfiles\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$max_dolibarr_version\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$menu\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$module_parts\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$module_position\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$need_dolibarr_version\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$phpmin\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$picto\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$requiredby\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$rights\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$rights_class\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$tabs\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$warnings_activation\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Access to an undefined property modDoliCar\:\:\$warnings_activation_ext\.$#'
-			identifier: property.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Call to an undefined method modDoliCar\:\:_init\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
-
-		-
-			message: '#^Call to an undefined method modDoliCar\:\:_load_tables\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/modules/modDoliCar.class.php
 
 		-
 			message: '#^Parameter \#1 \$invoice of function dolicar_push_invoice_to_vehicle_history expects Facture, CommonObject given\.$#'
@@ -821,18 +473,6 @@ parameters:
 			identifier: phpDoc.parseError
 			count: 1
 			path: lib/dolicar_registrationcertificatefr.lib.php
-
-		-
-			message: '#^Access to an undefined property User\:\:\$firstname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: public/agenda/public_vehicle_logbook.php
-
-		-
-			message: '#^Access to an undefined property User\:\:\$lastname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: public/agenda/public_vehicle_logbook.php
 
 		-
 			message: '#^Access to constant STATUS_DRAFT on an unknown class Control\.$#'
@@ -907,12 +547,6 @@ parameters:
 			path: public/agenda/public_vehicle_logbook.php
 
 		-
-			message: '#^Call to an undefined method User\:\:fetch\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: public/agenda/public_vehicle_logbook.php
-
-		-
 			message: '#^Call to method add_object_linked\(\) on an unknown class Control\.$#'
 			identifier: class.notFound
 			count: 1
@@ -928,12 +562,6 @@ parameters:
 			message: '#^Class Productlot referenced with incorrect case\: ProductLot\.$#'
 			identifier: class.nameCase
 			count: 1
-			path: public/agenda/public_vehicle_logbook.php
-
-		-
-			message: '#^Class User constructor invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 4
 			path: public/agenda/public_vehicle_logbook.php
 
 		-
