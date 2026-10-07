@@ -452,7 +452,8 @@ class ActionsDoliCar
                         $langs->load('dolicar@dolicar');
 
                         print '<a class="tab" href="' . dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?id=' . $parameters['objectId'] . '&entity=' . $parameters['entity'], 1) . '">';
-                        print $langs->transnoentities('PublicVehicleLogBook');
+                        // Short label: the tab is an item of the bottom navigation of the public control page
+                        print '<i class="fas fa-car"></i> ' . $langs->transnoentities('VehicleLogBook');
                         print '</a>';
                     }
                 }
