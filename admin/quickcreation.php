@@ -86,7 +86,7 @@ $constArray[$moduleNameLowerCase] = [
     ]
 ];
 
-require_once __DIR__ . '/../../saturne/core/tpl/admin/object/object_const_view.tpl.php';
+require_once dol_buildpath('/saturne/core/tpl/admin/object/object_const_view.tpl.php');
 
 // Page end
 print dol_get_fiche_end();
