@@ -121,6 +121,7 @@ PhotoAndVoiceMemo               = Photo et mémo vocal
 SendReport                      = Envoyer le signalement
 ProblemReportSent               = Signalement envoyé
 ProblemReportSentDesc           = Le responsable a été prévenu par email.
+ProblemReportSentNoMailDesc     = Le signalement est enregistré dans l'historique du véhicule, mais le responsable n'a pas pu être prévenu par email : pensez à le contacter directement.
 ProblemReportedOnVehicle        = Problème signalé sur le véhicule %s
 ProblemReportEmailSubject       = Problème signalé - véhicule %s
 ProblemReportEmailIntro         = Un problème a été signalé sur le véhicule %s via le carnet de bord public.
