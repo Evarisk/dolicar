@@ -309,9 +309,11 @@ if (empty($resHook)) {
             }
         }
 
-        // Email the manager
+        // Email the manager. The confirmation screen only tells the driver the manager was warned
+        // when the email really left (issue #493): the report itself is saved either way.
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
-        $sendTo = getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL');
+        $problemMailSent = 0;
+        $sendTo          = getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL');
         if (empty($sendTo)) {
             $sendTo = getDolGlobalString('MAIN_INFO_SOCIETE_MAIL');
         }
@@ -357,13 +359,19 @@ if (empty($resHook)) {
             }
 
             $mailFile = new CMailFile($subject, $sendTo, $from, $body, $attachmentPaths, $attachmentMimes, $attachmentNames, '', '', 0, 1);
-            $mailFile->sendfile();
+            if ($mailFile->sendfile()) {
+                $problemMailSent = 1;
+            } else {
+                dol_syslog('public_vehicle_logbook.php: problem report email to ' . $sendTo . ' failed: ' . $mailFile->error, LOG_ERR);
+            }
+        } else {
+            dol_syslog('public_vehicle_logbook.php: problem report email not sent, neither DOLICAR_PROBLEM_REPORT_EMAIL nor the company email is set', LOG_WARNING);
         }
 
         // Clean the temp token + dir
         saturne_invalidate_upload_token($problemUploadContext, 'dolicar', 'problem_report');
 
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . $entity . '&success=1&problem=1');
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . $entity . '&success=1&problem=1&mailsent=' . $problemMailSent);
         exit;
     }
 
