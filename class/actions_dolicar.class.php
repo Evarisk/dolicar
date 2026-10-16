@@ -441,7 +441,7 @@ class ActionsDoliCar
                 }
 
                 if (!empty($linkedObjectParentData['class_path'])) {
-                    require_once DOL_DOCUMENT_ROOT . '/' . $linkedObjectParentData['class_path'];
+                    require_once dol_buildpath('/' . $linkedObjectParentData['class_path']);
 
                     $parentLinkedObject = new $linkedObjectParentData['class_name']($this->db);
 
