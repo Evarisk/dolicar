@@ -538,8 +538,12 @@ class ActionsDoliCar
         $link     = new Link($this->db);
         $ecmFiles = new EcmFiles($this->db);
 
-        // Only files shared through a link are downloadable from the public interface
-        $ecmFiles->fetchAll('', '', 0, 0, 't.share:isnot:null');
+        // Only files shared through a link are downloadable from the public interface, and only those of the
+        // registration certificates of the lot are wanted: the instance may share thousands of files
+        $certificateIds = array_map(function ($registrationCertificate) {
+            return (int) $registrationCertificate->id;
+        }, $registrationCertificates);
+        $ecmFiles->fetchAll('', '', 0, 0, "(t.share:isnot:null) AND (t.src_object_type:=:'" . $this->db->escape($registrationCertificateFr->table_element) . "') AND (t.src_object_id:in:" . implode(',', $certificateIds) . ")");
 
         $files = [];
         $links = [];
