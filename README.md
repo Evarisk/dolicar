@@ -3,7 +3,7 @@
 ## Informations
 
 - Numéro du module : 436380
-- Dernière mise à jour : 25/09/2026
+- Dernière mise à jour : 20/10/2026
 - Éditeur : [Evarisk](https://evarisk.com)
 - Thème : Eldy Menu
 - Licence : GPLv3
@@ -11,7 +11,7 @@
 
 ### Version
 
-- Version : 23.1.0
+- Version : 23.1.1
 - PHP : 7.4.33
 - Compatibilité : Dolibarr 23.0.0 - 24.0.0
 - Saturne Framework : 23.2.1
