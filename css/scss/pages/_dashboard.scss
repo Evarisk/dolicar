@@ -1,0 +1,17 @@
+// Dashboard — overdue technical controls: days past the expiry date, darker as the delay grows
+.dolicar-overdue-days {
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.85em;
+  font-weight: bold;
+
+  &--level1 { background: #E8A317; }
+  &--level2 { background: #E06C00; }
+  &--level3 { background: #C0392B; }
+  &--level4 { background: #8B0000; }
+}
+
+.dolicar-overdue-date {
+  color: #E05353;
+}

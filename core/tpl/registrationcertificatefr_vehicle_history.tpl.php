@@ -139,7 +139,8 @@ if (!empty($eventsList)) {
         $isTrip    = !empty($evt->code) && strpos($evt->code, '_ADD_PUBLIC_VEHICLE_LOG_BOOK') !== false;
         $kmArrival = (int) ($evt->array_options['options_arrival_mileage'] ?? 0);
         $editingKm = ($action == 'edit_mileage' && GETPOSTINT('event_id') === (int) $evt->id);
-        $badge   = '<span style="color:' . $color . ';font-weight:bold;"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';
+        // The colour of the category is data: it goes in a custom property, the look in the stylesheet
+        $badge   = '<span class="dolicar-event-type" style="--dolicar-event-color:' . $color . ';"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';
 
         $evt->fetchObjectLinked(null, null, null, null, 'OR', 1, 'sourcetype', 0);
         $linkedHtml = '';

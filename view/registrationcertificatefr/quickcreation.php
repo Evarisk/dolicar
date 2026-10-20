@@ -517,10 +517,10 @@ if ($step === 'search') {
         print '<input type="hidden" name="confirm_retry" value="1">';
     }
 
-    print '<div class="qc-form-row" style="grid-template-columns:120px 1fr;align-items:center">';
+    print '<div class="qc-form-row qc-form-row--plate">';
     print '<label>' . $langs->trans('LicencePlate') . '</label>';
-    print '<div class="qc-field-wrapper" style="max-width:320px">';
-    print '<i class="fas fa-id-card qc-field-icon" style="color:#b89a00"></i>';
+    print '<div class="qc-field-wrapper qc-field-wrapper--plate">';
+    print '<i class="fas fa-id-card qc-field-icon qc-plate-icon"></i>';
     print '<input type="text" class="qc-plate-input" name="a_registration_number" placeholder="AB-123-CD" maxlength="11" value="' . dol_escape_htmltag($plate) . '" autocomplete="off">';
     print '</div>';
     print '</div>'; // .qc-form-row
