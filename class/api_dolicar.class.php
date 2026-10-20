@@ -171,6 +171,9 @@ class Dolicar extends DolibarrApi
 
         for ($i = 0; $i < $num; $i++) {
             $obj = $this->db->fetch_object($result);
+            if (!$obj) {
+                continue;
+            }
 
             $certificate = new RegistrationCertificateFr($this->db);
             if ($certificate->fetch((int) $obj->rowid) > 0) {
