@@ -271,7 +271,21 @@ class ActionsDoliCar
 
             // Link to the DigiQuali public quality-control interface for the linked vehicle lot
             if (isModEnabled('digiquali')) {
-                $trackId          = base64_encode(json_encode(['type' => 'productlot', 'id' => (int) $object->fk_lot]));
+                // Signed track id when DigiQuali provides it: an unsigned one only opens the page for a logged in user, so a
+                // link copied and sent to a customer would end on a 404
+                $digiQualiControlLib = dol_buildpath('/digiquali/lib/digiquali_control.lib.php', 0);
+                if (is_file($digiQualiControlLib)) {
+                    require_once $digiQualiControlLib;
+                }
+                if (function_exists('digiquali_public_control_track_id')) {
+                    require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+
+                    $lot     = new Productlot($this->db);
+                    $lot->id = (int) $object->fk_lot;
+                    $trackId = digiquali_public_control_track_id($lot);
+                } else {
+                    $trackId = base64_encode(json_encode(['type' => 'productlot', 'id' => (int) $object->fk_lot]));
+                }
                 $publicControlUrl = dol_buildpath('/custom/digiquali/public/control/public_control_history.php', 1) . '?track_id=' . urlencode($trackId) . '&entity=' . (int) $conf->entity;
                 $this->resprints .= '<a href="' . dol_escape_htmltag($publicControlUrl) . '" target="_blank" class="dolicar-banner-link dolicar-public-control-link">';
                 $this->resprints .= img_picto('', 'digiquali_color@digiquali', 'class="dolicar-banner-logo"') . $langs->transnoentities('QualityControlInterface');
@@ -452,7 +466,8 @@ class ActionsDoliCar
                         $langs->load('dolicar@dolicar');
 
                         print '<a class="tab" href="' . dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?id=' . $parameters['objectId'] . '&entity=' . $parameters['entity'], 1) . '">';
-                        print $langs->transnoentities('PublicVehicleLogBook');
+                        // Short label: the tab is an item of the bottom navigation of the public control page
+                        print '<i class="fas fa-car"></i> ' . $langs->transnoentities('VehicleLogBook');
                         print '</a>';
                     }
                 }
@@ -537,8 +552,12 @@ class ActionsDoliCar
         $link     = new Link($this->db);
         $ecmFiles = new EcmFiles($this->db);
 
-        // Only files shared through a link are downloadable from the public interface
-        $ecmFiles->fetchAll('', '', 0, 0, 't.share:isnot:null');
+        // Only files shared through a link are downloadable from the public interface, and only those of the
+        // registration certificates of the lot are wanted: the instance may share thousands of files
+        $certificateIds = array_map(function ($registrationCertificate) {
+            return (int) $registrationCertificate->id;
+        }, $registrationCertificates);
+        $ecmFiles->fetchAll('', '', 0, 0, "(t.share:isnot:null) AND (t.src_object_type:=:'" . $this->db->escape($registrationCertificateFr->table_element) . "') AND (t.src_object_id:in:" . implode(',', $certificateIds) . ")");
 
         $files = [];
         $links = [];
