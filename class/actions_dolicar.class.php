@@ -271,7 +271,21 @@ class ActionsDoliCar
 
             // Link to the DigiQuali public quality-control interface for the linked vehicle lot
             if (isModEnabled('digiquali')) {
-                $trackId          = base64_encode(json_encode(['type' => 'productlot', 'id' => (int) $object->fk_lot]));
+                // Signed track id when DigiQuali provides it: an unsigned one only opens the page for a logged in user, so a
+                // link copied and sent to a customer would end on a 404
+                $digiQualiControlLib = dol_buildpath('/digiquali/lib/digiquali_control.lib.php', 0);
+                if (is_file($digiQualiControlLib)) {
+                    require_once $digiQualiControlLib;
+                }
+                if (function_exists('digiquali_public_control_track_id')) {
+                    require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+
+                    $lot     = new Productlot($this->db);
+                    $lot->id = (int) $object->fk_lot;
+                    $trackId = digiquali_public_control_track_id($lot);
+                } else {
+                    $trackId = base64_encode(json_encode(['type' => 'productlot', 'id' => (int) $object->fk_lot]));
+                }
                 $publicControlUrl = dol_buildpath('/custom/digiquali/public/control/public_control_history.php', 1) . '?track_id=' . urlencode($trackId) . '&entity=' . (int) $conf->entity;
                 $this->resprints .= '<a href="' . dol_escape_htmltag($publicControlUrl) . '" target="_blank" class="dolicar-banner-link dolicar-public-control-link">';
                 $this->resprints .= img_picto('', 'digiquali_color@digiquali', 'class="dolicar-banner-logo"') . $langs->transnoentities('QualityControlInterface');
