@@ -1,0 +1,96 @@
+/* DoliCar modern theme: design tokens.
+
+   The generic restyle of the back office (titles, tabs, lists, forms, buttons, modals) is the shared
+   theme of Saturne. saturne_header() puts its saturne-theme class on the logged-in pages only: the
+   public vehicle logbook and its PWA, which have their own design, never get it. The DoliCar
+   components below aim at the same scope.
+
+   This stylesheet is compiled apart from Saturne: the colours, radii and shadows are the CSS custom
+   properties that the shared theme exposes on that scope, so that both stay in step. */
+$dc-scope: 'body#mainbody.saturne-theme';
+
+$dc-bg: var(--saturne-bg);
+$dc-surface: var(--saturne-surface);
+$dc-surface-soft: var(--saturne-surface-soft);
+$dc-border: var(--saturne-border);
+$dc-border-soft: var(--saturne-border-soft);
+$dc-border-strong: var(--saturne-border-strong);
+$dc-text: var(--saturne-text);
+$dc-text-soft: var(--saturne-text-soft);
+$dc-muted: var(--saturne-muted);
+$dc-faint: var(--saturne-faint);
+
+$dc-primary: var(--saturne-primary);
+$dc-primary-strong: var(--saturne-primary-strong);
+$dc-primary-soft: var(--saturne-primary-soft);
+$dc-navy: var(--saturne-navy);
+$dc-success: var(--saturne-success);
+$dc-success-soft: var(--saturne-success-soft);
+$dc-warning: var(--saturne-warning);
+$dc-warning-soft: var(--saturne-warning-soft);
+$dc-danger: var(--saturne-danger);
+$dc-danger-soft: var(--saturne-danger-soft);
+
+/* Text colours of the tinted pills, same as the status badges of the shared theme */
+$dc-success-text: #15803d;
+$dc-warning-text: #a16207;
+$dc-danger-text: #b91c1c;
+
+$dc-radius-lg: var(--saturne-radius-lg);
+$dc-radius: var(--saturne-radius);
+$dc-radius-sm: var(--saturne-radius-sm);
+$dc-radius-pill: var(--saturne-radius-pill);
+
+$dc-shadow-sm: var(--saturne-shadow-sm);
+$dc-shadow: var(--saturne-shadow);
+$dc-shadow-hover: var(--saturne-shadow-hover);
+$dc-shadow-lg: var(--saturne-shadow-lg);
+$dc-ring: var(--saturne-ring);
+
+$dc-font: var(--saturne-font);
+$dc-font-mono: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+$dc-transition: 0.15s ease;
+
+/* Uppercase micro label, used for table headers and field labels */
+@mixin dc-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $dc-muted;
+}
+
+/* White rounded surface */
+@mixin dc-card {
+  background: $dc-surface;
+  border: 1px solid $dc-border;
+  border-radius: $dc-radius-lg;
+  box-shadow: $dc-shadow-sm;
+}
+
+/* Tinted pill, the recipe of the status badges of the shared theme */
+@mixin dc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-radius: $dc-radius-pill;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Square tinted tile holding an icon, like the pictos of the titles */
+@mixin dc-icon-tile($size: 28px) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: $size;
+  height: $size;
+  border-radius: $dc-radius-sm;
+  background: $dc-primary-soft;
+  color: $dc-primary;
+}

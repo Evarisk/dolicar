@@ -667,7 +667,8 @@ class ActionsDoliCar
                 if (dol_strlen($control->next_control_date) > 0) {
                     $nextControl          = (int) round(($control->next_control_date - dol_now('tzuser'))/(3600 * 24));
                     $nextControlDateColor = $control->getNextControlDateColor();
-                    $out[$parameters['key']] = '<div class="wpeo-button" style="background-color: ' . $nextControlDateColor .'; border-color: ' . $nextControlDateColor . ' ">' . $nextControl . '</div>';
+                    // The colour depends on the delay: it goes in a custom property, the look in the stylesheet
+                    $out[$parameters['key']] = '<div class="wpeo-button dolicar-next-control-days" style="--dolicar-pill-color: ' . $nextControlDateColor . ';">' . $nextControl . '</div>';
                 }
             }
 

@@ -1,0 +1,466 @@
+@use 'tokens' as *;
+
+/* DoliCar modern theme: quick creation of a registration certificate (quickcreation.php):
+   stepper, sections as white cards, fields with an icon, API source dropdown */
+
+$dc-qc-input: 'input[type="text"], input[type="number"], input[type="date"], input[type="email"], select';
+
+#{$dc-scope} .quickcreation-page {
+  /* ---- Stepper ---- */
+
+  .qc-stepper {
+    gap: 6px;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    @include dc-card;
+  }
+
+  .qc-step {
+    padding: 8px 12px;
+    border-radius: $dc-radius;
+  }
+
+  .qc-step-num {
+    width: 30px;
+    height: 30px;
+    border: 1px solid $dc-border;
+    background: $dc-bg;
+    color: $dc-muted;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .qc-step-label {
+    @include dc-label;
+    font-size: 10.5px;
+    color: $dc-faint;
+  }
+
+  .qc-step-title {
+    color: $dc-text-soft;
+    font-weight: 600;
+  }
+
+  .qc-step-arrow {
+    color: $dc-border-strong;
+    font-size: 11px;
+  }
+
+  .qc-step--active {
+    background: $dc-primary-soft;
+
+    .qc-step-num {
+      border-color: $dc-primary;
+      background: $dc-primary;
+      color: #ffffff;
+      box-shadow: $dc-ring;
+    }
+
+    .qc-step-label {
+      color: $dc-primary;
+    }
+
+    .qc-step-title {
+      color: $dc-primary-strong;
+      font-weight: 700;
+    }
+  }
+
+  .qc-step--done {
+    .qc-step-num {
+      border-color: rgba(22, 163, 74, 0.3);
+      background: $dc-success-soft;
+      color: $dc-success-text;
+    }
+
+    .qc-step-title {
+      color: $dc-success-text;
+    }
+  }
+
+  /* ---- Sections: a header and a body forming one white card ---- */
+
+  .qc-section-header {
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid $dc-border;
+    border-bottom-color: $dc-border-soft;
+    border-radius: $dc-radius-lg $dc-radius-lg 0 0;
+    background: $dc-surface;
+    transition: background-color $dc-transition;
+
+    &.collapsible:hover {
+      background: $dc-surface-soft;
+    }
+
+    /* Folded: the header is the whole card */
+    &.collapsed {
+      border-bottom-color: $dc-border;
+      border-radius: $dc-radius-lg;
+      box-shadow: $dc-shadow-sm;
+    }
+  }
+
+  .qc-section-title {
+    gap: 10px;
+    color: $dc-text;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    text-transform: none;
+
+    > i:first-child {
+      @include dc-icon-tile(30px);
+      font-size: 13px;
+    }
+
+    .qc-code {
+      margin-left: 0;
+      color: $dc-faint;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  }
+
+  .qc-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: $dc-muted;
+  }
+
+  .qc-section-header.collapsible:hover .qc-chevron {
+    background: $dc-bg;
+    color: $dc-text;
+  }
+
+  .qc-badge-count {
+    padding: 2px 9px;
+    border-radius: $dc-radius-pill;
+    background: $dc-primary-soft;
+    color: $dc-primary-strong;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .qc-section-body {
+    margin-bottom: 18px;
+    padding: 18px 20px;
+    border: 1px solid $dc-border;
+    border-top: none;
+    border-radius: 0 0 $dc-radius-lg $dc-radius-lg;
+    background: $dc-surface;
+    box-shadow: $dc-shadow-sm;
+  }
+
+  /* ---- API source dropdown, in the header of the plate section ---- */
+
+  .qc-source-btn {
+    padding: 7px 12px;
+    border: 1px solid rgba(13, 138, 255, 0.25);
+    border-radius: $dc-radius-sm;
+    background: $dc-primary-soft;
+    color: $dc-primary-strong;
+    font-weight: 600;
+    transition: border-color $dc-transition, box-shadow $dc-transition;
+
+    &:hover {
+      border-color: $dc-primary;
+    }
+
+    i.globe {
+      color: $dc-primary;
+    }
+
+    i.chevron {
+      color: $dc-primary;
+    }
+  }
+
+  .qc-source-wrap.open .qc-source-btn {
+    border-color: $dc-primary;
+    box-shadow: $dc-ring;
+  }
+
+  .qc-source-menu {
+    top: calc(100% + 6px);
+    border: 1px solid $dc-border;
+    border-radius: $dc-radius;
+    box-shadow: $dc-shadow-hover;
+  }
+
+  .qc-source-option {
+    border-bottom-color: $dc-border-soft;
+    transition: background-color $dc-transition;
+
+    &:hover {
+      background: $dc-surface-soft;
+    }
+
+    .qc-opt-radio {
+      border-color: $dc-border-strong;
+    }
+
+    &.selected {
+      background: rgba(13, 138, 255, 0.05);
+
+      .qc-opt-radio {
+        border-color: $dc-primary;
+
+        &::after {
+          background: $dc-primary;
+        }
+      }
+    }
+
+    .qc-opt-title {
+      color: $dc-text;
+    }
+
+    .qc-opt-desc {
+      color: $dc-muted;
+    }
+
+    .qc-opt-meta {
+      color: $dc-primary-strong;
+    }
+  }
+
+  /* ---- Form rows ---- */
+
+  .qc-form-row label {
+    color: $dc-text-soft;
+    font-weight: 500;
+
+    .qc-code {
+      color: $dc-faint;
+      font-size: 12px;
+    }
+  }
+
+  .qc-field-icon {
+    left: 12px;
+    color: $dc-faint;
+  }
+
+  .qc-field-wrapper:focus-within .qc-field-icon {
+    color: $dc-primary;
+  }
+
+  /* The select2 of the rows take the height of the inputs */
+  .qc-field-wrapper .select2-container--default .select2-selection--single {
+    min-height: 36px;
+
+    .select2-selection__rendered {
+      font-size: 13px;
+      line-height: 34px;
+    }
+
+    .select2-selection__arrow {
+      height: 34px;
+    }
+  }
+
+  .qc-add-btn {
+    border-color: $dc-border-strong;
+    border-radius: $dc-radius-sm;
+    color: $dc-primary;
+
+    &:hover {
+      border-color: $dc-primary;
+      background: $dc-primary-soft;
+    }
+  }
+
+  /* ---- Third party: "or create a new one" ---- */
+
+  .qc-tier-divider {
+    color: $dc-faint;
+
+    &::before,
+    &::after {
+      background: $dc-border;
+    }
+  }
+
+  .qc-required {
+    color: $dc-danger;
+  }
+
+  /* ---- Warehouse pill in the header of the characteristics section ---- */
+
+  .qc-warehouse-pill {
+    gap: 6px;
+    padding: 3px 6px 3px 12px;
+    border: 1px solid $dc-border-strong;
+    border-radius: $dc-radius-pill;
+    background: $dc-surface;
+    color: $dc-text;
+    transition: border-color $dc-transition;
+
+    &:hover {
+      border-color: $dc-faint;
+      background: $dc-surface;
+    }
+
+    i {
+      color: $dc-primary;
+    }
+
+    /* The select2 of the pill is borderless: the pill is its frame (the shared theme draws a
+       border with !important around every select2) */
+    .select2-container--default .select2-selection--single {
+      min-height: 24px;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+
+      .select2-selection__rendered {
+        color: $dc-text;
+        font-weight: 600;
+      }
+    }
+  }
+
+  /* ---- Banners ---- */
+
+  .qc-prefill-banner,
+  .qc-notfound-banner {
+    padding: 12px 16px;
+    border-radius: $dc-radius-lg;
+    font-size: 13px;
+  }
+
+  .qc-prefill-banner {
+    border-color: rgba(22, 163, 74, 0.3);
+    background: $dc-success-soft;
+    color: $dc-success-text;
+  }
+
+  .qc-notfound-banner {
+    border-color: rgba(233, 173, 79, 0.45);
+    background: $dc-warning-soft;
+    color: $dc-warning-text;
+
+    strong {
+      color: $dc-text;
+    }
+  }
+
+  /* ---- Actions ---- */
+
+  .qc-search-btn {
+    margin-top: 20px;
+    padding: 13px;
+    border-radius: $dc-radius;
+    background: $dc-primary;
+    box-shadow: 0 1px 2px rgba(13, 138, 255, 0.35);
+    font-weight: 700;
+    transition: background-color $dc-transition, box-shadow $dc-transition;
+
+    &:hover {
+      background: $dc-primary-strong;
+      box-shadow: 0 4px 12px rgba(13, 138, 255, 0.3);
+    }
+  }
+
+  .qc-quick-action {
+    color: $dc-muted;
+    font-size: 12.5px;
+
+    a {
+      color: $dc-primary-strong;
+      font-weight: 600;
+    }
+  }
+
+  .qc-form-actions {
+    border-top-color: $dc-border;
+  }
+
+  .qc-btn {
+    padding: 8px 16px;
+    border: 1px solid $dc-border-strong;
+    border-radius: $dc-radius;
+    background: $dc-surface;
+    color: $dc-text-soft;
+    font-weight: 600;
+
+    &:hover {
+      border-color: $dc-faint;
+      background: $dc-surface-soft;
+      color: $dc-text;
+    }
+
+    &.qc-btn-primary {
+      border-color: $dc-primary;
+      background: $dc-primary;
+      color: #ffffff;
+      box-shadow: 0 1px 2px rgba(13, 138, 255, 0.35);
+
+      &:hover {
+        border-color: $dc-primary-strong;
+        background: $dc-primary-strong;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(13, 138, 255, 0.3);
+      }
+    }
+
+    &.qc-btn-large {
+      padding: 11px 20px;
+    }
+  }
+}
+
+/* ---- Inputs ----
+   Aimed through div.fiche and two :not() so as to outweigh the generic input rule of the shared
+   theme, which would otherwise drop the left padding that leaves room for the field icon */
+#{$dc-scope} div.fiche .quickcreation-page .qc-field-wrapper :is(#{$dc-qc-input}):not(.select2-search__field):not([type="hidden"]) {
+  /* eldy gives the text inputs a fixed 28px height, not the number ones: one height for all */
+  height: 36px;
+  padding: 0 12px 0 34px;
+  border: 1px solid $dc-border-strong;
+  border-radius: $dc-radius-sm;
+  background: $dc-surface;
+  color: $dc-text;
+  font-size: 13px;
+
+  &:hover {
+    border-color: $dc-faint;
+  }
+
+  &:focus {
+    border-color: $dc-primary;
+    box-shadow: $dc-ring;
+  }
+
+  /* Filled in by the plate API */
+  &.prefilled {
+    border-color: rgba(22, 163, 74, 0.35);
+    background: rgba(22, 163, 74, 0.06);
+    color: $dc-success-text;
+    font-weight: 600;
+  }
+
+  /* The plate keeps the look of a number plate: monospace capitals */
+  &.qc-plate-input {
+    height: 40px;
+    padding-left: 36px;
+    font-family: $dc-font-mono;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    &::placeholder {
+      color: $dc-faint;
+      font-weight: 600;
+    }
+  }
+}
+
+#{$dc-scope} .quickcreation-page .qc-plate-icon {
+  color: $dc-muted;
+}
