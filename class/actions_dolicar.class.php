@@ -444,7 +444,8 @@ class ActionsDoliCar
         global $langs;
 
         if (isModEnabled('digiquali') && $parameters['objectType'] == 'productlot') {
-            $linkableElement = $parameters['linkableElements'][$parameters['linkedObject']->element];
+            // The registry is keyed by type (productlot, thirdparty), not by element: take the entry digiquali found
+            $linkableElement = $parameters['linkableElement'] ?? ($parameters['linkableElements'][$parameters['linkedObject']->element] ?? []);
             if (isset($linkableElement['fk_parent'])) {
                 $linkedObjectParentData = [];
                 foreach ($parameters['linkableElements'] as $value) {
