@@ -156,7 +156,7 @@ if (empty($resHook)) {
     require_once DOL_DOCUMENT_ROOT . '/core/actions_addupdatedelete.inc.php';
 
     // Actions set_thirdparty, set_project
-    require_once __DIR__ . '/../../../saturne/core/tpl/actions/banner_actions.tpl.php';
+    require_once dol_buildpath('/saturne/core/tpl/actions/banner_actions.tpl.php');
 
     // Actions builddoc, forcebuilddoc, remove_file
     $upload_dir = '';
@@ -195,7 +195,7 @@ if (empty($resHook)) {
             'tmparray'         => [],
             'hideTemplateName' => 0,
         ];
-        require_once __DIR__ . '/../../../saturne/core/tpl/documents/documents_action.tpl.php';
+        require_once dol_buildpath('/saturne/core/tpl/documents/documents_action.tpl.php');
     }
 }
 

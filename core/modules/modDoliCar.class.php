@@ -42,8 +42,8 @@ class modDoliCar extends DolibarrModules
         global $conf, $langs;
         $this->db = $db;
 
-        if (file_exists(__DIR__ . '/../../../saturne/lib/saturne_functions.lib.php')) {
-            require_once __DIR__ . '/../../../saturne/lib/saturne_functions.lib.php';
+        if (file_exists(dol_buildpath('/saturne/lib/saturne_functions.lib.php'))) {
+            dol_include_once('/saturne/lib/saturne_functions.lib.php');
             saturne_load_langs(['dolicar@dolicar']);
         } else {
             $this->error++;
@@ -575,7 +575,7 @@ class modDoliCar extends DolibarrModules
         require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
         require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
         require_once DOL_DOCUMENT_ROOT . '/product/class/productbatch.class.php';
-        require_once __DIR__ . '/../../../saturne/lib/object.lib.php';
+        dol_include_once('/saturne/lib/object.lib.php');
 
         if (getDolGlobalInt('DOLICAR_INTERNE_WAREHOUSE_ID') <= 0) {
             $oldWarehouseID = getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID');
