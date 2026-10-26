@@ -78,7 +78,7 @@ class modDoliCar extends DolibarrModules
         $this->editor_url  = 'https://www.evarisk.com';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '23.1.1';
+        $this->version = '23.1.2';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -514,6 +514,17 @@ class modDoliCar extends DolibarrModules
     public function init($options = ''): int
     {
         global $conf, $langs, $user;
+
+        // Saturne provides the functions used below : refuse the activation rather than a fatal error when it is missing
+        if (!function_exists('saturne_load_langs')) {
+            $this->error = $langs->trans('activateModuleDependNotSatisfied', $this->name, 'modSaturne', $this->name);
+            return -1;
+        }
+
+        // Dolibarr runs init() before activating $this->depends, without reloading $conf : activate them first, $conf is reloaded after each one
+        if (function_exists('saturne_activate_module_dependencies') && saturne_activate_module_dependencies($this) < 0) {
+            return -1;
+        }
 
         // Permissions
         $this->remove($options);
