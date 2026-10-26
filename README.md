@@ -11,10 +11,10 @@
 
 ### Version
 
-- Version : 23.1.1
+- Version : 23.1.2
 - PHP : 7.4.33
 - Compatibilité : Dolibarr 23.0.0 - 24.0.0
-- Saturne Framework : 23.2.1
+- Saturne Framework : 23.5.0
 
 ## Liens
 
@@ -22,7 +22,7 @@
 - Demo : [Demo Dolicar](https://demodoli.digirisk.com) - ID: demo - Password: demo
 - Documentation : [Wiki DoliCar](https://wiki.dolibarr.org/index.php/Module_Dolicar)
 - Projet GitHub : [Projet DoliCar](https://github.com/Eoxia/Dolicar/projects?query=is%3Aopen)
-- Saturne Framework : 23.2.1
+- Saturne Framework : 23.5.0
 - D'autres modules développés par Evarisk disponibles sur [Dolistore.com](https://dolistore.com)
 
 ## Fonctionnalités
