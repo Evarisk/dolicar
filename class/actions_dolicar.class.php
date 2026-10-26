@@ -361,9 +361,9 @@ class ActionsDoliCar
             'name_field'     => 'ref',
             'hook_name_card' => 'registrationcertificatefrlist',
             'hook_name_list' => 'registrationcertificatefrcard',
-            'create_url'     => 'custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
-            'class_path'     => 'custom/dolicar/class/registrationcertificatefr.class.php',
-            'lib_path'       => 'custom/dolicar/lib/dolicar_registrationcertificatefr.lib.php'
+            'create_url'     => 'dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
+            'class_path'     => 'dolicar/class/registrationcertificatefr.class.php',
+            'lib_path'       => 'dolicar/lib/dolicar_registrationcertificatefr.lib.php'
         ];
         $this->results = $objectsMetadata;
 
@@ -444,7 +444,8 @@ class ActionsDoliCar
         global $langs;
 
         if (isModEnabled('digiquali') && $parameters['objectType'] == 'productlot') {
-            $linkableElement = $parameters['linkableElements'][$parameters['linkedObject']->element];
+            // The registry is keyed by type (productlot, thirdparty), not by element: take the entry digiquali found
+            $linkableElement = $parameters['linkableElement'] ?? ($parameters['linkableElements'][$parameters['linkedObject']->element] ?? []);
             if (isset($linkableElement['fk_parent'])) {
                 $linkedObjectParentData = [];
                 foreach ($parameters['linkableElements'] as $value) {
@@ -455,7 +456,7 @@ class ActionsDoliCar
                 }
 
                 if (!empty($linkedObjectParentData['class_path'])) {
-                    require_once DOL_DOCUMENT_ROOT . '/' . $linkedObjectParentData['class_path'];
+                    require_once dol_buildpath('/' . $linkedObjectParentData['class_path']);
 
                     $parentLinkedObject = new $linkedObjectParentData['class_name']($this->db);
 
