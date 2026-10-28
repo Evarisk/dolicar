@@ -64,7 +64,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 // Load Saturne libraries
 if ($publicInterfaceUseSignatory) {
-    require_once __DIR__ . '/../../../saturne/class/saturnesignature.class.php';
+    dol_include_once('/saturne/class/saturnesignature.class.php');
     require_once DOL_DOCUMENT_ROOT . '/core/lib/ticket.lib.php'; // For generate_random_id()
 }
 
@@ -153,7 +153,7 @@ if ($isModEnabledDigiquali) {
 }
 
 // Problem report (issue #443): photo/voice are uploaded to a per-session temp dir keyed by an upload token
-require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
+dol_include_once('/saturne/lib/medias.lib.php');
 $problemUploadContext = 'dolicar_problem_report_' . $id;
 $problemUploadSubDir  = 'problem_report/' . saturne_get_upload_token($problemUploadContext);
 
