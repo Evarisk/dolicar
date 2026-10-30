@@ -131,6 +131,7 @@ ProblemReportEmail              = Email du responsable
 ProblemReportEmailDesc          = Adresse à laquelle les signalements de problème du carnet de bord public sont envoyés. Si vide, l'email de la société est utilisé.
 ProblemReportEmailTemplate      = Modèle d'email
 ProblemReportEmailTemplateDesc  = Modèle utilisé pour le mail envoyé au responsable. Si aucun modèle n'est choisi, le message par défaut du module est envoyé.
+ProblemReportEmailSetting       = Mail envoyé au responsable
 SeeEmailTemplates               = Voir les modèles d'emails
 AvailableSubstitutions          = Substitutions disponibles
 ProblemReportEmailTemplateLabel = Signalement de problème (carnet de bord public)
