@@ -264,10 +264,34 @@ class ActionsDoliCar
 
         if (strpos($parameters['context'], 'registrationcertificatefrcard') !== false && !empty($object->fk_lot)) {
             $publicLogbookUrl = dol_buildpath('/custom/dolicar/public/agenda/public_vehicle_logbook.php', 1) . '?id=' . (int) $object->fk_lot . '&entity=' . (int) $conf->entity;
-            $this->resprints  = '<div class="refidno">';
-            $this->resprints .= '<a href="' . dol_escape_htmltag($publicLogbookUrl) . '" target="_blank" class="dolicar-public-logbook-link">';
-            $this->resprints .= '<i class="fas fa-globe"></i> ' . $langs->transnoentities('PublicVehicleLogBook');
+            $this->resprints  = '<div class="refidno dolicar-banner-links">';
+            $this->resprints .= '<a href="' . dol_escape_htmltag($publicLogbookUrl) . '" target="_blank" class="dolicar-banner-link dolicar-public-logbook-link">';
+            $this->resprints .= img_picto('', 'dolicar_color@dolicar', 'class="dolicar-banner-logo"') . $langs->transnoentities('PublicVehicleLogBook');
             $this->resprints .= '</a>';
+
+            // Link to the DigiQuali public quality-control interface for the linked vehicle lot
+            if (isModEnabled('digiquali')) {
+                // Signed track id when DigiQuali provides it: an unsigned one only opens the page for a logged in user, so a
+                // link copied and sent to a customer would end on a 404
+                $digiQualiControlLib = dol_buildpath('/digiquali/lib/digiquali_control.lib.php', 0);
+                if (is_file($digiQualiControlLib)) {
+                    require_once $digiQualiControlLib;
+                }
+                if (function_exists('digiquali_public_control_track_id')) {
+                    require_once DOL_DOCUMENT_ROOT . '/product/stock/class/productlot.class.php';
+
+                    $lot     = new Productlot($this->db);
+                    $lot->id = (int) $object->fk_lot;
+                    $trackId = digiquali_public_control_track_id($lot);
+                } else {
+                    $trackId = base64_encode(json_encode(['type' => 'productlot', 'id' => (int) $object->fk_lot]));
+                }
+                $publicControlUrl = dol_buildpath('/custom/digiquali/public/control/public_control_history.php', 1) . '?track_id=' . urlencode($trackId) . '&entity=' . (int) $conf->entity;
+                $this->resprints .= '<a href="' . dol_escape_htmltag($publicControlUrl) . '" target="_blank" class="dolicar-banner-link dolicar-public-control-link">';
+                $this->resprints .= img_picto('', 'digiquali_color@digiquali', 'class="dolicar-banner-logo"') . $langs->transnoentities('QualityControlInterface');
+                $this->resprints .= '</a>';
+            }
+
             $this->resprints .= '</div>';
         }
 
@@ -294,6 +318,52 @@ class ActionsDoliCar
     }
 
     /**
+     * Overloading the emailElementlist function : replacing the parent's function with the one below
+     *
+     * Declare the problem report template type so it can be picked in the email templates admin page
+     *
+     * @param  array $parameters Hook metadatas (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function emailElementlist(array $parameters): int
+    {
+        global $langs, $user;
+
+        if (strpos($parameters['context'], 'emailtemplates') !== false && $user->hasRight('dolicar', 'adminpage', 'read')) {
+            $langs->load('dolicar@dolicar');
+
+            $this->results = ['dolicar_problem_report' => img_picto('', 'fontawesome_fa-car_fas_#d35968', 'class="pictofixedwidth"') . dol_escape_htmltag($langs->trans('ProblemReportConfig'))];
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     * Overloading the saturneEmailTemplateSettings function : replacing the parent's function with the one below
+     *
+     * Declares the DoliCar settings designating an email template, shown by their label in the "Used by" column of
+     * the Saturne email templates overview
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturneEmailTemplateSettings(array $parameters): int
+    {
+        global $langs;
+
+        $langs->load('dolicar@dolicar');
+
+        $this->results = [
+            'DOLICAR_PROBLEM_REPORT_EMAIL_TEMPLATE' => [
+                'label' => $langs->transnoentities('ProblemReportConfig') . ' · ' . $langs->transnoentities('ProblemReportEmailSetting'),
+                'url'   => dol_buildpath('/dolicar/admin/setup.php', 1),
+            ],
+        ];
+
+        return 0;
+    }
+
+    /**
      * Overloading the saturneExtendGetObjectsMetadata function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadata (context, etc...)
@@ -301,6 +371,11 @@ class ActionsDoliCar
      */
     public function saturneExtendGetObjectsMetadata(array $parameters): int
     {
+        // Paths relative to DOL_DOCUMENT_ROOT as installed (custom/dolicar on a standard install): Saturne < 23.3.0 and older
+        // readers prepend DOL_DOCUMENT_ROOT, newer ones use dol_buildpath(). Bare name only outside the main document root
+        $moduleDir  = dol_buildpath('/dolicar', 0);
+        $modulePath = strpos($moduleDir, DOL_DOCUMENT_ROOT . '/') === 0 ? substr($moduleDir, strlen(DOL_DOCUMENT_ROOT) + 1) : 'dolicar';
+
         $objectsMetadata['dolicar_registrationcertificatefr'] = [
             'mainmenu'       => 'dolicar',
             'leftmenu'       => '',
@@ -316,9 +391,9 @@ class ActionsDoliCar
             'name_field'     => 'ref',
             'hook_name_card' => 'registrationcertificatefrlist',
             'hook_name_list' => 'registrationcertificatefrcard',
-            'create_url'     => 'custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
-            'class_path'     => 'custom/dolicar/class/registrationcertificatefr.class.php',
-            'lib_path'       => 'custom/dolicar/lib/dolicar_registrationcertificatefr.lib.php'
+            'create_url'     => $modulePath . '/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
+            'class_path'     => $modulePath . '/class/registrationcertificatefr.class.php',
+            'lib_path'       => $modulePath . '/lib/dolicar_registrationcertificatefr.lib.php'
         ];
         $this->results = $objectsMetadata;
 
@@ -399,7 +474,8 @@ class ActionsDoliCar
         global $langs;
 
         if (isModEnabled('digiquali') && $parameters['objectType'] == 'productlot') {
-            $linkableElement = $parameters['linkableElements'][$parameters['linkedObject']->element];
+            // The registry is keyed by type (productlot, thirdparty), not by element: take the entry digiquali found
+            $linkableElement = $parameters['linkableElement'] ?? ($parameters['linkableElements'][$parameters['linkedObject']->element] ?? []);
             if (isset($linkableElement['fk_parent'])) {
                 $linkedObjectParentData = [];
                 foreach ($parameters['linkableElements'] as $value) {
@@ -410,7 +486,7 @@ class ActionsDoliCar
                 }
 
                 if (!empty($linkedObjectParentData['class_path'])) {
-                    require_once DOL_DOCUMENT_ROOT . '/' . $linkedObjectParentData['class_path'];
+                    require_once dol_buildpath('/' . $linkedObjectParentData['class_path']);
 
                     $parentLinkedObject = new $linkedObjectParentData['class_name']($this->db);
 
@@ -421,12 +497,122 @@ class ActionsDoliCar
                         $langs->load('dolicar@dolicar');
 
                         print '<a class="tab" href="' . dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?id=' . $parameters['objectId'] . '&entity=' . $parameters['entity'], 1) . '">';
-                        print $langs->transnoentities('PublicVehicleLogBook');
+                        // Short label: the tab is an item of the bottom navigation of the public control page
+                        print '<i class="fas fa-car"></i> ' . $langs->transnoentities('VehicleLogBook');
                         print '</a>';
                     }
                 }
             }
         }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     * Overloading the printPublicControlLinkedObjectIdentity function : replacing the parent's function with the one below
+     *
+     * Replaces the linked object identity block of the public control card to show the vehicle
+     * registration plate prominently, keeping the lot/serial (VIN) as a secondary line.
+     *
+     * @param  array  $parameters Hook metadata (context, etc...)
+     * @param  object $object     Linked object (productlot expected)
+     * @return int                0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function printPublicControlLinkedObjectIdentity(array $parameters, $object): int
+    {
+        global $langs;
+
+        if (strpos($parameters['context'], 'publiccontrol') === false || !is_object($object) || $object->element != 'productlot') {
+            return 0;
+        }
+
+        $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+        $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 1, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
+        if (!is_array($registrationCertificates) || empty($registrationCertificates)) {
+            return 0;
+        }
+        $registrationCertificateFr = reset($registrationCertificates);
+
+        $langs->load('dolicar@dolicar');
+
+        $lotTitle = $parameters['linkedObjectInfoArray']['linkedObject']['title'] ?? '';
+        $lotValue = $parameters['linkedObjectInfoArray']['linkedObject']['name_field'] ?? '';
+
+        $out  = '<div class="information-type">' . $langs->transnoentities('RegistrationPlate') . '</div>';
+        $out .= '<div class="information-label size-l">' . dol_escape_htmltag($registrationCertificateFr->ref) . '</div>';
+        $out .= '<div class="information-type">' . $lotTitle . '</div>';
+        $out .= '<div class="information-label">' . $lotValue . '</div>';
+
+        $this->resprints = $out;
+
+        return 1; // replace standard code
+    }
+
+    /**
+     * Overloading the digiqualiLinkedObjectDocumentation function : replacing the parent's function with the one below
+     *
+     * Adds the shared files and links of the registration certificates bound to the lot to the public control
+     * documentation tab, which otherwise only exposes those of the lot and of its parent product.
+     *
+     * @param  array  $parameters Hook metadata (context, etc...)
+     * @param  object $object     Linked object (productlot expected)
+     * @return int                0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function digiqualiLinkedObjectDocumentation(array $parameters, $object): int
+    {
+        global $langs;
+
+        if (strpos($parameters['context'], 'publiccontrol') === false || !is_object($object) || $object->element != 'productlot') {
+            return 0;
+        }
+
+        $registrationCertificateFr = new RegistrationCertificateFr($this->db);
+        $registrationCertificates  = $registrationCertificateFr->fetchAll('', '', 0, 0, ['customsql' => 't.fk_lot = ' . (int) $object->id]);
+        if (!is_array($registrationCertificates) || empty($registrationCertificates)) {
+            return 0;
+        }
+
+        // Load Dolibarr libraries
+        require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
+
+        $langs->load('dolicar@dolicar');
+
+        $link     = new Link($this->db);
+        $ecmFiles = new EcmFiles($this->db);
+
+        // Only files shared through a link are downloadable from the public interface, and only those of the
+        // registration certificates of the lot are wanted: the instance may share thousands of files
+        $certificateIds = array_map(function ($registrationCertificate) {
+            return (int) $registrationCertificate->id;
+        }, $registrationCertificates);
+        $ecmFiles->fetchAll('', '', 0, 0, "(t.share:isnot:null) AND (t.src_object_type:=:'" . $this->db->escape($registrationCertificateFr->table_element) . "') AND (t.src_object_id:in:" . implode(',', $certificateIds) . ")");
+
+        $files = [];
+        $links = [];
+        foreach ($registrationCertificates as $registrationCertificate) {
+            $nameField = img_picto('', 'fontawesome_fa-car_fas_#d35968', 'class="pictofixedwidth"') . dol_escape_htmltag($registrationCertificate->ref);
+
+            if (is_array($ecmFiles->lines)) {
+                foreach ($ecmFiles->lines as $ecmFilesLine) {
+                    if ($ecmFilesLine->src_object_type == $registrationCertificate->table_element && $ecmFilesLine->src_object_id == $registrationCertificate->id) {
+                        $ecmFilesLine->name_field = $nameField;
+                        $files[]                  = $ecmFilesLine;
+                    }
+                }
+            }
+
+            $certificateLinks = [];
+            $link->fetchAll($certificateLinks, $registrationCertificate->element, $registrationCertificate->id);
+            foreach ($certificateLinks as $certificateLink) {
+                $certificateLink->name_field = $nameField;
+                $links[]                     = $certificateLink;
+            }
+        }
+
+        $this->results = ['files' => $files, 'links' => $links];
 
         return 0; // or return 1 to replace standard code
     }
@@ -512,7 +698,8 @@ class ActionsDoliCar
                 if (dol_strlen($control->next_control_date) > 0) {
                     $nextControl          = (int) round(($control->next_control_date - dol_now('tzuser'))/(3600 * 24));
                     $nextControlDateColor = $control->getNextControlDateColor();
-                    $out[$parameters['key']] = '<div class="wpeo-button" style="background-color: ' . $nextControlDateColor .'; border-color: ' . $nextControlDateColor . ' ">' . $nextControl . '</div>';
+                    // The colour depends on the delay: it goes in a custom property, the look in the stylesheet
+                    $out[$parameters['key']] = '<div class="wpeo-button dolicar-next-control-days" style="--dolicar-pill-color: ' . $nextControlDateColor . ';">' . $nextControl . '</div>';
                 }
             }
 

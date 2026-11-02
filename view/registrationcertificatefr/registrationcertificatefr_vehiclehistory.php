@@ -35,7 +35,10 @@ require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
-require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
+require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
+require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
+dol_include_once('/digiquali/class/control.class.php');
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
@@ -45,7 +48,7 @@ require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 global $conf, $db, $form, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['trips']);
 
 // Get parameters
 $id     = GETPOST('id', 'int');
@@ -65,6 +68,46 @@ require_once DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be
 $permissionToRead = $user->rights->dolicar->registrationcertificatefr->read;
 $permissiontoadd  = $user->rights->dolicar->registrationcertificatefr->write;
 saturne_check_access($permissionToRead);
+
+// AJAX: return the lines of an expense report for the vehicle-event form (issue #452)
+if ($action == 'get_expensereport_lines') {
+    require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
+
+    $fkExpenseReport = GETPOSTINT('fk_expensereport');
+    $linesData       = [];
+    if ($fkExpenseReport > 0) {
+        $expenseReport = new ExpenseReport($db);
+        if ($expenseReport->fetch($fkExpenseReport) > 0) {
+            $expenseReport->fetch_lines();
+            if (is_array($expenseReport->lines)) {
+                foreach ($expenseReport->lines as $line) {
+                    $typeLabel    = ($langs->transnoentities($line->type_fees_code) != $line->type_fees_code) ? $langs->transnoentities($line->type_fees_code) : ($line->type_fees_libelle ?: '');
+                    $projectLabel = $line->projet_title ?: $line->projet_ref;
+                    $parts        = [];
+                    if ($typeLabel !== '') {
+                        $parts[] = $typeLabel;
+                    }
+                    if (!empty($projectLabel)) {
+                        $parts[] = $projectLabel;
+                    }
+                    if (!empty($line->comments)) {
+                        $parts[] = dol_trunc($line->comments, 60);
+                    }
+                    $label = implode(' · ', $parts);
+                    $linesData[] = [
+                        'id'     => (int) $line->rowid,
+                        'label'  => $label,
+                        'amount' => price($line->total_ttc, 0, $langs, 1, -1, -1, $conf->currency),
+                    ];
+                }
+            }
+        }
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($linesData);
+    exit;
+}
 
 // Ensure parent event category exists and children are initialized
 $parentCategoryId = getDolGlobalInt('DOLICAR_VEHICLE_EVENT_CATEGORY_ID');
@@ -93,6 +136,7 @@ if ($parentCategoryId <= 0) {
         $defaultChildren = [
             ['label' => 'Contrôle technique', 'color' => '5BA86E'],
             ['label' => 'Révision',           'color' => 'E8A317'],
+            ['label' => 'Réparation',         'color' => '3B82F6'],
             ['label' => 'Accident',           'color' => 'E05353'],
             ['label' => 'Autre',              'color' => '888888'],
         ];
@@ -117,6 +161,11 @@ $iconMap = [
     'Accident'           => 'fa-exclamation-triangle',
     'Autre'              => 'fa-circle',
 ];
+$iconMap[$langs->transnoentities('ReportedProblem')]     = 'fa-exclamation-triangle';
+$iconMap['Réparation']                                   = 'fa-wrench';
+$iconMap[$langs->transnoentities('Repair')]              = 'fa-wrench';
+$iconMap[$langs->transnoentities('VehicleInvoiceEvent')] = 'fa-file-invoice-dollar';
+$iconMap[$langs->transnoentities('Trip')]               = 'fa-route';
 
 // Load child categories and build display structures for the TPL
 $catById   = [];
@@ -150,16 +199,46 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
 
     if (is_array($allEvents)) {
         foreach ($allEvents as $evt) {
+            $matched   = false;
             $evtCatIds = $catHelper->containing($evt->id, Categorie::TYPE_ACTIONCOMM, 'id');
-            if (!is_array($evtCatIds)) {
-                continue;
-            }
-            foreach ($evtCatIds as $evtCatId) {
-                if (isset($catById[(int) $evtCatId])) {
-                    $eventsList[]               = $evt;
-                    $evtCatById[(int) $evt->id] = $catById[(int) $evtCatId];
-                    break;
+            if (is_array($evtCatIds)) {
+                foreach ($evtCatIds as $evtCatId) {
+                    if (isset($catById[(int) $evtCatId])) {
+                        $eventsList[]               = $evt;
+                        $evtCatById[(int) $evt->id] = $catById[(int) $evtCatId];
+                        $matched                    = true;
+                        break;
+                    }
                 }
+            }
+
+            // Problem reports from the public logbook carry no DoliCar category — surface them with a dedicated badge
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_REPORT_PROBLEM') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('ReportedProblem'), 'color' => 'F59E0B'];
+                $matched                    = true;
+            }
+
+            // Repairs from the public logbook carry no DoliCar category — surface them with a dedicated badge
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_ADD_REPAIR') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('Repair'), 'color' => '3B82F6'];
+                $matched                    = true;
+            }
+
+            // Invoices pushed automatically on validation carry no DoliCar category either (issue #464)
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_VEHICLE_INVOICE') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('VehicleInvoiceEvent'), 'color' => '8B5CF6'];
+                $matched                    = true;
+            }
+
+            // Trips recorded from the public logbook. They were left out of this tab, which made the
+            // mileage they carry unreachable from the back office: correcting a typo meant editing the
+            // event by hand in the agenda.
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_ADD_PUBLIC_VEHICLE_LOG_BOOK') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('Trip'), 'color' => '10B981'];
             }
         }
     }
@@ -169,6 +248,68 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
  * Actions
  */
 
+// Correct a mileage that was mistyped, on a trip as on any other event of this vehicle. A
+// correction is never silent: the reason is required and written into the note of the event, with
+// who did it and what the figure was before, so the history explains itself later.
+if ($action == 'save_mileage' && !empty($permissiontoadd) && !empty($object->fk_lot) && $object->fk_lot > 0) {
+    $mileageEventId = GETPOSTINT('mileage_event_id');
+    $mileageReason  = trim(GETPOST('mileage_reason', 'restricthtml'));
+
+    $mileageEvent = new ActionComm($db);
+    if ($mileageEventId <= 0 || $mileageEvent->fetch($mileageEventId) <= 0
+        || $mileageEvent->elementtype !== 'productlot' || (int) $mileageEvent->fk_element !== (int) $object->fk_lot) {
+        // An event of another vehicle must not be reachable by typing its id in the URL
+        setEventMessages($langs->transnoentities('ErrorRecordNotFound'), null, 'errors');
+    } elseif ($mileageReason === '') {
+        setEventMessages($langs->transnoentities('MileageCorrectionReasonRequired'), null, 'errors');
+    } else {
+        $mileageEvent->fetch_optionals();
+
+        // A trip carries both figures, any other event only the first one
+        $changes = [];
+        foreach (['starting_mileage' => 'StartingMileage', 'arrival_mileage' => 'ArrivalMileage'] as $field => $labelKey) {
+            if (!GETPOSTISSET('mileage_' . $field)) {
+                continue;
+            }
+            $oldValue = (int) ($mileageEvent->array_options['options_' . $field] ?? 0);
+            $newValue = GETPOSTINT('mileage_' . $field);
+            if ($newValue === $oldValue) {
+                continue;
+            }
+            $mileageEvent->array_options['options_' . $field] = $newValue;
+            $changes[] = $langs->transnoentities($labelKey) . ' : '
+                . ($oldValue > 0 ? price($oldValue, 0, '', 1, 0) . ' km' : '-') . ' → '
+                . ($newValue > 0 ? price($newValue, 0, '', 1, 0) . ' km' : '-');
+        }
+
+        if (empty($changes)) {
+            setEventMessages($langs->transnoentities('MileageUnchanged'), null, 'warnings');
+        } else {
+            $trace  = '<br><strong>' . dol_print_date(dol_now(), 'dayhour') . ' - ' . dol_escape_htmltag($user->getFullName($langs)) . '</strong>';
+            $trace .= '<br>' . $langs->transnoentities('MileageCorrected') . ' : ' . implode(' / ', $changes);
+            $trace .= '<br>' . $langs->transnoentities('MileageCorrectionReason') . ' : ' . dol_escape_htmltag($mileageReason);
+
+            $mileageEvent->note_private = (string) $mileageEvent->note_private . $trace;
+
+            $db->begin();
+            $saved = true;
+            foreach (['starting_mileage', 'arrival_mileage'] as $field) {
+                if (GETPOSTISSET('mileage_' . $field) && $mileageEvent->updateExtraField($field) < 0) {
+                    $saved = false;
+                }
+            }
+            if ($saved && $mileageEvent->update($user) > 0) {
+                $db->commit();
+                setEventMessages($langs->transnoentities('MileageCorrectedConfirm'), []);
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
+                exit;
+            }
+            $db->rollback();
+            setEventMessages($mileageEvent->error, $mileageEvent->errors, 'errors');
+        }
+    }
+}
+
 if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object->fk_lot) && $object->fk_lot > 0) {
     $error           = 0;
     $eventCategoryId = GETPOSTINT('event_category_id');
@@ -177,7 +318,19 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     $eventNote       = GETPOST('event_note', 'restricthtml');
     $fkFacture       = GETPOSTINT('event_fk_facture');
     $fkPropal        = GETPOSTINT('event_fk_propal');
+    $fkExpenseReport = GETPOSTINT('event_fk_expensereport');
+    $fkSupplierOrder = GETPOSTINT('event_fk_supplierorder');
+    $fkSupplierInvoice = GETPOSTINT('event_fk_supplierinvoice');
     $fkControl       = GETPOSTINT('event_fk_control');
+    $expenseReportLineIds = array_values(array_filter(array_map('intval', (array) GETPOST('event_expensereport_lines', 'array'))));
+
+    // Event type is optional: when none is picked, fall back to the "Autre" category so the event still saves and shows in the history
+    if ($eventCategoryId <= 0 && $parentCategoryId > 0) {
+        $fallbackCat = new Categorie($db);
+        if ($fallbackCat->fetch(0, 'Autre', Categorie::TYPE_ACTIONCOMM) > 0 && (int) $fallbackCat->fk_parent === $parentCategoryId) {
+            $eventCategoryId = (int) $fallbackCat->id;
+        }
+    }
 
     $selectedCat = new Categorie($db);
     if ($eventCategoryId <= 0 || $selectedCat->fetch($eventCategoryId) <= 0 || (int) $selectedCat->fk_parent !== $parentCategoryId) {
@@ -211,6 +364,20 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
             }
             if ($fkPropal > 0) {
                 $actionComm->add_object_linked('propal', $fkPropal);
+            }
+            // Link the whole expense report only when no specific lines were selected (issue #452)
+            if (empty($expenseReportLineIds) && $fkExpenseReport > 0) {
+                $actionComm->add_object_linked('expensereport', $fkExpenseReport);
+            }
+            // Otherwise link the selected expense report lines (core element_element table, no schema change)
+            foreach ($expenseReportLineIds as $expenseReportLineId) {
+                $actionComm->add_object_linked('expensereportline', $expenseReportLineId);
+            }
+            if ($fkSupplierOrder > 0) {
+                $actionComm->add_object_linked('order_supplier', $fkSupplierOrder);
+            }
+            if ($fkSupplierInvoice > 0) {
+                $actionComm->add_object_linked('invoice_supplier', $fkSupplierInvoice);
             }
             if ($fkControl > 0) {
                 $actionComm->add_object_linked('control', $fkControl);

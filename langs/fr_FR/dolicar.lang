@@ -81,8 +81,8 @@ ProjectQuickCreationDescription     = Cette option permet de créer rapidement u
 
 # Public interface - Interface publique
 OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
-MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
-MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
+MaxArrivalMileage            = Seuil d'alerte du kilométrage d'arrivée
+MaxArrivalMileageDescription = Cette option permet de configurer le nombre de kilomètres parcourus à partir duquel un avertissement est affiché au conducteur lors de l'enregistrement d'un retour dans le carnet de bord d'un véhicule. La saisie reste possible au-delà de ce seuil. <br> (par défaut 1000 km)
 
 # Setup - Réglages
 ImmatriculationAPIConfig          = Configuration de l'API
@@ -109,6 +109,35 @@ ListRegistrationcertificatefr   = Liste des cartes grises
 NewRegistrationcertificatefr    = Nouvelle carte grise
 ModifyRegistrationcertificatefr = Modifier la carte grise
 FindLicencePlateInRepertory     = Rechercher une plaque d'immatriculation
+RegistrationPlate               = Immatriculation
+QualityControlInterface         = Interface de contrôle qualité
+
+# Public vehicle logbook - Signaler un problème
+ReportProblem                   = Signaler un problème
+ReportedProblem                 = Problème signalé
+ReportProblemSub                = Photo, commentaire, vocal
+DescribeProblem                 = Décrivez le problème rencontré
+PhotoAndVoiceMemo               = Photo et mémo vocal
+SendReport                      = Envoyer le signalement
+ProblemReportSent               = Signalement envoyé
+ProblemReportSentDesc           = Le responsable a été prévenu par email.
+ProblemReportSentNoMailDesc     = Le signalement est enregistré dans l'historique du véhicule, mais le responsable n'a pas pu être prévenu par email : pensez à le contacter directement.
+ProblemReportedOnVehicle        = Problème signalé sur le véhicule %s
+ProblemReportEmailSubject       = Problème signalé - véhicule %s
+ProblemReportEmailIntro         = Un problème a été signalé sur le véhicule %s via le carnet de bord public.
+AccessVehicleSheet              = Accéder à la fiche du véhicule
+ProblemReportConfig             = Signalement de problème
+ProblemReportEmail              = Email du responsable
+ProblemReportEmailDesc          = Adresse à laquelle les signalements de problème du carnet de bord public sont envoyés. Si vide, l'email de la société est utilisé.
+ProblemReportEmailTemplate      = Modèle d'email
+ProblemReportEmailTemplateDesc  = Modèle utilisé pour le mail envoyé au responsable. Si aucun modèle n'est choisi, le message par défaut du module est envoyé.
+ProblemReportEmailSetting       = Mail envoyé au responsable
+SeeEmailTemplates               = Voir les modèles d'emails
+AvailableSubstitutions          = Substitutions disponibles
+ProblemReportEmailTemplateLabel = Signalement de problème (carnet de bord public)
+# Sans %s : ces deux cles alimentent le modele d'email, ou la substitution __(Cle)__ ne passe pas d'argument
+ProblemReportEmailSubjectTemplate = Problème signalé - véhicule
+ProblemReportEmailIntroTemplate   = Un problème a été signalé sur ce véhicule via le carnet de bord public.
 
 # Fiels - Champs
 RegistrationNumber            = Numéro d'immatriculation (A)
@@ -222,7 +251,9 @@ LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les c
 
 # Public interface - Interface publique
 PublicVehicleLogBook          = Carnet de bord publique du véhicule
+VehicleLogBook                = Carnet de bord
 Driver                        = Conducteur
+ReturnedBy                    = Rendu par
 DriverName                    = Nom du conducteur
 StartDateAndHour              = Date et heure de départ
 StartingMileage               = Kilométrage de départ
@@ -252,6 +283,20 @@ DeclareReturn                = Déclarer un retour
 ReturnExpected               = Le véhicule étant sorti, le retour est attendu
 WhoAreYou                    = Qui êtes-vous ?
 SelectDriver                 = Sélectionner un conducteur
+DriverInternal               = Utilisateur interne
+DriverExternal               = Externe
+SelectContact                = Sélectionner un contact
+SelectAThirdPartyFirst       = Choisir d'abord un tiers
+LinkedThirdParty             = Client / Tiers
+ExistingThirdParty           = Tiers existant
+NewThirdParty                = Nouveau tiers
+OrCreateNewThirdParty        = Ou créer un nouveau tiers
+RegistrationCertificatesList = Liste des cartes grises
+NoRegistrationCertificate    = Aucune carte grise
+BottomBarVehiclesList        = Cartes grises
+BottomBarCurrentVehicle      = En cours
+SearchVehicle                = Rechercher (plaque, marque, modèle)
+NoVehicleFound               = Aucun véhicule trouvé
 When                         = Quand
 LastKnownMileage             = Dernier kilométrage connu
 DepartureMileage             = Kilométrage au départ
@@ -276,6 +321,35 @@ RecentTrips                  = Derniers trajets
 TripInProgress               = En cours
 TripDone                     = Terminé
 ClosePublicLogBook           = Fermer
+
+# Public interface - Trajets (issue #457)
+BottomBarHistory             = Trajets
+VehicleTripHistory           = Trajets
+Trips                        = trajets
+NoTripRecorded               = Aucun trajet enregistré pour ce véhicule
+SeeAllTripHistory            = Voir tous les trajets
+ViewStateSheet               = Voir la fiche état
+
+# Public interface - Réparation
+Repair               = Réparation
+BottomBarRepair      = Réparation
+RepairDate           = Date de la réparation
+RepairMileage        = Kilométrage
+RepairDescription    = Description de la réparation
+RepairOnVehicle      = Réparation sur le véhicule %s
+RepairRecorded       = Réparation enregistrée !
+RepairRecordedDesc   = L'événement a été ajouté à l'historique du véhicule.
+ValidateRepair       = Enregistrer la réparation
+
+# Public interface - Contrôle DigiQuali
+Control                  = Contrôle
+BottomBarControl         = Contrôle
+ControlSheet             = Modèle de contrôle
+Controller               = Contrôleur
+ControlOnVehicle         = Contrôle - véhicule %s
+CreateAndFillControl     = Créer et remplir le contrôle
+SelectControlSheet       = Choisir un modèle de contrôle
+NoControlSheetAvailable  = Aucun modèle de contrôle applicable aux véhicules n'est disponible.
 
 
 
@@ -331,8 +405,29 @@ VehicleEventAdded              = Événement véhicule ajouté avec succès
 LinkedDocuments                = Documents liés
 Invoices                       = Factures
 Proposals                      = Devis
+ExpenseReports                 = Notes de frais
+ExpenseReportLines             = Lignes de note de frais
+SuppliersOrders                = Commandes fournisseurs
+SuppliersInvoices              = Factures fournisseurs
 Controls                       = Contrôles DigiQuali
 DolicarVehicleEventCategory    = DoliCar Véhicule Événement
+VehicleEventLinkableDocuments  = Documents liables aux événements véhicule
+VehicleInvoiceEvent            = Facture
+VehicleInvoiceEventLabel       = Facture %s établie sur le véhicule
+Trip                           = Trajet
+
+# Correction de kilométrage depuis l'historique du véhicule
+CorrectMileage                  = Corriger le kilométrage
+MileageCorrectionReason         = Motif de la correction
+MileageCorrectionReasonRequired = Indiquez le motif de la correction du kilométrage
+MileageCorrected                = Kilométrage corrigé
+MileageCorrectedConfirm         = Kilométrage corrigé, le motif a été ajouté à la note de l'événement
+MileageUnchanged                = Le kilométrage n'a pas changé, rien n'a été enregistré
+PushInvoicesToVehicleHistory       = Remontée des factures dans l'historique
+PushInvoicesToVehicleHistoryButton = Remonter les factures existantes
+PushInvoicesToVehicleHistoryHelp   = À la validation d'une facture, celle-ci est ajoutée automatiquement à l'historique du véhicule renseigné dessus, avec son kilométrage. Ce bouton traite les factures déjà validées avant l'activation de cette remontée.
+InvoicesPushedToVehicleHistory     = %s facture(s) remontée(s) dans l'historique des véhicules
+VehicleEventLinkableDocumentHelp = Si activé, ce type de document peut être lié lors de l''ajout d''un événement dans l''historique du véhicule.
 ErrorUpdateCarBrandsFromApi = Erreur lors de la mise à jour des marques depuis l''API : %s
 ErrorUpdateCarBrandsFromApiBadResponse = Réponse invalide de l''API lors de la mise à jour des marques
 ErrorUpdateCarBrandsFromApiNoData = Aucune donnée de marque trouvée dans la réponse de l''API
@@ -370,3 +465,45 @@ TripsHistory                         = Historique des trajets
 DepartureDate                        = Date départ
 ReturnDate                           = Date retour
 Comments                             = Commentaires
+Signatures                           = Signatures
+
+# PDF fiche état avant/après et fiche photos (issue #457)
+VehicleStateSheet                    = Fiche état avant/après
+VehiclePhotosSheet                   = Fiche détails photos
+VehicleStateSheetPDFDescription      = Modèle PDF de fiche état du véhicule (départ / retour)
+VehiclePhotosSheetPDFDescription     = Modèle PDF des photos du véhicule (départ / retour)
+VehicleStateBeforeAfter              = État du véhicule — Avant / Après
+TripOf                               = Trajet du %s
+PhotosDeparture                      = Photos départ
+PhotosReturn                         = Photos retour
+TripPhotos                           = Photos du trajet
+NoPhoto                              = Aucune photo
+NoCompletedTrip                      = Aucun trajet terminé
+Signature                            = Signature
+
+# Import - Import de cartes grises
+ImportRegistrationCertificate         = Importer des cartes grises
+ImportRegistrationCertificateDesc     = Importez vos cartes grises depuis un fichier CSV. Chaque ligne est créée via la logique métier du module (normalisation de la plaque, produit/lot et déclencheurs).
+ImportFromCSV                         = Import depuis un fichier CSV
+CSVFile                               = Fichier CSV
+UpdateExistingRecords                 = Mettre à jour les fiches existantes
+UpdateExistingRecordsHelp             = Si une carte grise avec la même immatriculation existe déjà, elle est mise à jour. Sinon la ligne est ignorée.
+DownloadCSVTemplate                   = Télécharger le modèle CSV
+LaunchImport                          = Lancer l'import
+ImportResults                         = Résultats de l'import
+RecognizedColumns                     = Colonnes reconnues
+CSVColumn                             = Colonne CSV
+FieldName                             = Champ
+ImportStatusCreated                   = Créée
+ImportStatusUpdated                   = Mise à jour
+ImportStatusSkipped                   = Ignorée
+ImportStatusError                     = Erreur
+ImportLineAlreadyExists               = Une carte grise existe déjà pour cette immatriculation
+ImportErrorEmptyPlate                 = Numéro d'immatriculation manquant
+ImportThirdPartyNotFound              = Tiers « %s » introuvable
+ImportProductNotFound                 = Produit « %s » introuvable
+ImportProjectNotFound                 = Projet « %s » introuvable
+ImportSummaryMessage                  = Import terminé : %s créée(s), %s mise(s) à jour, %s ignorée(s), %s en erreur.
+ErrorNoFileUploaded                   = Aucun fichier n'a été envoyé
+ErrorEmptyCSVFile                     = Le fichier CSV est vide ou ne contient aucune donnée
+ErrorMissingRegistrationNumberColumn  = La colonne « immatriculation » est obligatoire et n'a pas été trouvée dans le fichier

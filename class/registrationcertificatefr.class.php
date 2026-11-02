@@ -22,7 +22,7 @@
  */
 
 // Load Saturne libraries
-require_once __DIR__ . '/../../saturne/class/saturneobject.class.php';
+dol_include_once('/saturne/class/saturneobject.class.php');
 
 // Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
@@ -635,6 +635,21 @@ class RegistrationCertificateFr extends SaturneObject
             return (int) ((float) $value != 0);
         }
         return preg_match('/n\W{0,2}est\s+pas|non|false|^no$/i', trim((string) $value)) ? 0 : 1;
+    }
+
+    /**
+     * Delete object in database
+     *
+     * Registration certificate deletion must be definitive (hard delete) so no soft-deleted row is kept in database.
+     *
+     * @param  User      $user       User that deletes
+     * @param  int<0,1>  $noTrigger  0 = launch triggers after, 1 = disable triggers
+     * @param  bool      $softDelete Keep object in database with a deleted status instead of removing it
+     * @return int<-1,1>             Return integer 0 < if KO, > 0 if OK
+     */
+    public function delete(User $user, int $noTrigger = 0, bool $softDelete = false): int
+    {
+        return parent::delete($user, $noTrigger, $softDelete);
     }
 
     /**
