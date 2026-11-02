@@ -166,7 +166,7 @@ function dolicar_get_vehicle_warehouse_id(RegistrationCertificateFr $vehicle): i
  * @param  int                       $toWarehouseId   Destination warehouse ID
  * @param  int                       $fromWarehouseId Source warehouse ID, 0 when the vehicle is in no warehouse yet
  * @param  User                      $user            User doing the move
- * @return int                                        < 0 if KO, > 0 if OK
+ * @return int                                        1 if OK, -1 if KO
  */
 function dolicar_transfer_vehicle_warehouse(RegistrationCertificateFr $vehicle, int $toWarehouseId, int $fromWarehouseId, User $user): int
 {
@@ -189,7 +189,7 @@ function dolicar_transfer_vehicle_warehouse(RegistrationCertificateFr $vehicle, 
         return -1;
     }
 
-    $lot = new ProductLot($db);
+    $lot = new Productlot($db);
     if ($lot->fetch((int) $vehicle->fk_lot) <= 0 || empty($lot->batch)) {
         return -1;
     }
