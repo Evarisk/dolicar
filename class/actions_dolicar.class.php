@@ -371,6 +371,11 @@ class ActionsDoliCar
      */
     public function saturneExtendGetObjectsMetadata(array $parameters): int
     {
+        // Paths relative to DOL_DOCUMENT_ROOT as installed (custom/dolicar on a standard install): Saturne < 23.3.0 and older
+        // readers prepend DOL_DOCUMENT_ROOT, newer ones use dol_buildpath(). Bare name only outside the main document root
+        $moduleDir  = dol_buildpath('/dolicar', 0);
+        $modulePath = strpos($moduleDir, DOL_DOCUMENT_ROOT . '/') === 0 ? substr($moduleDir, strlen(DOL_DOCUMENT_ROOT) + 1) : 'dolicar';
+
         $objectsMetadata['dolicar_registrationcertificatefr'] = [
             'mainmenu'       => 'dolicar',
             'leftmenu'       => '',
@@ -386,9 +391,9 @@ class ActionsDoliCar
             'name_field'     => 'ref',
             'hook_name_card' => 'registrationcertificatefrlist',
             'hook_name_list' => 'registrationcertificatefrcard',
-            'create_url'     => 'dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
-            'class_path'     => 'dolicar/class/registrationcertificatefr.class.php',
-            'lib_path'       => 'dolicar/lib/dolicar_registrationcertificatefr.lib.php'
+            'create_url'     => $modulePath . '/view/registrationcertificatefr/registrationcertificatefr_card.php?action=create',
+            'class_path'     => $modulePath . '/class/registrationcertificatefr.class.php',
+            'lib_path'       => $modulePath . '/lib/dolicar_registrationcertificatefr.lib.php'
         ];
         $this->results = $objectsMetadata;
 
