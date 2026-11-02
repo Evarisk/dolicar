@@ -1,0 +1,73 @@
+@use 'tokens' as *;
+
+/* DoliCar modern theme: linked objects of a registration certificate
+   (registrationcertificatefr_linked_objects.tpl.php) and DigiQuali columns of the list */
+
+#{$dc-scope} {
+  /* ---- Linked objects table ---- */
+
+  .dolicar-linked-objects-table {
+    /* Second header row: the per-column search inputs, like the search row of the lists */
+    > tbody > tr.liste_titre + tr.liste_titre > td {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      background: $dc-surface;
+      text-transform: none;
+    }
+
+    > tbody > tr.dolicar-linked-object-row {
+      transition: background-color $dc-transition;
+
+      &:hover {
+        background: $dc-surface-soft;
+      }
+    }
+  }
+
+  /* ---- Verdict of a DigiQuali control and days before the next one: tinted pills ---- */
+
+  .dolicar-linked-objects-table .wpeo-button,
+  table.liste td > .wpeo-button.button-green,
+  table.liste td > .wpeo-button.button-red,
+  table.liste td > .wpeo-button.button-grey,
+  table.liste td > .wpeo-button.dolicar-next-control-days {
+    @include dc-pill;
+    justify-content: center;
+    min-width: 44px;
+    box-shadow: none;
+    cursor: default;
+
+    &:hover {
+      box-shadow: none;
+    }
+  }
+
+  .dolicar-linked-objects-table .wpeo-button.button-green,
+  table.liste td > .wpeo-button.button-green {
+    border-color: rgba(22, 163, 74, 0.3);
+    background: $dc-success-soft;
+    color: $dc-success-text;
+  }
+
+  .dolicar-linked-objects-table .wpeo-button.button-red,
+  table.liste td > .wpeo-button.button-red {
+    border-color: rgba(224, 83, 83, 0.3);
+    background: $dc-danger-soft;
+    color: $dc-danger-text;
+  }
+
+  .dolicar-linked-objects-table .wpeo-button.button-grey,
+  table.liste td > .wpeo-button.button-grey {
+    border-color: $dc-border-strong;
+    background: $dc-bg;
+    color: $dc-text-soft;
+  }
+
+  /* The colour of the delay comes from DigiQuali, handed over in --dolicar-pill-color */
+  table.liste td > .wpeo-button.dolicar-next-control-days {
+    border-color: color-mix(in srgb, var(--dolicar-pill-color, #{$dc-muted}) 35%, transparent);
+    background: color-mix(in srgb, var(--dolicar-pill-color, #{$dc-muted}) 14%, transparent);
+    color: color-mix(in srgb, var(--dolicar-pill-color, #{$dc-muted}) 70%, #0f172a);
+    font-variant-numeric: tabular-nums;
+  }
+}

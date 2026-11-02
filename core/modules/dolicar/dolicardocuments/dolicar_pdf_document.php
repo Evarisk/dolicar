@@ -676,6 +676,9 @@ if (!class_exists('DolicarPdfData')) {
                     'datep'             => $trip->datep,
                     'datef'             => $trip->datef,
                     'driver'            => $json['driver'] ?? '',
+                    // Falls back on the departure driver: a trip closed before the return screen
+                    // asked the question has only one name to show on both sides
+                    'return_driver'     => $json['return_driver'] ?? ($json['driver'] ?? ''),
                     'start_comment'     => $json['start_comment'] ?? '',
                     'end_comment'       => $json['end_comment'] ?? '',
                     'fuel_level'        => $json['fuel_level'] ?? '',

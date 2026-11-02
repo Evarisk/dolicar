@@ -81,8 +81,8 @@ ProjectQuickCreationDescription     = Cette option permet de créer rapidement u
 
 # Public interface - Interface publique
 OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
-MaxArrivalMileage            = Nombre maximal de kilomètre d'arrivé
-MaxArrivalMileageDescription = Cette option permet de configurer le nombre maximal de kilomètre d'arrivé qu'un conducteur peut saisir lors de l'enregistrement d'une donné dans le carnet de bord d'un véhicule <br> (par défaut 1000 km)
+MaxArrivalMileage            = Seuil d'alerte du kilométrage d'arrivée
+MaxArrivalMileageDescription = Cette option permet de configurer le nombre de kilomètres parcourus à partir duquel un avertissement est affiché au conducteur lors de l'enregistrement d'un retour dans le carnet de bord d'un véhicule. La saisie reste possible au-delà de ce seuil. <br> (par défaut 1000 km)
 
 # Setup - Réglages
 ImmatriculationAPIConfig          = Configuration de l'API
@@ -121,6 +121,7 @@ PhotoAndVoiceMemo               = Photo et mémo vocal
 SendReport                      = Envoyer le signalement
 ProblemReportSent               = Signalement envoyé
 ProblemReportSentDesc           = Le responsable a été prévenu par email.
+ProblemReportSentNoMailDesc     = Le signalement est enregistré dans l'historique du véhicule, mais le responsable n'a pas pu être prévenu par email : pensez à le contacter directement.
 ProblemReportedOnVehicle        = Problème signalé sur le véhicule %s
 ProblemReportEmailSubject       = Problème signalé - véhicule %s
 ProblemReportEmailIntro         = Un problème a été signalé sur le véhicule %s via le carnet de bord public.
@@ -128,6 +129,15 @@ AccessVehicleSheet              = Accéder à la fiche du véhicule
 ProblemReportConfig             = Signalement de problème
 ProblemReportEmail              = Email du responsable
 ProblemReportEmailDesc          = Adresse à laquelle les signalements de problème du carnet de bord public sont envoyés. Si vide, l'email de la société est utilisé.
+ProblemReportEmailTemplate      = Modèle d'email
+ProblemReportEmailTemplateDesc  = Modèle utilisé pour le mail envoyé au responsable. Si aucun modèle n'est choisi, le message par défaut du module est envoyé.
+ProblemReportEmailSetting       = Mail envoyé au responsable
+SeeEmailTemplates               = Voir les modèles d'emails
+AvailableSubstitutions          = Substitutions disponibles
+ProblemReportEmailTemplateLabel = Signalement de problème (carnet de bord public)
+# Sans %s : ces deux cles alimentent le modele d'email, ou la substitution __(Cle)__ ne passe pas d'argument
+ProblemReportEmailSubjectTemplate = Problème signalé - véhicule
+ProblemReportEmailIntroTemplate   = Un problème a été signalé sur ce véhicule via le carnet de bord public.
 
 # Fiels - Champs
 RegistrationNumber            = Numéro d'immatriculation (A)
@@ -208,6 +218,30 @@ CreateManuallyFromPaper               = La recherche n'a rien renvoyé. Créez l
 VehicleCharacteristics                = Caractéristiques du véhicule
 CreateRegistrationCertificate         = Créer la carte grise
 DestinationWarehouse                  = Entrepôt de destination
+AddFromCarteGriseJson                  = Ajout depuis un fichier JSON de carte grise (mode dégradé)
+AddFromCarteGriseJsonHelp              = Sélectionnez le fichier JSON de la carte grise : les clés sont les rubriques officielles (A, B, C.1, D.1, ..., Z.4). La rubrique A (plaque d'immatriculation) est obligatoire, les valeurs nulles sont ignorées.
+CreateFromJson                         = Créer depuis le fichier JSON
+DropJsonFileHere                       = Glissez-déposez le fichier JSON ici
+OrClickToBrowseJson                    = ou cliquez pour parcourir vos fichiers (.json)
+RegistrationCertificateCreatedFromJson = Carte grise créée depuis le JSON
+FillFromCarteGriseJson                 = Compléter depuis un fichier JSON de carte grise
+FillFromCarteGriseJsonHelp             = Glissez-déposez ou cliquez pour choisir le fichier (.json) : les rubriques renseignées rempliront les champs du formulaire, vérifiez-les puis cliquez sur Enregistrer
+ImportJson                             = Importer
+ConfirmJsonPlateMismatch               = Le JSON correspond à la plaque {jsonPlate} mais cette fiche concerne la plaque {cardPlate}. Voulez-vous quand même remplir les champs ?
+FieldsFilledFromJson                   = {count} champs remplis depuis le JSON. Vérifiez les valeurs puis cliquez sur Enregistrer pour les sauvegarder.
+ErrorInvalidCarteGriseJson             = Le JSON fourni est invalide ou vide
+ErrorNoCarteGriseJsonFile              = Veuillez sélectionner un fichier JSON de carte grise
+ErrorJsonMissingRegistrationNumber     = Le JSON ne contient pas de plaque d'immatriculation (rubrique A)
+ScanCarteGriseWithAi                   = Scanner la carte grise avec l'IA (photo)
+ScanCarteGriseWithAiHelp               = Envoyez une photo de la carte grise : l'IA extrait les rubriques officielles et la carte grise est créée automatiquement. La plaque (rubrique A) doit être lisible sur la photo.
+DropCarteGrisePhotoHere                = Glissez-déposez la photo de la carte grise ici
+OrClickToBrowsePhoto                   = ou cliquez pour parcourir vos fichiers (photo)
+AnalyzeAndCreate                       = Analyser et créer la carte grise
+ErrorNoCarteGrisePhoto                 = Veuillez sélectionner une photo de carte grise valide
+ErrorCarteGrisePhotoTooLarge           = La photo dépasse la taille maximale de 10 Mo
+ErrorAiAnalysisFailed                  = L'analyse par l'IA a échoué : %s
+ErrorAiInvalidJson                     = L'IA n'a pas renvoyé un JSON de carte grise exploitable
+RegistrationCertificateCreatedFromAi   = Carte grise créée depuis la photo analysée par l'IA
 
 # DigiQuali
 LinkDolicar_registrationcertificatefr            = Activer le lien avec les cartes grises
@@ -217,7 +251,9 @@ LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les c
 
 # Public interface - Interface publique
 PublicVehicleLogBook          = Carnet de bord publique du véhicule
+VehicleLogBook                = Carnet de bord
 Driver                        = Conducteur
+ReturnedBy                    = Rendu par
 DriverName                    = Nom du conducteur
 StartDateAndHour              = Date et heure de départ
 StartingMileage               = Kilométrage de départ
@@ -378,6 +414,15 @@ DolicarVehicleEventCategory    = DoliCar Véhicule Événement
 VehicleEventLinkableDocuments  = Documents liables aux événements véhicule
 VehicleInvoiceEvent            = Facture
 VehicleInvoiceEventLabel       = Facture %s établie sur le véhicule
+Trip                           = Trajet
+
+# Correction de kilométrage depuis l'historique du véhicule
+CorrectMileage                  = Corriger le kilométrage
+MileageCorrectionReason         = Motif de la correction
+MileageCorrectionReasonRequired = Indiquez le motif de la correction du kilométrage
+MileageCorrected                = Kilométrage corrigé
+MileageCorrectedConfirm         = Kilométrage corrigé, le motif a été ajouté à la note de l'événement
+MileageUnchanged                = Le kilométrage n'a pas changé, rien n'a été enregistré
 PushInvoicesToVehicleHistory       = Remontée des factures dans l'historique
 PushInvoicesToVehicleHistoryButton = Remonter les factures existantes
 PushInvoicesToVehicleHistoryHelp   = À la validation d'une facture, celle-ci est ajoutée automatiquement à l'historique du véhicule renseigné dessus, avec son kilométrage. Ce bouton traite les factures déjà validées avant l'activation de cette remontée.

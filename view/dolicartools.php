@@ -183,7 +183,7 @@ if ($nbLots > 0) {
             print '<td>' . dol_escape_htmltag($obj->a_registration_number) . '</td>';
             print '<td>' . dol_escape_htmltag($obj->batch) . '</td>';
             print '<td>' . dol_escape_htmltag($obj->product_ref) . ' – ' . dol_escape_htmltag($obj->product_label) . '</td>';
-            print '<td class="center"><strong style="color:var(--colorbacktitle2,#e05d2c)">' . $obj->qty . '</strong></td>';
+            print '<td class="center"><strong class="dolicar-tools-qty">' . $obj->qty . '</strong></td>';
             print '</tr>';
         }
         $db->free($resqlDetail);

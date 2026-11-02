@@ -1,0 +1,10 @@
+/* DoliCar modern theme: the DoliCar components on top of the shared theme of Saturne, used last by
+   style.scss so that it wins over the legacy partials. Every rule is scoped by $dc-scope (see
+   _tokens.scss): the public vehicle logbook and its PWA keep their own design. */
+
+@use 'card';
+@use 'quickcreation';
+@use 'history';
+@use 'linked-objects';
+@use 'dashboard';
+@use 'admin';
