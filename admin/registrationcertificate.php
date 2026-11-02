@@ -69,7 +69,7 @@ print load_fiche_titre($title, $linkBack, 'title_setup');
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'registrationcertificate', $title, -1, 'dolicar_color@dolicar');
 
-require_once __DIR__ . '/../../saturne/core/tpl/admin/object/object_numbering_module_view.tpl.php';
+require_once dol_buildpath('/saturne/core/tpl/admin/object/object_numbering_module_view.tpl.php');
 
 print load_fiche_titre($langs->transnoentities('RegistrationCertificateFieldsConfig'), '', '');
 
@@ -90,6 +90,38 @@ foreach ($object->fields as $registrationCertificateCode => $registrationCertifi
         print $form->textwithpicto('', $langs->transnoentities('ShowRegistrationCertificateFieldHelp'));
         print '</td></tr>';
     }
+}
+
+print '</table>';
+
+// Vehicle event linkable documents configuration
+$linkableTypes = dolicar_get_vehicle_event_linkable_types();
+
+// Default every type to enabled on first display so the toggles match the
+// add-event form's default-on behaviour.
+foreach ($linkableTypes as $linkableType) {
+    if (!isset($conf->global->{$linkableType['const']})) {
+        dolibarr_set_const($db, $linkableType['const'], '1', 'chaine', 0, '', $conf->entity);
+    }
+}
+
+print load_fiche_titre($langs->transnoentities('VehicleEventLinkableDocuments'), '', '');
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->transnoentities('Parameters') . '</td>';
+print '<td class="center">' . $langs->transnoentities('Status') . '</td>';
+print '<td class="center">' . $langs->transnoentities('ShortInfo') . '</td>';
+print '</tr>';
+
+foreach ($linkableTypes as $linkableType) {
+    print '<tr class="oddeven"><td>';
+    print $langs->transnoentities('Display') . ' ' . $langs->transnoentities($linkableType['label']);
+    print '</td><td class="center">';
+    print ajax_constantonoff($linkableType['const']);
+    print '</td><td class="center">';
+    print $form->textwithpicto('', $langs->transnoentities('VehicleEventLinkableDocumentHelp'));
+    print '</td></tr>';
 }
 
 print '</table>';

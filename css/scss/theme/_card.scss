@@ -1,0 +1,124 @@
+@use 'tokens' as *;
+
+/* DoliCar modern theme: registration certificate card (registrationcertificatefr_card.php) */
+
+#{$dc-scope} {
+  /* ---- Links of the banner: public vehicle logbook, DigiQuali control interface ---- */
+
+  .dolicar-banner-links {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .dolicar-banner-link {
+    gap: 6px;
+    padding: 4px 11px 4px 8px;
+    border: 1px solid rgba(13, 138, 255, 0.2);
+    border-radius: $dc-radius-pill;
+    background: $dc-primary-soft;
+    color: $dc-primary-strong !important;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    transition: background-color $dc-transition, border-color $dc-transition;
+
+    &:hover {
+      border-color: $dc-primary;
+      background: rgba(13, 138, 255, 0.16);
+      color: $dc-primary-strong !important;
+    }
+
+    .dolicar-banner-logo {
+      height: 14px;
+    }
+  }
+
+  /* ---- Quick DigiQuali control under the chassis number: model selector + add button ---- */
+
+  .dolicar-control-inline-creator {
+    gap: 8px;
+    padding: 3px 6px 3px 8px;
+    border: 1px solid $dc-border;
+    border-radius: $dc-radius;
+    background: $dc-surface-soft;
+    color: $dc-text-soft;
+    font-size: 13px;
+
+    .dolicar-control-separator {
+      color: $dc-border-strong;
+    }
+
+    .dolicar-control-add-btn {
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border-radius: 50%;
+      color: $dc-primary;
+      font-size: 16px;
+      transition: background-color $dc-transition, color $dc-transition;
+
+      &:hover {
+        background: $dc-primary-soft;
+        color: $dc-primary-strong;
+      }
+
+      &[disabled],
+      &.button-disable {
+        background: none;
+        color: $dc-border-strong;
+      }
+    }
+  }
+
+  /* Under the chassis number of the card, the creator only takes the room it needs */
+  .tableforfield .field_fk_lot td:last-child .dolicar-control-inline-creator {
+    display: flex;
+    width: fit-content;
+    margin-top: 6px;
+  }
+
+  /* ---- "Registration certificate data" group of the field tables (folded by the card JS) ---- */
+
+  table.tableforfield,
+  table.tableforfieldcreate,
+  table.tableforfieldedit {
+    > tbody > tr.registration-certificate-group-header > td:first-child {
+      padding: 11px 14px !important;
+      background: transparent !important;
+      color: $dc-text;
+      font-size: 14px;
+      font-weight: 700 !important;
+      transition: color $dc-transition;
+    }
+
+    > tbody > tr.registration-certificate-group-header:hover > td:first-child {
+      filter: none !important;
+      color: $dc-primary-strong;
+    }
+
+    .registration-certificate-group-icon {
+      @include dc-icon-tile(22px);
+      margin-right: 10px;
+      border-radius: 6px;
+      font-size: 10px;
+      vertical-align: middle;
+    }
+
+    /* The rows of the group are indented under its title, past the chevron tile */
+    > tbody > tr.registration-certificate-field > td:first-child {
+      padding-left: 46px !important;
+    }
+  }
+
+  /* ---- Expense report lines picked on a vehicle event (issue #452) ---- */
+
+  .dolicar-er-lines label.dolicar-er-line {
+    padding: 4px 8px;
+    border-radius: $dc-radius-sm;
+    color: $dc-text-soft;
+
+    &:hover {
+      background: $dc-surface-soft;
+    }
+  }
+}

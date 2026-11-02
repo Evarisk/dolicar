@@ -48,6 +48,7 @@ window.dolicar.quickcreation = {};
  */
 window.dolicar.quickcreation.init = function() {
   window.dolicar.quickcreation.event();
+  window.dolicar.quickcreation.refreshTierState();
 };
 
 /**
@@ -64,6 +65,7 @@ window.dolicar.quickcreation.event = function() {
   $(document).on('click', '.qc-source-btn', window.dolicar.quickcreation.toggleSourceDropdown);
   $(document).on('click', '.qc-source-option', window.dolicar.quickcreation.selectSource);
   $(document).on('click', '.qc-section-header.collapsible', window.dolicar.quickcreation.toggleSection);
+  $(document).on('change', '[name="fk_soc"]', window.dolicar.quickcreation.refreshTierState);
   $(document).on('input', '.qc-plate-input', window.dolicar.quickcreation.formatPlate);
   $(document).on('click', window.dolicar.quickcreation.closeDropdownsOnOutsideClick);
 };
@@ -144,6 +146,26 @@ window.dolicar.quickcreation.toggleSection = function() {
   var $header = $(this);
   $header.toggleClass('collapsed');
   $header.next('.qc-section-body').toggleClass('collapsed');
+};
+
+/**
+ * Grey out the "new third party" fields when an existing third party is selected
+ *
+ * @memberof DoliCar_QuickCreation
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.dolicar.quickcreation.refreshTierState = function() {
+  var $select = $('[name="fk_soc"]');
+  if (!$select.length) {
+    return;
+  }
+  var value       = parseInt($select.val(), 10);
+  var hasExisting = !isNaN(value) && value > 0;
+  $('[data-tier-new]').toggleClass('qc-disabled', hasExisting);
 };
 
 /**

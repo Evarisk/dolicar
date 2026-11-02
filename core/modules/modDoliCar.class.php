@@ -42,8 +42,8 @@ class modDoliCar extends DolibarrModules
         global $conf, $langs;
         $this->db = $db;
 
-        if (file_exists(__DIR__ . '/../../../saturne/lib/saturne_functions.lib.php')) {
-            require_once __DIR__ . '/../../../saturne/lib/saturne_functions.lib.php';
+        if (file_exists(dol_buildpath('/saturne/lib/saturne_functions.lib.php'))) {
+            dol_include_once('/saturne/lib/saturne_functions.lib.php');
             saturne_load_langs(['dolicar@dolicar']);
         } else {
             $this->error++;
@@ -78,7 +78,7 @@ class modDoliCar extends DolibarrModules
         $this->editor_url  = 'https://www.evarisk.com';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '22.0.0';
+        $this->version = '23.1.2';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -131,7 +131,8 @@ class modDoliCar extends DolibarrModules
                     'orderlist',
                     'invoicelist',
                     'main',
-                    'publiccontrol'
+                    'publiccontrol',
+                    'emailtemplates'
                 ]
             ],
             // Set this to 1 if features of module are opened to external users
@@ -159,7 +160,8 @@ class modDoliCar extends DolibarrModules
 
         // Prerequisites
         $this->phpmin                = [7, 4]; // Minimum version of PHP required by module
-        $this->need_dolibarr_version = [20, 0]; // Minimum version of Dolibarr required by module
+        $this->need_dolibarr_version = [23, 0]; // Minimum version of Dolibarr required by module
+        $this->max_dolibarr_version = [24, 0]; // Maximum version of Dolibarr supported by module
 
         // Messages at activation
         $this->warnings_activation     = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
@@ -356,6 +358,22 @@ class modDoliCar extends DolibarrModules
         ];
 
         $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar,fk_leftmenu=registrationcertificatefr',
+            'type'     => 'left',
+            'titre'    => $langs->transnoentities('ImportRegistrationCertificate'),
+            'prefix'   => '<i class="fas fa-file-import pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'registrationcertificatefr_import',
+            'url'      => '/dolicar/view/registrationcertificatefr/registrationcertificatefr_import.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => '$conf->dolicar->enabled',
+            'perms'    => '$user->rights->dolicar->registrationcertificatefr->write',
+            'target'   => '',
+            'user'     => 0
+        ];
+
+        $this->menu[$r++] = [
             'fk_menu'  => 'fk_mainmenu=dolicar',
             'type'     => 'left',
             'titre'    => $langs->transnoentities('ThirdParty'),
@@ -497,6 +515,17 @@ class modDoliCar extends DolibarrModules
     {
         global $conf, $langs, $user;
 
+        // Saturne provides the functions used below : refuse the activation rather than a fatal error when it is missing
+        if (!function_exists('saturne_load_langs')) {
+            $this->error = $langs->trans('activateModuleDependNotSatisfied', $this->name, 'modSaturne', $this->name);
+            return -1;
+        }
+
+        // Dolibarr runs init() before activating $this->depends, without reloading $conf : activate them first, $conf is reloaded after each one
+        if (function_exists('saturne_activate_module_dependencies') && saturne_activate_module_dependencies($this) < 0) {
+            return -1;
+        }
+
         // Permissions
         $this->remove($options);
 
@@ -557,7 +586,7 @@ class modDoliCar extends DolibarrModules
         require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
         require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
         require_once DOL_DOCUMENT_ROOT . '/product/class/productbatch.class.php';
-        require_once __DIR__ . '/../../../saturne/lib/object.lib.php';
+        dol_include_once('/saturne/lib/object.lib.php');
 
         if (getDolGlobalInt('DOLICAR_INTERNE_WAREHOUSE_ID') <= 0) {
             $oldWarehouseID = getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID');
@@ -786,6 +815,13 @@ class modDoliCar extends DolibarrModules
         delDocumentModel('vehiclelogbookdocument_odt', 'vehiclelogbookdocument');
         delDocumentModel('vehiclelogbookdocument', 'vehiclelogbookdocument');
         addDocumentModel('vehiclelogbookdocument', 'vehiclelogbookdocument', $langs->transnoentities('VehicleLogBookDocument') . '.pdf');
+
+        // Before/after state sheet and departure/return photos sheet (issue #457)
+        delDocumentModel('vehiclestatesheet', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclestatesheet', 'vehiclelogbookdocument', $langs->transnoentities('VehicleStateSheet') . '.pdf');
+
+        delDocumentModel('vehiclephotossheet', 'vehiclelogbookdocument');
+        addDocumentModel('vehiclephotossheet', 'vehiclelogbookdocument', $langs->transnoentities('VehiclePhotosSheet') . '.pdf');
 
         return $this->_init($sql, $options);
     }

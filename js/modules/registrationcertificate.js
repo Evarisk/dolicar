@@ -237,6 +237,13 @@ window.dolicar.registrationcertificate.createPublicVehicleLogBook = function() {
   let token          = window.saturne.toolbox.getToken();
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
+  // Avoid duplicate entries when the button is clicked several times before the request completes
+  let $validateButton = $('.public-vehicle-log-book-validate');
+  if ($validateButton.hasClass('button-disable')) {
+    return;
+  }
+  $validateButton.addClass('button-disable');
+
   const formData = new FormData($('#public-vehicle-log-book-form')[0]);
   if (window.saturne.signature.canvas) {
     const signature = window.saturne.signature.canvas.toDataURL();
@@ -250,12 +257,11 @@ window.dolicar.registrationcertificate.createPublicVehicleLogBook = function() {
     contentType: false,
     data: formData,
     success: function() {
-      $('.public-vehicle-log-book-confirmation-close').closest('.card__confirmation').css('display', 'flex');
-      $('.public-vehicle-log-book-confirmation-close').on('click', function() {
-        $('.public-vehicle-log-book-confirmation-close').closest('.card__confirmation').css('display', 'none');
-        window.location.reload();
-      });
+      // Redirect to the dedicated confirmation screen so the user gets a clear feedback
+      window.location.href = document.URL + querySeparator + 'success=1';
     },
-    error: function() {}
+    error: function() {
+      $validateButton.removeClass('button-disable');
+    }
   });
 };

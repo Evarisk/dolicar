@@ -1,11 +1,16 @@
-.dolicar-public-logbook-link {
+.dolicar-banner-links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.dolicar-banner-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     padding: 2px 8px;
-    background: #e8f0fd;
-    color: #1a5cdc !important;
-    border: 1px solid #c0d4f7;
+    border: 1px solid transparent;
     border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
@@ -13,12 +18,26 @@
     vertical-align: middle;
     line-height: 1.6;
 
-    i { font-size: 10px; }
+    .dolicar-banner-logo {
+        height: 13px;
+        width: auto;
+        vertical-align: middle;
+    }
+
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+.dolicar-public-logbook-link,
+.dolicar-public-control-link {
+    background: #e8f0fd;
+    color: #1a5cdc !important;
+    border-color: #c0d4f7;
 
     &:hover {
         background: #d0e2fb;
         border-color: #90b8f0;
-        text-decoration: none;
         color: #1a5cdc !important;
     }
 }
@@ -123,5 +142,28 @@
         td:first-child {
             padding-left: 18px !important;
         }
+    }
+}
+
+// Vehicle history — type of an event, in the colour of its category (custom property set by the tpl)
+.dolicar-event-type {
+    color: var(--dolicar-event-color);
+    font-weight: bold;
+}
+
+// Registration certificate list — days before the next control, in the colour of the delay
+.dolicar-next-control-days {
+    background-color: var(--dolicar-pill-color);
+    border-color: var(--dolicar-pill-color);
+}
+
+// Vehicle event form — expense report line picker (issue #452)
+.dolicar-er-lines {
+    label.dolicar-er-line {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 3px 0;
+        cursor: pointer;
     }
 }
