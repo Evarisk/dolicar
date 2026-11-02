@@ -426,27 +426,27 @@ class DolicarDashboard
             $lot  = $item['lot'];
             $days = $item['days'];
 
+            // Severity of the overdue, coloured by css/scss (dolicar-overdue-days--level1 to level4)
             if ($days >= 90) {
-                $color = '#8B0000';
+                $level = 4;
             } elseif ($days >= 60) {
-                $color = '#C0392B';
+                $level = 3;
             } elseif ($days >= 30) {
-                $color = '#E06C00';
+                $level = 2;
             } else {
-                $color = '#E8A317';
+                $level = 1;
             }
 
             $cardUrl    = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $cg->id;
             $refLink    = '<a href="' . $cardUrl . '">' . dol_escape_htmltag($cg->a_registration_number) . '</a>';
             $brandModel = dol_escape_htmltag(trim($cg->d1_vehicle_brand . ' ' . $cg->d3_vehicle_model));
             $eatbyDate  = dol_print_date($lot->eatby, 'day');
-            $daysHtml   = '<span style="background:' . $color . ';color:#fff;padding:2px 8px;border-radius:12px;font-weight:bold;font-size:0.85em;">'
-                        . $days . ' j</span>';
+            $daysHtml   = '<span class="dolicar-overdue-days dolicar-overdue-days--level' . $level . '">' . $days . ' j</span>';
 
             $listData[] = [
                 'Ref'        => ['value' => $refLink],
                 'Vehicle'    => ['value' => $brandModel, 'morecss' => 'center'],
-                'ExpiryDate' => ['value' => '<span style="color:#E05353;">' . $eatbyDate . '</span>', 'morecss' => 'center nowraponall'],
+                'ExpiryDate' => ['value' => '<span class="dolicar-overdue-date">' . $eatbyDate . '</span>', 'morecss' => 'center nowraponall'],
                 'DaysOver'   => ['value' => $daysHtml, 'morecss' => 'center nowraponall'],
             ];
         }

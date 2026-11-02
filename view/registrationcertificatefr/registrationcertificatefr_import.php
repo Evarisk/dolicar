@@ -455,7 +455,7 @@ print '<br>';
 print load_fiche_titre($langs->trans('RecognizedColumns'), '', '');
 
 print '<div class="div-table-responsive-no-min">';
-print '<table class="noborder centpercent">';
+print '<table class="noborder centpercent dolicar-import-columns">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('CSVColumn') . '</td>';
 print '<td>' . $langs->trans('FieldName') . '</td>';
@@ -466,7 +466,7 @@ foreach ($importableFields as $fieldDef) {
     print '<tr class="oddeven">';
     print '<td><strong>' . dol_escape_htmltag($fieldDef['csvheader']) . '</strong></td>';
     print '<td>' . dol_escape_htmltag($langs->trans($fieldDef['label'])) . '</td>';
-    print '<td class="center">' . ($fieldDef['required'] ? '<span style="color:var(--colorbacktitle2,#e05d2c)">' . $langs->trans('Yes') . '</span>' : $langs->trans('No')) . '</td>';
+    print '<td class="center">' . ($fieldDef['required'] ? '<span class="dolicar-import-required">' . $langs->trans('Yes') . '</span>' : '<span class="dolicar-import-optional">' . $langs->trans('No') . '</span>') . '</td>';
     print '</tr>';
 }
 

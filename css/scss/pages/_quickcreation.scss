@@ -602,6 +602,16 @@
     margin: 0 auto;
   }
 
+  // Plate row of the search step: short label, narrow field, number plate yellow icon
+  .qc-form-row--plate {
+    grid-template-columns: 120px 1fr;
+    align-items: center;
+  }
+
+  .qc-field-wrapper--plate { max-width: 320px; }
+
+  .qc-plate-icon { color: #b89a00; }
+
   // Responsive
   @media (max-width: 700px) {
     .qc-step-arrow { display: none; }

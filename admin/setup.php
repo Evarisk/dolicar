@@ -314,7 +314,7 @@ if (is_readable($carBrandsFile)) {
 print '<br>';
 print load_fiche_titre($langs->transnoentities('CarBrands'), '', '');
 
-print '<table class="noborder centpercent">';
+print '<table class="noborder centpercent dolicar-car-brands">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->transnoentities('CarBrands') . '</td>';
 print '</tr>';
