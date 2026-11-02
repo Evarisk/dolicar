@@ -114,6 +114,7 @@ jobs:
                   path: dolibarr-core
                   sparse-checkout: |
                       htdocs/ai/class
+                      htdocs/ai/lib
                       htdocs/api/class
                       htdocs/bookmarks/class
                       htdocs/core/*.inc.php
