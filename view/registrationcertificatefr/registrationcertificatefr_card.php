@@ -152,6 +152,7 @@ if (empty($resHook)) {
         require_once __DIR__ . '/../../core/tpl/dolicar_registrationcertificatefr_immatriculation_api_fetch_action.tpl.php';
     }
 
+
     // Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
     require_once DOL_DOCUMENT_ROOT . '/core/actions_addupdatedelete.inc.php';
 
@@ -405,9 +406,43 @@ if (($id || $ref) && $action == 'edit') {
 
     print dol_get_fiche_end();
 
+    // Fill fields from a carte grise JSON file — advanced panel, collapsed by default.
+    // Import is done client-side: it only fills the edit form, the user reviews then saves.
+    print '<div class="dolicar-json-import-panel">';
+    print '<div class="qc-section-header collapsible collapsed">';
+    print '<div class="qc-section-title">';
+    print '<i class="fas fa-file-code"></i>';
+    print $langs->trans('FillFromCarteGriseJson');
+    print '</div>';
+    print '<i class="fas fa-chevron-down qc-chevron"></i>';
+    print '</div>';
+
+    print '<div class="qc-section-body collapsed">';
+    print '<div class="dolicar-json-import"';
+    print ' data-error-invalid="' . dol_escape_htmltag($langs->trans('ErrorInvalidCarteGriseJson')) . '"';
+    print ' data-confirm-plate="' . dol_escape_htmltag($langs->trans('ConfirmJsonPlateMismatch')) . '"';
+    print ' data-fields-filled="' . dol_escape_htmltag($langs->trans('FieldsFilledFromJson')) . '">';
+    print '<label class="qc-dropzone qc-dropzone--compact" for="dolicar-json-file-edit">';
+    print '<input type="file" id="dolicar-json-file-edit" accept=".json,application/json">';
+    print '<i class="fas fa-file-arrow-up qc-dropzone-icon"></i>';
+    print '<div class="qc-dropzone-meta">';
+    print '<div class="qc-dropzone-text">' . $langs->trans('DropJsonFileHere') . '</div>';
+    print '<div class="qc-dropzone-hint">' . $langs->trans('FillFromCarteGriseJsonHelp') . '</div>';
+    print '<div class="qc-dropzone-file"><i class="fas fa-file-code"></i> <span class="qc-dropzone-filename"></span></div>';
+    print '</div>';
+    print '</label>';
+    print '<button type="button" class="qc-btn qc-btn-primary dolicar-json-apply" disabled>';
+    print '<i class="fas fa-file-import"></i> ' . $langs->trans('ImportJson');
+    print '</button>';
+    print '</div>'; // .dolicar-json-import
+    print '</div>'; // .qc-section-body
+
+    print '</div>'; // .dolicar-json-import-panel
+
     print $form->buttonsSaveCancel();
 
-    print '</form>'; ?>
+    print '</form>';
+    ?>
 
     <script>
         const $editTable     = $('.tableforfieldedit');
