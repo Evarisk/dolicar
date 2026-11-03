@@ -193,6 +193,18 @@ DolicarBatch                  = Numéro de châssis
 VINNumber          = Numéro VIN
 LinkedProductBatch = Numéro de lot/série lié
 
+# File tags - Tags des fichiers joints
+FileTag                             = Tag
+FileTagRegistrationCertificateFront = Carte grise recto
+FileTagRegistrationCertificateBack  = Carte grise verso
+FileTagInsuranceFront               = Assurance recto
+FileTagInsuranceBack                = Assurance verso
+FileTagTechnicalInspection          = Contrôle technique
+FileTagEnvironmentalSticker         = Macaron environnement
+FileTagNotSaved                     = Le tag du fichier n'a pas été enregistré
+FileTagAdd                          = Ajouter un tag
+FileTagNone                         = Sans tag
+
 # API - API
 ZeroApiRequestsRemaining              = Vous n'avez plus de jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.
 LessThanHundredApiRequestsRemaining   = Il vous reste moins de 10 jetons de recherche de plaque d'immatriculation. Pour en obtenir à nouveau, contactez votre administrateur.

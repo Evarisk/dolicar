@@ -187,6 +187,20 @@ class ActionsDoliCar
             }
         }
 
+        // Tag picked on a line of the attached files of a carte grise, saved in AJAX
+        if (strpos($parameters['context'], 'registrationcertificatefrdocument') !== false && $action == 'set_file_tag') {
+            require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
+
+            $result = 0;
+            if ($user->hasRight('dolicar', 'registrationcertificatefr', 'write') && $object instanceof RegistrationCertificateFr && $object->id > 0) {
+                $result = dolicar_set_registration_certificate_file_tag($object, GETPOSTINT('ecm_file_id'), GETPOST('file_tag', 'aZ09'));
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode(['success' => $result > 0]);
+            exit;
+        }
+
         return 0; // or return 1 to replace standard code
     }
 
@@ -307,11 +321,15 @@ class ActionsDoliCar
      */
     public function printCommonFooter(array $parameters): int
     {
-        global $db, $langs; // // $db/$langs mandatory for TPL
+        global $db, $langs, $object, $user; // // $db/$langs mandatory for TPL
 
         if ((strpos($parameters['context'], 'productlotcard') !== false) && GETPOST('action', 'aZ09') != 'create') {
             $fromProductLot = 1;
             require_once __DIR__ . '/../core/tpl/registrationcertificatefr_linked_objects.tpl.php';
+        }
+
+        if (strpos($parameters['context'], 'registrationcertificatefrdocument') !== false && $object instanceof RegistrationCertificateFr && $object->id > 0) {
+            require_once __DIR__ . '/../core/tpl/registrationcertificatefr_file_tags.tpl.php';
         }
 
         return 0; // or return 1 to replace standard code
