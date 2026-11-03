@@ -259,6 +259,39 @@ function dolicar_get_vehicle_history_linked_element_ids(int $lotId): array
 }
 
 /**
+ * Current mileage of a vehicle: the highest one recorded in its history.
+ *
+ * A trip of the public logbook carries a mileage at each end, any other event (maintenance, invoice
+ * pushed at validation) the one it was recorded at. One query on the extrafields of the events of the lot.
+ *
+ * @param  int $lotId Product lot ID of the vehicle
+ * @return int        0 when no mileage was ever recorded, the mileage otherwise
+ */
+function dolicar_get_vehicle_current_mileage(int $lotId): int
+{
+    global $db;
+
+    if ($lotId <= 0) {
+        return 0;
+    }
+
+    $sql  = 'SELECT MAX(ef.starting_mileage) AS starting_mileage, MAX(ef.arrival_mileage) AS arrival_mileage';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm a';
+    $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'actioncomm_extrafields ef ON ef.fk_object = a.id';
+    $sql .= " WHERE a.elementtype = 'productlot' AND a.fk_element = " . $lotId;
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        return 0;
+    }
+
+    $obj = $db->fetch_object($resql);
+    $db->free($resql);
+
+    return !empty($obj) ? max((int) $obj->starting_mileage, (int) $obj->arrival_mileage) : 0;
+}
+
+/**
  * Push an invoice issued for a vehicle into the history of that vehicle (issue #464).
  *
  * Creates the event on the product lot of the vehicle, carries the mileage of the invoice over to
