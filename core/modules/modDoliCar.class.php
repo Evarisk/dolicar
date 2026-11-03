@@ -571,6 +571,7 @@ class modDoliCar extends DolibarrModules
         dolibarr_set_const($this->db, 'DOLICAR_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
         // Create extrafields during init
+        require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
         $commonExtraFieldsValue = ['entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"];
 
         $extraFieldsArrays = [
@@ -589,7 +590,12 @@ class modDoliCar extends DolibarrModules
 
             'starting_mileage' => ['Label' => 'StartingMileage', 'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 10, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'arrival_mileage'  => ['Label' => 'ArrivalMileage',  'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 20, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
-            'json'             => ['Label' => 'JSON',            'type' => 'text', 'elementtype' => ['actioncomm'], 'position' => 30, 'alwayseditable' => 1, 'list' => 0, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"]
+            'json'             => ['Label' => 'JSON',            'type' => 'text', 'elementtype' => ['actioncomm'], 'position' => 30, 'alwayseditable' => 1, 'list' => 0, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
+
+            // Tag of a file attached to a carte grise, picked in its documents tab: hidden from the forms of the ECM module
+            'dolicar_file_tag' => ['Label' => 'FileTag', 'type' => 'select', 'elementtype' => ['ecm_files'], 'position' => $this->numero . 100, 'list' => 0, 'params' => array_map(function (array $fileTag): string {
+                return $fileTag['label'];
+            }, dolicar_get_file_tags())]
         ];
 
         saturne_manage_extrafields($extraFieldsArrays, $commonExtraFieldsValue);
