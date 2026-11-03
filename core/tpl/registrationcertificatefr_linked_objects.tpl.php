@@ -51,10 +51,18 @@ if ($propalEnabled) {
     require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 }
 
-// Column count for the "no data" message (+1 for the amount column, always displayed)
-$colspanEmpty = ($digiqualiEnabled ? 8 : 4) + 1;
-
 $totalAmount = 0;
+
+/**
+ * Helper : does the linked object carry an amount ? Only commercial documents do
+ *
+ * @param  CommonObject $linkedObject        The linked object
+ * @param  string       $linkedObjectElement The element type key (e.g. 'facture')
+ * @return bool                              True if the object has an amount (incl. tax)
+ */
+$hasAmount = static function ($linkedObject, string $linkedObjectElement): bool {
+    return in_array($linkedObjectElement, ['facture', 'propal', 'commande'], true) && isset($linkedObject->total_ttc);
+};
 
 /**
  * Helper : render a single linked object row
@@ -62,11 +70,12 @@ $totalAmount = 0;
  * @param  CommonObject $linkedObject        The linked object to display
  * @param  string       $linkedObjectElement The element type key (e.g. 'digiquali_control')
  * @param  bool         $digiqualiEnabled    Whether DigiQuali module is active
+ * @param  bool         $showAmountColumn    Whether the amount column is displayed
  * @param  Translate    $langs               Translation object
  * @param  float        $totalAmount         Running total of amounts (passed by reference)
  * @return string                            HTML row string
  */
-$renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectElement, bool $digiqualiEnabled, $langs, &$totalAmount): string {
+$renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectElement, bool $digiqualiEnabled, bool $showAmountColumn, $langs, &$totalAmount) use ($hasAmount): string {
     global $conf, $db;
     $isControl       = ($linkedObjectElement === 'digiquali_control');
     $isSurvey        = ($linkedObjectElement === 'digiquali_survey');
@@ -91,6 +100,12 @@ $renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectEle
     }
     $row .= '<td>' . (!$isControl && !$isSurvey && !$isCommercialDoc ? ($linkedObject->array_options['options_mileage'] ?? '') : '') . '</td>';
     $row .= '<td>' . dol_print_date($linkedObject->date_creation, 'dayhour') . '</td>';
+    // Status of every object. The public interface only shows locked controls: say so on the others, or the user wonders where they went
+    $row .= '<td class="nowrap">' . (method_exists($linkedObject, 'getLibStatut') ? $linkedObject->getLibStatut(5) : '');
+    if ($isControl && $linkedObject->status != Control::STATUS_LOCKED) {
+        $row .= ' <span class="classfortooltip opacitymedium" title="' . dol_escape_htmltag($langs->transnoentities('ControlNotOnPublicInterface')) . '"><i class="fas fa-eye-slash"></i></span>';
+    }
+    $row .= '</td>';
     if ($digiqualiEnabled) {
         if ($isControl) {
             $verdictColor = $linkedObject->verdict == 1 ? 'green' : ($linkedObject->verdict == 2 ? 'red' : 'grey');
@@ -103,11 +118,13 @@ $renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectEle
         }
     }
     // Amount (incl. tax) column: only commercial documents carry an amount; it feeds the grand total
-    if ($isCommercialDoc && isset($linkedObject->total_ttc)) {
-        $totalAmount += (float) $linkedObject->total_ttc;
-        $row .= '<td class="right nowrap">' . price($linkedObject->total_ttc, 0, $langs, 1, -1, -1, $conf->currency) . '</td>';
-    } else {
-        $row .= '<td class="right"></td>';
+    if ($showAmountColumn) {
+        if ($hasAmount($linkedObject, $linkedObjectElement)) {
+            $totalAmount += (float) $linkedObject->total_ttc;
+            $row .= '<td class="right nowrap">' . price($linkedObject->total_ttc, 0, $langs, 1, -1, -1, $conf->currency) . '</td>';
+        } else {
+            $row .= '<td class="right"></td>';
+        }
     }
     $row .= '</tr>';
     return $row;
@@ -116,19 +133,21 @@ $renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectEle
 $registrationCertificate = new RegistrationCertificateFr($db);
 $registrationCertificate->fetch(!isset($fromProductLot) ? GETPOST('id') : 0, !isset($fromProductLot) ? GETPOST('ref') : '', isset($fromProductLot) ? ' AND t.fk_lot = ' . GETPOST('id') : '');
 
-// Collect all rows, keyed by element+id to avoid duplicates
-$rows = [];
+// Collect all linked objects, keyed by element+id to avoid duplicates. The rows are rendered once all are known:
+// the amount column is only displayed when one of them carries an amount
+$linkedItems = [];
 
 // Linked objects directly on the registration certificate
 // No params = OR query: finds links where regcert is source (digiquali controls) AND where it is target (propals, invoices, etc.)
+// The linked objects are keyed by link id, not by object id: key them by object id, else an invoice also found below is listed twice
 $registrationCertificate->fetchObjectLinked();
 if (!empty($registrationCertificate->linkedObjects)) {
     foreach ($registrationCertificate->linkedObjects as $linkedObjectElement => $linkedObjects) {
-        foreach ($linkedObjects as $linkedObjectId => $linkedObject) {
+        foreach ($linkedObjects as $linkedObject) {
             if (isset($linkedObject->status) && $linkedObject->status == -1) {
                 continue;
             }
-            $rows[$linkedObjectElement . '_' . $linkedObjectId] = $renderLinkedObjectRow($linkedObject, $linkedObjectElement, $digiqualiEnabled, $langs, $totalAmount);
+            $linkedItems[$linkedObjectElement . '_' . $linkedObject->id] = [$linkedObject, $linkedObjectElement];
         }
     }
 }
@@ -141,13 +160,13 @@ if ($digiqualiEnabled && $registrationCertificate->fk_lot > 0) {
     $productLotLinked->fetchObjectLinked();
     foreach (['digiquali_control', 'digiquali_survey'] as $elementType) {
         if (!empty($productLotLinked->linkedObjects[$elementType])) {
-            foreach ($productLotLinked->linkedObjects[$elementType] as $linkedObjectId => $linkedObject) {
+            foreach ($productLotLinked->linkedObjects[$elementType] as $linkedObject) {
                 if (isset($linkedObject->status) && $linkedObject->status == -1) {
                     continue;
                 }
-                $key = $elementType . '_' . $linkedObjectId;
-                if (!isset($rows[$key])) {
-                    $rows[$key] = $renderLinkedObjectRow($linkedObject, $elementType, $digiqualiEnabled, $langs, $totalAmount);
+                $key = $elementType . '_' . $linkedObject->id;
+                if (!isset($linkedItems[$key])) {
+                    $linkedItems[$key] = [$linkedObject, $elementType];
                 }
             }
         }
@@ -168,16 +187,30 @@ foreach ($commercialDocSources as $elementType => $source) {
     if ($resql) {
         while ($obj = $db->fetch_object($resql)) {
             $key = $elementType . '_' . $obj->fk_object;
-            if (isset($rows[$key])) {
+            if (isset($linkedItems[$key])) {
                 continue;
             }
             $commercialDoc = new $source['class']($db);
             if ($commercialDoc->fetch($obj->fk_object) > 0) {
-                $rows[$key] = $renderLinkedObjectRow($commercialDoc, $elementType, $digiqualiEnabled, $langs, $totalAmount);
+                $linkedItems[$key] = [$commercialDoc, $elementType];
             }
         }
         $db->free($resql);
     }
+}
+
+// The amount column, and its total, only when one of the linked objects carries an amount
+$showAmountColumn = false;
+foreach ($linkedItems as [$linkedObject, $linkedObjectElement]) {
+    if ($hasAmount($linkedObject, $linkedObjectElement)) {
+        $showAmountColumn = true;
+        break;
+    }
+}
+
+$rows = [];
+foreach ($linkedItems as $key => [$linkedObject, $linkedObjectElement]) {
+    $rows[$key] = $renderLinkedObjectRow($linkedObject, $linkedObjectElement, $digiqualiEnabled, $showAmountColumn, $langs, $totalAmount);
 }
 
 $out = load_fiche_titre($langs->transnoentities('LinkedObjects'), '', 'dolicar_color@dolicar');
@@ -191,12 +224,15 @@ if ($digiqualiEnabled) {
 }
 $columns[] = ['label' => $langs->trans('Mileage')];
 $columns[] = ['label' => $langs->trans('Date')];
+$columns[] = ['label' => $langs->trans('Status')];
 if ($digiqualiEnabled) {
     $columns[] = ['label' => $langs->trans('Verdict'), 'filter' => 'verdict'];
     $columns[] = ['label' => $langs->trans('ControlDate')];
     $columns[] = ['label' => $langs->trans('NextControlDate')];
 }
-$columns[] = ['label' => $langs->trans('AmountTTC'), 'align' => 'right'];
+if ($showAmountColumn) {
+    $columns[] = ['label' => $langs->trans('AmountTTC'), 'align' => 'right'];
+}
 
 $out .= '<table class="noborder centpercent dolicar-linked-objects-table">';
 
@@ -238,12 +274,14 @@ if (!empty($rows)) {
 if (!empty($rows)) {
     $out .= implode('', $rows);
     // Grand total of the linked commercial documents (invoices + proposals)
-    $out .= '<tr class="liste_total">';
-    $out .= '<td class="right" colspan="' . ($colspanEmpty - 1) . '">' . $langs->trans('Total') . '</td>';
-    $out .= '<td class="right nowrap">' . price($totalAmount, 0, $langs, 1, -1, -1, $conf->currency) . '</td>';
-    $out .= '</tr>';
+    if ($showAmountColumn) {
+        $out .= '<tr class="liste_total">';
+        $out .= '<td class="right" colspan="' . (count($columns) - 1) . '">' . $langs->trans('Total') . '</td>';
+        $out .= '<td class="right nowrap">' . price($totalAmount, 0, $langs, 1, -1, -1, $conf->currency) . '</td>';
+        $out .= '</tr>';
+    }
 } else {
-    $out .= '<tr><td colspan="' . $colspanEmpty . '">' . $langs->trans('NoLinkedObjectsToPrint') . '</td></tr>';
+    $out .= '<tr><td colspan="' . count($columns) . '">' . $langs->trans('NoLinkedObjectsToPrint') . '</td></tr>';
 }
 
 $out .= '</table>'; ?>

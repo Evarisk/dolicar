@@ -391,6 +391,7 @@ ObjectType             = Type d'objet
 Object                 = Objet
 Mileage                = Kilométrage
 NoLinkedObjectsToPrint = Pas d'objets liés à afficher
+ControlNotOnPublicInterface = Pas visible sur l'interface publique : seul un contrôle verrouillé y apparaît
 CarBrands              = Marques de véhicules
 
 
