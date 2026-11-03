@@ -30,6 +30,7 @@
  *            $catLabels (array id => ['label' => string, 'data-html' => string])
  *            $eventsList (array of ActionComm)
  *            $evtCatById (array evtId => Categorie)
+ *            $linkedElementIds (array type => [id => id] of the documents already attached to an event)
  */
 
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -86,9 +87,15 @@ if (!empty($permissiontoadd)) {
             ? img_picto('', $linkableType['picto'], 'class="pictofixedwidth"')
             : '<i class="fas ' . $linkableType['pictofa'] . ' pictofixedwidth"></i>';
 
+        // Leave out the documents already attached to an event of this vehicle (issue #426)
+        $selectArg = $linkableType['selectarg'];
+        if (!empty($linkedElementIds[$typeKey])) {
+            $selectArg .= ':0:(t.rowid:notin:' . implode(',', $linkedElementIds[$typeKey]) . ')';
+        }
+
         $out .= '<tr>';
         $out .= '<td>' . $typePicto . $langs->transnoentities($linkableType['label']) . '</td>';
-        $out .= '<td>' . $form->selectForForms($linkableType['selectarg'], $linkableType['field'], GETPOSTINT($linkableType['field']), 1, '', '', 'minwidth300') . '</td>';
+        $out .= '<td>' . $form->selectForForms($selectArg, $linkableType['field'], GETPOSTINT($linkableType['field']), 1, '', '', 'minwidth300') . '</td>';
         $out .= '</tr>';
 
         // Expense report: pick specific lines instead of the whole report (issue #452)

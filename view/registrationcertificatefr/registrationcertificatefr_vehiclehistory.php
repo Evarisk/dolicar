@@ -69,18 +69,25 @@ $permissionToRead = $user->rights->dolicar->registrationcertificatefr->read;
 $permissiontoadd  = $user->rights->dolicar->registrationcertificatefr->write;
 saturne_check_access($permissionToRead);
 
+// Documents already attached to an event of this vehicle: none of them may be picked again (issue #426)
+$linkedElementIds = dolicar_get_vehicle_history_linked_element_ids((int) $object->fk_lot);
+
 // AJAX: return the lines of an expense report for the vehicle-event form (issue #452)
 if ($action == 'get_expensereport_lines') {
     require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
 
     $fkExpenseReport = GETPOSTINT('fk_expensereport');
     $linesData       = [];
-    if ($fkExpenseReport > 0) {
+    if ($fkExpenseReport > 0 && !isset($linkedElementIds['expensereport'][$fkExpenseReport])) {
         $expenseReport = new ExpenseReport($db);
         if ($expenseReport->fetch($fkExpenseReport) > 0) {
             $expenseReport->fetch_lines();
             if (is_array($expenseReport->lines)) {
                 foreach ($expenseReport->lines as $line) {
+                    if (isset($linkedElementIds['expensereportline'][(int) $line->rowid])) {
+                        continue;
+                    }
+
                     $typeLabel    = ($langs->transnoentities($line->type_fees_code) != $line->type_fees_code) ? $langs->transnoentities($line->type_fees_code) : ($line->type_fees_libelle ?: '');
                     $projectLabel = $line->projet_title ?: $line->projet_ref;
                     $parts        = [];
@@ -336,6 +343,36 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     if ($eventCategoryId <= 0 || $selectedCat->fetch($eventCategoryId) <= 0 || (int) $selectedCat->fk_parent !== $parentCategoryId) {
         setEventMessages($langs->transnoentities('VehicleEventType') . ' ' . $langs->transnoentities('NotValid'), null, 'errors');
         $error++;
+    }
+
+    // The form no longer offers a document already attached to this vehicle, a crafted POST must not either (issue #426)
+    foreach (dolicar_get_vehicle_event_linkable_types() as $typeKey => $linkableType) {
+        $fkLinkedElement = GETPOSTINT($linkableType['field']);
+        if ($fkLinkedElement > 0 && isset($linkedElementIds[$typeKey][$fkLinkedElement])) {
+            setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities($linkableType['label'])), null, 'errors');
+            $error++;
+        }
+    }
+    foreach ($expenseReportLineIds as $expenseReportLineId) {
+        if (isset($linkedElementIds['expensereportline'][$expenseReportLineId])) {
+            setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities('ExpenseReportLines')), null, 'errors');
+            $error++;
+            break;
+        }
+    }
+    // The whole report would count again the lines already attached to another event
+    if (!$error && empty($expenseReportLineIds) && $fkExpenseReport > 0 && !empty($linkedElementIds['expensereportline'])) {
+        $expenseReport = new ExpenseReport($db);
+        if ($expenseReport->fetch($fkExpenseReport) > 0) {
+            $expenseReport->fetch_lines();
+            foreach ((array) $expenseReport->lines as $line) {
+                if (isset($linkedElementIds['expensereportline'][(int) $line->rowid])) {
+                    setEventMessages($langs->transnoentities('VehicleEventExpenseReportPartlyLinked'), null, 'errors');
+                    $error++;
+                    break;
+                }
+            }
+        }
     }
 
     if (!$error) {

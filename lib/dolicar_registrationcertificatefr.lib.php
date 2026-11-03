@@ -218,6 +218,47 @@ function dolicar_get_vehicle_history_event_of_invoice(int $invoiceId, int $lotId
 }
 
 /**
+ * Collect the documents already attached to an event of a vehicle history, by type (issue #426).
+ *
+ * One query on element_element for the whole history, so a document cannot be picked again for
+ * another event of the same vehicle. Covers every linkable type and the expense report lines.
+ *
+ * @param  int                           $lotId Product lot ID of the vehicle
+ * @return array<string, array<int,int>>        Linked IDs keyed by element type, then by ID
+ */
+function dolicar_get_vehicle_history_linked_element_ids(int $lotId): array
+{
+    global $db;
+
+    $linkedElementIds = [];
+    if ($lotId <= 0) {
+        return $linkedElementIds;
+    }
+
+    $sourceTypes   = array_keys(dolicar_get_vehicle_event_linkable_types());
+    $sourceTypes[] = 'expensereportline';
+
+    // ActionComm->element is 'action', which is what add_object_linked() stores as targettype
+    $sql  = 'SELECT ee.sourcetype, ee.fk_source FROM ' . MAIN_DB_PREFIX . 'element_element ee';
+    $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'actioncomm a ON a.id = ee.fk_target';
+    $sql .= " WHERE ee.targettype = 'action'";
+    $sql .= " AND ee.sourcetype IN ('" . implode("','", array_map([$db, 'escape'], $sourceTypes)) . "')";
+    $sql .= " AND a.elementtype = 'productlot' AND a.fk_element = " . $lotId;
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        return $linkedElementIds;
+    }
+
+    while ($obj = $db->fetch_object($resql)) {
+        $linkedElementIds[$obj->sourcetype][(int) $obj->fk_source] = (int) $obj->fk_source;
+    }
+    $db->free($resql);
+
+    return $linkedElementIds;
+}
+
+/**
  * Push an invoice issued for a vehicle into the history of that vehicle (issue #464).
  *
  * Creates the event on the product lot of the vehicle, carries the mileage of the invoice over to
