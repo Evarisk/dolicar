@@ -76,7 +76,9 @@ if ($action == 'update_problem_report') {
     // Several recipients can be given, separated by commas or line breaks (the field is a textarea):
     // CMailFile sends one mail to the whole list. The list is stored cleaned up and comma separated,
     // so an empty item never ends up as a blank recipient.
-    $emails        = array_values(array_filter(array_map('trim', preg_split('/[,\r\n]+/', GETPOST('DOLICAR_PROBLEM_REPORT_EMAIL', 'alphanohtml'))), 'strlen'));
+    $emails        = array_values(array_filter(array_map('trim', preg_split('/[,\r\n]+/', GETPOST('DOLICAR_PROBLEM_REPORT_EMAIL', 'alphanohtml'))), function ($email) {
+        return $email !== '';
+    }));
     $invalidEmails = array_filter($emails, function ($email) {
         return !isValidEmail($email);
     });
@@ -270,7 +272,9 @@ print '<br><span class="opacitymedium wordbreak">' . $langs->transnoentities('Pr
 print '</td>';
 print '<td class="center">';
 // One address per line, so the whole list stays readable however long it gets
-$problemReportEmails = array_filter(array_map('trim', explode(',', getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL'))), 'strlen');
+$problemReportEmails = array_filter(array_map('trim', explode(',', getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL'))), function ($email) {
+    return $email !== '';
+});
 print '<textarea class="flat minwidth300" name="DOLICAR_PROBLEM_REPORT_EMAIL" rows="' . max(3, count($problemReportEmails) + 1) . '" placeholder="responsable@example.com,&#10;atelier@example.com">' . dol_escape_htmltag(implode(",\n", $problemReportEmails), 0, 1) . '</textarea>';
 print '</td>';
 print '</tr>';
