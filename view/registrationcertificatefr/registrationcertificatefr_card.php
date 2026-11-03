@@ -514,6 +514,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     // Common attributes
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_view.tpl.php';
 
+    // Current mileage, read from the vehicle history (trips, maintenance, invoices)
+    $currentMileage = dolicar_get_vehicle_current_mileage((int) $object->fk_lot);
+    print '<tr class="field_current_mileage"><td class="titlefieldmiddle">' . $langs->trans('CurrentMileage') . '</td>';
+    print '<td class="valuefield">' . ($currentMileage > 0 ? price($currentMileage, 0, '', 1, 0) . ' ' . $langs->trans('km') : '') . '</td></tr>';
+
     // Other attributes. Fields from hook formObjectOptions and Extrafields
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_view.tpl.php';
 
