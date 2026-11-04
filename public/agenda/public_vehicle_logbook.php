@@ -81,7 +81,7 @@ if ($isModEnabledDigiquali) {
 global $conf, $db, $hookmanager, $langs;
 
 // Load translation files required by the page
-saturne_load_langs(['productbatch']);
+saturne_load_langs(['companies', 'productbatch']);
 
 // Get parameters
 $id                 = GETPOST('id', 'int');
