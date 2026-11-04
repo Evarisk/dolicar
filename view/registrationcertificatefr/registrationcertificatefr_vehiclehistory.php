@@ -355,7 +355,7 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     }
     foreach ($expenseReportLineIds as $expenseReportLineId) {
         if (isset($linkedElementIds['expensereportline'][$expenseReportLineId])) {
-            setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities('ExpenseReportLines')), null, 'errors');
+            setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities('DoliCarExpenseReportLines')), null, 'errors');
             $error++;
             break;
         }

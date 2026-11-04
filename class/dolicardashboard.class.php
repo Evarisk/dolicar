@@ -204,7 +204,7 @@ class DolicarDashboard
                 'picto'  => 'fas fa-warehouse',
                 'name'   => 'warehouseList',
                 'labels' => [
-                    'Ref'       => 'RegistrationNumber',
+                    'Ref'       => 'DoliCarRegistrationNumber',
                     'Vehicle'   => 'Vehicle',
                     'Warehouse' => 'Warehouse',
                 ],
@@ -441,7 +441,7 @@ class DolicarDashboard
             $refLink    = '<a href="' . $cardUrl . '">' . dol_escape_htmltag($cg->a_registration_number) . '</a>';
             $brandModel = dol_escape_htmltag(trim($cg->d1_vehicle_brand . ' ' . $cg->d3_vehicle_model));
             $eatbyDate  = dol_print_date($lot->eatby, 'day');
-            $daysHtml   = '<span class="dolicar-overdue-days dolicar-overdue-days--level' . $level . '">' . $days . ' j</span>';
+            $daysHtml   = '<span class="dolicar-overdue-days dolicar-overdue-days--level' . $level . '">' . $days . ' ' . $langs->trans('DayShort') . '</span>';
 
             $listData[] = [
                 'Ref'        => ['value' => $refLink],
@@ -465,7 +465,7 @@ class DolicarDashboard
             'picto'  => 'fontawesome_fa-exclamation-triangle_fas_#E05353',
             'name'   => 'overdueCtList',
             'labels' => [
-                'Ref'        => 'RegistrationNumber',
+                'Ref'        => 'DoliCarRegistrationNumber',
                 'Vehicle'    => 'Vehicle',
                 'ExpiryDate' => 'ExpiryDate',
                 'DaysOver'   => 'DaysOverdue',

@@ -42,7 +42,7 @@
 
 <?php if (empty($controlSheets)) : ?>
     <div class="plv2-content">
-        <p class="plv2-hint"><i class="fas fa-info-circle"></i> <?php echo $langs->trans('NoControlSheetAvailable'); ?></p>
+        <p class="plv2-hint"><i class="fas fa-info-circle"></i> <?php echo $langs->trans('DoliCarNoControlSheetAvailable'); ?></p>
     </div>
 <?php else : ?>
     <!-- target="_blank": create the control and open the DigiQuali answer page in a new tab, keeping this logbook tab open -->
