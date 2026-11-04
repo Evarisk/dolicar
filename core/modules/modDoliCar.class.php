@@ -718,7 +718,7 @@ class modDoliCar extends DolibarrModules
             $brandTagID      = $category->create($user);
 
             if ($brandTagID > 0) {
-                $filename = DOL_DOCUMENT_ROOT . '/custom/dolicar/core/car_brands.txt';
+                $filename = dol_buildpath('/dolicar/core/car_brands.txt', 0);
                 $file     = fopen($filename, 'r');
                 if ($file) {
                     while (($line = fgets($file)) !== false) {
