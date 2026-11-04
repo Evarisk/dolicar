@@ -109,7 +109,7 @@ function dolicar_get_vehicle_event_linkable_types(): array
             'label'     => 'Controls',
             'picto'     => '',
             'pictofa'   => 'fa-tasks',
-            'selectarg' => 'Control:custom/digiquali/class/control.class.php',
+            'selectarg' => 'Control:digiquali/class/control.class.php',
             'field'     => 'event_fk_control',
         ],
     ];

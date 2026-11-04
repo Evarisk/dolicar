@@ -711,10 +711,10 @@ if ($showScreen === 'list' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')
 }
 
 $title   = $langs->trans('PublicVehicleLogBook');
-$moreJS  = ['/custom/saturne/js/includes/signature-pad.min.js'];
+$moreJS  = ['/saturne/js/includes/signature-pad.min.js'];
 // select2 styling lives in the Dolibarr theme CSS, which this lightweight public page does not load.
 // Load select2's own stylesheet so the native pickers (driver / third party / contact) render correctly.
-$moreCSS = ['/custom/saturne/css/pico.min.css', '/includes/jquery/plugins/select2/dist/css/select2.min.css'];
+$moreCSS = ['/saturne/css/pico.min.css', '/includes/jquery/plugins/select2/dist/css/select2.min.css'];
 
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
