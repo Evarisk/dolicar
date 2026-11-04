@@ -734,7 +734,7 @@ saturne_header(1, '', $title, '', '', 0, 0, $moreJS, $moreCSS, '', $bodyCssClass
 
 $baseUrl     = $_SERVER['PHP_SELF'] . '?entity=' . urlencode($entity);
 $vehicleUrl  = $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . urlencode($entity);
-$logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
+$logoUrl     = dol_buildpath('/dolicar/img/dolicar_color.svg', 1); ?>
 
 <div class="plv2-app">
 
