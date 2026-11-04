@@ -163,7 +163,7 @@ if ($nbLots > 0) {
 
     $resqlDetail = $db->query($sqlDetail);
 
-    $rcCardUrl = dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1);
+    $rcCardUrl = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1);
 
     print '<div class="notice-subtitle"><strong>' . $langs->transnoentities('FixLotStockQuantityWarning', $nbLots, $excess) . '</strong></div>';
     print '<br>';

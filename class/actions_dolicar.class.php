@@ -73,7 +73,7 @@ class ActionsDoliCar
     public function hookSetManifest(array $parameters): int
     {
         if (strpos($_SERVER['PHP_SELF'], 'dolicar') !== false) {
-            $this->resprints = dol_buildpath('custom/dolicar/manifest.json.php', 1);
+            $this->resprints = dol_buildpath('/dolicar/manifest.json.php', 1);
             return 1; // or return 1 to replace standard code
         }
 
@@ -277,7 +277,7 @@ class ActionsDoliCar
         }
 
         if (strpos($parameters['context'], 'registrationcertificatefrcard') !== false && !empty($object->fk_lot)) {
-            $publicLogbookUrl = dol_buildpath('/custom/dolicar/public/agenda/public_vehicle_logbook.php', 1) . '?id=' . (int) $object->fk_lot . '&entity=' . (int) $conf->entity;
+            $publicLogbookUrl = dol_buildpath('/dolicar/public/agenda/public_vehicle_logbook.php', 1) . '?id=' . (int) $object->fk_lot . '&entity=' . (int) $conf->entity;
             $this->resprints  = '<div class="refidno dolicar-banner-links">';
             $this->resprints .= '<a href="' . dol_escape_htmltag($publicLogbookUrl) . '" target="_blank" class="dolicar-banner-link dolicar-public-logbook-link">';
             $this->resprints .= img_picto('', 'dolicar_color@dolicar', 'class="dolicar-banner-logo"') . $langs->transnoentities('PublicVehicleLogBook');
@@ -300,7 +300,7 @@ class ActionsDoliCar
                 } else {
                     $trackId = base64_encode(json_encode(['type' => 'productlot', 'id' => (int) $object->fk_lot]));
                 }
-                $publicControlUrl = dol_buildpath('/custom/digiquali/public/control/public_control_history.php', 1) . '?track_id=' . urlencode($trackId) . '&entity=' . (int) $conf->entity;
+                $publicControlUrl = dol_buildpath('/digiquali/public/control/public_control_history.php', 1) . '?track_id=' . urlencode($trackId) . '&entity=' . (int) $conf->entity;
                 $this->resprints .= '<a href="' . dol_escape_htmltag($publicControlUrl) . '" target="_blank" class="dolicar-banner-link dolicar-public-control-link">';
                 $this->resprints .= img_picto('', 'digiquali_color@digiquali', 'class="dolicar-banner-logo"') . $langs->transnoentities('QualityControlInterface');
                 $this->resprints .= '</a>';
@@ -514,7 +514,7 @@ class ActionsDoliCar
                     if (in_array(getDolGlobalInt('DOLICAR_VEHICLE_TAG'), $categories)) {
                         $langs->load('dolicar@dolicar');
 
-                        print '<a class="tab" href="' . dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?id=' . $parameters['objectId'] . '&entity=' . $parameters['entity'], 1) . '">';
+                        print '<a class="tab" href="' . dol_buildpath('/dolicar/public/agenda/public_vehicle_logbook.php', 1) . '?id=' . $parameters['objectId'] . '&entity=' . $parameters['entity'] . '">';
                         // Short label: the tab is an item of the bottom navigation of the public control page
                         print '<i class="fas fa-car"></i> ' . $langs->transnoentities('VehicleLogBook');
                         print '</a>';

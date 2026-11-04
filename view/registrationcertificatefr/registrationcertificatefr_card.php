@@ -563,9 +563,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     <?php
 
     if (isModEnabled('digiquali') && !empty($object->fk_lot) && $object->fk_lot > 0 && !empty($digiQualiSheets)) {
-        $controlCardUrl = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1);
-        $backToPage     = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
-        $logoUrl        = dol_buildpath('/custom/digiquali/img/digiquali_color.svg', 1);
+        $controlCardUrl = dol_buildpath('/digiquali/view/control/control_card.php', 1);
+        $backToPage     = dol_buildpath('/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
+        $logoUrl        = dol_buildpath('/digiquali/img/digiquali_color.svg', 1);
 
         $sheetsForJs = [];
         foreach ($digiQualiSheets as $digiQualiSheet) {

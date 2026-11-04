@@ -89,41 +89,44 @@ $manifest->name       = getDolGlobalString('MAIN_INFO_SOCIETE_NOM') . '-DoliCar'
 $manifest->icons      = [];
 
 $img               = new stdClass();
-$img->src          = dol_buildpath('custom/dolicar/img/dolicar_color.svg', 1);
+$img->src          = dol_buildpath('/dolicar/img/dolicar_color.svg', 1);
 $img->type         = 'image/svg+xml';
 $img->sizes        = '150x150';
 $manifest->icons[] = $img;
 
 $img               = new stdClass();
-$img->src          = dol_buildpath('custom/dolicar/img/dolicar_color_192.png', 1);
+$img->src          = dol_buildpath('/dolicar/img/dolicar_color_192.png', 1);
 $img->type         = 'image/png';
 $img->sizes        = '192x192';
 $manifest->icons[] = $img;
 
 $img               = new stdClass();
-$img->src          = dol_buildpath('custom/dolicar/img/dolicar_color_512.png', 1);
+$img->src          = dol_buildpath('/dolicar/img/dolicar_color_512.png', 1);
 $img->type         = 'image/png';
 $img->sizes        = '512x512';
 $manifest->icons[] = $img;
 
-$manifest->id               = dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook?entity=' . $conf->entity, 1);
-$manifest->start_url        = dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook?entity=' . $conf->entity, 1);
+// dol_buildpath() only finds the module root from an existing file: the page itself, the query string comes after
+$publicLogbookUrl = dol_buildpath('/dolicar/public/agenda/public_vehicle_logbook.php', 1);
+
+$manifest->id               = preg_replace('/\.php$/', '', $publicLogbookUrl) . '?entity=' . $conf->entity;
+$manifest->start_url        = preg_replace('/\.php$/', '', $publicLogbookUrl) . '?entity=' . $conf->entity;
 $manifest->background_color = '#ffffff';
 $manifest->display          = 'standalone';
 $manifest->display_override = ['window-controls-overlay'];
-$manifest->scope            = dol_buildpath('custom/dolicar/', 1);
+$manifest->scope            = dirname(dol_buildpath('/dolicar/dolicarindex.php', 1)) . '/';
 $manifest->theme_color      = '#ffffff';
 $manifest->description      = 'Gérez la facturation de vos prestations de réparation et de maintenance de véhicules';
 
 $img                     = new stdClass();
-$img->src                = dol_buildpath('custom/dolicar/img/dolicar_color_512.png', 1);
+$img->src                = dol_buildpath('/dolicar/img/dolicar_color_512.png', 1);
 $img->type               = 'image/png';
 $img->sizes              = '512x512';
 $img->form_factor        = 'narrow';
 $manifest->screenshots[] = $img;
 
 $img                     = new stdClass();
-$img->src                = dol_buildpath('custom/dolicar/img/dolicar_color_512.png', 1);
+$img->src                = dol_buildpath('/dolicar/img/dolicar_color_512.png', 1);
 $img->type               = 'image/png';
 $img->sizes              = '512x512';
 $img->form_factor        = 'wide';

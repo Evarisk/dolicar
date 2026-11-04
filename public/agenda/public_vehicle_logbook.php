@@ -320,7 +320,7 @@ if (empty($resHook)) {
         if (!empty($sendTo)) {
             $from        = getDolGlobalString('MAIN_MAIL_EMAIL_FROM');
             $vehicleLabel = trim($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model);
-            $vehicleLink = dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 2) . '?id=' . (int) $registrationCertificateFR->id;
+            $vehicleLink = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 2) . '?id=' . (int) $registrationCertificateFR->id;
             $subject     = $langs->transnoentities('ProblemReportEmailSubject', $registrationCertificateFR->a_registration_number);
 
             $body  = '<p>' . $langs->transnoentities('ProblemReportEmailIntro', $registrationCertificateFR->a_registration_number) . '</p>';
@@ -446,7 +446,7 @@ if (empty($resHook)) {
             // Link the control to the vehicle lot (stored as sourcetype = productbatch / targettype = digiquali_control)
             $newControl->add_object_linked('productbatch', $id);
 
-            $answerUrl = dol_buildpath('custom/digiquali/public/public_answer.php?track_id=' . $newControl->track_id . '&object_type=control&document_type=ControlDocument&entity=' . $entity, 3);
+            $answerUrl = dol_buildpath('/digiquali/public/public_answer.php', 3) . '?track_id=' . $newControl->track_id . '&object_type=control&document_type=ControlDocument&entity=' . $entity;
             header('Location: ' . $answerUrl);
             exit;
         }
