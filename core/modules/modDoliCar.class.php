@@ -575,7 +575,7 @@ class modDoliCar extends DolibarrModules
         $commonExtraFieldsValue = ['entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"];
 
         $extraFieldsArrays = [
-            'registration_number'       => ['Label' => 'RegistrationNumber',        'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 10, 'list' => 5],
+            'registration_number'       => ['Label' => 'DoliCarRegistrationNumber', 'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 10, 'list' => 5],
             'vehicle_model'             => ['Label' => 'VehicleModel',              'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 20, 'list' => 5],
             'VIN_number'                => ['Label' => 'VINNumber',                 'type' => 'varchar', 'length' => 128, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 30, 'list' => 5],
             'first_registration_date'   => ['Label' => 'FirstRegistrationDate',     'type' => 'date',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 40, 'list' => 5],

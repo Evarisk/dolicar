@@ -46,7 +46,7 @@ $historyUrl = $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . urlencode($enti
 <div class="plv2-content">
     <div class="plv2-history-head">
         <span class="plv2-plate-badge"><?php echo dol_escape_htmltag($registrationCertificateFR->a_registration_number); ?></span>
-        <span class="plv2-history-head__count"><?php echo count($historyTrips); ?> <?php echo $langs->trans('Trips'); ?></span>
+        <span class="plv2-history-head__count"><?php echo count($historyTrips); ?> <?php echo $langs->trans('DoliCarTrips'); ?></span>
     </div>
 
     <?php if (empty($historyTrips)) : ?>

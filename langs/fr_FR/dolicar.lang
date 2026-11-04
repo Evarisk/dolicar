@@ -140,7 +140,7 @@ ProblemReportEmailSubjectTemplate = Problème signalé - véhicule
 ProblemReportEmailIntroTemplate   = Un problème a été signalé sur ce véhicule via le carnet de bord public.
 
 # Fiels - Champs
-RegistrationNumber            = Numéro d'immatriculation (A)
+DoliCarRegistrationNumber     = Numéro d'immatriculation (A)
 FirstRegistrationDate         = Date de la première immatriculation (B)
 OwnerFullName                 = Nom et prénom du propriétaire (C.1)
 RegistrationAddress           = Adresse du propriétaire (C.3)
@@ -341,7 +341,7 @@ ClosePublicLogBook           = Fermer
 # Public interface - Trajets (issue #457)
 BottomBarHistory             = Trajets
 VehicleTripHistory           = Trajets
-Trips                        = trajets
+DoliCarTrips                 = trajets
 NoTripRecorded               = Aucun trajet enregistré pour ce véhicule
 SeeAllTripHistory            = Voir tous les trajets
 ViewStateSheet               = Voir la fiche état
@@ -365,7 +365,7 @@ Controller               = Contrôleur
 ControlOnVehicle         = Contrôle - véhicule %s
 CreateAndFillControl     = Créer et remplir le contrôle
 SelectControlSheet       = Choisir un modèle de contrôle
-NoControlSheetAvailable  = Aucun modèle de contrôle applicable aux véhicules n'est disponible.
+DoliCarNoControlSheetAvailable = Aucun modèle de contrôle applicable aux véhicules n'est disponible.
 
 
 
@@ -425,7 +425,7 @@ LinkedDocuments                = Documents liés
 Invoices                       = Factures
 Proposals                      = Devis
 ExpenseReports                 = Notes de frais
-ExpenseReportLines             = Lignes de note de frais
+DoliCarExpenseReportLines      = Lignes de note de frais
 SuppliersOrders                = Commandes fournisseurs
 SuppliersInvoices              = Factures fournisseurs
 Controls                       = Contrôles DigiQuali
@@ -446,23 +446,23 @@ PushInvoicesToVehicleHistory       = Remontée des factures dans l'historique
 PushInvoicesToVehicleHistoryButton = Remonter les factures existantes
 PushInvoicesToVehicleHistoryHelp   = À la validation d'une facture, celle-ci est ajoutée automatiquement à l'historique du véhicule renseigné dessus, avec son kilométrage. Ce bouton traite les factures déjà validées avant l'activation de cette remontée.
 InvoicesPushedToVehicleHistory     = %s facture(s) remontée(s) dans l'historique des véhicules
-VehicleEventLinkableDocumentHelp = Si activé, ce type de document peut être lié lors de l''ajout d''un événement dans l''historique du véhicule.
-ErrorUpdateCarBrandsFromApi = Erreur lors de la mise à jour des marques depuis l''API : %s
-ErrorUpdateCarBrandsFromApiBadResponse = Réponse invalide de l''API lors de la mise à jour des marques
-ErrorUpdateCarBrandsFromApiNoData = Aucune donnée de marque trouvée dans la réponse de l''API
-ErrorUpdateCarBrandsFile = Impossible d''écrire le fichier car_brands.txt
+VehicleEventLinkableDocumentHelp = Si activé, ce type de document peut être lié lors de l'ajout d'un événement dans l'historique du véhicule.
+ErrorUpdateCarBrandsFromApi = Erreur lors de la mise à jour des marques depuis l'API : %s
+ErrorUpdateCarBrandsFromApiBadResponse = Réponse invalide de l'API lors de la mise à jour des marques
+ErrorUpdateCarBrandsFromApiNoData = Aucune donnée de marque trouvée dans la réponse de l'API
+ErrorUpdateCarBrandsFile = Impossible d'écrire le fichier car_brands.txt
 
 # PDF documents - Documents PDF (livret d'entretien / carnet de bord)
-LivretEntretienPDFDescription        = Modèle PDF de carnet d''entretien du véhicule
+LivretEntretienPDFDescription        = Modèle PDF de carnet d'entretien du véhicule
 VehicleLogBookDocumentPDFDescription = Modèle PDF de carnet de bord du véhicule
 EditedOn                             = Édité le
 RegistrationCardReference            = Référence carte grise
-LicensePlate                         = Plaque d''immatriculation
+LicensePlate                         = Plaque d'immatriculation
 BrandAndModel                        = Marque et modèle
 Energy                               = Énergie
 OwnerThirdParty                      = Tiers / Propriétaire
 CurrentMileage                       = Kilométrage actuel
-MaintenanceSynthesis                 = Synthèse de l''entretien
+MaintenanceSynthesis                 = Synthèse de l'entretien
 Interventions                        = Interventions
 TotalCostInclTax                     = Coût total TTC
 LastIntervention                     = Dernière intervention
@@ -503,7 +503,7 @@ Signature                            = Signature
 # Import - Import de cartes grises
 ImportRegistrationCertificate         = Importer des cartes grises
 ImportRegistrationCertificateDesc     = Importez vos cartes grises depuis un fichier CSV. Chaque ligne est créée via la logique métier du module (normalisation de la plaque, produit/lot et déclencheurs).
-ImportFromCSV                         = Import depuis un fichier CSV
+DoliCarImportFromCSV                  = Import depuis un fichier CSV
 CSVFile                               = Fichier CSV
 UpdateExistingRecords                 = Mettre à jour les fiches existantes
 UpdateExistingRecordsHelp             = Si une carte grise avec la même immatriculation existe déjà, elle est mise à jour. Sinon la ligne est ignorée.

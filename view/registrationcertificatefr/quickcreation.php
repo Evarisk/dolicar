@@ -537,7 +537,7 @@ if ($step === 'search') {
     print '<div class="qc-section-header">';
     print '<div class="qc-section-title">';
     print '<i class="fas fa-id-card"></i>';
-    print $langs->trans('RegistrationNumber');
+    print $langs->trans('DoliCarRegistrationNumber');
     print ' <span class="qc-code">(A)</span>';
     print '</div>';
 
@@ -705,7 +705,7 @@ if ($step === 'edit') {
     print '<div class="qc-section-header">';
     print '<div class="qc-section-title">';
     print '<i class="fas fa-id-card"></i>';
-    print $langs->trans('RegistrationNumber');
+    print $langs->trans('DoliCarRegistrationNumber');
     print ' <span class="qc-code">(A)</span>';
     print '</div>';
     print '</div>';

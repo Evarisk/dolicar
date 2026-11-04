@@ -170,7 +170,7 @@ if ($nbLots > 0) {
     print '<table class="noborder" style="width:100%">';
     print '<tr class="liste_titre">';
     print '<td>' . $langs->trans('RegistrationCertificateFr') . '</td>';
-    print '<td>' . $langs->trans('RegistrationNumber') . '</td>';
+    print '<td>' . $langs->trans('DoliCarRegistrationNumber') . '</td>';
     print '<td>' . $langs->trans('DolicarBatch') . '</td>';
     print '<td>' . $langs->trans('Product') . '</td>';
     print '<td class="center">' . $langs->trans('Qty') . '</td>';

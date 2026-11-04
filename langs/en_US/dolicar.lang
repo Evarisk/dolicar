@@ -140,7 +140,7 @@ ProblemReportEmailSubjectTemplate = Problem reported - vehicle
 ProblemReportEmailIntroTemplate   = A problem has been reported on this vehicle via the public logbook.
 
 # Fields
-RegistrationNumber            = Registration number (A)
+DoliCarRegistrationNumber     = Registration number (A)
 FirstRegistrationDate         = Date of first registration (B)
 OwnerFullName                 = Owner full name (C.1)
 RegistrationAddress           = Owner address (C.3)
@@ -341,7 +341,7 @@ ClosePublicLogBook           = Close
 # Public interface - Trips (issue #457)
 BottomBarHistory             = Trips
 VehicleTripHistory           = Trips
-Trips                        = trips
+DoliCarTrips                 = trips
 NoTripRecorded               = No trip recorded for this vehicle
 SeeAllTripHistory            = See all trips
 ViewStateSheet               = View the condition report
@@ -365,7 +365,7 @@ Controller               = Controller
 ControlOnVehicle         = Control - vehicle %s
 CreateAndFillControl     = Create and fill in the control
 SelectControlSheet       = Choose a control sheet
-NoControlSheetAvailable  = No control sheet applicable to vehicles is available.
+DoliCarNoControlSheetAvailable = No control sheet applicable to vehicles is available.
 
 
 
@@ -425,7 +425,7 @@ LinkedDocuments                = Linked documents
 Invoices                       = Invoices
 Proposals                      = Commercial proposals
 ExpenseReports                 = Expense reports
-ExpenseReportLines             = Expense report lines
+DoliCarExpenseReportLines      = Expense report lines
 SuppliersOrders                = Purchase orders
 SuppliersInvoices              = Vendor invoices
 Controls                       = DigiQuali controls
@@ -503,7 +503,7 @@ Signature                            = Signature
 # Import
 ImportRegistrationCertificate         = Import registration certificates
 ImportRegistrationCertificateDesc     = Import your registration certificates from a CSV file. Each line is created through the business logic of the module (plate normalization, product/lot and triggers).
-ImportFromCSV                         = Import from a CSV file
+DoliCarImportFromCSV                  = Import from a CSV file
 CSVFile                               = CSV file
 UpdateExistingRecords                 = Update existing records
 UpdateExistingRecordsHelp             = If a registration certificate with the same registration number already exists, it is updated. Otherwise the line is skipped.

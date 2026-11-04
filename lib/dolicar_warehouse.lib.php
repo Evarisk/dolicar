@@ -320,7 +320,7 @@ function dolicar_print_warehouse_block(string $blockId, string $blockTitle, arra
 
     print '<table class="noborder centpercent">';
     print '<tr class="liste_titre">';
-    print '<td>' . $langs->transnoentities('RegistrationNumber') . '</td>';
+    print '<td>' . $langs->transnoentities('DoliCarRegistrationNumber') . '</td>';
     print '<td>' . $langs->transnoentities('Vehicle') . '</td>';
     print '<td>' . $langs->transnoentities('VINNumber') . '</td>';
     print '<td class="center">' . $langs->transnoentities('Status') . '</td>';

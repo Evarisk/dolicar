@@ -101,7 +101,7 @@ if (!empty($permissiontoadd)) {
         // Expense report: pick specific lines instead of the whole report (issue #452)
         if ($typeKey === 'expensereport') {
             $out .= '<tr id="dolicar-er-lines-row" style="display:none;">';
-            $out .= '<td>' . $langs->transnoentities('ExpenseReportLines') . '</td>';
+            $out .= '<td>' . $langs->transnoentities('DoliCarExpenseReportLines') . '</td>';
             $out .= '<td><div id="dolicar-er-lines" class="dolicar-er-lines" data-url="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id) . '"></div></td>';
             $out .= '</tr>';
         }
