@@ -238,12 +238,12 @@ class modDoliCar extends DolibarrModules
         // $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@dolicar:$user->rights->othermodule->read:/dolicar/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key
         // $this->tabs[] = array('data'=>'objecttype:-tabname:NU:conditiontoremove');
         $this->tabs   = [];
-        $pictoPath    = dol_buildpath('custom/dolicar/img/dolicar_color.png', 1);
+        $pictoPath    = dol_buildpath('/dolicar/img/dolicar_color.png', 1);
         $pictoModule  = img_picto('', $pictoPath, '', 1, 0, 0, '', 'pictoModule');
-        $this->tabs[] = ['data' => 'productlot:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot'];
-        $this->tabs[] = ['data' => 'thirdparty:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty'];
-        $this->tabs[] = ['data' => 'product:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product'];
-        $this->tabs[] = ['data' => 'project:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project'];
+        $this->tabs[] = ['data' => 'productlot:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot'];
+        $this->tabs[] = ['data' => 'thirdparty:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty'];
+        $this->tabs[] = ['data' => 'product:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product'];
+        $this->tabs[] = ['data' => 'project:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project'];
 
         // Dictionaries
         $this->dictionaries = [];
@@ -497,7 +497,7 @@ class modDoliCar extends DolibarrModules
             'prefix'   => '<i class="fas fa-globe pictofixedwidth"></i>',
             'mainmenu' => 'dolicar',
             'leftmenu' => 'public_interface',
-            'url'      => '/custom/dolicar/admin/publicinterface.php',
+            'url'      => '/dolicar/admin/publicinterface.php',
             'langs'    => 'dolicar@dolicar',
             'position' => 1000 + $r,
             'enabled'  => '$conf->dolicar->enabled',
@@ -718,7 +718,7 @@ class modDoliCar extends DolibarrModules
             $brandTagID      = $category->create($user);
 
             if ($brandTagID > 0) {
-                $filename = DOL_DOCUMENT_ROOT . '/custom/dolicar/core/car_brands.txt';
+                $filename = dol_buildpath('/dolicar/core/car_brands.txt', 0);
                 $file     = fopen($filename, 'r');
                 if ($file) {
                     while (($line = fgets($file)) !== false) {

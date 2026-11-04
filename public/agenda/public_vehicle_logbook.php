@@ -320,7 +320,7 @@ if (empty($resHook)) {
         if (!empty($sendTo)) {
             $from        = getDolGlobalString('MAIN_MAIL_EMAIL_FROM');
             $vehicleLabel = trim($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model);
-            $vehicleLink = dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 2) . '?id=' . (int) $registrationCertificateFR->id;
+            $vehicleLink = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 2) . '?id=' . (int) $registrationCertificateFR->id;
             $subject     = $langs->transnoentities('ProblemReportEmailSubject', $registrationCertificateFR->a_registration_number);
 
             $body  = '<p>' . $langs->transnoentities('ProblemReportEmailIntro', $registrationCertificateFR->a_registration_number) . '</p>';
@@ -446,7 +446,7 @@ if (empty($resHook)) {
             // Link the control to the vehicle lot (stored as sourcetype = productbatch / targettype = digiquali_control)
             $newControl->add_object_linked('productbatch', $id);
 
-            $answerUrl = dol_buildpath('custom/digiquali/public/public_answer.php?track_id=' . $newControl->track_id . '&object_type=control&document_type=ControlDocument&entity=' . $entity, 3);
+            $answerUrl = dol_buildpath('/digiquali/public/public_answer.php', 3) . '?track_id=' . $newControl->track_id . '&object_type=control&document_type=ControlDocument&entity=' . $entity;
             header('Location: ' . $answerUrl);
             exit;
         }
@@ -711,10 +711,10 @@ if ($showScreen === 'list' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')
 }
 
 $title   = $langs->trans('PublicVehicleLogBook');
-$moreJS  = ['/custom/saturne/js/includes/signature-pad.min.js'];
+$moreJS  = ['/saturne/js/includes/signature-pad.min.js'];
 // select2 styling lives in the Dolibarr theme CSS, which this lightweight public page does not load.
 // Load select2's own stylesheet so the native pickers (driver / third party / contact) render correctly.
-$moreCSS = ['/custom/saturne/css/pico.min.css', '/includes/jquery/plugins/select2/dist/css/select2.min.css'];
+$moreCSS = ['/saturne/css/pico.min.css', '/includes/jquery/plugins/select2/dist/css/select2.min.css'];
 
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
@@ -734,7 +734,7 @@ saturne_header(1, '', $title, '', '', 0, 0, $moreJS, $moreCSS, '', $bodyCssClass
 
 $baseUrl     = $_SERVER['PHP_SELF'] . '?entity=' . urlencode($entity);
 $vehicleUrl  = $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . urlencode($entity);
-$logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
+$logoUrl     = dol_buildpath('/dolicar/img/dolicar_color.svg', 1); ?>
 
 <div class="plv2-app">
 
