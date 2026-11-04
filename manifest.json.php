@@ -109,8 +109,10 @@ $manifest->icons[] = $img;
 // dol_buildpath() only finds the module root from an existing file: the page itself, the query string comes after
 $publicLogbookUrl = dol_buildpath('/dolicar/public/agenda/public_vehicle_logbook.php', 1);
 
+// The id keeps its former shape, without .php: it is the identity of the apps already installed.
+// The start_url opens the page itself, without relying on the content negotiation of the server (MultiViews)
 $manifest->id               = preg_replace('/\.php$/', '', $publicLogbookUrl) . '?entity=' . $conf->entity;
-$manifest->start_url        = preg_replace('/\.php$/', '', $publicLogbookUrl) . '?entity=' . $conf->entity;
+$manifest->start_url        = $publicLogbookUrl . '?entity=' . $conf->entity;
 $manifest->background_color = '#ffffff';
 $manifest->display          = 'standalone';
 $manifest->display_override = ['window-controls-overlay'];
