@@ -30,6 +30,7 @@
  *            $catLabels (array id => ['label' => string, 'data-html' => string])
  *            $eventsList (array of ActionComm)
  *            $evtCatById (array evtId => Categorie)
+ *            $linkedElementIds (array type => [id => id] of the documents already attached to an event)
  */
 
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -86,15 +87,21 @@ if (!empty($permissiontoadd)) {
             ? img_picto('', $linkableType['picto'], 'class="pictofixedwidth"')
             : '<i class="fas ' . $linkableType['pictofa'] . ' pictofixedwidth"></i>';
 
+        // Leave out the documents already attached to an event of this vehicle (issue #426)
+        $selectArg = $linkableType['selectarg'];
+        if (!empty($linkedElementIds[$typeKey])) {
+            $selectArg .= ':0:(t.rowid:notin:' . implode(',', $linkedElementIds[$typeKey]) . ')';
+        }
+
         $out .= '<tr>';
         $out .= '<td>' . $typePicto . $langs->transnoentities($linkableType['label']) . '</td>';
-        $out .= '<td>' . $form->selectForForms($linkableType['selectarg'], $linkableType['field'], GETPOSTINT($linkableType['field']), 1, '', '', 'minwidth300') . '</td>';
+        $out .= '<td>' . $form->selectForForms($selectArg, $linkableType['field'], GETPOSTINT($linkableType['field']), 1, '', '', 'minwidth300') . '</td>';
         $out .= '</tr>';
 
         // Expense report: pick specific lines instead of the whole report (issue #452)
         if ($typeKey === 'expensereport') {
             $out .= '<tr id="dolicar-er-lines-row" style="display:none;">';
-            $out .= '<td>' . $langs->transnoentities('ExpenseReportLines') . '</td>';
+            $out .= '<td>' . $langs->transnoentities('DoliCarExpenseReportLines') . '</td>';
             $out .= '<td><div id="dolicar-er-lines" class="dolicar-er-lines" data-url="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken()) . '"></div></td>';
             $out .= '</tr>';
         }
@@ -139,7 +146,8 @@ if (!empty($eventsList)) {
         $isTrip    = !empty($evt->code) && strpos($evt->code, '_ADD_PUBLIC_VEHICLE_LOG_BOOK') !== false;
         $kmArrival = (int) ($evt->array_options['options_arrival_mileage'] ?? 0);
         $editingKm = ($action == 'edit_mileage' && GETPOSTINT('event_id') === (int) $evt->id);
-        $badge   = '<span style="color:' . $color . ';font-weight:bold;"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';
+        // The colour of the category is data: it goes in a custom property, the look in the stylesheet
+        $badge   = '<span class="dolicar-event-type" style="--dolicar-event-color:' . $color . ';"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';
 
         $evt->fetchObjectLinked(null, null, null, null, 'OR', 1, 'sourcetype', 0);
         $linkedHtml = '';

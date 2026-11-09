@@ -51,7 +51,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'DoliCar triggers.';
-        $this->version     = '23.1.0';
+        $this->version     = '23.1.2';
         $this->picto       = 'dolicar@dolicar';
     }
 
@@ -134,7 +134,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
 
                     $registrationCertificateFr->add_object_linked($object->element, $object->id);
 
-                    $object->note_public  = $langs->transnoentities('RegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
+                    $object->note_public  = $langs->transnoentities('DoliCarRegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('VINNumber') . ' : ' . (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';

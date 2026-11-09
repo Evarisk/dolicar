@@ -1,0 +1,550 @@
+# Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# DoliCar
+#
+
+ModuleDoliCarName  = DoliCar
+ModuleDoliCarDesc  = Vehicle fleet management and repairs
+DoliCarDescription = Vehicle fleet management and repairs
+
+# Init
+DefaultBrand     = Default brand
+DoliCarWarehouse           = DoliCar warehouse
+DoliCarInterneWarehouse    = Dolicar Internal
+DoliCarReparationWarehouse = Dolicar Repair
+ClientVehicle    = Customer vehicle
+DefaultVehicle   = Default vehicle
+
+# Tags
+Vehicle           = Vehicle
+Brands            = Brands
+Truck             = Truck
+CommercialVehicle = Commercial vehicle
+Car               = Car
+Bicycle           = Bicycle
+
+#
+# Dashboard
+#
+
+DashboardRemainingRequestsRequest         = License plate lookup tokens
+DashboardNumberOfRegestrationCertifatesFr = Number of registration certificates
+DashboardCarState                         = Vehicle status
+DashboardWarehouseStats                   = Registration certificates by warehouse
+DashboardWarehouseList                    = List of registration certificates by warehouse
+DashboardRecentActivities                 = Recent activity
+DashboardOverdueCT                        = Overdue technical inspections
+DashboardActivity                         = Activity
+Warehouse                                 = Warehouse
+ExpiryDate                                = Expiry Date
+NoRecentActivityDolicar                   = No recent activity
+NoCTOverdueDolicar                        = No overdue technical inspection
+LotCreatedForRegistrationCertificate      = Serial number created for registration certificate %s
+DaysOverdue                               = Overdue
+
+
+#
+# Config page
+#
+
+# RegistrationCertificateFr
+RegistrationCertificateFieldsConfig     = Registration certificate fields configuration
+Display                                 = Show
+ShowRegistrationCertificateFieldHelp    = Show/hide this field on the registration certificate
+HideObjectDetsDolicarDetails            = Hide DoliCar details on object lines
+HideObjectDetsDolicarDetailsDescription = This option hides/shows the mileage, the license plate and the vehicle model on invoice/proposal/order lines
+
+# QuickCreation
+QuickCreation                       = Quick add
+AutomaticContactCreation            = Automatic contact creation when a third party is created
+AutomaticContactCreationDescription = This option automatically creates a contact when a third party is created
+ThirdPartyQuickCreation             = Third party quick creation
+ThirdPartyQuickCreationDescription  = This option allows a third party to be created quickly
+ContactQuickCreation                = Contact quick creation
+ContactQuickCreationDescription     = This option allows a contact to be created quickly
+ProjectQuickCreation                = Project quick creation
+ProjectQuickCreationDescription     = This option allows a project to be created quickly
+
+# Public interface
+OfPublicVehicleLogBook       = of the public vehicle logbook
+MaxArrivalMileage            = Arrival mileage alert threshold
+MaxArrivalMileageDescription = This option sets the number of kilometers driven above which a warning is shown to the driver when a return is recorded in a vehicle logbook. Entry remains possible beyond this threshold. <br> (default 1000 km)
+
+# Setup
+ImmatriculationAPIConfig          = API configuration
+RemainingRequests                 = Remaining license plate lookup tokens: %s
+WarehouseConfig                   = Warehouse configuration
+DefaultWarehouseForVehicle        = Default warehouse for vehicle creation
+DefaultWarehouseForVehicleDesc    = Warehouse in which vehicles are created by default (can be changed when creating a registration certificate)
+WarehouseForThisVehicle           = Destination warehouse
+
+
+
+#
+# RegistrationCertificateFr
+#
+
+# Data
+RegistrationCertificateData     = Registration certificate data
+RegistrationCertificateFr       = Registration certificate
+Registrationcertificatefrs      = Registration certificates
+Registrationcertificatefr       = Registration certificate
+RegistrationCertificatesFrMin   = registration certificates
+TheRegistrationcertificatefr    = the registration certificate
+ListRegistrationcertificatefr   = List of registration certificates
+NewRegistrationcertificatefr    = New registration certificate
+ModifyRegistrationcertificatefr = Edit registration certificate
+FindLicencePlateInRepertory     = Look up a license plate
+RegistrationPlate               = Registration
+QualityControlInterface         = Quality control interface
+
+# Public vehicle logbook - Report a problem
+ReportProblem                   = Report a problem
+ReportedProblem                 = Reported problem
+ReportProblemSub                = Photo, comment, voice
+DescribeProblem                 = Describe the problem
+PhotoAndVoiceMemo               = Photo and voice memo
+SendReport                      = Send the report
+ProblemReportSent               = Report sent
+ProblemReportSentDesc           = The manager has been notified by email.
+ProblemReportSentNoMailDesc     = The report has been saved in the vehicle history, but the manager could not be notified by email: please contact them directly.
+ProblemReportedOnVehicle        = Problem reported on vehicle %s
+ProblemReportEmailSubject       = Problem reported - vehicle %s
+ProblemReportEmailIntro         = A problem has been reported on vehicle %s via the public logbook.
+AccessVehicleSheet              = View the vehicle record
+ProblemReportConfig             = Problem reporting
+ProblemReportEmail              = Manager email addresses
+ProblemReportEmailDesc          = Addresses to which problem reports from the public logbook are sent. Several addresses can be entered, separated by commas or one per line: each one receives the email. If empty, the company email is used.
+ProblemReportEmailTemplate      = Email template
+ProblemReportEmailTemplateDesc  = Template used for the email sent to the manager. If no template is selected, the default message of the module is sent.
+ProblemReportEmailSetting       = Email sent to the manager
+SeeEmailTemplates               = See email templates
+AvailableSubstitutions          = Available substitutions
+ProblemReportEmailTemplateLabel = Problem report (public logbook)
+# No %s: these two keys feed the email template, where the __(Key)__ substitution passes no argument
+ProblemReportEmailSubjectTemplate = Problem reported - vehicle
+ProblemReportEmailIntroTemplate   = A problem has been reported on this vehicle via the public logbook.
+
+# Fields
+DoliCarRegistrationNumber     = Registration number (A)
+FirstRegistrationDate         = Date of first registration (B)
+OwnerFullName                 = Owner full name (C.1)
+RegistrationAddress           = Owner address (C.3)
+VehicleOwner                  = Vehicle owner? (C.4a)
+SecondOwnerNumber             = Number of owners (C.4.1)
+SecondOwnerName               = Second owner name (C.4.1)
+VehicleBrand                  = Vehicle brand (D.1)
+VehicleType                   = Vehicle type, variant, version (D.2)
+VehicleCNIT                   = Vehicle national type identification code (D.2.1)
+VehicleModel                  = Vehicle model (D.3)
+VehicleSerialNumber           = Vehicle identification number (E)
+TechnicalPTAC                 = Technically permissible maximum laden mass (in kg) (F.1)
+PTAC                          = Maximum permissible laden mass (in kg) (F.2)
+PTRA                          = Maximum permissible laden mass of the combination (in kg) (F.3)
+VehicleWeight                 = Vehicle mass (in kg) (G)
+VehicleEmptyWeight            = Empty weight (in kg) (G.1)
+ValidityPeriod                = Validity period (H)
+VehicleRegistrationDate       = Registration date of this certificate (I)
+VehicleCategory               = Vehicle category (J)
+NationalType                  = National category (J.1)
+EuropeanBodyWork              = Bodywork - European standard (J.2)
+NationalBodyWork              = Bodywork - national standard (J.3)
+TypeApprovalNumber            = Type-approval number (K)
+CylinderCapacity              = Engine capacity (in cm3) (P.1)
+MaximumNetPower               = Maximum net power (in kW) (P.2)
+FuelType                      = Fuel type or power source (P.3)
+NationalAdministrativePower   = National administrative power, or fiscal horsepower (P.6)
+PowerToWeightRatio            = Power-to-weight ratio (in kW/kg) (Q)
+SeatingCapacity               = Number of seats (S.1)
+StandingCapacity              = Number of standing places allowed (S.2)
+StationaryNoiseLevel          = Stationary noise level (in dB) (U.1)
+MotorSpeed                    = Engine speed (in min-1) (U.2)
+CO2Emission                   = CO2 emissions (in g/km) (V.7)
+EnvironmentalCategory         = Environmental category (V.9)
+FirstTechnicalInspectionDate  = Date of first technical inspection (X.1)
+RegionalTax                   = Regional tax (Y.1)
+ProfessionalTax               = Professional tax (Y.2)
+EcologicalTax                 = Ecological tax (Y.3)
+ManagementTax                 = Management tax (Y.4)
+ForwardingExpensesTax         = Delivery fee tax (Y.5)
+TotalPriceVehicleRegistration = Total price of the registration certificate (Y.6)
+SpecificDetails1              = Specific details 1 (Z.1)
+SpecificDetails2              = Specific details 2 (Z.2)
+SpecificDetails3              = Specific details 3 (Z.3)
+SpecificDetails4              = Specific details 4 (Z.4)
+LinkedProduct                 = Linked product
+DolicarBatch                  = Chassis number
+
+# Extrafields
+VINNumber          = VIN
+LinkedProductBatch = Linked lot/serial number
+
+# File tags
+FileTag                             = Tag
+FileTagRegistrationCertificateFront = Registration certificate front
+FileTagRegistrationCertificateBack  = Registration certificate back
+FileTagInsuranceFront               = Insurance front
+FileTagInsuranceBack                = Insurance back
+FileTagTechnicalInspection          = Technical inspection
+FileTagEnvironmentalSticker         = Environmental sticker
+FileTagNotSaved                     = The file tag was not saved
+FileTagAdd                          = Add a tag
+FileTagNone                         = No tag
+
+# API
+ZeroApiRequestsRemaining              = You have no license plate lookup tokens left. To get more, contact your administrator.
+LessThanHundredApiRequestsRemaining   = You have fewer than 10 license plate lookup tokens left. To get more, contact your administrator.
+LicencePlateWasAlreadyExisting        = This license plate already exists, you have been redirected to its page.
+BadAPIUsernameOrBadLicencePlateFormat = Plate <strong>%s</strong> cannot be found or its format is invalid.<br>Please use one of the following formats: <br><b>XX-111-XX<br>XX111XX</b>
+LicencePlateInformationsCharged       = The registration certificate information has been retrieved
+LicencePlateInformationsFromDatabase  = The information was retrieved from the database (no token used)
+BadAPIUsername                        = Invalid API username
+RegistrationNumberPreviousApiError    = Plate <strong>%s</strong> already returned an error on the last API lookup.<br>Error returned: “%s”<br>Click <strong>Search</strong> again to run the lookup again and use a new token.
+
+# QuickCreation
+QuickRegistrationCertificateCreation  = Registration certificate quick add
+LicencePlate                          = License plate
+PleaseEnterRegistrationNumber         = Please enter a license plate number
+Step                                  = Step
+VerifyResult                          = Check the result
+SIVSource                             = Main SIV source
+LaunchSearch                          = Run the search
+OrDirectlyCreate                      = No plate?
+CreateEmptyRegistrationCertificate    = Create an empty registration certificate directly
+NoPlateFound                          = No plate found
+CreateManuallyFromPaper               = The search returned nothing. Create the registration certificate manually from the paper document.
+VehicleCharacteristics                = Vehicle characteristics
+CreateRegistrationCertificate         = Create the registration certificate
+DestinationWarehouse                  = Destination warehouse
+AddFromCarteGriseJson                  = Add from a registration certificate JSON file (fallback mode)
+AddFromCarteGriseJsonHelp              = Select the registration certificate JSON file: its keys are the official fields (A, B, C.1, D.1, ..., Z.4). Field A (license plate) is mandatory, null values are ignored.
+CreateFromJson                         = Create from the JSON file
+DropJsonFileHere                       = Drag and drop the JSON file here
+OrClickToBrowseJson                    = or click to browse your files (.json)
+RegistrationCertificateCreatedFromJson = Registration certificate created from the JSON
+FillFromCarteGriseJson                 = Fill in from a registration certificate JSON file
+FillFromCarteGriseJsonHelp             = Drag and drop or click to choose the file (.json): the fields it contains will fill in the form, check them then click Save
+ImportJson                             = Import
+ConfirmJsonPlateMismatch               = The JSON matches plate {jsonPlate} but this record is for plate {cardPlate}. Fill in the fields anyway?
+FieldsFilledFromJson                   = {count} fields filled in from the JSON. Check the values then click Save to store them.
+ErrorInvalidCarteGriseJson             = The JSON provided is invalid or empty
+ErrorNoCarteGriseJsonFile              = Please select a registration certificate JSON file
+ErrorJsonMissingRegistrationNumber     = The JSON does not contain a license plate (field A)
+ScanCarteGriseWithAi                   = Scan the registration certificate with AI (photo)
+ScanCarteGriseWithAiHelp               = Send a photo of the registration certificate: the AI extracts the official fields and the registration certificate is created automatically. The plate (field A) must be readable on the photo.
+DropCarteGrisePhotoHere                = Drag and drop the registration certificate photo here
+OrClickToBrowsePhoto                   = or click to browse your files (photo)
+AnalyzeAndCreate                       = Analyze and create the registration certificate
+ErrorNoCarteGrisePhoto                 = Please select a valid registration certificate photo
+ErrorCarteGrisePhotoTooLarge           = The photo exceeds the maximum size of 10 MB
+ErrorAiAnalysisFailed                  = AI analysis failed: %s
+ErrorAiInvalidJson                     = The AI did not return a usable registration certificate JSON
+RegistrationCertificateCreatedFromAi   = Registration certificate created from the photo analyzed by AI
+
+# DigiQuali
+LinkDolicar_registrationcertificatefr            = Enable link with registration certificates
+LinkDolicar_registrationcertificatefrDescription = Allows linking between registration certificates and templates
+
+
+
+# Public interface
+PublicVehicleLogBook          = Public vehicle logbook
+VehicleLogBook                = Logbook
+Driver                        = Driver
+ReturnedBy                    = Returned by
+DriverName                    = Driver name
+StartDateAndHour              = Departure date and time
+StartingMileage               = Starting mileage
+StartComment                  = Departure comment
+EndDateAndHour                = Return date and time
+ArrivalMileage                = Arrival mileage
+EndComment                    = Arrival comment
+ObjectAddPublicVehicleLogBook = Mileage log: %s - VIN: %s
+SavedPublicVehicleLogBook     = Public vehicle logbook saved
+LicencePlateNotFoundInDB      = The license plate cannot be found in the registration certificate database
+
+# Public interface v2 - New labels
+HelloDriver                  = Hello
+WhichVehicleToday            = Which vehicle are you taking today?
+EnterPlate                   = Enter the license plate
+QRCodeMayHavePrefilled       = The QR code stuck in the vehicle may have already prefilled it
+PlateNotFound                = Plate not found
+VehicleFound                 = Vehicle found
+KnownMileage                 = Known mileage
+VehicleCurrentlyOut          = Vehicle currently OUT
+VehicleCurrentlyIn           = Vehicle available
+WhatDoYouWantToDo            = What do you want to do?
+TakeVehicle                  = Pick up
+DeclareDeparture             = Declare a departure
+ReturnVehicle                = Drop off
+DeclareReturn                = Declare a return
+ReturnExpected               = The vehicle is out, a return is expected
+WhoAreYou                    = Who are you?
+SelectDriver                 = Select a driver
+DriverInternal               = Internal
+DriverExternal               = External
+DriverFree                   = Free entry
+DriverLastname               = Last name
+DriverFirstname              = First name
+DriverPhone                  = Phone
+SelectContact                = Select a contact
+SelectAThirdPartyFirst       = Select a third party first...
+LinkedThirdParty             = Customer / Third party
+ExistingThirdParty           = Existing third party
+NewThirdParty                = New Third Party (prospect, customer, vendor)
+OrCreateNewThirdParty        = Or create a new third party
+RegistrationCertificatesList = List of registration certificates
+NoRegistrationCertificate    = No registration certificate
+BottomBarVehiclesList        = Vehicles
+BottomBarCurrentVehicle      = Current
+SearchVehicle                = Search (plate, brand, model)
+NoVehicleFound               = No vehicle found
+When                         = When
+LastKnownMileage             = Last known mileage
+DepartureMileage             = Departure mileage
+FuelLevel                    = Fuel level
+FuelReserve                  = Reserve
+FuelFull                     = Full
+Observation                  = Observation
+Remarks                      = Remarks (optional)
+RemarksPlaceholder           = Warning lights, incidents, general condition, tank filled...
+VehiclePhotos                = Vehicle photos
+AddPhoto                     = Add picture
+SignHere                     = Tap to sign
+ValidateDeparture            = Validate the departure
+ValidateReturn               = Validate the return
+DepartureRecorded            = Departure recorded!
+ReturnRecorded               = Return recorded!
+ActionCommCreatedInAgenda    = The event has been added to the Dolibarr agenda and the registration certificate has been updated.
+NewEntry                     = Add another entry
+Departure                    = Departure
+Return                       = Return
+RecentTrips                  = Recent trips
+TripInProgress               = In progress
+TripDone                     = Completed
+ClosePublicLogBook           = Close
+
+# Public interface - Trips (issue #457)
+BottomBarHistory             = Trips
+VehicleTripHistory           = Trips
+DoliCarTrips                 = trips
+NoTripRecorded               = No trip recorded for this vehicle
+SeeAllTripHistory            = See all trips
+ViewStateSheet               = View the condition report
+
+# Public interface - Repair
+Repair               = Repair
+BottomBarRepair      = Repair
+RepairDate           = Repair date
+RepairMileage        = Mileage
+RepairDescription    = Repair description
+RepairOnVehicle      = Repair on vehicle %s
+RepairRecorded       = Repair recorded!
+RepairRecordedDesc   = The event has been added to the vehicle history.
+ValidateRepair       = Save the repair
+
+# Public interface - DigiQuali control
+Control                  = Control
+BottomBarControl         = Control
+ControlSheet             = Control sheet
+Controller               = Controller
+ControlOnVehicle         = Control - vehicle %s
+CreateAndFillControl     = Create and fill in the control
+SelectControlSheet       = Choose a control sheet
+DoliCarNoControlSheetAvailable = No control sheet applicable to vehicles is available.
+
+
+
+#
+# Tools
+#
+
+Tools                        = Tools
+FixLotStockQuantity          = Fix serial number stocks
+FixLotStockQuantityWarning   = %s serial number(s) have a stock greater than 1 (total excess: %s unit(s)). These lots will be brought back to a quantity of 1.
+NoLotStockQuantityToFix      = No serial number with a stock greater than 1 detected.
+Fix                          = Fix
+FixLotStockQuantityLabel     = Stock correction by the DoliCar tool
+LotStockQuantityFixed        = %s serial number(s) fixed successfully.
+
+#
+# Other
+#
+
+# Data
+LinkedObjects          = Linked objects
+ObjectType             = Object type
+Object                 = Object
+Mileage                = Mileage
+NoLinkedObjectsToPrint = No linked objects to display
+ControlNotOnPublicInterface = Not visible on the public interface: only a locked control is shown there
+CarBrands              = Vehicle brands
+
+
+#
+# API
+#
+
+RegistrationCertificateAPI = Registration certificate API
+ImmatriculationAPIDefault = Default API: immatriculationapi.com
+APIPlaqueImmatriculationDesc = API: apiplaqueimmatriculation.com
+FindVINInRepertory = Look up a VIN
+VINWasAlreadyExisting = This VIN already exists
+UpdateCarBrandsList    = Update the list
+CarBrandsUpdated       = The brand list has been updated
+
+# Documents
+LivretEntretien              = Maintenance log
+GenerateLivretEntretien      = Generate the maintenance log
+VehicleLogBookDocument       = Logbook
+GenerateVehicleLogBookDocument = Generate the logbook
+
+# Vehicle history
+AddVehicleEvent                = Add a vehicle event
+VehicleEventType               = Event type
+VehicleHistory                 = Vehicle history
+NoVehicleHistory               = No event recorded
+VehicleEventAdded              = Vehicle event added successfully
+VehicleEventElementAlreadyLinked = %s: this document is already linked to another event of this vehicle
+VehicleEventExpenseReportPartlyLinked = Some lines of this expense report are already linked to another event of this vehicle: select the remaining lines
+LinkedDocuments                = Linked documents
+Invoices                       = Invoices
+Proposals                      = Commercial proposals
+ExpenseReports                 = Expense reports
+DoliCarExpenseReportLines      = Expense report lines
+SuppliersOrders                = Purchase orders
+SuppliersInvoices              = Vendor invoices
+Controls                       = DigiQuali controls
+DolicarVehicleEventCategory    = DoliCar Vehicle Event
+VehicleEventLinkableDocuments  = Documents linkable to vehicle events
+VehicleInvoiceEvent            = Invoice
+VehicleInvoiceEventLabel       = Invoice %s issued on the vehicle
+Trip                           = Trip
+
+# Mileage correction from the vehicle history
+CorrectMileage                  = Correct the mileage
+MileageCorrectionReason         = Reason for the correction
+MileageCorrectionReasonRequired = Enter the reason for the mileage correction
+MileageCorrected                = Mileage corrected
+MileageCorrectedConfirm         = Mileage corrected, the reason has been added to the event note
+MileageUnchanged                = The mileage has not changed, nothing was saved
+PushInvoicesToVehicleHistory       = Push invoices to the vehicle history
+PushInvoicesToVehicleHistoryButton = Push existing invoices
+PushInvoicesToVehicleHistoryHelp   = When an invoice is validated, it is automatically added to the history of the vehicle entered on it, with its mileage. This button processes the invoices validated before this feature was enabled.
+InvoicesPushedToVehicleHistory     = %s invoice(s) pushed to the vehicle history
+VehicleEventLinkableDocumentHelp = If enabled, this type of document can be linked when an event is added to the vehicle history.
+ErrorUpdateCarBrandsFromApi = Error while updating brands from the API: %s
+ErrorUpdateCarBrandsFromApiBadResponse = Invalid API response while updating brands
+ErrorUpdateCarBrandsFromApiNoData = No brand data found in the API response
+ErrorUpdateCarBrandsFile = Unable to write the car_brands.txt file
+
+# PDF documents (maintenance log / logbook)
+LivretEntretienPDFDescription        = PDF template of the vehicle maintenance log
+VehicleLogBookDocumentPDFDescription = PDF template of the vehicle logbook
+EditedOn                             = Issued on
+RegistrationCardReference            = Registration certificate reference
+LicensePlate                         = License plate
+BrandAndModel                        = Brand and model
+Energy                               = Energy
+OwnerThirdParty                      = Third party / Owner
+CurrentMileage                       = Current mileage
+MaintenanceSynthesis                 = Maintenance summary
+Interventions                        = Interventions
+TotalCostInclTax                     = Total cost (inc. tax)
+LastIntervention                     = Last intervention
+InterventionsJournal                 = Intervention log
+InterventionType                     = Type
+Comment                              = Comment
+CostInclTax                          = Cost (inc. tax)
+TotalMaintenance                     = Maintenance total
+Validation                           = Validation
+DocumentEditedBy                     = Document issued on %s by %s for the company %s.
+FleetManager                         = Fleet manager
+CompanyStamp                         = Company stamp
+Fuel                                 = Fuel
+VinOrLotNumber                       = VIN / Lot no.
+TripsSynthesis                       = Trips summary
+TotalTrips                           = Total trips
+CompletedTrips                       = Completed trips
+TripsHistory                         = Trip history
+DepartureDate                        = Departure date
+ReturnDate                           = Return date
+Comments                             = Comments
+Signatures                           = Signatures
+
+# PDF before/after condition report and photo report (issue #457)
+VehicleStateSheet                    = Before/after condition report
+VehiclePhotosSheet                   = Photo details report
+VehicleStateSheetPDFDescription      = PDF template of the vehicle condition report (departure / return)
+VehiclePhotosSheetPDFDescription     = PDF template of the vehicle photos (departure / return)
+VehicleStateBeforeAfter              = Vehicle condition — Before / After
+TripOf                               = Trip on %s
+PhotosDeparture                      = Departure photos
+PhotosReturn                         = Return photos
+TripPhotos                           = Trip photos
+NoPhoto                              = No photo
+NoCompletedTrip                      = No completed trip
+Signature                            = Signature
+
+# Import
+ImportRegistrationCertificate         = Import registration certificates
+ImportRegistrationCertificateDesc     = Import your registration certificates from a CSV file. Each line is created through the business logic of the module (plate normalization, product/lot and triggers).
+DoliCarImportFromCSV                  = Import from a CSV file
+CSVFile                               = CSV file
+UpdateExistingRecords                 = Update existing records
+UpdateExistingRecordsHelp             = If a registration certificate with the same registration number already exists, it is updated. Otherwise the line is skipped.
+DownloadCSVTemplate                   = Download the CSV template
+LaunchImport                          = Start the import
+ImportResults                         = Import results
+RecognizedColumns                     = Recognized columns
+CSVColumn                             = CSV column
+FieldName                             = Field
+ImportStatusCreated                   = Created
+ImportStatusUpdated                   = Updated
+ImportStatusSkipped                   = Skipped
+ImportStatusError                     = Error
+ImportLineAlreadyExists               = A registration certificate already exists for this registration number
+ImportErrorEmptyPlate                 = Missing registration number
+ImportThirdPartyNotFound              = Third party “%s” not found
+ImportProductNotFound                 = Product “%s” not found
+ImportProjectNotFound                 = Project “%s” not found
+ImportSummaryMessage                  = Import finished: %s created, %s updated, %s skipped, %s with errors.
+ErrorNoFileUploaded                   = No file was uploaded
+ErrorEmptyCSVFile                     = The CSV file is empty or contains no data
+ErrorMissingRegistrationNumberColumn  = The “immatriculation” column is mandatory and was not found in the file
+
+# Warehouse fleet
+WarehouseFleet                    = Fleet by warehouse
+VehiclesByWarehouse               = Vehicles by warehouse
+Vehicles                          = vehicle(s)
+TotalVehicles                     = Total vehicles
+VehiclesWithoutWarehouse          = Vehicles without warehouse
+NoVehicleInWarehouse              = No vehicle in this warehouse
+NoVehicleInFleet                  = No vehicle in stock
+Transfer                          = Transfer
+TransferToWarehouse               = Transfer to
+VehicleTransferred                = Vehicle %s transferred
+VehicleWarehouseTransferLabel     = DoliCar warehouse transfer - %s
+ErrorVehicleTransferFailed        = Transfer of vehicle %s failed
+ErrorVehicleTransferSameWarehouse = Choose a destination warehouse different from the current one
+WarehouseMap                      = Warehouse map
+Latitude                          = Latitude
+Longitude                         = Longitude
+GeocodeWarehouses                 = Geocode warehouses
+WarehousesGeocoded                = %s warehouse(s) geocoded from their address
+NoWarehouseGeocoded               = No warehouse could be geocoded: check that their postal address is filled in and that the server can access the Internet
+NoWarehouseCoordinates            = No geocoded warehouse. Enter the latitude and longitude on the warehouse record, or run the geocoding from their postal address.

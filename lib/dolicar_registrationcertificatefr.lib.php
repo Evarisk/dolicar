@@ -109,7 +109,7 @@ function dolicar_get_vehicle_event_linkable_types(): array
             'label'     => 'Controls',
             'picto'     => '',
             'pictofa'   => 'fa-tasks',
-            'selectarg' => 'Control:custom/digiquali/class/control.class.php',
+            'selectarg' => 'Control:digiquali/class/control.class.php',
             'field'     => 'event_fk_control',
         ],
     ];
@@ -218,6 +218,80 @@ function dolicar_get_vehicle_history_event_of_invoice(int $invoiceId, int $lotId
 }
 
 /**
+ * Collect the documents already attached to an event of a vehicle history, by type (issue #426).
+ *
+ * One query on element_element for the whole history, so a document cannot be picked again for
+ * another event of the same vehicle. Covers every linkable type and the expense report lines.
+ *
+ * @param  int                           $lotId Product lot ID of the vehicle
+ * @return array<string, array<int,int>>        Linked IDs keyed by element type, then by ID
+ */
+function dolicar_get_vehicle_history_linked_element_ids(int $lotId): array
+{
+    global $db;
+
+    $linkedElementIds = [];
+    if ($lotId <= 0) {
+        return $linkedElementIds;
+    }
+
+    $sourceTypes   = array_keys(dolicar_get_vehicle_event_linkable_types());
+    $sourceTypes[] = 'expensereportline';
+
+    // ActionComm->element is 'action', which is what add_object_linked() stores as targettype
+    $sql  = 'SELECT ee.sourcetype, ee.fk_source FROM ' . MAIN_DB_PREFIX . 'element_element ee';
+    $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'actioncomm a ON a.id = ee.fk_target';
+    $sql .= " WHERE ee.targettype = 'action'";
+    $sql .= " AND ee.sourcetype IN ('" . implode("','", array_map([$db, 'escape'], $sourceTypes)) . "')";
+    $sql .= " AND a.elementtype = 'productlot' AND a.fk_element = " . $lotId;
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        return $linkedElementIds;
+    }
+
+    while ($obj = $db->fetch_object($resql)) {
+        $linkedElementIds[$obj->sourcetype][(int) $obj->fk_source] = (int) $obj->fk_source;
+    }
+    $db->free($resql);
+
+    return $linkedElementIds;
+}
+
+/**
+ * Current mileage of a vehicle: the highest one recorded in its history.
+ *
+ * A trip of the public logbook carries a mileage at each end, any other event (maintenance, invoice
+ * pushed at validation) the one it was recorded at. One query on the extrafields of the events of the lot.
+ *
+ * @param  int $lotId Product lot ID of the vehicle
+ * @return int        0 when no mileage was ever recorded, the mileage otherwise
+ */
+function dolicar_get_vehicle_current_mileage(int $lotId): int
+{
+    global $db;
+
+    if ($lotId <= 0) {
+        return 0;
+    }
+
+    $sql  = 'SELECT MAX(ef.starting_mileage) AS starting_mileage, MAX(ef.arrival_mileage) AS arrival_mileage';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm a';
+    $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'actioncomm_extrafields ef ON ef.fk_object = a.id';
+    $sql .= " WHERE a.elementtype = 'productlot' AND a.fk_element = " . $lotId;
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        return 0;
+    }
+
+    $obj = $db->fetch_object($resql);
+    $db->free($resql);
+
+    return !empty($obj) ? max((int) $obj->starting_mileage, (int) $obj->arrival_mileage) : 0;
+}
+
+/**
  * Push an invoice issued for a vehicle into the history of that vehicle (issue #464).
  *
  * Creates the event on the product lot of the vehicle, carries the mileage of the invoice over to
@@ -323,6 +397,107 @@ function dolicar_push_all_invoices_to_vehicle_history(User $user): int
     $db->free($resql);
 
     return $pushedCount;
+}
+
+/**
+ * Return the tags a file attached to a carte grise can carry, in display order.
+ *
+ * The tag is stored on the file index (ecm_files extra field dolicar_file_tag), so it follows the file
+ * when it is renamed and goes away with it. The tags of a same document share their picto and their
+ * colour (css modifier of the dolicar-file-tag pill).
+ *
+ * @return array<string, array{label: string, pictofa: string, css: string}>
+ */
+function dolicar_get_file_tags(): array
+{
+    return [
+        'registration_certificate_front' => ['label' => 'FileTagRegistrationCertificateFront', 'pictofa' => 'fa-id-card',         'css' => 'registration-certificate'],
+        'registration_certificate_back'  => ['label' => 'FileTagRegistrationCertificateBack',  'pictofa' => 'fa-id-card',         'css' => 'registration-certificate'],
+        'insurance_front'                => ['label' => 'FileTagInsuranceFront',               'pictofa' => 'fa-shield-alt',      'css' => 'insurance'],
+        'insurance_back'                 => ['label' => 'FileTagInsuranceBack',                'pictofa' => 'fa-shield-alt',      'css' => 'insurance'],
+        'technical_inspection'           => ['label' => 'FileTagTechnicalInspection',          'pictofa' => 'fa-clipboard-check', 'css' => 'technical-inspection'],
+        'environmental_sticker'          => ['label' => 'FileTagEnvironmentalSticker',         'pictofa' => 'fa-leaf',            'css' => 'environmental-sticker'],
+    ];
+}
+
+/**
+ * Collect the files attached to a carte grise with their tag.
+ *
+ * Reads the file index of the documents tab directory: listing that tab indexes every file found on
+ * disk, so each line of its list has an index ID here.
+ *
+ * @param  RegistrationCertificateFr $object Carte grise
+ * @return array<int, string>                Tag code ('' when none), keyed by file index ID
+ */
+function dolicar_get_registration_certificate_file_tags(RegistrationCertificateFr $object): array
+{
+    global $conf, $db;
+
+    require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+
+    $fileTags = [];
+    $entity   = $object->entity ?: $conf->entity;
+    if (empty($object->id) || empty($conf->dolicar->multidir_output[$entity])) {
+        return $fileTags;
+    }
+
+    // The extra field is created by the module activation: nothing to read until the module is reactivated
+    $extraFields = new ExtraFields($db);
+    $extraFields->fetch_name_optionals_label('ecm_files');
+    if (!isset($extraFields->attributes['ecm_files']['type']['dolicar_file_tag'])) {
+        return $fileTags;
+    }
+
+    // Same directory as the documents tab, relative to the data root like the file index
+    $uploadDir   = $conf->dolicar->multidir_output[$entity] . '/' . $object->element . '/' . get_exdir(0, 0, 0, 1, $object);
+    $relativeDir = trim(preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '/', '', $uploadDir), '/');
+
+    $sql  = 'SELECT ef.rowid, efe.dolicar_file_tag FROM ' . MAIN_DB_PREFIX . 'ecm_files ef';
+    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'ecm_files_extrafields efe ON efe.fk_object = ef.rowid';
+    $sql .= " WHERE ef.filepath = '" . $db->escape($relativeDir) . "'";
+    $sql .= ' AND ef.entity = ' . ((int) $entity);
+
+    $resql = $db->query($sql);
+    if (!$resql) {
+        return $fileTags;
+    }
+
+    while ($obj = $db->fetch_object($resql)) {
+        $fileTags[(int) $obj->rowid] = (string) $obj->dolicar_file_tag;
+    }
+    $db->free($resql);
+
+    return $fileTags;
+}
+
+/**
+ * Tag a file attached to a carte grise, or remove its tag.
+ *
+ * @param  RegistrationCertificateFr $object    Carte grise the file is attached to
+ * @param  int                       $ecmFileId File index ID, from the documents tab list
+ * @param  string                    $tag       Tag code, '' to remove the tag
+ * @return int                                  1 if OK, 0 or -1 if KO
+ */
+function dolicar_set_registration_certificate_file_tag(RegistrationCertificateFr $object, int $ecmFileId, string $tag): int
+{
+    global $db;
+
+    require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
+
+    // The browser sends the file ID: only a known tag, on a file of this carte grise
+    if (($tag !== '' && !array_key_exists($tag, dolicar_get_file_tags())) || !array_key_exists($ecmFileId, dolicar_get_registration_certificate_file_tags($object))) {
+        return -1;
+    }
+
+    $ecmFile = new EcmFiles($db);
+    if ($ecmFile->fetch($ecmFileId) <= 0) {
+        return -1;
+    }
+
+    // fetch() loaded the other extra fields of the file, updateExtraField() only writes this one
+    $ecmFile->array_options['options_dolicar_file_tag'] = $tag;
+
+    return $ecmFile->updateExtraField('dolicar_file_tag');
 }
 
 /**

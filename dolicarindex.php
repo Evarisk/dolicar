@@ -30,4 +30,4 @@ if (file_exists('dolicar.main.inc.php')) {
     die('Include of dolicar main fails');
 }
 
-require_once __DIR__ . '/../saturne/core/tpl/index/index_view.tpl.php';
+require_once dol_buildpath('/saturne/core/tpl/index/index_view.tpl.php');

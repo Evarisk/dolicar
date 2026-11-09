@@ -152,11 +152,12 @@ if (empty($resHook)) {
         require_once __DIR__ . '/../../core/tpl/dolicar_registrationcertificatefr_immatriculation_api_fetch_action.tpl.php';
     }
 
+
     // Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
     require_once DOL_DOCUMENT_ROOT . '/core/actions_addupdatedelete.inc.php';
 
     // Actions set_thirdparty, set_project
-    require_once __DIR__ . '/../../../saturne/core/tpl/actions/banner_actions.tpl.php';
+    require_once dol_buildpath('/saturne/core/tpl/actions/banner_actions.tpl.php');
 
     // Actions builddoc, forcebuilddoc, remove_file
     $upload_dir = '';
@@ -195,7 +196,7 @@ if (empty($resHook)) {
             'tmparray'         => [],
             'hideTemplateName' => 0,
         ];
-        require_once __DIR__ . '/../../../saturne/core/tpl/documents/documents_action.tpl.php';
+        require_once dol_buildpath('/saturne/core/tpl/documents/documents_action.tpl.php');
     }
 }
 
@@ -405,9 +406,43 @@ if (($id || $ref) && $action == 'edit') {
 
     print dol_get_fiche_end();
 
+    // Fill fields from a carte grise JSON file — advanced panel, collapsed by default.
+    // Import is done client-side: it only fills the edit form, the user reviews then saves.
+    print '<div class="dolicar-json-import-panel">';
+    print '<div class="qc-section-header collapsible collapsed">';
+    print '<div class="qc-section-title">';
+    print '<i class="fas fa-file-code"></i>';
+    print $langs->trans('FillFromCarteGriseJson');
+    print '</div>';
+    print '<i class="fas fa-chevron-down qc-chevron"></i>';
+    print '</div>';
+
+    print '<div class="qc-section-body collapsed">';
+    print '<div class="dolicar-json-import"';
+    print ' data-error-invalid="' . dol_escape_htmltag($langs->trans('ErrorInvalidCarteGriseJson')) . '"';
+    print ' data-confirm-plate="' . dol_escape_htmltag($langs->trans('ConfirmJsonPlateMismatch')) . '"';
+    print ' data-fields-filled="' . dol_escape_htmltag($langs->trans('FieldsFilledFromJson')) . '">';
+    print '<label class="qc-dropzone qc-dropzone--compact" for="dolicar-json-file-edit">';
+    print '<input type="file" id="dolicar-json-file-edit" accept=".json,application/json">';
+    print '<i class="fas fa-file-arrow-up qc-dropzone-icon"></i>';
+    print '<div class="qc-dropzone-meta">';
+    print '<div class="qc-dropzone-text">' . $langs->trans('DropJsonFileHere') . '</div>';
+    print '<div class="qc-dropzone-hint">' . $langs->trans('FillFromCarteGriseJsonHelp') . '</div>';
+    print '<div class="qc-dropzone-file"><i class="fas fa-file-code"></i> <span class="qc-dropzone-filename"></span></div>';
+    print '</div>';
+    print '</label>';
+    print '<button type="button" class="qc-btn qc-btn-primary dolicar-json-apply" disabled>';
+    print '<i class="fas fa-file-import"></i> ' . $langs->trans('ImportJson');
+    print '</button>';
+    print '</div>'; // .dolicar-json-import
+    print '</div>'; // .qc-section-body
+
+    print '</div>'; // .dolicar-json-import-panel
+
     print $form->buttonsSaveCancel();
 
-    print '</form>'; ?>
+    print '</form>';
+    ?>
 
     <script>
         const $editTable     = $('.tableforfieldedit');
@@ -479,6 +514,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     // Common attributes
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_view.tpl.php';
 
+    // Current mileage, read from the vehicle history (trips, maintenance, invoices)
+    $currentMileage = dolicar_get_vehicle_current_mileage((int) $object->fk_lot);
+    print '<tr class="field_current_mileage"><td class="titlefieldmiddle">' . $langs->trans('CurrentMileage') . '</td>';
+    print '<td class="valuefield">' . ($currentMileage > 0 ? price($currentMileage, 0, '', 1, 0) . ' ' . $langs->trans('km') : '') . '</td></tr>';
+
     // Other attributes. Fields from hook formObjectOptions and Extrafields
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_view.tpl.php';
 
@@ -523,9 +563,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     <?php
 
     if (isModEnabled('digiquali') && !empty($object->fk_lot) && $object->fk_lot > 0 && !empty($digiQualiSheets)) {
-        $controlCardUrl = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1);
-        $backToPage     = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
-        $logoUrl        = dol_buildpath('/custom/digiquali/img/digiquali_color.svg', 1);
+        $controlCardUrl = dol_buildpath('/digiquali/view/control/control_card.php', 1);
+        $backToPage     = dol_buildpath('/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
+        $logoUrl        = dol_buildpath('/digiquali/img/digiquali_color.svg', 1);
 
         $sheetsForJs = [];
         foreach ($digiQualiSheets as $digiQualiSheet) {

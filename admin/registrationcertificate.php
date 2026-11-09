@@ -69,7 +69,7 @@ print load_fiche_titre($title, $linkBack, 'title_setup');
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'registrationcertificate', $title, -1, 'dolicar_color@dolicar');
 
-require_once __DIR__ . '/../../saturne/core/tpl/admin/object/object_numbering_module_view.tpl.php';
+require_once dol_buildpath('/saturne/core/tpl/admin/object/object_numbering_module_view.tpl.php');
 
 print load_fiche_titre($langs->transnoentities('RegistrationCertificateFieldsConfig'), '', '');
 

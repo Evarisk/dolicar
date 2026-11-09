@@ -1,5 +1,7 @@
 @use "element/element";
 @use "pages/pages";
+// Modern back office theme, used last so that it wins over the legacy rules above
+@use "theme/theme";
 
 .product-object .nowraponall {
   white-space: normal;

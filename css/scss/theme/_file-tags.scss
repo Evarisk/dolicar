@@ -1,0 +1,113 @@
+@use 'tokens' as *;
+
+/* DoliCar modern theme: tags of the attached files of a carte grise (registrationcertificatefr_file_tags.tpl.php,
+   select2 rendered by fileTag.js) */
+
+#{$dc-scope} {
+  /* Tag of a file: a pill tinted with the colour of its document, like the event types of the history.
+     The tags of a same document (recto, verso) share their colour */
+  .dolicar-file-tag {
+    --dolicar-file-tag-color: #{$dc-muted};
+
+    @include dc-pill;
+    border-color: color-mix(in srgb, var(--dolicar-file-tag-color) 30%, transparent);
+    background: color-mix(in srgb, var(--dolicar-file-tag-color) 11%, transparent);
+    color: var(--dolicar-file-tag-color);
+    transition: background $dc-transition, border-color $dc-transition;
+
+    .fas {
+      font-size: 11px;
+      color: inherit;
+    }
+
+    .dolicar-file-tag-caret {
+      margin-left: 1px;
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
+    &.dolicar-file-tag--registration-certificate {
+      --dolicar-file-tag-color: #2563eb;
+    }
+    &.dolicar-file-tag--insurance {
+      --dolicar-file-tag-color: #7c3aed;
+    }
+    &.dolicar-file-tag--technical-inspection {
+      --dolicar-file-tag-color: #b45309;
+    }
+    &.dolicar-file-tag--environmental-sticker {
+      --dolicar-file-tag-color: #{$dc-success-text};
+    }
+
+    /* No tag yet: a dashed outline inviting to add one */
+    &.dolicar-file-tag--empty {
+      border-style: dashed;
+      border-color: $dc-border-strong;
+      background: transparent;
+      color: $dc-muted;
+      font-weight: 600;
+    }
+  }
+
+  /* The select2 of a file: its selection is the pill alone, without the box nor the arrow of the field */
+  .dolicar-file-tag-picker {
+    .select2-container {
+      vertical-align: middle;
+    }
+
+    .select2-container--default .select2-selection--single {
+      height: auto;
+      min-height: 0;
+      border: 0 !important;
+      border-radius: $dc-radius-pill !important;
+      background: transparent;
+      outline: none;
+
+      .select2-selection__rendered {
+        padding: 0;
+        line-height: normal;
+      }
+      .select2-selection__arrow {
+        display: none;
+      }
+    }
+
+    .dolicar-file-tag-editable {
+      cursor: pointer;
+
+      &:hover {
+        border-color: color-mix(in srgb, var(--dolicar-file-tag-color) 45%, transparent);
+        background: color-mix(in srgb, var(--dolicar-file-tag-color) 18%, transparent);
+      }
+      &.dolicar-file-tag--empty:hover {
+        border-color: $dc-primary;
+        background: $dc-primary-soft;
+        color: $dc-primary;
+      }
+    }
+  }
+
+  /* The list of the tags: one pill per line on a light background, the current tag stays marked */
+  .select2-container--default .select2-dropdown.dolicar-file-tag-dropdown {
+    min-width: 210px;
+    padding: 4px;
+
+    .select2-results__option {
+      padding: 4px 6px;
+      border-radius: $dc-radius-sm;
+      background: transparent;
+    }
+    .select2-results__option[aria-selected="true"] {
+      background: $dc-surface-soft;
+    }
+    .select2-results__option--highlighted[aria-selected] {
+      background: $dc-primary-soft;
+
+      // eldy whitens every span of the hovered line (color: #fff !important): the pill keeps its colour
+      .dolicar-file-tag,
+      .dolicar-file-tag-label {
+        color: var(--dolicar-file-tag-color) !important;
+      }
+    }
+  }
+}

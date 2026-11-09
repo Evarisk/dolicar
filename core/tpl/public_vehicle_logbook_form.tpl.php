@@ -24,11 +24,13 @@
 /**
  * Rendered by public/agenda/public_vehicle_logbook.php (inherits its scope).
  * Expects: $actionType, $vehicleUrl, $logoUrl, $langs, $registrationCertificateFR, $form,
- *          $preselectedDriverId, $conf, $user, $lastArrivalMileage, $lastUnfinishedActionComm,
- *          $tripUploadSubDir, $publicInterfaceUseSignatory
+ *          $preselectedDriverId, $preselectedDriverType, $preselectedDriverLastname,
+ *          $preselectedDriverFirstname, $preselectedDriverPhone, $conf, $user, $lastArrivalMileage,
+ *          $lastUnfinishedActionComm, $tripUploadSubDir, $publicInterfaceUseSignatory
  */
 
-$isDepart = ($actionType === 'depart');
+$isDepart     = ($actionType === 'depart');
+$isFreeDriver = ($preselectedDriverType === 'free');
 ?>
 <!-- ===== SCREEN 3 : formulaire départ / retour ===== -->
 <div class="plv2-header plv2-header--dark">
@@ -57,23 +59,26 @@ $isDepart = ($actionType === 'depart');
         <div class="plv2-card">
             <h3><i class="fas fa-user"></i> <?php echo $isDepart ? $langs->trans('Driver') : $langs->trans('ReturnedBy'); ?> <span class="plv2-req">*</span></h3>
 
-            <div class="plv2-seg" id="plv2-driver-type">
-                <button type="button" class="plv2-seg__btn active" data-type="internal">
+            <div class="plv2-seg plv2-seg--three" id="plv2-driver-type">
+                <button type="button" class="plv2-seg__btn<?php echo $isFreeDriver ? '' : ' active'; ?>" data-type="internal">
                     <i class="fas fa-user-tie"></i> <?php echo $langs->trans('DriverInternal'); ?>
                 </button>
                 <button type="button" class="plv2-seg__btn" data-type="external">
                     <i class="fas fa-user-friends"></i> <?php echo $langs->trans('DriverExternal'); ?>
                 </button>
+                <button type="button" class="plv2-seg__btn<?php echo $isFreeDriver ? ' active' : ''; ?>" data-type="free">
+                    <i class="fas fa-pen"></i> <?php echo $langs->trans('DriverFree'); ?>
+                </button>
             </div>
-            <input type="hidden" name="driver_type" id="plv2-driver-type-value" value="internal">
+            <input type="hidden" name="driver_type" id="plv2-driver-type-value" value="<?php echo $isFreeDriver ? 'free' : 'internal'; ?>">
 
             <!-- Conducteur interne -->
-            <div class="plv2-form-group" id="plv2-driver-internal">
+            <div class="plv2-form-group" id="plv2-driver-internal"<?php echo $isFreeDriver ? ' hidden' : ''; ?>>
                 <?php echo $form->select_dolusers($preselectedDriverId, 'driver_user_id', 1, null, 0, '', '', (string) $conf->entity); ?>
             </div>
 
             <!-- Conducteur externe : tiers puis contact -->
-            <div id="plv2-driver-external" style="display: none;">
+            <div id="plv2-driver-external" hidden>
                 <div class="plv2-form-group">
                     <label><?php echo $langs->trans('ThirdParty'); ?></label>
                     <?php
@@ -86,6 +91,39 @@ $isDepart = ($actionType === 'depart');
                 <div class="plv2-form-group">
                     <label><?php echo $langs->trans('Contact'); ?></label>
                     <?php echo $form->selectcontacts(-1, '', 'driver_contact_id', 1); ?>
+                </div>
+            </div>
+
+            <!-- Conducteur libre : personne qui n'est ni un utilisateur ni un contact connu.
+                 Les valeurs sont pre-remplies depuis les cookies poses au precedent passage
+                 (vehicleLogbook.js) pour que la meme personne n'ait plus qu'a valider. -->
+            <div id="plv2-driver-free"<?php echo $isFreeDriver ? '' : ' hidden'; ?>>
+                <div class="plv2-field-row">
+                    <div class="plv2-form-group">
+                        <label><?php echo $langs->trans('DriverLastname'); ?> <span class="plv2-req">*</span></label>
+                        <input type="text"
+                               name="driver_free_lastname"
+                               id="plv2-driver-free-lastname"
+                               value="<?php echo dol_escape_htmltag($preselectedDriverLastname); ?>"
+                               autocomplete="family-name"
+                               <?php echo $isFreeDriver ? 'required' : ''; ?>>
+                    </div>
+                    <div class="plv2-form-group">
+                        <label><?php echo $langs->trans('DriverFirstname'); ?></label>
+                        <input type="text"
+                               name="driver_free_firstname"
+                               id="plv2-driver-free-firstname"
+                               value="<?php echo dol_escape_htmltag($preselectedDriverFirstname); ?>"
+                               autocomplete="given-name">
+                    </div>
+                </div>
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('DriverPhone'); ?></label>
+                    <input type="tel"
+                           name="driver_free_phone"
+                           id="plv2-driver-free-phone"
+                           value="<?php echo dol_escape_htmltag($preselectedDriverPhone); ?>"
+                           autocomplete="tel">
                 </div>
             </div>
         </div>
