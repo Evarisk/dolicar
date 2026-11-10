@@ -102,7 +102,7 @@ if (!empty($permissiontoadd)) {
         if ($typeKey === 'expensereport') {
             $out .= '<tr id="dolicar-er-lines-row" style="display:none;">';
             $out .= '<td>' . $langs->transnoentities('DoliCarExpenseReportLines') . '</td>';
-            $out .= '<td><div id="dolicar-er-lines" class="dolicar-er-lines" data-url="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id) . '"></div></td>';
+            $out .= '<td><div id="dolicar-er-lines" class="dolicar-er-lines" data-url="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken()) . '"></div></td>';
             $out .= '</tr>';
         }
     }
