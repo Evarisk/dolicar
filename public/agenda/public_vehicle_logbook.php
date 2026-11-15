@@ -236,17 +236,21 @@ if (empty($resHook)) {
                 dol_mkdir($uploadDir);
             }
 
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+
             $invalidFile   = false;
             $uploadedFiles = isset($_FILES['userfile']) ? $_FILES['userfile'] : [];
             if (!empty($uploadedFiles['tmp_name'])) {
-                $tmpNames = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
-                foreach ($tmpNames as $tmpName) {
+                $tmpNames  = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
+                $origNames = is_array($uploadedFiles['name']) ? $uploadedFiles['name'] : [$uploadedFiles['name']];
+                foreach ($tmpNames as $key => $tmpName) {
                     if (empty($tmpName)) {
                         continue;
                     }
+                    $origName = (string) ($origNames[$key] ?? '');
                     $finfo    = new finfo(FILEINFO_MIME_TYPE);
-                    $mimeType = $finfo->file($tmpName);
-                    if (strpos($mimeType, 'image/') !== 0) {
+                    $mimeType = (string) $finfo->file($tmpName);
+                    if (strpos($mimeType, 'image/') !== 0 || $mimeType === 'image/svg+xml' || image_format_supported($origName) < 0) {
                         $invalidFile = true;
                         break;
                     }
@@ -260,15 +264,21 @@ if (empty($resHook)) {
     }
 
     // Problem report — voice memo upload posted by the Saturne media block (issue #443)
-    if ($action == 'add_audio') {
+    if ($action == 'add_audio' && !empty($conf->global->MAIN_UPLOAD_DOC) && !empty($_FILES['audio']['tmp_name'])) {
         $uploadSubDir = GETPOST('sub_dir', 'alpha');
-        if (!empty($_FILES['audio']['tmp_name']) && !empty($uploadSubDir) && strpos($uploadSubDir, '..') === false) {
-            $uploadDir = $conf->dolicar->dir_output . '/' . $uploadSubDir;
-            if (!dol_is_dir($uploadDir)) {
-                dol_mkdir($uploadDir);
+        if (!empty($uploadSubDir) && strpos($uploadSubDir, '..') === false) {
+            $fileInfo  = new finfo(FILEINFO_MIME_TYPE);
+            $audioType = (string) $fileInfo->file($_FILES['audio']['tmp_name']);
+            $isAudio   = strpos($audioType, 'audio/') === 0 || in_array($audioType, ['video/webm', 'video/mp4', 'application/ogg'], true);
+
+            if ($isAudio && $_FILES['audio']['size'] <= getDolGlobalInt('MAIN_UPLOAD_DOC') * 1024) {
+                $uploadDir = $conf->dolicar->dir_output . '/' . $uploadSubDir;
+                if (!dol_is_dir($uploadDir)) {
+                    dol_mkdir($uploadDir);
+                }
+                $destFile = $uploadDir . '/' . dol_print_date(dol_now(), 'dayhourlog') . '_audio.wav';
+                move_uploaded_file($_FILES['audio']['tmp_name'], $destFile);
             }
-            $destFile = $uploadDir . '/' . dol_print_date(dol_now(), 'dayhourlog') . '_audio.wav';
-            move_uploaded_file($_FILES['audio']['tmp_name'], $destFile);
         }
     }
 
