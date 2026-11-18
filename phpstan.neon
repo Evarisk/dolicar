@@ -68,6 +68,7 @@ parameters:
         - ../saturne/core/
         - ../saturne/lib/
         - ../../ai/class/
+        - ../../ai/lib/
         - ../../api/class/
         - ../../bookmarks/class/
         - ../../categories/class/

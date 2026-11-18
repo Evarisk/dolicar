@@ -1,0 +1,18 @@
+@use 'tokens' as *;
+
+/* DoliCar modern theme: vehicle history (registrationcertificatefr_vehicle_history.tpl.php) */
+
+#{$dc-scope} {
+  /* Type of an event: a pill tinted with the colour of its category, which the tpl hands over
+     in --dolicar-event-color */
+  .dolicar-event-type {
+    @include dc-pill;
+    border-color: color-mix(in srgb, var(--dolicar-event-color, #{$dc-muted}) 30%, transparent);
+    background: color-mix(in srgb, var(--dolicar-event-color, #{$dc-muted}) 11%, transparent);
+    color: var(--dolicar-event-color, #{$dc-muted});
+
+    .fas {
+      font-size: 11px;
+    }
+  }
+}
