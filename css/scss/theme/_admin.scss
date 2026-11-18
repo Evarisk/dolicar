@@ -1,0 +1,86 @@
+@use 'tokens' as *;
+
+/* DoliCar modern theme: setup pages, CSV import and tools */
+
+#{$dc-scope} {
+  /* ---- Setup: list of the car brands (admin/setup.php) ----
+     Several hundred one word rows: laid out as a grid of cells instead of a page long column */
+  table.noborder.dolicar-car-brands {
+    display: block;
+    overflow: hidden;
+
+    /* The -1px hides the rule under the bottom row of cells, against the border of the card */
+    > tbody {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      margin-bottom: -1px;
+    }
+
+    /* eldy sets row and cell heights made for table rows: blocks size to their content */
+    > tbody > tr {
+      display: block;
+      height: auto;
+    }
+
+    /* eldy fixes the title rows at 26px with !important */
+    > tbody > tr.liste_titre {
+      grid-column: 1 / -1;
+      height: auto !important;
+    }
+
+    > tbody > tr > td {
+      display: block;
+      height: auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    > tbody > tr:not(.liste_titre):not(.liste_titre_filter) > td {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      color: $dc-text-soft;
+      font-family: $dc-font;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* The last brand is not alone on the bottom row of the grid: it keeps its rule like the others */
+    > tbody > tr:last-child > td {
+      border-bottom: 1px solid $dc-border-soft !important;
+    }
+  }
+
+  /* ---- CSV import: recognised columns (registrationcertificatefr_import.php) ---- */
+
+  .dolicar-import-columns > tbody > tr > td:first-child strong {
+    padding: 2px 8px;
+    border: 1px solid $dc-border;
+    border-radius: 6px;
+    background: $dc-surface-soft;
+    color: $dc-text;
+    font-family: $dc-font-mono;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .dolicar-import-required {
+    @include dc-pill;
+    border-color: rgba(13, 138, 255, 0.25);
+    background: $dc-primary-soft;
+    color: $dc-primary-strong;
+  }
+
+  .dolicar-import-optional {
+    color: $dc-faint;
+  }
+
+  /* ---- Tools: lots holding more than one vehicle (view/dolicartools.php) ---- */
+
+  .dolicar-tools-qty {
+    @include dc-pill;
+    border-color: rgba(224, 83, 83, 0.3);
+    background: $dc-danger-soft;
+    color: $dc-danger-text;
+    font-variant-numeric: tabular-nums;
+  }
+}
