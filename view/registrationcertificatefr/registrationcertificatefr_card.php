@@ -385,14 +385,21 @@ if (($id || $ref) && $action == 'edit') {
     print'<tr class="field_fk_lot"><td>';
     print $langs->trans('DolicarBatch');
     print '</td><td>';
-    $productLotsData = [];
-    $productLots     = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . GETPOST('fk_product') > 0 ? GETPOST('fk_product') : $object->fk_product]);
+    // Lots of the product picked in the form (AJAX reload after a product change), else of the product of the carte grise
+    $fkProductForLots = GETPOSTINT('fk_product') > 0 ? GETPOSTINT('fk_product') : (int) $object->fk_product;
+    $productLotsData  = [];
+    $productLots      = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . $fkProductForLots]);
     if (is_array($productLots) && !empty($productLots)) {
         foreach ($productLots as $productLotSingle) {
             $productLotsData[$productLotSingle->id] = $productLotSingle->batch;
         }
     }
-    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOST('fk_lot') > 0 ? GETPOST('fk_lot') : $object->fk_lot, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
+    // The attached lot stays offered while the product is unchanged, even if it belongs to another product: missing
+    // from the list, it would be posted as -1 and saving the form would detach it from the carte grise
+    if ($fkProductForLots == (int) $object->fk_product && $object->fk_lot > 0 && !isset($productLotsData[$object->fk_lot]) && $productLot->fetch($object->fk_lot) > 0) {
+        $productLotsData[$productLot->id] = $productLot->batch;
+    }
+    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOSTINT('fk_lot') > 0 ? GETPOSTINT('fk_lot') : $object->fk_lot, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
     print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : ($object->fk_product > 0 ? '&fk_product=' . $object->fk_product : '')) . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
     print '</td></tr>';
 
