@@ -73,8 +73,8 @@ require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 
 // Load DigiQuali libraries
 if ($isModEnabledDigiquali) {
-    require_once __DIR__ . '/../../../digiquali/class/control.class.php';
-    require_once __DIR__ . '/../../../digiquali/class/sheet.class.php';
+    dol_include_once('/digiquali/class/control.class.php');
+    dol_include_once('/digiquali/class/sheet.class.php');
 }
 
 // Global variables definitions
