@@ -83,7 +83,7 @@ print load_fiche_titre($title, $linkBack, 'title_setup');
 $head = dolicar_admin_prepare_head();
 print dol_get_fiche_head($head, 'publicinterface', $title, -1, 'dolicar_color@dolicar');
 
-$publicInterfaceUrl = dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?entity=' . $conf->entity, 3);
+$publicInterfaceUrl = dol_buildpath('/dolicar/public/agenda/public_vehicle_logbook.php', 3) . '?entity=' . $conf->entity;
 print '<a class="marginrightonly" href="' . $publicInterfaceUrl . '" target="_blank">' . img_picto('', 'url', 'class="pictofixedwidth"') . $langs->trans('PublicInterfaceObject', $langs->transnoentities('OfPublicVehicleLogBook')) . '</a>';
 print showValueWithClipboardCPButton($publicInterfaceUrl, 0, 'none');
 

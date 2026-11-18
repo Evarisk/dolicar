@@ -163,14 +163,14 @@ if ($nbLots > 0) {
 
     $resqlDetail = $db->query($sqlDetail);
 
-    $rcCardUrl = dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1);
+    $rcCardUrl = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1);
 
     print '<div class="notice-subtitle"><strong>' . $langs->transnoentities('FixLotStockQuantityWarning', $nbLots, $excess) . '</strong></div>';
     print '<br>';
     print '<table class="noborder" style="width:100%">';
     print '<tr class="liste_titre">';
     print '<td>' . $langs->trans('RegistrationCertificateFr') . '</td>';
-    print '<td>' . $langs->trans('RegistrationNumber') . '</td>';
+    print '<td>' . $langs->trans('DoliCarRegistrationNumber') . '</td>';
     print '<td>' . $langs->trans('DolicarBatch') . '</td>';
     print '<td>' . $langs->trans('Product') . '</td>';
     print '<td class="center">' . $langs->trans('Qty') . '</td>';
@@ -183,7 +183,7 @@ if ($nbLots > 0) {
             print '<td>' . dol_escape_htmltag($obj->a_registration_number) . '</td>';
             print '<td>' . dol_escape_htmltag($obj->batch) . '</td>';
             print '<td>' . dol_escape_htmltag($obj->product_ref) . ' – ' . dol_escape_htmltag($obj->product_label) . '</td>';
-            print '<td class="center"><strong style="color:var(--colorbacktitle2,#e05d2c)">' . $obj->qty . '</strong></td>';
+            print '<td class="center"><strong class="dolicar-tools-qty">' . $obj->qty . '</strong></td>';
             print '</tr>';
         }
         $db->free($resqlDetail);

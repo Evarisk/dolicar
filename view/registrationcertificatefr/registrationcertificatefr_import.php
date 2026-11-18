@@ -64,7 +64,7 @@ saturne_check_access($permissionToRead);
  * type: plate|string|int|double|date|fk_soc|fk_product|fk_project
  */
 $importableFields = [
-    'a_registration_number'            => ['type' => 'plate',       'required' => true,  'label' => 'RegistrationNumber',          'csvheader' => 'immatriculation',                'aliases' => ['plaque', 'registrationnumber', 'ref']],
+    'a_registration_number'            => ['type' => 'plate',       'required' => true,  'label' => 'DoliCarRegistrationNumber',   'csvheader' => 'immatriculation',                'aliases' => ['plaque', 'registrationnumber', 'ref']],
     'd1_vehicle_brand'                 => ['type' => 'string',      'required' => false, 'label' => 'VehicleBrand',                'csvheader' => 'marque',                         'aliases' => ['brand', 'd1']],
     'd2_vehicle_type'                  => ['type' => 'string',      'required' => false, 'label' => 'VehicleType',                 'csvheader' => 'type',                           'aliases' => ['d2']],
     'd21_vehicle_cnit'                 => ['type' => 'string',      'required' => false, 'label' => 'VehicleCNIT',                 'csvheader' => 'cnit',                           'aliases' => ['d21']],
@@ -398,7 +398,7 @@ print '<input type="hidden" name="action" value="import">';
 print '<div class="div-table-responsive-no-min">';
 print '<table class="noborder centpercent">';
 
-print '<tr class="liste_titre"><td colspan="2">' . $langs->trans('ImportFromCSV') . '</td></tr>';
+print '<tr class="liste_titre"><td colspan="2">' . $langs->trans('DoliCarImportFromCSV') . '</td></tr>';
 
 print '<tr class="oddeven"><td class="titlefieldcreate">' . $langs->trans('CSVFile') . '</td>';
 print '<td><input type="file" name="userfile" accept=".csv,text/csv" required></td></tr>';
@@ -425,7 +425,7 @@ if ($importDone) {
     print '<table class="noborder centpercent">';
     print '<tr class="liste_titre">';
     print '<td>' . $langs->trans('Line') . '</td>';
-    print '<td>' . $langs->trans('RegistrationNumber') . '</td>';
+    print '<td>' . $langs->trans('DoliCarRegistrationNumber') . '</td>';
     print '<td>' . $langs->trans('Status') . '</td>';
     print '<td>' . $langs->trans('Message') . '</td>';
     print '</tr>';
@@ -455,7 +455,7 @@ print '<br>';
 print load_fiche_titre($langs->trans('RecognizedColumns'), '', '');
 
 print '<div class="div-table-responsive-no-min">';
-print '<table class="noborder centpercent">';
+print '<table class="noborder centpercent dolicar-import-columns">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('CSVColumn') . '</td>';
 print '<td>' . $langs->trans('FieldName') . '</td>';
@@ -466,7 +466,7 @@ foreach ($importableFields as $fieldDef) {
     print '<tr class="oddeven">';
     print '<td><strong>' . dol_escape_htmltag($fieldDef['csvheader']) . '</strong></td>';
     print '<td>' . dol_escape_htmltag($langs->trans($fieldDef['label'])) . '</td>';
-    print '<td class="center">' . ($fieldDef['required'] ? '<span style="color:var(--colorbacktitle2,#e05d2c)">' . $langs->trans('Yes') . '</span>' : $langs->trans('No')) . '</td>';
+    print '<td class="center">' . ($fieldDef['required'] ? '<span class="dolicar-import-required">' . $langs->trans('Yes') . '</span>' : '<span class="dolicar-import-optional">' . $langs->trans('No') . '</span>') . '</td>';
     print '</tr>';
 }
 

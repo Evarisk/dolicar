@@ -145,6 +145,18 @@
     }
 }
 
+// Vehicle history — type of an event, in the colour of its category (custom property set by the tpl)
+.dolicar-event-type {
+    color: var(--dolicar-event-color);
+    font-weight: bold;
+}
+
+// Registration certificate list — days before the next control, in the colour of the delay
+.dolicar-next-control-days {
+    background-color: var(--dolicar-pill-color);
+    border-color: var(--dolicar-pill-color);
+}
+
 // Vehicle event form — expense report line picker (issue #452)
 .dolicar-er-lines {
     label.dolicar-er-line {

@@ -59,7 +59,93 @@ window.dolicar.vehicleLogbook.init = function() {
  * @return {void}
  */
 window.dolicar.vehicleLogbook.event = function() {
-  // The arrival mileage warning this module was written for has been dropped. The module stays as
-  // the home of the public logbook form handlers rather than being deleted, PR #491 moving the
-  // driver picker of the page into it.
+  $(document).on('click', '#plv2-driver-type .plv2-seg__btn', window.dolicar.vehicleLogbook.selectDriverType);
+  $(document).on('change', '#driver_user_id', window.dolicar.vehicleLogbook.rememberDriverUser);
+  $(document).on('change', '#plv2-driver-free input', window.dolicar.vehicleLogbook.rememberFreeDriver);
+};
+
+/**
+ * Switch the driver picker: internal user, external third party / contact, or free identity.
+ * The name of a free driver is only required while its block is the visible one, otherwise the
+ * browser would refuse to submit a form holding a required field it cannot focus.
+ *
+ * @memberof DoliCar_VehicleLogbook
+ *
+ * @since   1.5.0
+ * @version 1.5.0
+ *
+ * @return {void}
+ */
+window.dolicar.vehicleLogbook.selectDriverType = function() {
+  var type = $(this).data('type');
+
+  $('#plv2-driver-type .plv2-seg__btn').removeClass('active');
+  $(this).addClass('active');
+  $('#plv2-driver-type-value').val(type);
+
+  $('#plv2-driver-internal').prop('hidden', type !== 'internal');
+  $('#plv2-driver-external').prop('hidden', type !== 'external');
+  $('#plv2-driver-free').prop('hidden', type !== 'free');
+  $('#plv2-driver-free-lastname').prop('required', type === 'free');
+
+  // The next visit opens on the same tab, so a free driver finds the typed identity straight away
+  window.dolicar.vehicleLogbook.setCookie('plv2_driver_type', type);
+};
+
+/**
+ * Remember the picked internal driver so the next form comes pre-selected
+ *
+ * @memberof DoliCar_VehicleLogbook
+ *
+ * @since   1.5.0
+ * @version 1.5.0
+ *
+ * @return {void}
+ */
+window.dolicar.vehicleLogbook.rememberDriverUser = function() {
+  var driverId = $(this).val();
+
+  if (driverId) {
+    window.dolicar.vehicleLogbook.setCookie('plv2_driver_id', driverId);
+  }
+};
+
+/**
+ * Remember the typed free identity (name, first name, phone) for the next visit
+ *
+ * @memberof DoliCar_VehicleLogbook
+ *
+ * @since   1.5.0
+ * @version 1.5.0
+ *
+ * @return {void}
+ */
+window.dolicar.vehicleLogbook.rememberFreeDriver = function() {
+  var cookies = {
+    'plv2_driver_lastname' : $('#plv2-driver-free-lastname').val(),
+    'plv2_driver_firstname': $('#plv2-driver-free-firstname').val(),
+    'plv2_driver_phone'    : $('#plv2-driver-free-phone').val()
+  };
+
+  for (var name in cookies) {
+    if (cookies.hasOwnProperty(name)) {
+      window.dolicar.vehicleLogbook.setCookie(name, cookies[name] || '');
+    }
+  }
+};
+
+/**
+ * Write a one year cookie on the public interface
+ *
+ * @memberof DoliCar_VehicleLogbook
+ *
+ * @since   1.5.0
+ * @version 1.5.0
+ *
+ * @param  {string} name  Cookie name
+ * @param  {string} value Cookie value
+ * @return {void}
+ */
+window.dolicar.vehicleLogbook.setCookie = function(name, value) {
+  document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; max-age=31536000; SameSite=Lax';
 };
