@@ -144,7 +144,7 @@ $isFreeDriver = ($preselectedDriverType === 'free');
 
             <!-- Kilométrage -->
             <div class="plv2-card">
-                <h3><i class="fas fa-gauge"></i> <?php echo $langs->trans('Mileage'); ?></h3>
+                <h3><i class="fas fa-tachometer-alt"></i> <?php echo $langs->trans('Mileage'); ?></h3>
                 <div class="plv2-form-group">
                     <label>
                         <?php echo $isDepart ? $langs->trans('StartingMileage') : $langs->trans('ArrivalMileage'); ?>
