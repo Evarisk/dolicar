@@ -424,7 +424,7 @@ if (($id || $ref) && $action == 'edit') {
     print ' data-fields-filled="' . dol_escape_htmltag($langs->trans('FieldsFilledFromJson')) . '">';
     print '<label class="qc-dropzone qc-dropzone--compact" for="dolicar-json-file-edit">';
     print '<input type="file" id="dolicar-json-file-edit" accept=".json,application/json">';
-    print '<i class="fas fa-file-arrow-up qc-dropzone-icon"></i>';
+    print '<i class="fas fa-file-upload qc-dropzone-icon"></i>';
     print '<div class="qc-dropzone-meta">';
     print '<div class="qc-dropzone-text">' . $langs->trans('DropJsonFileHere') . '</div>';
     print '<div class="qc-dropzone-hint">' . $langs->trans('FillFromCarteGriseJsonHelp') . '</div>';

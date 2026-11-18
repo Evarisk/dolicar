@@ -658,7 +658,7 @@ if ($step === 'search') {
 
     // Primary action at the very bottom so the user completes the whole form (plate + third party) before searching
     print '<button type="submit" class="qc-search-btn">';
-    print '<i class="fas fa-magnifying-glass"></i>';
+    print '<i class="fas fa-search"></i>';
     print ' ' . $langs->trans('LaunchSearch');
     print '</button>';
 
@@ -695,7 +695,7 @@ if ($step === 'edit') {
     // Result banner (only shown when API returned no data)
     if (!$plateFound) {
         print '<div class="qc-notfound-banner">';
-        print '<i class="fas fa-magnifying-glass-minus"></i>';
+        print '<i class="fas fa-search-minus"></i>';
         print '<div><strong>' . $langs->trans('NoPlateFound') . '</strong>';
         print ' — ' . $langs->trans('CreateManuallyFromPaper') . '</div>';
         print '</div>';
@@ -811,7 +811,7 @@ if ($step === 'edit') {
         'p1_cylinder_capacity' => [
             'label' => $langs->trans('CylinderCapacity'),
             'code'  => '(P.1)',
-            'icon'  => 'fas fa-gauge',
+            'icon'  => 'fas fa-tachometer-alt',
             'type'  => 'number',
         ],
         'p3_fuel_type' => [
@@ -893,7 +893,7 @@ if ($step === 'search' && isModEnabled('ai')) {
 
     print '<div class="qc-section-header collapsible collapsed">';
     print '<div class="qc-section-title">';
-    print '<i class="fas fa-wand-magic-sparkles"></i>';
+    print '<i class="fas fa-magic"></i>';
     print $langs->trans('ScanCarteGriseWithAi');
     print '</div>';
     print '<i class="fas fa-chevron-down qc-chevron"></i>';
@@ -912,7 +912,7 @@ if ($step === 'search' && isModEnabled('ai')) {
 
     print '<div class="qc-form-actions">';
     print '<button type="submit" class="qc-btn qc-btn-primary qc-btn-large" disabled>';
-    print '<i class="fas fa-wand-magic-sparkles"></i> ' . $langs->trans('AnalyzeAndCreate');
+    print '<i class="fas fa-magic"></i> ' . $langs->trans('AnalyzeAndCreate');
     print '</button>';
     print '</div>';
 
@@ -945,7 +945,7 @@ if ($step === 'search') {
 
     print '<label class="qc-dropzone" for="qc-json-file">';
     print '<input type="file" name="json_file" id="qc-json-file" accept=".json,application/json">';
-    print '<i class="fas fa-file-arrow-up qc-dropzone-icon"></i>';
+    print '<i class="fas fa-file-upload qc-dropzone-icon"></i>';
     print '<div class="qc-dropzone-text">' . $langs->trans('DropJsonFileHere') . '</div>';
     print '<div class="qc-dropzone-hint">' . $langs->trans('OrClickToBrowseJson') . '</div>';
     print '<div class="qc-dropzone-file"><i class="fas fa-file-code"></i> <span class="qc-dropzone-filename"></span></div>';

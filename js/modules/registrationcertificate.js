@@ -578,6 +578,6 @@ window.dolicar.registrationcertificate.fillEditForm = function(data, $container)
   // Notice inviting the user to review then save
   $('.dolicar-json-applied-banner').remove();
   var bannerMessage = String($container.data('fields-filled')).replace('{count}', filledCount);
-  $form.before('<div class="dolicar-json-applied-banner"><i class="fas fa-circle-check"></i><div>' + bannerMessage + '</div></div>');
+  $form.before('<div class="dolicar-json-applied-banner"><i class="fas fa-check-circle"></i><div>' + bannerMessage + '</div></div>');
   $form[0].scrollIntoView({behavior: 'smooth', block: 'start'});
 };
