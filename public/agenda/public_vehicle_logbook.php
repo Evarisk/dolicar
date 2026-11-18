@@ -144,7 +144,7 @@ if (!is_array($recentActionComms)) {
 }
 
 if ($isModEnabledDigiquali) {
-    $controls = saturne_fetch_all_object_type('Control', 'DESC', 't.control_date', 1, 0, ['customsql' => 't.rowid = ee.fk_target AND t.status = ' . Control::STATUS_LOCKED], 'AND', false, true, false, ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ee.sourcetype = "productbatch" AND ee.fk_source = ' . $id . ' AND ee.targettype = "digiquali_control" AND ee.fk_target = t.rowid');
+    $controls = saturne_fetch_all_object_type('Control', 'DESC', 't.control_date', 1, 0, ['customsql' => 't.rowid = ee.fk_target AND t.status = ' . Control::STATUS_LOCKED], 'AND', false, true, false, ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ee.sourcetype = "' . $productLot->element . '" AND ee.fk_source = ' . ((int) $id) . ' AND ee.targettype = "digiquali_control" AND ee.fk_target = t.rowid');
     if (is_array($controls) && !empty($controls)) {
         foreach ($controls as $control) {
             $lastControl = $control;
@@ -453,8 +453,9 @@ if (empty($resHook)) {
 
         $newControlID = $newControl->create($controllerUser);
         if ($newControlID > 0) {
-            // Link the control to the vehicle lot (stored as sourcetype = productbatch / targettype = digiquali_control)
-            $newControl->add_object_linked('productbatch', $id);
+            // Link the control to the vehicle lot with the element DigiQuali reads (sourcetype = productlot / targettype = digiquali_control),
+            // otherwise the control card and list show no Lot/Serial and the vehicle never lists the control
+            $newControl->add_object_linked($productLot->element, $id);
 
             $answerUrl = dol_buildpath('/digiquali/public/public_answer.php', 3) . '?track_id=' . $newControl->track_id . '&object_type=control&document_type=ControlDocument&entity=' . $entity;
             header('Location: ' . $answerUrl);
@@ -666,7 +667,7 @@ if ($success) {
     $showScreen = 'search';
 }
 
-// Control screen — list the DigiQuali sheets applicable to a vehicle (control type, locked, linked to productbatch)
+// Control screen — list the DigiQuali sheets applicable to a vehicle (control type, locked, linked to productlot)
 $controlSheets = [];
 if ($showScreen === 'control' && $isModEnabledDigiquali) {
     // Sheets store their linkable object types as a JSON key — for vehicles it's "productlot" (same filter as registrationcertificatefr_card.php)

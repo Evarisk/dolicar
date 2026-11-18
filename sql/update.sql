@@ -28,3 +28,6 @@ ALTER TABLE `llx_dolicar_registrationcertificatefr` ADD `json` longtext AFTER `z
 
 -- 21.0.0
 UPDATE llx_element_element SET sourcetype = 'dolicar_registrationcertificatefr' WHERE sourcetype = 'dolicar_regcertfr' AND targettype = 'digiquali_control';
+
+-- 23.1.2 : controls created from the public vehicle logbook were linked as productbatch, DigiQuali reads productlot
+UPDATE llx_element_element SET sourcetype = 'productlot' WHERE sourcetype = 'productbatch' AND targettype = 'digiquali_control';
