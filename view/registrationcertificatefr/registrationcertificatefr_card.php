@@ -181,7 +181,9 @@ if (empty($resHook)) {
         }
 
         $requestedModel = GETPOST('model', 'alpha');
-        if (($action === 'builddoc' || GETPOST('forcebuilddoc')) && strpos($requestedModel, 'vehiclelogbookdocument') !== false) {
+        // Every model registered under the vehiclelogbookdocument type by modDoliCar::init(): the logbook and the two
+        // trip sheets, which write in vehiclelogbookdocument/<ref> too
+        if (($action === 'builddoc' || GETPOST('forcebuilddoc')) && preg_match('/vehiclelogbookdocument|vehiclephotossheet|vehiclestatesheet/', $requestedModel)) {
             $document   = new VehicleLogBookDocument($db);
             $upload_dir = $dirOutput . '/vehiclelogbookdocument/' . dol_sanitizeFileName($object->ref);
         } else {
