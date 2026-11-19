@@ -349,12 +349,16 @@ function dolicar_push_invoice_to_vehicle_history(Facture $invoice, User $user): 
         return 0;
     }
 
+    // From BILL_VALIDATE, the invoice still has its (PROVn) ref: Facture::validate() calls its triggers before taking
+    // the final ref, kept meanwhile in newref, as the agenda trigger of Dolibarr core reads it
+    $invoiceRef = !empty($invoice->newref) ? $invoice->newref : $invoice->ref;
+
     $event              = new ActionComm($db);
     $event->code        = 'AC_DOLICAR_VEHICLE_INVOICE';
     $event->type_code   = 'AC_OTH_AUTO';
     $event->fk_element  = (int) $registrationCertificate->fk_lot;
     $event->elementtype = 'productlot';
-    $event->label       = $langs->transnoentities('VehicleInvoiceEventLabel', $invoice->ref);
+    $event->label       = $langs->transnoentities('VehicleInvoiceEventLabel', $invoiceRef);
     $event->datep       = $invoice->date ?: dol_now();
     $event->userownerid = $user->id;
     $event->percentage  = -1;
