@@ -47,7 +47,7 @@ require_once __DIR__ . '/../../class/dolicardocuments/livretentretien.class.php'
 require_once __DIR__ . '/../../class/dolicardocuments/vehiclelogbookdocument.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 if (isModEnabled('digiquali')) {
-    require_once __DIR__ . '/../../../digiquali/class/sheet.class.php';
+    dol_include_once('/digiquali/class/sheet.class.php');
 }
 
 // Global variables definitions
