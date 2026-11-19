@@ -278,7 +278,8 @@ class pdf_livretentretien
                 dol_print_date($evt->datep, 'day'),
                 $km > 0 ? number_format($km, 0, ',', ' ') . ' km' : '',
                 $typeLabel,
-                strip_tags($evt->note_private ?? ''),
+                // HTML note: its <br> become line breaks, strip_tags() alone glued the lines together
+                trim(dol_string_nohtmltag($evt->note_private ?? '', 0)),
                 $cost > 0 ? price($cost, 0, $outputLangs, 1, -1, -1, $conf->currency) : '',
             ];
         }
