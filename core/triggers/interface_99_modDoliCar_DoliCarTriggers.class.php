@@ -52,7 +52,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $this->family      = 'demo';
         $this->description = 'DoliCar triggers.';
         $this->version     = '23.2.0';
-        $this->picto       = 'dolicar@dolicar';
+        $this->picto       = 'dolicar_color@dolicar';
     }
 
     /**
