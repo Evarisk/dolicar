@@ -99,7 +99,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         }
 
         $objects      = ['REGISTRATIONCERTIFICATEFR'];
-        $triggerTypes = ['CREATE', 'MODIFY', 'DELETE', 'ARCHIVE'];
+        $triggerTypes = ['CREATE', 'MODIFY', 'DELETE', 'ARCHIVE', 'UNARCHIVE'];
 
         $actions = array_merge(
             array_merge(...array_map(fn($s) => array_map(fn($p) => "{$p}_{$s}", $objects), $triggerTypes)),

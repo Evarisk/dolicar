@@ -125,6 +125,9 @@ if ($id > 0) {
 }
 $productLot->fetch($id);
 
+// An archived vehicle (sold, out of the fleet) keeps its history but takes no new entry
+$isVehicleArchived = $registrationCertificateFR->id > 0 && $registrationCertificateFR->isArchived();
+
 $lastActionComm = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NOT NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
 if (is_array($lastActionComm) && !empty($lastActionComm)) {
     $lastArrivalMileage = $lastActionComm[0]->array_options['options_arrival_mileage'];
@@ -197,6 +200,11 @@ $parameters = [];
 $resHook    = $hookmanager->executeHooks('doActions', $parameters, $actionComm, $action); // Note that $action and $project may have been modified by some hooks
 if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
+
+// No departure, return, problem, repair, control or media on an archived vehicle, whatever the page that posts it
+if ($isVehicleArchived && in_array($action, ['add', 'report_problem', 'add_repair', 'create_control', 'uploadPhoto', 'add_audio'], true)) {
+    $action = '';
 }
 
 if (empty($resHook)) {
@@ -651,6 +659,8 @@ if ($success) {
     $successType = $isVehicleOut ? 'depart' : 'retour';
 } elseif ($view === 'list') {
     $showScreen = 'list';
+} elseif ($id > 0 && $isVehicleArchived) {
+    $showScreen = 'archived';
 } elseif ($view === 'history' && $id > 0 && $registrationCertificateFR->id > 0) {
     $showScreen = 'history';
 } elseif ($id > 0 && $registrationCertificateFR->id > 0) {
@@ -715,7 +725,8 @@ if ($showScreen === 'history') {
 $allCertificates = [];
 if ($showScreen === 'list' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
     $listCertificate = new RegistrationCertificateFr($db);
-    $fetchedCertificates = $listCertificate->fetchAll('ASC', 'a_registration_number', 0, 0, []);
+    // Archived (sold) and deleted vehicles are not offered
+    $fetchedCertificates = $listCertificate->fetchAll('ASC', 'a_registration_number', 0, 0, ['customsql' => 't.status >= 0 AND t.status <> ' . RegistrationCertificateFr::STATUS_ARCHIVED]);
     if (is_array($fetchedCertificates)) {
         $allCertificates = $fetchedCertificates;
     }

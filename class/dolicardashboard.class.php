@@ -147,7 +147,7 @@ class DolicarDashboard
         $lotIdsStr = implode(',', array_map('intval', array_keys($lotWarehouseMap)));
         $cgObject  = new RegistrationCertificateFr($this->db);
         $cgList = $cgObject->fetchAll('ASC', 'a_registration_number', 0, 0, [
-            'customsql' => 't.status >= 0 AND t.fk_lot IN (' . $lotIdsStr . ')',
+            'customsql' => 't.status >= 0 AND t.status <> ' . RegistrationCertificateFr::STATUS_ARCHIVED . ' AND t.fk_lot IN (' . $lotIdsStr . ')',
         ]);
 
         if (!is_array($cgList) || empty($cgList)) {
@@ -230,7 +230,7 @@ class DolicarDashboard
 
         $cgObject = new RegistrationCertificateFr($this->db);
         // fetchAll() handles entity filtering automatically via ismultientitymanaged
-        $cgList   = $cgObject->fetchAll('', '', 0, 0, ['customsql' => 't.status >= 0']);
+        $cgList   = $cgObject->fetchAll('', '', 0, 0, ['customsql' => 't.status >= 0 AND t.status <> ' . RegistrationCertificateFr::STATUS_ARCHIVED]);
 
         if (!is_array($cgList) || empty($cgList)) {
             return $this->buildActivitiesListResult([], $langs);
@@ -396,7 +396,7 @@ class DolicarDashboard
         $now       = dol_now();
 
         // fetchAll() handles entity filtering automatically
-        $cgList = $cgObject->fetchAll('', '', 0, 0, ['customsql' => 't.status >= 0 AND t.fk_lot > 0']);
+        $cgList = $cgObject->fetchAll('', '', 0, 0, ['customsql' => 't.status >= 0 AND t.status <> ' . RegistrationCertificateFr::STATUS_ARCHIVED . ' AND t.fk_lot > 0']);
 
         $overdueItems = [];
 
