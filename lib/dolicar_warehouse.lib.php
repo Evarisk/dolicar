@@ -60,7 +60,8 @@ function dolicar_get_fleet_by_warehouse(): array
     }
 
     $vehicleObject = new RegistrationCertificateFr($db);
-    $vehicles      = $vehicleObject->fetchAll('ASC', 'a_registration_number', 0, 0, ['customsql' => 't.status >= 0']);
+    // Archived vehicles (sold, out of the fleet) are no longer in a warehouse
+    $vehicles      = $vehicleObject->fetchAll('ASC', 'a_registration_number', 0, 0, ['customsql' => 't.status >= 0 AND t.status <> ' . RegistrationCertificateFr::STATUS_ARCHIVED]);
 
     $fleet      = [];
     $unassigned = [];

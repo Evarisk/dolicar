@@ -126,7 +126,7 @@ class RegistrationCertificateFr extends SaturneObject
         'date_creation'                       => ['type' => 'datetime',     'label' => 'DateCreation',                  'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 2],
         'tms'                                 => ['type' => 'timestamp',    'label' => 'DateModification',              'enabled' => 1, 'position' => 50,  'notnull' => 0, 'visible' => -2],
         'import_key'                          => ['type' => 'varchar(14)',  'label' => 'ImportId',                      'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => -2],
-        'status'                              => ['type' => 'integer',      'label' => 'Status',                        'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => -2, 'index' => 1, 'default' => 1, 'arrayofkeyval' => [1 => 'Validated', 3 => 'Archived']],
+        'status'                              => ['type' => 'integer',      'label' => 'Status',                        'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => 2, 'index' => 1, 'searchmulti' => 1, 'default' => 1, 'arrayofkeyval' => [0 => 'Draft', 1 => 'Enabled', 3 => 'Archived']],
         'a_registration_number'               => ['type' => 'varchar(128)', 'label' => 'DoliCarRegistrationNumber',     'enabled' => 1, 'position' => 11,  'notnull' => 1, 'visible' => 1, 'showinpwa' => 1],
         'b_first_registration_date'           => ['type' => 'date',         'label' => 'FirstRegistrationDate',         'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => -3, 'config' => 1],
         'c1_owner_fullname'                   => ['type' => 'varchar(255)', 'label' => 'OwnerFullName',                 'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => -3, 'config' => 1],
@@ -635,6 +635,19 @@ class RegistrationCertificateFr extends SaturneObject
             return (int) ((float) $value != 0);
         }
         return preg_match('/n\W{0,2}est\s+pas|non|false|^no$/i', trim((string) $value)) ? 0 : 1;
+    }
+
+    /**
+     * Is the vehicle archived (sold or out of the fleet)?
+     *
+     * An archived vehicle keeps its history but is read-only, hidden from the lists, the dashboard and the warehouses, and
+     * the public vehicle logbook takes no new entry for it.
+     *
+     * @return bool True if the vehicle is archived
+     */
+    public function isArchived(): bool
+    {
+        return (int) $this->status === self::STATUS_ARCHIVED;
     }
 
     /**

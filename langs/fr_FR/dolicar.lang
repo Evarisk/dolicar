@@ -367,6 +367,16 @@ CreateAndFillControl     = Créer et remplir le contrôle
 SelectControlSheet       = Choisir un modèle de contrôle
 DoliCarNoControlSheetAvailable = Aucun modèle de contrôle applicable aux véhicules n'est disponible.
 
+# Archive - Véhicule vendu ou sorti du parc (issue #610)
+ArchiveVehicle                     = Archiver
+ReactivateVehicle                  = Réactiver
+ConfirmArchiveVehicle              = Archiver le véhicule %s (vendu, sorti du parc) ? Il n'apparaîtra plus dans la liste, le tableau de bord ni les entrepôts, et le carnet de bord public n'acceptera plus de saisie. Son historique reste consultable depuis sa fiche, et vous pourrez le réactiver.
+ArchivedVehicleReadOnly            = Ce véhicule est archivé : réactivez-le pour le modifier.
+ObjectUnarchiveTrigger             = %s %s réactivé(e)
+PublicVehicleLogBookArchivedTitle  = Véhicule archivé
+PublicVehicleLogBookArchivedDesc   = Ce véhicule ne fait plus partie du parc : le carnet de bord n'accepte plus de saisie.
+PublicVehicleLogBookSearchAnother  = Rechercher un autre véhicule
+
 
 
 #

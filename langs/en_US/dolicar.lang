@@ -367,6 +367,16 @@ CreateAndFillControl     = Create and fill in the control
 SelectControlSheet       = Choose a control sheet
 DoliCarNoControlSheetAvailable = No control sheet applicable to vehicles is available.
 
+# Archive - Vehicle sold or out of the fleet (issue #610)
+ArchiveVehicle                     = Archive
+ReactivateVehicle                  = Reactivate
+ConfirmArchiveVehicle              = Archive vehicle %s (sold, out of the fleet)? It will no longer appear in the list, the dashboard or the warehouses, and the public vehicle logbook will take no new entry. Its history stays available from its card, and you can reactivate it.
+ArchivedVehicleReadOnly            = This vehicle is archived: reactivate it to modify it.
+ObjectUnarchiveTrigger             = %s %s reactivated
+PublicVehicleLogBookArchivedTitle  = Archived vehicle
+PublicVehicleLogBookArchivedDesc   = This vehicle is no longer part of the fleet: the logbook takes no new entry.
+PublicVehicleLogBookSearchAnother  = Search another vehicle
+
 
 
 #

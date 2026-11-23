@@ -153,8 +153,17 @@ if (empty($resHook)) {
     }
 
 
+    // An archived vehicle (sold, out of the fleet) is read-only : reactivate it first
+    if ($object->id > 0 && $object->isArchived() && in_array($action, ['edit', 'update', 'update_extras'], true)) {
+        setEventMessages($langs->trans('ArchivedVehicleReadOnly'), [], 'errors');
+        $action = '';
+    }
+
     // Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
     require_once DOL_DOCUMENT_ROOT . '/core/actions_addupdatedelete.inc.php';
+
+    // Actions confirm_archive, confirm_unarchive
+    require_once dol_buildpath('/saturne/core/tpl/actions/object_workflow_actions.tpl.php');
 
     // Actions set_thirdparty, set_project
     require_once dol_buildpath('/saturne/core/tpl/actions/banner_actions.tpl.php');
@@ -502,6 +511,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         $formConfirm .= $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('Delete'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
     }
 
+    // Confirmation to archive (vehicle sold, out of the fleet)
+    if ($action == 'archive' && !$object->isArchived()) {
+        $formConfirm .= $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('ArchiveVehicle'), $langs->trans('ConfirmArchiveVehicle', $object->a_registration_number), 'confirm_archive', '', 'yes', 1);
+    }
+
     // Call Hook formConfirm
     $parameters = ['formConfirm' => $formConfirm];
     $resHook    = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
@@ -572,7 +586,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     </script>
     <?php
 
-    if (isModEnabled('digiquali') && !empty($object->fk_lot) && $object->fk_lot > 0 && !empty($digiQualiSheets)) {
+    if (isModEnabled('digiquali') && !$object->isArchived() && !empty($object->fk_lot) && $object->fk_lot > 0 && !empty($digiQualiSheets)) {
         $controlCardUrl = dol_buildpath('/digiquali/view/control/control_card.php', 1);
         $backToPage     = dol_buildpath('/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
         $logoUrl        = dol_buildpath('/digiquali/img/digiquali_color.svg', 1);
@@ -620,8 +634,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         }
 
         if (empty($resHook)) {
-            $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-edit pictofixedwidth"></i>' . $langs->trans('Modify') : '<i class="fas fa-edit fa-2x"></i>';
-            print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=edit&token=' . newToken(), '', $permissiontoadd);
+            if (!$object->isArchived()) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-edit pictofixedwidth"></i>' . $langs->trans('Modify') : '<i class="fas fa-edit fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=edit&token=' . newToken(), '', $permissiontoadd);
+            }
 
             if (isModEnabled('propal')) {
                 $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans('NewPropal') : '<i class="fas fa-file-signature fa-2x"></i>';
@@ -636,6 +652,15 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
             if (isModEnabled('fichinter')) {
                 $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-ambulance"></i>' . ' ' . $langs->trans('NewIntervention') : '<i class="fas fa-ambulance fa-2x"></i>';
                 print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
+            }
+
+            // Archive a sold vehicle : its history stays, it leaves the lists and the public logbook
+            if ($object->isArchived()) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-box-open pictofixedwidth"></i>' . $langs->trans('ReactivateVehicle') : '<i class="fas fa-box-open fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=confirm_unarchive&token=' . newToken(), '', $permissiontoadd);
+            } elseif ((int) $object->status === RegistrationCertificateFr::STATUS_VALIDATED) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-archive pictofixedwidth"></i>' . $langs->trans('ArchiveVehicle') : '<i class="fas fa-archive fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=archive&token=' . newToken(), '', $permissiontoadd);
             }
 
             $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-trash pictofixedwidth"></i>' . $langs->trans('Delete') : '<i class="fas fa-trash fa-2x"></i>';
