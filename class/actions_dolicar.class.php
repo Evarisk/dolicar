@@ -85,11 +85,11 @@ class ActionsDoliCar
      *
      * @param  array        $parameters Hook metadatas (context, etc...)
      * @param  CommonObject $object     Current object
-     * @param  string       $action     Current action
+     * @param  string|null  $action     Current action
      * @return int                      0 < on error, 0 on success, 1 to replace standard code
      * @throws Exception
      */
-    public function doActions(array $parameters, $object, string $action): int
+    public function doActions(array $parameters, $object, ?string $action): int
     {
         global $conf, $db, $extrafields, $user, $langs; // $conf/$db mandatory for actions_setnotes.inc.php
 
@@ -423,11 +423,11 @@ class ActionsDoliCar
      *
      * @param  array        $parameters Hook metadatas (context, etc...)
      * @param  CommonObject $object     Current object
-     * @param  string       $action     Current action
+     * @param  string|null  $action     Current action
      * @return int                      0 < on error, 0 on success, 1 to replace standard code
      * @throws Exception
      */
-    public function quickCreationAction(array $parameters, CommonObject $object, string $action)
+    public function quickCreationAction(array $parameters, CommonObject $object, ?string $action)
     {
         global $conf, $db, $langs, $user; // $conf/$db/$langs mandatory for TPL
 
