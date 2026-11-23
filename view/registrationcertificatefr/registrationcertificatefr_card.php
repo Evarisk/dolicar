@@ -154,7 +154,7 @@ if (empty($resHook)) {
 
 
     // An archived vehicle (sold, out of the fleet) is read-only : reactivate it first
-    if ($object->id > 0 && $object->isArchived() && in_array($action, ['edit', 'update', 'update_extras'], true)) {
+    if ($object->id > 0 && $object->isArchived() && in_array($action, ['edit', 'update', 'update_extras', 'set_societe', 'set_project'], true)) {
         setEventMessages($langs->trans('ArchivedVehicleReadOnly'), [], 'errors');
         $action = '';
     }
