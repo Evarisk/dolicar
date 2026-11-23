@@ -129,6 +129,13 @@ if (isModEnabled('digiquali')) {
 // Initialize array of search criterias
 $searchAll = trim(GETPOST('search_all'));
 $search    = [];
+// Archived vehicles (sold, out of the fleet) are hidden until asked for, "Remove filters" goes back to these statuses.
+// From a product lot, a product, a third party or a project, every vehicle is listed: its history is what is looked for
+$defaultSearchStatus = [RegistrationCertificateFr::STATUS_DRAFT, RegistrationCertificateFr::STATUS_VALIDATED];
+if (!empty($fromType)) {
+    $defaultSearchStatus[] = RegistrationCertificateFr::STATUS_ARCHIVED;
+}
+$search['status'] = saturne_get_status_search_filter($defaultSearchStatus);
 foreach ($object->fields as $key => $val) {
     if (GETPOST('search_' . $key, 'alpha') !== '') {
         $search[$key] = GETPOST('search_' . $key, 'alpha');
@@ -218,6 +225,8 @@ if (empty($resHook)) {
         $searchAll            = '';
         $toselect             = [];
         $search_array_options = [];
+        // An emptied status would list the archived vehicles for this page only, the next sort bringing the default back
+        $search['status'] = $defaultSearchStatus;
     }
     if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')
         || GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha')) {
