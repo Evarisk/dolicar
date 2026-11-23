@@ -88,6 +88,11 @@ class pdf_vehiclephotossheet
     public $error = '';
 
     /**
+     * @var string[] Non blocking warnings of the last generation, read back by CommonObject::commonGenerateDocument()
+     */
+    public $warnings = [];
+
+    /**
      * Constructor
      *
      * @param DoliDB $db Database handler

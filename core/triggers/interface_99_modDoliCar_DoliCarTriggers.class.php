@@ -51,8 +51,8 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'DoliCar triggers.';
-        $this->version     = '23.2.0';
-        $this->picto       = 'dolicar@dolicar';
+        $this->version     = '23.3.0';
+        $this->picto       = 'dolicar_color@dolicar';
     }
 
     /**
@@ -99,7 +99,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         }
 
         $objects      = ['REGISTRATIONCERTIFICATEFR'];
-        $triggerTypes = ['CREATE', 'MODIFY', 'DELETE', 'ARCHIVE'];
+        $triggerTypes = ['CREATE', 'MODIFY', 'DELETE', 'ARCHIVE', 'UNARCHIVE'];
 
         $actions = array_merge(
             array_merge(...array_map(fn($s) => array_map(fn($p) => "{$p}_{$s}", $objects), $triggerTypes)),

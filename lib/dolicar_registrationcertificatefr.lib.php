@@ -182,6 +182,21 @@ function dolicar_vehicle_event_doc_preview_link($linkedObject, string $modulePar
 }
 
 /**
+ * One line excerpt of a note shown next to a document of the vehicle history.
+ *
+ * Notes may be HTML (written with <br> by the DoliCar triggers, or by the WYSIWYG editor): the tags are
+ * removed before truncating, so that none is printed as text nor cut in half.
+ *
+ * @param  string|null $note   Note of the linked document, plain text or HTML
+ * @param  int         $length Maximum length of the excerpt
+ * @return string              Excerpt ready for HTML output
+ */
+function dolicar_vehicle_event_note_excerpt(?string $note, int $length = 80): string
+{
+    return dol_escape_htmltag(dol_trunc(dol_string_nohtmltag((string) $note, 1), $length));
+}
+
+/**
  * Find the vehicle history event an invoice is already attached to.
  *
  * The automatic push and a manual link from the add-event form land in the same element_element row,
@@ -334,12 +349,16 @@ function dolicar_push_invoice_to_vehicle_history(Facture $invoice, User $user): 
         return 0;
     }
 
+    // From BILL_VALIDATE, the invoice still has its (PROVn) ref: Facture::validate() calls its triggers before taking
+    // the final ref, kept meanwhile in newref, as the agenda trigger of Dolibarr core reads it
+    $invoiceRef = !empty($invoice->newref) ? $invoice->newref : $invoice->ref;
+
     $event              = new ActionComm($db);
     $event->code        = 'AC_DOLICAR_VEHICLE_INVOICE';
     $event->type_code   = 'AC_OTH_AUTO';
     $event->fk_element  = (int) $registrationCertificate->fk_lot;
     $event->elementtype = 'productlot';
-    $event->label       = $langs->transnoentities('VehicleInvoiceEventLabel', $invoice->ref);
+    $event->label       = $langs->transnoentities('VehicleInvoiceEventLabel', $invoiceRef);
     $event->datep       = $invoice->date ?: dol_now();
     $event->userownerid = $user->id;
     $event->percentage  = -1;
