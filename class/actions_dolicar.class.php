@@ -85,11 +85,11 @@ class ActionsDoliCar
      *
      * @param  array        $parameters Hook metadatas (context, etc...)
      * @param  CommonObject $object     Current object
-     * @param  string       $action     Current action
+     * @param  string|null  $action     Current action
      * @return int                      0 < on error, 0 on success, 1 to replace standard code
      * @throws Exception
      */
-    public function doActions(array $parameters, $object, string $action): int
+    public function doActions(array $parameters, $object, ?string $action): int
     {
         global $conf, $db, $extrafields, $user, $langs; // $conf/$db mandatory for actions_setnotes.inc.php
 
@@ -423,11 +423,11 @@ class ActionsDoliCar
      *
      * @param  array        $parameters Hook metadatas (context, etc...)
      * @param  CommonObject $object     Current object
-     * @param  string       $action     Current action
+     * @param  string|null  $action     Current action
      * @return int                      0 < on error, 0 on success, 1 to replace standard code
      * @throws Exception
      */
-    public function quickCreationAction(array $parameters, CommonObject $object, string $action)
+    public function quickCreationAction(array $parameters, CommonObject $object, ?string $action)
     {
         global $conf, $db, $langs, $user; // $conf/$db/$langs mandatory for TPL
 
@@ -654,19 +654,41 @@ class ActionsDoliCar
                 return 0;
             }
 
-            $countControls = 0;
-            arsort($object->linkedObjects['digiquali_control']);
-            foreach ($object->linkedObjects['digiquali_control'] as $controlID => $control) {
-                if ($control->status != Control::STATUS_LOCKED) {
-                    continue;
+            // linkedObjects is indexed by link : indexed here by control, a control is listed once
+            $controls = [];
+            foreach ($object->linkedObjects['digiquali_control'] as $control) {
+                if ($control->status == Control::STATUS_LOCKED) {
+                    $controls[$control->id] = $control;
                 }
-
-                if ($countControls < getDolGlobalInt('MAIN_SIZE_SHORTLIST_LIMIT')) {
-                    $conf->cache['controls'][$controlID] = $control;
-                }
-                $countControls++;
             }
-            $conf->cache['control'] = reset($conf->cache['controls']);
+            if (empty($controls)) {
+                return 0;
+            }
+
+            // Most recent first
+            uasort($controls, function ($a, $b) {
+                return [$b->control_date ?: $b->date_creation, $b->id] <=> [$a->control_date ?: $a->date_creation, $a->id];
+            });
+
+            // The control columns follow the control the vehicle status comes from : the mandatory one when the vehicle
+            // has some (the roadworthiness test), not a more recent informative quarterly check. It is listed first, in bold.
+            $statusControl = reset($controls);
+            if (!function_exists('digiquali_get_object_control_status')) {
+                $digiQualiControlLib = dol_buildpath('/digiquali/lib/digiquali_control.lib.php', 0);
+                if (is_file($digiQualiControlLib)) {
+                    require_once $digiQualiControlLib;
+                }
+            }
+            if (function_exists('digiquali_get_object_control_status')) {
+                $controlStatus = digiquali_get_object_control_status($controls);
+                if ($controlStatus['control'] !== null) {
+                    $statusControl = $controlStatus['control'];
+                }
+            }
+            $controls = [$statusControl->id => $statusControl] + $controls;
+
+            $conf->cache['controls'] = array_slice($controls, 0, max(getDolGlobalInt('MAIN_SIZE_SHORTLIST_LIMIT'), 1), true);
+            $conf->cache['control']  = $statusControl;
         }
 
         return 0; // or return 1 to replace standard code
@@ -692,6 +714,7 @@ class ActionsDoliCar
                     return 0;
                 }
 
+                $out[$parameters['key']] = '';
                 foreach ($controls as $control) {
                     $out[$parameters['key']] .= $control->getNomUrl(1, '', 0, $firstOccurrence ? 'bold' : '') . '<br>';
                     $firstOccurrence = false;

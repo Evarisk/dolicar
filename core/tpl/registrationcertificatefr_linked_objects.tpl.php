@@ -67,24 +67,24 @@ $hasAmount = static function ($linkedObject, string $linkedObjectElement): bool 
 /**
  * Helper : render a single linked object row
  *
- * @param  CommonObject $linkedObject        The linked object to display
- * @param  string       $linkedObjectElement The element type key (e.g. 'digiquali_control')
- * @param  bool         $digiqualiEnabled    Whether DigiQuali module is active
- * @param  bool         $showAmountColumn    Whether the amount column is displayed
- * @param  Translate    $langs               Translation object
- * @param  float        $totalAmount         Running total of amounts (passed by reference)
- * @return string                            HTML row string
+ * @param  CommonObject          $linkedObject        The linked object to display
+ * @param  string                $linkedObjectElement The element type key (e.g. 'digiquali_control')
+ * @param  bool                  $digiqualiEnabled    Whether DigiQuali module is active
+ * @param  bool                  $showAmountColumn    Whether the amount column is displayed
+ * @param  array<string, string> $objectTypeLabels    Translated label of each element type, keyed by element type
+ * @param  Translate             $langs               Translation object
+ * @param  float                 $totalAmount         Running total of amounts (passed by reference)
+ * @return string                                     HTML row string
  */
-$renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectElement, bool $digiqualiEnabled, bool $showAmountColumn, $langs, &$totalAmount) use ($hasAmount): string {
+$renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectElement, bool $digiqualiEnabled, bool $showAmountColumn, array $objectTypeLabels, $langs, &$totalAmount) use ($hasAmount): string {
     global $conf, $db;
-    $isControl       = ($linkedObjectElement === 'digiquali_control');
-    $isSurvey        = ($linkedObjectElement === 'digiquali_survey');
-    $isCommercialDoc = in_array($linkedObjectElement, ['facture', 'propal', 'commande'], true);
+    $isControl = ($linkedObjectElement === 'digiquali_control');
+    $isSurvey  = ($linkedObjectElement === 'digiquali_survey');
 
     $verdictValue = $isControl ? (int) $linkedObject->verdict : '';
 
     $row  = '<tr class="dolicar-linked-object-row" data-verdict="' . $verdictValue . '">';
-    $row .= '<td class="nowrap">' . $langs->transnoentities(ucfirst($linkedObjectElement)) . '</td>';
+    $row .= '<td class="nowrap">' . ($objectTypeLabels[$linkedObjectElement] ?? $langs->trans(ucfirst($linkedObjectElement))) . '</td>';
     $row .= '<td>' . $linkedObject->getNomUrl(1) . '</td>';
     if ($digiqualiEnabled) {
         if ($isControl || $isSurvey) {
@@ -98,7 +98,9 @@ $renderLinkedObjectRow = static function ($linkedObject, string $linkedObjectEle
             $row .= '<td></td>';
         }
     }
-    $row .= '<td>' . (!$isControl && !$isSurvey && !$isCommercialDoc ? ($linkedObject->array_options['options_mileage'] ?? '') : '') . '</td>';
+    // Mileage entered on the object: extrafield "mileage" of proposals, orders and invoices, the one that feeds the current mileage
+    $mileage = (int) ($linkedObject->array_options['options_mileage'] ?? 0);
+    $row    .= '<td class="nowraponall">' . ($mileage > 0 ? price($mileage, 0, '', 1, 0) . ' ' . $langs->trans('km') : '') . '</td>';
     $row .= '<td>' . dol_print_date($linkedObject->date_creation, 'dayhour') . '</td>';
     // Status of every object. The public interface only shows locked controls: say so on the others, or the user wonders where they went
     $row .= '<td class="nowrap">' . (method_exists($linkedObject, 'getLibStatut') ? $linkedObject->getLibStatut(5) : '');
@@ -208,9 +210,20 @@ foreach ($linkedItems as [$linkedObject, $linkedObjectElement]) {
     }
 }
 
+// Label of each element type, from the object metadata of Saturne: its link_name is the type stored in
+// llx_element_element ('facture' is "Invoice", 'digiquali_control' is "Control", declared by DigiQuali)
+$objectTypeLabels = [];
+if (!empty($linkedItems)) {
+    foreach (saturne_get_objects_metadata() as $objectMetadata) {
+        if (!empty($objectMetadata['link_name']) && !empty($objectMetadata['langs']) && !isset($objectTypeLabels[$objectMetadata['link_name']])) {
+            $objectTypeLabels[$objectMetadata['link_name']] = $langs->trans($objectMetadata['langs']);
+        }
+    }
+}
+
 $rows = [];
 foreach ($linkedItems as $key => [$linkedObject, $linkedObjectElement]) {
-    $rows[$key] = $renderLinkedObjectRow($linkedObject, $linkedObjectElement, $digiqualiEnabled, $showAmountColumn, $langs, $totalAmount);
+    $rows[$key] = $renderLinkedObjectRow($linkedObject, $linkedObjectElement, $digiqualiEnabled, $showAmountColumn, $objectTypeLabels, $langs, $totalAmount);
 }
 
 $out = load_fiche_titre($langs->transnoentities('LinkedObjects'), '', 'dolicar_color@dolicar');
