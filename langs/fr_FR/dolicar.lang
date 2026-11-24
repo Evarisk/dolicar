@@ -80,7 +80,7 @@ ProjectQuickCreation                = Création rapide de projet
 ProjectQuickCreationDescription     = Cette option permet de créer rapidement un projet
 
 # Public interface - Interface publique
-OfPublicVehicleLogBook       = du carnet de bord publique du véhicule
+OfPublicVehicleLogBook       = du carnet de bord public du véhicule
 MaxArrivalMileage            = Seuil d'alerte du kilométrage d'arrivée
 MaxArrivalMileageDescription = Cette option permet de configurer le nombre de kilomètres parcourus à partir duquel un avertissement est affiché au conducteur lors de l'enregistrement d'un retour dans le carnet de bord d'un véhicule. La saisie reste possible au-delà de ce seuil. <br> (par défaut 1000 km)
 
@@ -262,7 +262,7 @@ LinkDolicar_registrationcertificatefrDescription = Permet la liaison entre les c
 
 
 # Public interface - Interface publique
-PublicVehicleLogBook          = Carnet de bord publique du véhicule
+PublicVehicleLogBook          = Carnet de bord public du véhicule
 VehicleLogBook                = Carnet de bord
 Driver                        = Conducteur
 ReturnedBy                    = Rendu par
@@ -274,7 +274,7 @@ EndDateAndHour                = Date et heure de retour
 ArrivalMileage                = Kilométrage d'arrivée
 EndComment                    = Commentaire d'arrivée
 ObjectAddPublicVehicleLogBook = Suivi Km : %s - VIN : %s
-SavedPublicVehicleLogBook     = Carnet de bord publique du véhicule enregistré
+SavedPublicVehicleLogBook     = Carnet de bord public du véhicule enregistré
 LicencePlateNotFoundInDB      = La plaque d'immatriculation est introuvable dans la base de données des cartes grises
 
 # Public interface v2 - Nouveaux libellés
