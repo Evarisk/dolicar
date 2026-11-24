@@ -646,21 +646,12 @@ class ActionsDoliCar
     {
         global $conf;
 
-        if (strpos($parameters['context'], 'registrationcertificatefrlist') !== false && isModEnabled('digiquali')) {
+        if (strpos($parameters['context'], 'registrationcertificatefrlist') !== false && isModEnabled('digiquali') && $object instanceof RegistrationCertificateFr) {
             $conf->cache['control']  = null;
             $conf->cache['controls'] = [];
-            $object->fetchObjectLinked(null, '', '', 'digiquali_control');
-            if (empty($object->linkedObjects['digiquali_control']) || !is_array($object->linkedObjects['digiquali_control'])) {
-                return 0;
-            }
 
-            // linkedObjects is indexed by link : indexed here by control, a control is listed once
-            $controls = [];
-            foreach ($object->linkedObjects['digiquali_control'] as $control) {
-                if ($control->status == Control::STATUS_LOCKED) {
-                    $controls[$control->id] = $control;
-                }
-            }
+            // The controls of the vehicle are those of its registration certificate and those of its lot (VIN)
+            $controls = $this->fetchVehicleLockedControls($object);
             if (empty($controls)) {
                 return 0;
             }
@@ -692,6 +683,34 @@ class ActionsDoliCar
         }
 
         return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     * Fetch the locked controls of a vehicle : those of its registration certificate and those of its lot (VIN)
+     *
+     * The card widget reads both, and the quick control widget of the card and the public logbook link the controls
+     * to the lot. A single query loads the controls themselves, without the other objects linked to the vehicle
+     * (proposals, invoices...), and a control linked to both is listed once.
+     *
+     * @param  RegistrationCertificateFr $registrationCertificateFr Registration certificate of the vehicle
+     * @return SaturneObject[]                                      Locked DigiQuali controls of the vehicle, by control id
+     */
+    private function fetchVehicleLockedControls(RegistrationCertificateFr $registrationCertificateFr): array
+    {
+        // Load DigiQuali libraries
+        dol_include_once('/digiquali/class/control.class.php');
+
+        // DigiQuali links a control as the target of the object it controls
+        $controlledObjectsSql = "(ee.sourcetype = '" . $this->db->escape($registrationCertificateFr->getElementType()) . "' AND ee.fk_source = " . ((int) $registrationCertificateFr->id) . ')';
+        if ($registrationCertificateFr->fk_lot > 0) {
+            $controlledObjectsSql .= " OR (ee.sourcetype = 'productlot' AND ee.fk_source = " . ((int) $registrationCertificateFr->fk_lot) . ')';
+        }
+
+        // EXISTS rather than a join : a control linked to both the registration certificate and the lot comes once
+        $filter   = ['customsql' => 't.status = ' . Control::STATUS_LOCKED . ' AND EXISTS (SELECT 1 FROM ' . $this->db->prefix() . "element_element AS ee WHERE ee.targettype = 'digiquali_control' AND ee.fk_target = t.rowid AND (" . $controlledObjectsSql . '))'];
+        $controls = saturne_fetch_all_object_type('Control', '', '', 0, 0, $filter);
+
+        return is_array($controls) ? $controls : [];
     }
 
     /**
