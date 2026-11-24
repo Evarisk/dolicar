@@ -85,12 +85,13 @@ if (!$sortorder) {
 $objectsMetadata = saturne_get_objects_metadata();
 
 if (isModEnabled('digiquali')) {
+    // One control reference per line, the column as wide as the longest one: no minimum width that would widen the list
     $object->fields['controls'] = [
         'label'         => 'Controls',
         'enabled'       => 1,
         'position'      => 200,
         'visible'       => 2,
-        'css'           => 'minwidth150',
+        'csslist'       => 'nowraponall',
         'disablesearch' => 1,
         'disablesort'   => 1
     ];
