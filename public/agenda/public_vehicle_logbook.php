@@ -86,7 +86,7 @@ saturne_load_langs(['companies', 'productbatch']);
 // Get parameters
 $id                 = GETPOST('id', 'int');
 $registrationNumber = GETPOST('registration_number');
-$entity             = GETPOST('entity');
+$entity             = GETPOSTINT('entity');
 $action             = GETPOST('action', 'aZ09');
 $backToPage         = GETPOST('backtopage', 'alpha');
 $actionType         = GETPOST('action_type', 'alpha');
@@ -107,7 +107,8 @@ if ($isModEnabledDigiquali) {
 
 $hookmanager->initHooks(['publicvehiclelogbook', 'saturnepublicinterface']); // Note that conf->hooks_modules contains array
 
-if (!isModEnabled('multicompany')) {
+// The entity of the link is a number: the setup of the page is read for it
+if (!isModEnabled('multicompany') || $entity <= 0) {
     $entity = $conf->entity;
 }
 
@@ -120,7 +121,7 @@ $extraFields->fetch_name_optionals_label($actionComm->table_element);
 if ($id > 0) {
     $registrationCertificateFR->fetch(0, '', ' AND fk_lot = ' . $id);
 } else {
-    $registrationCertificateFR->fetch(0, '', ' AND a_registration_number = ' . "'" . $registrationNumber . "'");
+    $registrationCertificateFR->fetch(0, '', " AND a_registration_number = '" . $db->escape($registrationNumber) . "'");
     $id = $registrationCertificateFR->fk_lot;
 }
 $productLot->fetch($id);
@@ -477,7 +478,7 @@ if (empty($resHook)) {
 
     if ($action == 'get_registration_number') {
         $registrationNumber = GETPOST('registration_number');
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?registration_number=' . $registrationNumber . '&entity=' . $entity);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?registration_number=' . urlencode($registrationNumber) . '&entity=' . $entity);
         exit;
     }
 
@@ -494,6 +495,20 @@ if (empty($resHook)) {
     }
 
     if ($action == 'add') {
+        // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,
+        // so we read it raw and decode it ourselves (same intent as the standard Saturne signature flow). The signature is printed back
+        // as the source of an image: anything else than an image drawn on the canvas refuses the entry, nothing of it is recorded
+        $signature = '';
+        if ($publicInterfaceUseSignatory && dol_strlen(GETPOST('signature', 'none')) > 0) {
+            $postedSignature = json_decode(GETPOST('signature', 'none'));
+            if (!is_string($postedSignature) || !SaturneSignature::isValidSignatureData($postedSignature)) {
+                setEventMessages($langs->trans('ErrorUserSignatureInvalid'), [], 'errors');
+                http_response_code(400);
+                exit;
+            }
+            $signature = $postedSignature;
+        }
+
         // Resolve driver full name: internal user (select_dolusers), external third-party contact,
         // or a free identity typed on the spot by someone who is in neither list (issue #487)
         $driverType  = GETPOST('driver_type', 'aZ09');
@@ -582,10 +597,7 @@ if (empty($resHook)) {
             $signatory->firstname = !empty($driverName) ? $driverName : ($lastUnfinishedActionCommJSON['driver'] ?? '');
 
             $signatory->signature_date = dol_now();
-            // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,
-            // so we read it raw and decode it ourselves (same intent as the standard Saturne signature flow).
-            $postedSignature      = json_decode(GETPOST('signature', 'none'));
-            $signatory->signature = is_string($postedSignature) ? $postedSignature : '';
+            $signatory->signature      = $signature;
 
             $signatory->element_type  = 'user';
             $signatory->element_id    = 0;
