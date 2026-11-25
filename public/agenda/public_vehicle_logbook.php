@@ -86,7 +86,7 @@ saturne_load_langs(['companies', 'productbatch']);
 // Get parameters
 $id                 = GETPOST('id', 'int');
 $registrationNumber = GETPOST('registration_number');
-$entity             = GETPOST('entity');
+$entity             = GETPOSTINT('entity');
 $action             = GETPOST('action', 'aZ09');
 $backToPage         = GETPOST('backtopage', 'alpha');
 $actionType         = GETPOST('action_type', 'alpha');
@@ -107,7 +107,8 @@ if ($isModEnabledDigiquali) {
 
 $hookmanager->initHooks(['publicvehiclelogbook', 'saturnepublicinterface']); // Note that conf->hooks_modules contains array
 
-if (!isModEnabled('multicompany')) {
+// The entity of the link is a number: the setup of the page is read for it
+if (!isModEnabled('multicompany') || $entity <= 0) {
     $entity = $conf->entity;
 }
 
@@ -120,7 +121,7 @@ $extraFields->fetch_name_optionals_label($actionComm->table_element);
 if ($id > 0) {
     $registrationCertificateFR->fetch(0, '', ' AND fk_lot = ' . $id);
 } else {
-    $registrationCertificateFR->fetch(0, '', ' AND a_registration_number = ' . "'" . $registrationNumber . "'");
+    $registrationCertificateFR->fetch(0, '', " AND a_registration_number = '" . $db->escape($registrationNumber) . "'");
     $id = $registrationCertificateFR->fk_lot;
 }
 $productLot->fetch($id);
@@ -477,7 +478,7 @@ if (empty($resHook)) {
 
     if ($action == 'get_registration_number') {
         $registrationNumber = GETPOST('registration_number');
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?registration_number=' . $registrationNumber . '&entity=' . $entity);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?registration_number=' . urlencode($registrationNumber) . '&entity=' . $entity);
         exit;
     }
 
