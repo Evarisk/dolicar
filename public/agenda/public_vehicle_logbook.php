@@ -494,6 +494,20 @@ if (empty($resHook)) {
     }
 
     if ($action == 'add') {
+        // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,
+        // so we read it raw and decode it ourselves (same intent as the standard Saturne signature flow). The signature is printed back
+        // as the source of an image: anything else than an image drawn on the canvas refuses the entry, nothing of it is recorded
+        $signature = '';
+        if ($publicInterfaceUseSignatory && dol_strlen(GETPOST('signature', 'none')) > 0) {
+            $postedSignature = json_decode(GETPOST('signature', 'none'));
+            if (!is_string($postedSignature) || !SaturneSignature::isValidSignatureData($postedSignature)) {
+                setEventMessages($langs->trans('ErrorUserSignatureInvalid'), [], 'errors');
+                http_response_code(400);
+                exit;
+            }
+            $signature = $postedSignature;
+        }
+
         // Resolve driver full name: internal user (select_dolusers), external third-party contact,
         // or a free identity typed on the spot by someone who is in neither list (issue #487)
         $driverType  = GETPOST('driver_type', 'aZ09');
@@ -582,10 +596,7 @@ if (empty($resHook)) {
             $signatory->firstname = !empty($driverName) ? $driverName : ($lastUnfinishedActionCommJSON['driver'] ?? '');
 
             $signatory->signature_date = dol_now();
-            // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,
-            // so we read it raw and decode it ourselves (same intent as the standard Saturne signature flow).
-            $postedSignature      = json_decode(GETPOST('signature', 'none'));
-            $signatory->signature = is_string($postedSignature) ? $postedSignature : '';
+            $signatory->signature      = $signature;
 
             $signatory->element_type  = 'user';
             $signatory->element_id    = 0;
