@@ -537,6 +537,35 @@ ErrorNoFileUploaded                   = No file was uploaded
 ErrorEmptyCSVFile                     = The CSV file is empty or contains no data
 ErrorMissingRegistrationNumberColumn  = The “immatriculation” column is mandatory and was not found in the file
 
+# Repair service per vehicle (issue #475)
+VehicleRepairServiceConfig              = Repair service per vehicle
+VehicleRepairService                    = Repair service
+VehicleRepairServiceEnabled             = Create a repair service per vehicle
+VehicleRepairServiceEnabledDesc         = When a registration certificate is created, a service dedicated to the vehicle is created automatically to carry its repairs in supplier orders.
+VehicleRepairServiceRefMask             = Service reference
+VehicleRepairServiceDescriptionMask     = Service description
+VehicleRepairServiceMaskDesc            = Available fields: {PLAQUE} (registration number) and {VIN} (serial number)
+GenerateMissingRepairServices           = Generate the missing services
+GenerateMissingRepairServicesDesc       = Creates the service of the vehicles registered before the setting was enabled. No effect on those that already have one.
+VehicleRepairServicesGenerated          = %s service(s) created out of %s vehicle(s) processed
+VehicleRepairServicesGenerationErrors   = %s service(s) could not be created, see the logs
+VehicleRepairServiceDisabled            = First enable the creation of the repair service per vehicle
+
+# Vehicle event medias (issue #475)
+PhotosAndFiles                          = Photos and files
+
+# Invoice warranties (issue #475)
+Warranties                              = Warranties
+WarrantyLabel                           = Label
+WarrantyEndDate                         = Warranty end
+WarrantyAttachment                      = Attachment
+WarrantyExpired                         = Warranty expired
+WarrantyRunning                         = Warranty running
+WarrantyAdded                           = Warranty added
+WarrantyDeleted                         = Warranty deleted
+NoWarranty                              = No warranty
+VehicleWarranties                       = Vehicle warranties
+
 # Warehouse fleet
 WarehouseFleet                    = Fleet by warehouse
 VehiclesByWarehouse               = Vehicles by warehouse
