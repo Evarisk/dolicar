@@ -3,7 +3,7 @@
 ## Informations
 
 - Numéro du module : 436380
-- Dernière mise à jour : 15/07/2026
+- Dernière mise à jour : 25/11/2026
 - Éditeur : [Evarisk](https://evarisk.com)
 - Thème : Eldy Menu
 - Licence : GPLv3
@@ -11,18 +11,18 @@
 
 ### Version
 
-- Version : 23.0.0
+- Version : 23.3.1
 - PHP : 7.4.33
-- Compatibilité : Dolibarr 21.0.0 - 23.0.2
-- Saturne Framework : 23.0.0
+- Compatibilité : Dolibarr 23.0.0 - 24.0.0
+- Saturne Framework : 23.9.1
 
 ## Liens
 
 - Support & Assistance : [Forum dolibarr.fr](https://dolibarr.fr) / Par mail à technique@evarisk.com
 - Demo : [Demo Dolicar](https://demodoli.digirisk.com) - ID: demo - Password: demo
 - Documentation : [Wiki DoliCar](https://wiki.dolibarr.org/index.php/Module_Dolicar)
-- Projet GitHub : [Projet DoliCar](https://github.com/Eoxia/Dolicar/projects?query=is%3Aopen)
-- Saturne Framework : [Télécharger Saturne](https://dolistore.com/fr/modules/1906-Saturne.html)
+- Projet GitHub : [Projet DoliCar](https://github.com/Evarisk/dolicar/projects?query=is%3Aopen)
+- Saturne Framework : 23.9.1
 - D'autres modules développés par Evarisk disponibles sur [Dolistore.com](https://dolistore.com)
 
 ## Fonctionnalités

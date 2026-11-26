@@ -35,6 +35,11 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
     protected $db;
 
     /**
+     * @var string Trigger version.
+     */
+    public $version;
+
+    /**
      * Constructor
      *
      * @param DoliDB $db Database handler
@@ -46,8 +51,8 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'DoliCar triggers.';
-        $this->version     = '23.0.0';
-        $this->picto       = 'dolicar@dolicar';
+        $this->version     = '23.3.1';
+        $this->picto       = 'dolicar_color@dolicar';
     }
 
     /**
@@ -69,6 +74,13 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
             return 0; // If module is not enabled, we do nothing
         }
 
+        // Every event of the instance comes through here, also those another module sends with an object that is not
+        // a CommonObject (ExternalAccess passes its Context on externalAccessInitController): none of them concerns
+        // DoliCar, and the event prepared below reads an id, element, module and ref that such an object may lack
+        if (!($object instanceof CommonObject)) {
+            return 0;
+        }
+
         // Data and type of action are stored into $object and $action
         dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . '. id=' . $object->id);
 
@@ -76,7 +88,8 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
 
         $actionComm = new ActionComm($this->db);
 
-        $triggerType = dol_ucfirst(dol_strtolower(explode('_', $action)[1]));
+        // An action code without "_" (externalAccessInitController, for instance) carries no trigger type
+        $triggerType = dol_ucfirst(dol_strtolower(explode('_', $action)[1] ?? ''));
 
         $actionComm->code        = 'AC_' . $action;
         $actionComm->type_code   = 'AC_OTH_AUTO';
@@ -94,7 +107,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
         }
 
         $objects      = ['REGISTRATIONCERTIFICATEFR'];
-        $triggerTypes = ['CREATE', 'MODIFY', 'DELETE', 'ARCHIVE'];
+        $triggerTypes = ['CREATE', 'MODIFY', 'DELETE', 'ARCHIVE', 'UNARCHIVE'];
 
         $actions = array_merge(
             array_merge(...array_map(fn($s) => array_map(fn($p) => "{$p}_{$s}", $objects), $triggerTypes)),
@@ -125,7 +138,9 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
                 require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
                 require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
 
-                dolicar_create_vehicle_repair_service($object);
+                if ($object instanceof RegistrationCertificateFr) {
+                    dolicar_create_vehicle_repair_service($object);
+                }
                 break;
             case 'PROPAL_CREATE' :
             case 'ORDER_CREATE' :
@@ -137,7 +152,7 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
 
                     $registrationCertificateFr->add_object_linked($object->element, $object->id);
 
-                    $object->note_public  = $langs->transnoentities('RegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
+                    $object->note_public  = $langs->transnoentities('DoliCarRegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('VINNumber') . ' : ' . (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
                     $object->note_public .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
@@ -145,6 +160,13 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
 
                     $object->setValueFrom('note_public', $object->note_public);
                 }
+                break;
+            case 'BILL_VALIDATE':
+                // An invoice counts as work done on a vehicle once it is validated: that is when it
+                // goes up into the history of the vehicle it carries (issue #464)
+                require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
+
+                dolicar_push_invoice_to_vehicle_history($object, $user);
                 break;
         }
 

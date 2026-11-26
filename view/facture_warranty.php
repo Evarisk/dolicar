@@ -38,7 +38,7 @@ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
 
 // Load Saturne libraries
-require_once __DIR__ . '/../../saturne/lib/medias.lib.php';
+dol_include_once('/saturne/lib/medias.lib.php');
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../lib/dolicar_functions.lib.php';
@@ -74,7 +74,7 @@ if (empty($permissionToRead)) {
 }
 $permissionToAdd = dolicar_can_edit_invoice_warranties($object);
 
-$backToPage = dol_buildpath('/custom/dolicar/view/facture_warranty.php', 1) . '?id=' . $object->id . ($isSupplierInvoice ? '&element=invoice_supplier' : '');
+$backToPage = dol_buildpath('/dolicar/view/facture_warranty.php', 1) . '?id=' . $object->id . ($isSupplierInvoice ? '&element=invoice_supplier' : '');
 
 // Certificates are attached before the warranty exists: they wait in a temp dir keyed by an upload
 // token, and move next to the invoice once the warranty is saved
@@ -135,7 +135,7 @@ if ($action == 'add_warranty' && $permissionToAdd) {
                 }
 
                 // Index the move, dol_add_file_process() has recorded the temp path in llx_ecm_files
-                if (dol_move($warrantyTempFile['fullname'], $warrantyDir . '/' . $warrantyFileName, 0, 1, 0, 1)) {
+                if (dol_move($warrantyTempFile['fullname'], $warrantyDir . '/' . $warrantyFileName, '0', 1, 0, 1)) {
                     $warrantyFileNames[] = $warrantyFileName;
                 }
             }

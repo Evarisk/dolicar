@@ -86,8 +86,14 @@
                 <div>
                     <strong><?php echo $langs->trans('VehicleCurrentlyOut'); ?></strong>
                     <?php if (!empty($lastUnfinishedActionComm[0])) :
-                        $driverName = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'] ?? '{}', true)['driver'] ?? '';
+                        $outTripJson = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'] ?? '{}', true);
+                        $driverName  = $outTripJson['driver'] ?? '';
+                        $driverPhone = $outTripJson['driver_phone'] ?? '';
                         echo '<span>' . ($driverName ? dol_escape_htmltag($driverName) . ' · ' : '') . dol_print_date($lastUnfinishedActionComm[0]->datep, 'dayhour') . '</span>';
+                        // A free driver left a phone number: make it callable, it is the only way back to them
+                        if (!empty($driverPhone)) :
+                            echo '<a class="plv2-driver-phone" href="tel:' . dol_escape_htmltag($driverPhone) . '"><i class="fas fa-phone"></i> ' . dol_escape_htmltag($driverPhone) . '</a>';
+                        endif;
                     endif; ?>
                 </div>
             </div>

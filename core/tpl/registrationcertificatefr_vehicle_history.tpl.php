@@ -24,13 +24,14 @@
 /**
  * The following vars must be defined:
  * Global   : $conf, $db, $form, $langs
- * Variable : $object (RegistrationCertificateFr), $permissiontoadd
- *            $iconMap            (array label => FA class)
- *            $catById            (array id => Categorie)
- *            $catLabels          (array id => ['label' => string, 'data-html' => string])
- *            $eventsList         (array of ActionComm)
- *            $evtCatById         (array evtId => Categorie)
- *            $eventUploadSubDir  (string, temp media dir of the event being created)
+ * Variable : $object (RegistrationCertificateFr), $permissiontoadd, $action
+ *            $iconMap           (array label => FA class)
+ *            $catById           (array id => Categorie)
+ *            $catLabels         (array id => ['label' => string, 'data-html' => string])
+ *            $eventsList        (array of ActionComm)
+ *            $evtCatById        (array evtId => Categorie)
+ *            $linkedElementIds  (array type => [id => id] of the documents already attached to an event)
+ *            $eventUploadSubDir (string, temp media dir of the event being created)
  */
 
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -39,8 +40,8 @@ require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
-require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
-require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
+dol_include_once('/digiquali/class/control.class.php');
+dol_include_once('/saturne/lib/medias.lib.php');
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 
 if (empty($object->fk_lot) || $object->fk_lot <= 0) {
@@ -94,16 +95,22 @@ if (!empty($permissiontoadd)) {
             ? img_picto('', $linkableType['picto'], 'class="pictofixedwidth"')
             : '<i class="fas ' . $linkableType['pictofa'] . ' pictofixedwidth"></i>';
 
+        // Leave out the documents already attached to an event of this vehicle (issue #426)
+        $selectArg = $linkableType['selectarg'];
+        if (!empty($linkedElementIds[$typeKey])) {
+            $selectArg .= ':0:(t.rowid:notin:' . implode(',', $linkedElementIds[$typeKey]) . ')';
+        }
+
         $out .= '<tr>';
         $out .= '<td>' . $typePicto . $langs->transnoentities($linkableType['label']) . '</td>';
-        $out .= '<td>' . $form->selectForForms($linkableType['selectarg'], $linkableType['field'], GETPOSTINT($linkableType['field']), 1, '', '', 'minwidth300') . '</td>';
+        $out .= '<td>' . $form->selectForForms($selectArg, $linkableType['field'], GETPOSTINT($linkableType['field']), 1, '', '', 'minwidth300') . '</td>';
         $out .= '</tr>';
 
         // Expense report: pick specific lines instead of the whole report (issue #452)
         if ($typeKey === 'expensereport') {
             $out .= '<tr id="dolicar-er-lines-row" style="display:none;">';
-            $out .= '<td>' . $langs->transnoentities('ExpenseReportLines') . '</td>';
-            $out .= '<td><div id="dolicar-er-lines" class="dolicar-er-lines" data-url="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id) . '"></div></td>';
+            $out .= '<td>' . $langs->transnoentities('DoliCarExpenseReportLines') . '</td>';
+            $out .= '<td><div id="dolicar-er-lines" class="dolicar-er-lines" data-url="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken()) . '"></div></td>';
             $out .= '</tr>';
         }
     }
@@ -143,7 +150,13 @@ if (!empty($eventsList)) {
         $icon    = $evtCat ? ($iconMap[$evtCat->label] ?? 'fa-circle') : 'fa-circle';
         $km      = (int) ($evt->array_options['options_starting_mileage'] ?? 0);
         $userStr = $ownerUser->getNomUrl(1);
-        $badge   = '<span style="color:' . $color . ';font-weight:bold;"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';
+
+        // A trip holds a mileage at each end, any other event only the one it was recorded at
+        $isTrip    = !empty($evt->code) && strpos($evt->code, '_ADD_PUBLIC_VEHICLE_LOG_BOOK') !== false;
+        $kmArrival = (int) ($evt->array_options['options_arrival_mileage'] ?? 0);
+        $editingKm = ($action == 'edit_mileage' && GETPOSTINT('event_id') === (int) $evt->id);
+        // The colour of the category is data: it goes in a custom property, the look in the stylesheet
+        $badge   = '<span class="dolicar-event-type" style="--dolicar-event-color:' . $color . ';"><i class="fas ' . $icon . '"></i> ' . $label . '</span>';
 
         $evt->fetchObjectLinked(null, null, null, null, 'OR', 1, 'sourcetype', 0);
         $linkedHtml = '';
@@ -155,10 +168,10 @@ if (!empty($eventsList)) {
                 $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpFac, 'facture', $conf->facture->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpFac->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpFac->note_public)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpFac->note_public, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpFac->note_public) . '</span>';
                 }
                 if (!empty($tmpFac->note_private)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpFac->note_private, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpFac->note_private) . '</span>';
                 }
                 $linkedHtml .= '</div><br>';
             }
@@ -171,10 +184,10 @@ if (!empty($eventsList)) {
                 $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpPropal, 'propal', $conf->propal->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpPropal->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpPropal->note_public)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpPropal->note_public, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpPropal->note_public) . '</span>';
                 }
                 if (!empty($tmpPropal->note_private)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpPropal->note_private, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpPropal->note_private) . '</span>';
                 }
                 $linkedHtml .= '</div><br>';
             }
@@ -187,10 +200,10 @@ if (!empty($eventsList)) {
                 $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpExpenseReport, 'expensereport', $conf->expensereport->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpExpenseReport->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpExpenseReport->note_public)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpExpenseReport->note_public, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpExpenseReport->note_public) . '</span>';
                 }
                 if (!empty($tmpExpenseReport->note_private)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpExpenseReport->note_private, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpExpenseReport->note_private) . '</span>';
                 }
                 $linkedHtml .= '</div><br>';
             }
@@ -203,10 +216,10 @@ if (!empty($eventsList)) {
                 $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpSupplierOrder, 'commande_fournisseur', $conf->fournisseur->commande->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpSupplierOrder->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpSupplierOrder->note_public)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierOrder->note_public, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpSupplierOrder->note_public) . '</span>';
                 }
                 if (!empty($tmpSupplierOrder->note_private)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierOrder->note_private, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpSupplierOrder->note_private) . '</span>';
                 }
                 $linkedHtml .= '</div><br>';
             }
@@ -219,10 +232,10 @@ if (!empty($eventsList)) {
                 $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpSupplierInvoice, 'facture_fournisseur', $conf->fournisseur->facture->dir_output);
                 $linkedHtml .= ' &mdash; <strong>' . price($tmpSupplierInvoice->total_ttc) . ' ' . $conf->currency . '</strong>';
                 if (!empty($tmpSupplierInvoice->note_public)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierInvoice->note_public, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpSupplierInvoice->note_public) . '</span>';
                 }
                 if (!empty($tmpSupplierInvoice->note_private)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpSupplierInvoice->note_private, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpSupplierInvoice->note_private) . '</span>';
                 }
                 $linkedHtml .= '</div><br>';
             }
@@ -235,7 +248,7 @@ if (!empty($eventsList)) {
                 $linkedHtml .= dolicar_vehicle_event_doc_preview_link($tmpControl, 'digiquali', $conf->digiquali->dir_output);
                 $linkedHtml .= ' &mdash; ' . $tmpControl->getLibVerdict(4);
                 if (!empty($tmpControl->note_public)) {
-                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($tmpControl->note_public, 80)) . '</span>';
+                    $linkedHtml .= ' &mdash; <span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($tmpControl->note_public) . '</span>';
                 }
                 $linkedHtml .= '</div><br>';
             }
@@ -272,7 +285,7 @@ if (!empty($eventsList)) {
                     $lineParts[] = dol_escape_htmltag($projectLabel);
                 }
                 if (!empty($erLine->comments)) {
-                    $lineParts[] = '<span class="opacitymedium">' . dol_escape_htmltag(dol_trunc($erLine->comments, 80)) . '</span>';
+                    $lineParts[] = '<span class="opacitymedium">' . dolicar_vehicle_event_note_excerpt($erLine->comments) . '</span>';
                 }
 
                 $linkedHtml .= '<div class="inline-block">';
@@ -291,8 +304,41 @@ if (!empty($eventsList)) {
         $out .= '<tr class="oddeven">';
         $out .= '<td class="nowrap">' . $badge . '</td>';
         $out .= '<td class="center nowraponall">' . dol_print_date($evt->datep, 'day') . '</td>';
-        $out .= '<td class="center">' . ($km > 0 ? price($km, 0, '', 1, 0) . ' km' : '') . '</td>';
-        $out .= '<td>' . nl2br(dol_escape_htmltag((string) $evt->note_private)) . '</td>';
+        // Mileage cell: read only, or the correction form once its pencil has been clicked
+        if ($editingKm && !empty($permissiontoadd)) {
+            $out .= '<td class="center">';
+            $out .= '<form method="POST" action="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id) . '">';
+            $out .= '<input type="hidden" name="token" value="' . newToken() . '">';
+            $out .= '<input type="hidden" name="action" value="save_mileage">';
+            $out .= '<input type="hidden" name="mileage_event_id" value="' . (int) $evt->id . '">';
+            $out .= '<div class="nowraponall">' . $langs->transnoentities($isTrip ? 'StartingMileage' : 'Mileage') . '<br>';
+            $out .= '<input type="number" name="mileage_starting_mileage" class="maxwidth100" value="' . ($km > 0 ? $km : '') . '" min="0"> km</div>';
+            if ($isTrip) {
+                $out .= '<div class="nowraponall">' . $langs->transnoentities('ArrivalMileage') . '<br>';
+                $out .= '<input type="number" name="mileage_arrival_mileage" class="maxwidth100" value="' . ($kmArrival > 0 ? $kmArrival : '') . '" min="0"> km</div>';
+            }
+            // Required: a corrected mileage without a reason leaves the next reader guessing
+            $out .= '<div>' . $langs->transnoentities('MileageCorrectionReason') . ' <span class="fieldrequired">*</span><br>';
+            $out .= '<textarea name="mileage_reason" class="maxwidth150" rows="2" required></textarea></div>';
+            $out .= '<input type="submit" class="button small" value="' . dol_escape_htmltag($langs->transnoentities('Save')) . '">';
+            $out .= ' <a class="button button-cancel small" href="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id) . '">' . $langs->transnoentities('Cancel') . '</a>';
+            $out .= '</form></td>';
+        } else {
+            $kmText = $km > 0 ? price($km, 0, '', 1, 0) . ' km' : '';
+            if ($isTrip && $kmArrival > 0) {
+                $kmText = ($km > 0 ? price($km, 0, '', 1, 0) : '?') . ' → ' . price($kmArrival, 0, '', 1, 0) . ' km';
+            }
+            $out .= '<td class="center nowraponall">' . $kmText;
+            if (!empty($permissiontoadd)) {
+                // Token carried even though the link only opens the form: at MAIN_SECURITY_CSRF_WITH_TOKEN 3
+                // every GET action but a short allow list is refused without one
+                $out .= ' <a href="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=edit_mileage&token=' . newToken() . '&event_id=' . (int) $evt->id) . '"';
+                $out .= ' title="' . dol_escape_htmltag($langs->transnoentities('CorrectMileage')) . '">' . img_edit() . '</a>';
+            }
+            $out .= '</td>';
+        }
+        // The note is HTML (public logbook, mileage correction trace, restricthtml form field): print it as such, sanitized
+        $out .= '<td>' . dolPrintHTML((string) $evt->note_private) . '</td>';
         $out .= '<td class="center nowraponall">' . $userStr . '</td>';
         $out .= '<td>' . $linkedHtml . '</td>';
         $out .= '<td class="center"><div class="dolicar-event-media-cell">' . dolicar_get_vehicle_event_media_html((int) $evt->id) . '</div></td>';

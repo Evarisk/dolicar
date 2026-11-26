@@ -64,7 +64,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 // Load Saturne libraries
 if ($publicInterfaceUseSignatory) {
-    require_once __DIR__ . '/../../../saturne/class/saturnesignature.class.php';
+    dol_include_once('/saturne/class/saturnesignature.class.php');
     require_once DOL_DOCUMENT_ROOT . '/core/lib/ticket.lib.php'; // For generate_random_id()
 }
 
@@ -73,20 +73,20 @@ require_once __DIR__ . '/../../class/registrationcertificatefr.class.php';
 
 // Load DigiQuali libraries
 if ($isModEnabledDigiquali) {
-    require_once __DIR__ . '/../../../digiquali/class/control.class.php';
-    require_once __DIR__ . '/../../../digiquali/class/sheet.class.php';
+    dol_include_once('/digiquali/class/control.class.php');
+    dol_include_once('/digiquali/class/sheet.class.php');
 }
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs;
 
 // Load translation files required by the page
-saturne_load_langs(['productbatch']);
+saturne_load_langs(['companies', 'productbatch']);
 
 // Get parameters
 $id                 = GETPOST('id', 'int');
 $registrationNumber = GETPOST('registration_number');
-$entity             = GETPOST('entity');
+$entity             = GETPOSTINT('entity');
 $action             = GETPOST('action', 'aZ09');
 $backToPage         = GETPOST('backtopage', 'alpha');
 $actionType         = GETPOST('action_type', 'alpha');
@@ -107,7 +107,8 @@ if ($isModEnabledDigiquali) {
 
 $hookmanager->initHooks(['publicvehiclelogbook', 'saturnepublicinterface']); // Note that conf->hooks_modules contains array
 
-if (!isModEnabled('multicompany')) {
+// The entity of the link is a number: the setup of the page is read for it
+if (!isModEnabled('multicompany') || $entity <= 0) {
     $entity = $conf->entity;
 }
 
@@ -120,10 +121,13 @@ $extraFields->fetch_name_optionals_label($actionComm->table_element);
 if ($id > 0) {
     $registrationCertificateFR->fetch(0, '', ' AND fk_lot = ' . $id);
 } else {
-    $registrationCertificateFR->fetch(0, '', ' AND a_registration_number = ' . "'" . $registrationNumber . "'");
+    $registrationCertificateFR->fetch(0, '', " AND a_registration_number = '" . $db->escape($registrationNumber) . "'");
     $id = $registrationCertificateFR->fk_lot;
 }
 $productLot->fetch($id);
+
+// An archived vehicle (sold, out of the fleet) keeps its history but takes no new entry
+$isVehicleArchived = $registrationCertificateFR->id > 0 && $registrationCertificateFR->isArchived();
 
 $lastActionComm = $actionComm->getActions(0, $id,'productlot', ' AND fk_element = ' . $id . ' AND datep2 IS NOT NULL AND code = "AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK"', 'id','DESC', 1);
 if (is_array($lastActionComm) && !empty($lastActionComm)) {
@@ -144,7 +148,7 @@ if (!is_array($recentActionComms)) {
 }
 
 if ($isModEnabledDigiquali) {
-    $controls = saturne_fetch_all_object_type('Control', 'DESC', 't.control_date', 1, 0, ['customsql' => 't.rowid = ee.fk_target AND t.status = ' . Control::STATUS_LOCKED], 'AND', false, true, false, ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ee.sourcetype = "productbatch" AND ee.fk_source = ' . $id . ' AND ee.targettype = "digiquali_control" AND ee.fk_target = t.rowid');
+    $controls = saturne_fetch_all_object_type('Control', 'DESC', 't.control_date', 1, 0, ['customsql' => 't.rowid = ee.fk_target AND t.status = ' . Control::STATUS_LOCKED], 'AND', false, true, false, ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as ee on ee.sourcetype = "' . $productLot->element . '" AND ee.fk_source = ' . ((int) $id) . ' AND ee.targettype = "digiquali_control" AND ee.fk_target = t.rowid');
     if (is_array($controls) && !empty($controls)) {
         foreach ($controls as $control) {
             $lastControl = $control;
@@ -153,7 +157,7 @@ if ($isModEnabledDigiquali) {
 }
 
 // Problem report (issue #443): photo/voice are uploaded to a per-session temp dir keyed by an upload token
-require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
+dol_include_once('/saturne/lib/medias.lib.php');
 $problemUploadContext = 'dolicar_problem_report_' . $id;
 $problemUploadSubDir  = 'problem_report/' . saturne_get_upload_token($problemUploadContext);
 
@@ -199,6 +203,11 @@ if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
+// No departure, return, problem, repair, control or media on an archived vehicle, whatever the page that posts it
+if ($isVehicleArchived && in_array($action, ['add', 'report_problem', 'add_repair', 'create_control', 'uploadPhoto', 'add_audio'], true)) {
+    $action = '';
+}
+
 if (empty($resHook)) {
     // View the "before/after" state sheet PDF of a single trip inline (issue #457 — public trips list)
     if ($action == 'view_trip_pdf' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
@@ -236,17 +245,21 @@ if (empty($resHook)) {
                 dol_mkdir($uploadDir);
             }
 
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+
             $invalidFile   = false;
             $uploadedFiles = isset($_FILES['userfile']) ? $_FILES['userfile'] : [];
             if (!empty($uploadedFiles['tmp_name'])) {
-                $tmpNames = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
-                foreach ($tmpNames as $tmpName) {
+                $tmpNames  = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
+                $origNames = is_array($uploadedFiles['name']) ? $uploadedFiles['name'] : [$uploadedFiles['name']];
+                foreach ($tmpNames as $key => $tmpName) {
                     if (empty($tmpName)) {
                         continue;
                     }
+                    $origName = (string) ($origNames[$key] ?? '');
                     $finfo    = new finfo(FILEINFO_MIME_TYPE);
-                    $mimeType = $finfo->file($tmpName);
-                    if (strpos($mimeType, 'image/') !== 0) {
+                    $mimeType = (string) $finfo->file($tmpName);
+                    if (strpos($mimeType, 'image/') !== 0 || $mimeType === 'image/svg+xml' || image_format_supported($origName) < 0) {
                         $invalidFile = true;
                         break;
                     }
@@ -260,15 +273,21 @@ if (empty($resHook)) {
     }
 
     // Problem report — voice memo upload posted by the Saturne media block (issue #443)
-    if ($action == 'add_audio') {
+    if ($action == 'add_audio' && !empty($conf->global->MAIN_UPLOAD_DOC) && !empty($_FILES['audio']['tmp_name'])) {
         $uploadSubDir = GETPOST('sub_dir', 'alpha');
-        if (!empty($_FILES['audio']['tmp_name']) && !empty($uploadSubDir) && strpos($uploadSubDir, '..') === false) {
-            $uploadDir = $conf->dolicar->dir_output . '/' . $uploadSubDir;
-            if (!dol_is_dir($uploadDir)) {
-                dol_mkdir($uploadDir);
+        if (!empty($uploadSubDir) && strpos($uploadSubDir, '..') === false) {
+            $fileInfo  = new finfo(FILEINFO_MIME_TYPE);
+            $audioType = (string) $fileInfo->file($_FILES['audio']['tmp_name']);
+            $isAudio   = strpos($audioType, 'audio/') === 0 || in_array($audioType, ['video/webm', 'video/mp4', 'application/ogg'], true);
+
+            if ($isAudio && $_FILES['audio']['size'] <= getDolGlobalInt('MAIN_UPLOAD_DOC') * 1024) {
+                $uploadDir = $conf->dolicar->dir_output . '/' . $uploadSubDir;
+                if (!dol_is_dir($uploadDir)) {
+                    dol_mkdir($uploadDir);
+                }
+                $destFile = $uploadDir . '/' . dol_print_date(dol_now(), 'dayhourlog') . '_audio.wav';
+                move_uploaded_file($_FILES['audio']['tmp_name'], $destFile);
             }
-            $destFile = $uploadDir . '/' . dol_print_date(dol_now(), 'dayhourlog') . '_audio.wav';
-            move_uploaded_file($_FILES['audio']['tmp_name'], $destFile);
         }
     }
 
@@ -309,34 +328,69 @@ if (empty($resHook)) {
             }
         }
 
-        // Email the manager
+        // Email the manager. The confirmation screen only tells the driver the manager was warned
+        // when the email really left (issue #493): the report itself is saved either way.
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
-        $sendTo = getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL');
+        $problemMailSent = 0;
+        $sendTo          = getDolGlobalString('DOLICAR_PROBLEM_REPORT_EMAIL');
         if (empty($sendTo)) {
             $sendTo = getDolGlobalString('MAIN_INFO_SOCIETE_MAIL');
         }
         if (!empty($sendTo)) {
             $from        = getDolGlobalString('MAIN_MAIL_EMAIL_FROM');
-            $vehicleLink = dol_buildpath('/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 2) . '?id=' . (int) $registrationCertificateFR->id;
+            $vehicleLabel = trim($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model);
+            $vehicleLink = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 2) . '?id=' . (int) $registrationCertificateFR->id;
             $subject     = $langs->transnoentities('ProblemReportEmailSubject', $registrationCertificateFR->a_registration_number);
 
             $body  = '<p>' . $langs->transnoentities('ProblemReportEmailIntro', $registrationCertificateFR->a_registration_number) . '</p>';
             $body .= '<ul>';
             $body .= '<li>' . $langs->transnoentities('RegistrationPlate') . ' : <strong>' . dol_escape_htmltag($registrationCertificateFR->a_registration_number) . '</strong></li>';
-            $body .= '<li>' . $langs->transnoentities('Vehicle') . ' : ' . dol_escape_htmltag($registrationCertificateFR->d1_vehicle_brand . ' ' . $registrationCertificateFR->d3_vehicle_model) . '</li>';
+            $body .= '<li>' . $langs->transnoentities('Vehicle') . ' : ' . dol_escape_htmltag($vehicleLabel) . '</li>';
             $body .= '<li>' . $langs->transnoentities('Date') . ' : ' . dol_print_date(dol_now(), 'dayhour') . '</li>';
             $body .= '<li>' . $langs->transnoentities('Comment') . ' : ' . dol_escape_htmltag($comment) . '</li>';
             $body .= '</ul>';
             $body .= '<p><a href="' . $vehicleLink . '">' . $langs->transnoentities('AccessVehicleSheet') . '</a></p>';
 
+            // An email template chosen in the module setup wins over the message above (issue #492).
+            // Its topic and content go through the standard Dolibarr substitutions, so a template can
+            // also use __(TranslationKey)__ and __[CONSTANT]__ on top of the tokens added here.
+            $problemTemplateId = getDolGlobalInt('DOLICAR_PROBLEM_REPORT_EMAIL_TEMPLATE');
+            if ($problemTemplateId > 0) {
+                // Read the row directly: CEmailTemplate::fetch() adds "AND t.label = ''" to its where
+                // clause when called without a label, so fetching by id alone never returns anything.
+                $sqlTemplate  = 'SELECT topic, content FROM ' . MAIN_DB_PREFIX . 'c_email_templates';
+                $sqlTemplate .= ' WHERE rowid = ' . ((int) $problemTemplateId) . " AND type_template = 'dolicar_problem_report' AND active = 1";
+                $sqlTemplate .= ' AND entity IN (' . getEntity('c_email_templates') . ')';
+
+                $resqlTemplate   = $db->query($sqlTemplate);
+                $problemTemplate = $resqlTemplate ? $db->fetch_object($resqlTemplate) : null;
+                if (!empty($problemTemplate)) {
+                    $substitutions = getCommonSubstitutionArray($langs);
+                    $substitutions['__VEHICLE_PLATE__']   = dol_escape_htmltag($registrationCertificateFR->a_registration_number);
+                    $substitutions['__VEHICLE_LABEL__']   = dol_escape_htmltag($vehicleLabel);
+                    $substitutions['__PROBLEM_DATE__']    = dol_print_date(dol_now(), 'dayhour');
+                    $substitutions['__PROBLEM_COMMENT__'] = dol_escape_htmltag($comment);
+                    $substitutions['__VEHICLE_URL__']     = $vehicleLink;
+
+                    $subject = make_substitutions($problemTemplate->topic, $substitutions, $langs);
+                    $body    = make_substitutions($problemTemplate->content, $substitutions, $langs);
+                }
+            }
+
             $mailFile = new CMailFile($subject, $sendTo, $from, $body, $attachmentPaths, $attachmentMimes, $attachmentNames, '', '', 0, 1);
-            $mailFile->sendfile();
+            if ($mailFile->sendfile()) {
+                $problemMailSent = 1;
+            } else {
+                dol_syslog('public_vehicle_logbook.php: problem report email to ' . $sendTo . ' failed: ' . $mailFile->error, LOG_ERR);
+            }
+        } else {
+            dol_syslog('public_vehicle_logbook.php: problem report email not sent, neither DOLICAR_PROBLEM_REPORT_EMAIL nor the company email is set', LOG_WARNING);
         }
 
         // Clean the temp token + dir
         saturne_invalidate_upload_token($problemUploadContext, 'dolicar', 'problem_report');
 
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . $entity . '&success=1&problem=1');
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . $entity . '&success=1&problem=1&mailsent=' . $problemMailSent);
         exit;
     }
 
@@ -408,10 +462,11 @@ if (empty($resHook)) {
 
         $newControlID = $newControl->create($controllerUser);
         if ($newControlID > 0) {
-            // Link the control to the vehicle lot (stored as sourcetype = productbatch / targettype = digiquali_control)
-            $newControl->add_object_linked('productbatch', $id);
+            // Link the control to the vehicle lot with the element DigiQuali reads (sourcetype = productlot / targettype = digiquali_control),
+            // otherwise the control card and list show no Lot/Serial and the vehicle never lists the control
+            $newControl->add_object_linked($productLot->element, $id);
 
-            $answerUrl = dol_buildpath('custom/digiquali/public/public_answer.php?track_id=' . $newControl->track_id . '&object_type=control&document_type=ControlDocument&entity=' . $entity, 3);
+            $answerUrl = dol_buildpath('/digiquali/public/public_answer.php', 3) . '?track_id=' . $newControl->track_id . '&object_type=control&document_type=ControlDocument&entity=' . $entity;
             header('Location: ' . $answerUrl);
             exit;
         }
@@ -423,7 +478,7 @@ if (empty($resHook)) {
 
     if ($action == 'get_registration_number') {
         $registrationNumber = GETPOST('registration_number');
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?registration_number=' . $registrationNumber . '&entity=' . $entity);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?registration_number=' . urlencode($registrationNumber) . '&entity=' . $entity);
         exit;
     }
 
@@ -440,10 +495,29 @@ if (empty($resHook)) {
     }
 
     if ($action == 'add') {
-        // Resolve driver full name: internal user (select_dolusers) or external third-party contact
-        $driverType = GETPOST('driver_type', 'aZ09');
-        $driverName = '';
-        if ($driverType === 'external') {
+        // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,
+        // so we read it raw and decode it ourselves (same intent as the standard Saturne signature flow). The signature is printed back
+        // as the source of an image: anything else than an image drawn on the canvas refuses the entry, nothing of it is recorded
+        $signature = '';
+        if ($publicInterfaceUseSignatory && dol_strlen(GETPOST('signature', 'none')) > 0) {
+            $postedSignature = json_decode(GETPOST('signature', 'none'));
+            if (!is_string($postedSignature) || !SaturneSignature::isValidSignatureData($postedSignature)) {
+                setEventMessages($langs->trans('ErrorUserSignatureInvalid'), [], 'errors');
+                http_response_code(400);
+                exit;
+            }
+            $signature = $postedSignature;
+        }
+
+        // Resolve driver full name: internal user (select_dolusers), external third-party contact,
+        // or a free identity typed on the spot by someone who is in neither list (issue #487)
+        $driverType  = GETPOST('driver_type', 'aZ09');
+        $driverName  = '';
+        $driverPhone = '';
+        if ($driverType === 'free') {
+            $driverName  = trim(GETPOST('driver_free_firstname', 'alphanohtml') . ' ' . GETPOST('driver_free_lastname', 'alphanohtml'));
+            $driverPhone = trim(GETPOST('driver_free_phone', 'alphanohtml'));
+        } elseif ($driverType === 'external') {
             $driverContactId = GETPOSTINT('driver_contact_id');
             if ($driverContactId > 0) {
                 require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
@@ -482,24 +556,32 @@ if (empty($resHook)) {
             // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user
             $actionComm->note_private  = (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . '<br>' : $langs->transnoentities('NoData'));
             $actionComm->note_private .= $langs->transnoentities('Driver') . ' : ' . $driverName . '<br>';
+            $actionComm->note_private .= !empty($driverPhone) ? $langs->transnoentities('DriverPhone') . ' : ' . $driverPhone . '<br>' : '';
             $actionComm->note_private .= GETPOSTISSET('start_comment') && !empty(GETPOST('start_comment', 'restricthtml')) ? $langs->transnoentities('StartComment') . ' : ' . GETPOST('start_comment', 'restricthtml') . '<br>' : '';
             $actionComm->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
             $actionComm->label         = $langs->transnoentities('ObjectAddPublicVehicleLogBook', $registrationCertificateFR->a_registration_number, $productLot->batch);
 
-            $actionComm->array_options['json'] = json_encode(['driver' => $driverName, 'fuel_level' => GETPOST('options_fuel_level', 'alpha'), 'start_comment' => GETPOST('start_comment', 'restricthtml'), 'end_comment' => GETPOST('end_comment', 'restricthtml')]);
+            $actionComm->array_options['json'] = json_encode(['driver' => $driverName, 'driver_phone' => $driverPhone, 'fuel_level' => GETPOST('options_fuel_level', 'alpha'), 'start_comment' => GETPOST('start_comment', 'restricthtml'), 'end_comment' => GETPOST('end_comment', 'restricthtml')]);
 
             $extraFields->setOptionalsFromPost([], $actionComm);
 
             $actionCommID = $actionComm->create($user);
         } else {
-            $lastUnfinishedActionComm[0]->datef         = dol_stringtotime(GETPOST('end_date_and_hour'));
+            $lastUnfinishedActionComm[0]->datef = dol_stringtotime(GETPOST('end_date_and_hour'));
+
+            // Whoever brings the vehicle back is not always the one who took it: the return screen
+            // asks again, and the answer is kept beside the departure driver rather than over it.
+            $lastUnfinishedActionComm[0]->note_private .= !empty($driverName) ? '<br>' . $langs->transnoentities('ReturnedBy') . ' : ' . $driverName : '';
+            $lastUnfinishedActionComm[0]->note_private .= !empty($driverPhone) ? '<br>' . $langs->transnoentities('DriverPhone') . ' : ' . $driverPhone : '';
             $lastUnfinishedActionComm[0]->note_private .= GETPOSTISSET('end_comment') && !empty(GETPOST('end_comment', 'restricthtml')) ? '<br>' . $langs->transnoentities('EndComment') . ' : ' . GETPOST('end_comment', 'restricthtml') : '';
 
             $lastUnfinishedActionComm[0]->array_options['options_arrival_mileage'] = GETPOST('options_arrival_mileage');
             $lastUnfinishedActionComm[0]->updateExtraField('arrival_mileage');
 
             $existingJson = json_decode($lastUnfinishedActionComm[0]->array_options['options_json'] ?? '{}', true);
-            $existingJson['return_fuel_level'] = GETPOST('options_fuel_level', 'alpha');
+            $existingJson['return_driver']       = $driverName;
+            $existingJson['return_driver_phone'] = $driverPhone;
+            $existingJson['return_fuel_level']   = GETPOST('options_fuel_level', 'alpha');
             $existingJson['end_comment']       = GETPOST('end_comment', 'restricthtml');
             $lastUnfinishedActionComm[0]->array_options['options_json'] = json_encode($existingJson);
             $lastUnfinishedActionComm[0]->updateExtraField('json');
@@ -510,13 +592,12 @@ if (empty($resHook)) {
         if ($publicInterfaceUseSignatory && (isset($actionCommID) || isset($lastUnfinishedActionComm[0]))) {
             $signatory->status    = SaturneSignature::STATUS_SIGNED;
             $signatory->role      = $langs->transnoentities('Driver');
-            $signatory->firstname = $lastUnfinishedActionCommJSON['driver'] ?? $driverName;
+            // The signature belongs to whoever is standing there: on a return that is the person
+            // bringing the vehicle back, who is not always the one the departure recorded
+            $signatory->firstname = !empty($driverName) ? $driverName : ($lastUnfinishedActionCommJSON['driver'] ?? '');
 
             $signatory->signature_date = dol_now();
-            // The JS sends the data URI wrapped with JSON.stringify. GETPOST default ('alphanohtml') strips the quotes and never json_decodes,
-            // so we read it raw and decode it ourselves (same intent as the standard Saturne signature flow).
-            $postedSignature      = json_decode(GETPOST('signature', 'none'));
-            $signatory->signature = is_string($postedSignature) ? $postedSignature : '';
+            $signatory->signature      = $signature;
 
             $signatory->element_type  = 'user';
             $signatory->element_id    = 0;
@@ -566,6 +647,13 @@ $form = new Form($db);
 // Pre-select driver from cookie
 $preselectedDriverId = isset($_COOKIE['plv2_driver_id']) ? (int) $_COOKIE['plv2_driver_id'] : 0;
 
+// Same idea for the free driver identity (issue #487): someone who is neither a user nor a known
+// contact types name and phone once, and finds them pre-filled, tab included, on the next visit.
+$preselectedDriverType      = (isset($_COOKIE['plv2_driver_type']) && $_COOKIE['plv2_driver_type'] === 'free') ? 'free' : 'internal';
+$preselectedDriverLastname  = dol_string_nohtmltag($_COOKIE['plv2_driver_lastname'] ?? '');
+$preselectedDriverFirstname = dol_string_nohtmltag($_COOKIE['plv2_driver_firstname'] ?? '');
+$preselectedDriverPhone     = dol_string_nohtmltag($_COOKIE['plv2_driver_phone'] ?? '');
+
 // This NOLOGIN page never loads $user, but a Dolibarr session may still be active (e.g. a manager
 // opening the page while logged in). Default the control "controller" picker to that session user.
 $loggedUserId = 0;
@@ -583,6 +671,8 @@ if ($success) {
     $successType = $isVehicleOut ? 'depart' : 'retour';
 } elseif ($view === 'list') {
     $showScreen = 'list';
+} elseif ($id > 0 && $isVehicleArchived) {
+    $showScreen = 'archived';
 } elseif ($view === 'history' && $id > 0 && $registrationCertificateFR->id > 0) {
     $showScreen = 'history';
 } elseif ($id > 0 && $registrationCertificateFR->id > 0) {
@@ -599,7 +689,7 @@ if ($success) {
     $showScreen = 'search';
 }
 
-// Control screen — list the DigiQuali sheets applicable to a vehicle (control type, locked, linked to productbatch)
+// Control screen — list the DigiQuali sheets applicable to a vehicle (control type, locked, linked to productlot)
 $controlSheets = [];
 if ($showScreen === 'control' && $isModEnabledDigiquali) {
     // Sheets store their linkable object types as a JSON key — for vehicles it's "productlot" (same filter as registrationcertificatefr_card.php)
@@ -647,17 +737,18 @@ if ($showScreen === 'history') {
 $allCertificates = [];
 if ($showScreen === 'list' && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
     $listCertificate = new RegistrationCertificateFr($db);
-    $fetchedCertificates = $listCertificate->fetchAll('ASC', 'a_registration_number', 0, 0, []);
+    // Archived (sold) and deleted vehicles are not offered
+    $fetchedCertificates = $listCertificate->fetchAll('ASC', 'a_registration_number', 0, 0, ['customsql' => 't.status >= 0 AND t.status <> ' . RegistrationCertificateFr::STATUS_ARCHIVED]);
     if (is_array($fetchedCertificates)) {
         $allCertificates = $fetchedCertificates;
     }
 }
 
 $title   = $langs->trans('PublicVehicleLogBook');
-$moreJS  = ['/custom/saturne/js/includes/signature-pad.min.js'];
+$moreJS  = ['/saturne/js/includes/signature-pad.min.js'];
 // select2 styling lives in the Dolibarr theme CSS, which this lightweight public page does not load.
 // Load select2's own stylesheet so the native pickers (driver / third party / contact) render correctly.
-$moreCSS = ['/custom/saturne/css/pico.min.css', '/includes/jquery/plugins/select2/dist/css/select2.min.css'];
+$moreCSS = ['/saturne/css/pico.min.css', '/includes/jquery/plugins/select2/dist/css/select2.min.css'];
 
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
@@ -677,7 +768,7 @@ saturne_header(1, '', $title, '', '', 0, 0, $moreJS, $moreCSS, '', $bodyCssClass
 
 $baseUrl     = $_SERVER['PHP_SELF'] . '?entity=' . urlencode($entity);
 $vehicleUrl  = $_SERVER['PHP_SELF'] . '?id=' . $id . '&entity=' . urlencode($entity);
-$logoUrl     = DOL_URL_ROOT . '/custom/dolicar/img/dolicar_color.svg'; ?>
+$logoUrl     = dol_buildpath('/dolicar/img/dolicar_color.svg', 1); ?>
 
 <div class="plv2-app">
 
@@ -708,13 +799,6 @@ function plv2SelectFuel(btn) {
     $('#plv2-fuel-value').val($(btn).data('value'));
 }
 
-$(document).on('change', '#driver_user_id', function () {
-    var driverId = $(this).val();
-    if (driverId) {
-        document.cookie = 'plv2_driver_id=' + encodeURIComponent(driverId) + '; path=/; max-age=31536000; SameSite=Lax';
-    }
-});
-
 // Live client-side filter of the registration certificates list
 $(document).on('input', '#plv2-cg-search', function () {
     var query   = $(this).val().toLowerCase().trim();
@@ -729,15 +813,7 @@ $(document).on('input', '#plv2-cg-search', function () {
     $('.plv2-cg-noresult').toggle(visible === 0);
 });
 
-// Driver type toggle: internal user picker vs external third-party + contact pickers
-$(document).on('click', '#plv2-driver-type .plv2-seg__btn', function () {
-    var type = $(this).data('type');
-    $('#plv2-driver-type .plv2-seg__btn').removeClass('active');
-    $(this).addClass('active');
-    $('#plv2-driver-type-value').val(type);
-    $('#plv2-driver-internal').toggle(type === 'internal');
-    $('#plv2-driver-external').toggle(type === 'external');
-});
+// Driver type toggle (internal / external / free identity) and its cookies live in js/modules/vehicleLogbook.js
 
 // When the third party changes, refresh the native contact select2 with that company's contacts
 $(document).on('change', '#driver_socid', function () {

@@ -85,12 +85,13 @@ if (!$sortorder) {
 $objectsMetadata = saturne_get_objects_metadata();
 
 if (isModEnabled('digiquali')) {
+    // One control reference per line, the column as wide as the longest one: no minimum width that would widen the list
     $object->fields['controls'] = [
         'label'         => 'Controls',
         'enabled'       => 1,
         'position'      => 200,
         'visible'       => 2,
-        'css'           => 'minwidth150',
+        'csslist'       => 'nowraponall',
         'disablesearch' => 1,
         'disablesort'   => 1
     ];
@@ -129,6 +130,13 @@ if (isModEnabled('digiquali')) {
 // Initialize array of search criterias
 $searchAll = trim(GETPOST('search_all'));
 $search    = [];
+// Archived vehicles (sold, out of the fleet) are hidden until asked for, "Remove filters" goes back to these statuses.
+// From a product lot, a product, a third party or a project, every vehicle is listed: its history is what is looked for
+$defaultSearchStatus = [RegistrationCertificateFr::STATUS_DRAFT, RegistrationCertificateFr::STATUS_VALIDATED];
+if (!empty($fromType)) {
+    $defaultSearchStatus[] = RegistrationCertificateFr::STATUS_ARCHIVED;
+}
+$search['status'] = saturne_get_status_search_filter($defaultSearchStatus);
 foreach ($object->fields as $key => $val) {
     if (GETPOST('search_' . $key, 'alpha') !== '') {
         $search[$key] = GETPOST('search_' . $key, 'alpha');
@@ -218,6 +226,8 @@ if (empty($resHook)) {
         $searchAll            = '';
         $toselect             = [];
         $search_array_options = [];
+        // An emptied status would list the archived vehicles for this page only, the next sort bringing the default back
+        $search['status'] = $defaultSearchStatus;
     }
     if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')
         || GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha')) {
@@ -231,7 +241,7 @@ if (empty($resHook)) {
     require_once DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php';
 
     // Mass actions archive
-    require_once __DIR__ . '/../../../saturne/core/tpl/actions/list_massactions.tpl.php';
+    require_once dol_buildpath('/saturne/core/tpl/actions/list_massactions.tpl.php');
 }
 
 /*
@@ -255,14 +265,14 @@ if (!empty($fromType)) {
     $moreUrlParameters = '&fromtype=' . $fromType . '&fromid=' . $fromId . '&mode=' . $mode;
 }
 
-$createUrl = dol_buildpath('custom/dolicar/view/registrationcertificatefr/quickcreation.php', 1);
+$createUrl = dol_buildpath('/dolicar/view/registrationcertificatefr/quickcreation.php', 1);
 
-require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_build_sql_select.tpl.php';
-require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_header.tpl.php';
-require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_search_input.tpl.php';
-require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_search_title.tpl.php';
-require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_loop_object.tpl.php';
-require_once __DIR__ . '/../../../saturne/core/tpl/list/objectfields_list_footer.tpl.php';
+require_once dol_buildpath('/saturne/core/tpl/list/objectfields_list_build_sql_select.tpl.php');
+require_once dol_buildpath('/saturne/core/tpl/list/objectfields_list_header.tpl.php');
+require_once dol_buildpath('/saturne/core/tpl/list/objectfields_list_search_input.tpl.php');
+require_once dol_buildpath('/saturne/core/tpl/list/objectfields_list_search_title.tpl.php');
+require_once dol_buildpath('/saturne/core/tpl/list/objectfields_list_loop_object.tpl.php');
+require_once dol_buildpath('/saturne/core/tpl/list/objectfields_list_footer.tpl.php');
 
 // End of page
 llxFooter();

@@ -39,10 +39,10 @@ require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.facture.class.php';
-require_once DOL_DOCUMENT_ROOT . '/custom/digiquali/class/control.class.php';
+dol_include_once('/digiquali/class/control.class.php');
 
 // Load Saturne libraries
-require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
+dol_include_once('/saturne/lib/medias.lib.php');
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';
@@ -79,18 +79,25 @@ saturne_check_access($permissionToRead);
 $eventUploadContext = 'dolicar_vehicle_event_' . $object->id;
 $eventUploadSubDir  = 'vehicle_event/' . saturne_get_upload_token($eventUploadContext);
 
+// Documents already attached to an event of this vehicle: none of them may be picked again (issue #426)
+$linkedElementIds = dolicar_get_vehicle_history_linked_element_ids((int) $object->fk_lot);
+
 // AJAX: return the lines of an expense report for the vehicle-event form (issue #452)
 if ($action == 'get_expensereport_lines') {
     require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
 
     $fkExpenseReport = GETPOSTINT('fk_expensereport');
     $linesData       = [];
-    if ($fkExpenseReport > 0) {
+    if ($fkExpenseReport > 0 && !isset($linkedElementIds['expensereport'][$fkExpenseReport])) {
         $expenseReport = new ExpenseReport($db);
         if ($expenseReport->fetch($fkExpenseReport) > 0) {
             $expenseReport->fetch_lines();
             if (is_array($expenseReport->lines)) {
                 foreach ($expenseReport->lines as $line) {
+                    if (isset($linkedElementIds['expensereportline'][(int) $line->rowid])) {
+                        continue;
+                    }
+
                     $typeLabel    = ($langs->transnoentities($line->type_fees_code) != $line->type_fees_code) ? $langs->transnoentities($line->type_fees_code) : ($line->type_fees_libelle ?: '');
                     $projectLabel = $line->projet_title ?: $line->projet_ref;
                     $parts        = [];
@@ -171,9 +178,11 @@ $iconMap = [
     'Accident'           => 'fa-exclamation-triangle',
     'Autre'              => 'fa-circle',
 ];
-$iconMap[$langs->transnoentities('ReportedProblem')] = 'fa-exclamation-triangle';
-$iconMap['Réparation']                               = 'fa-wrench';
-$iconMap[$langs->transnoentities('Repair')]          = 'fa-wrench';
+$iconMap[$langs->transnoentities('ReportedProblem')]     = 'fa-exclamation-triangle';
+$iconMap['Réparation']                                   = 'fa-wrench';
+$iconMap[$langs->transnoentities('Repair')]              = 'fa-wrench';
+$iconMap[$langs->transnoentities('VehicleInvoiceEvent')] = 'fa-file-invoice-dollar';
+$iconMap[$langs->transnoentities('Trip')]               = 'fa-route';
 
 // Load child categories and build display structures for the TPL
 $catById   = [];
@@ -231,6 +240,22 @@ if (!empty($object->fk_lot) && $object->fk_lot > 0 && !empty($catById)) {
             if (!$matched && !empty($evt->code) && strpos($evt->code, '_ADD_REPAIR') !== false) {
                 $eventsList[]               = $evt;
                 $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('Repair'), 'color' => '3B82F6'];
+                $matched                    = true;
+            }
+
+            // Invoices pushed automatically on validation carry no DoliCar category either (issue #464)
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_VEHICLE_INVOICE') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('VehicleInvoiceEvent'), 'color' => '8B5CF6'];
+                $matched                    = true;
+            }
+
+            // Trips recorded from the public logbook. They were left out of this tab, which made the
+            // mileage they carry unreachable from the back office: correcting a typo meant editing the
+            // event by hand in the agenda.
+            if (!$matched && !empty($evt->code) && strpos($evt->code, '_ADD_PUBLIC_VEHICLE_LOG_BOOK') !== false) {
+                $eventsList[]               = $evt;
+                $evtCatById[(int) $evt->id] = (object) ['label' => $langs->transnoentities('Trip'), 'color' => '10B981'];
             }
         }
     }
@@ -301,6 +326,68 @@ if (in_array($action, ['uploadPhoto', 'uploadFile', 'deletePhoto', 'deleteFile']
     $action = '';
 }
 
+// Correct a mileage that was mistyped, on a trip as on any other event of this vehicle. A
+// correction is never silent: the reason is required and written into the note of the event, with
+// who did it and what the figure was before, so the history explains itself later.
+if ($action == 'save_mileage' && !empty($permissiontoadd) && !empty($object->fk_lot) && $object->fk_lot > 0) {
+    $mileageEventId = GETPOSTINT('mileage_event_id');
+    $mileageReason  = trim(GETPOST('mileage_reason', 'restricthtml'));
+
+    $mileageEvent = new ActionComm($db);
+    if ($mileageEventId <= 0 || $mileageEvent->fetch($mileageEventId) <= 0
+        || $mileageEvent->elementtype !== 'productlot' || (int) $mileageEvent->fk_element !== (int) $object->fk_lot) {
+        // An event of another vehicle must not be reachable by typing its id in the URL
+        setEventMessages($langs->transnoentities('ErrorRecordNotFound'), null, 'errors');
+    } elseif ($mileageReason === '') {
+        setEventMessages($langs->transnoentities('MileageCorrectionReasonRequired'), null, 'errors');
+    } else {
+        $mileageEvent->fetch_optionals();
+
+        // A trip carries both figures, any other event only the first one
+        $changes = [];
+        foreach (['starting_mileage' => 'StartingMileage', 'arrival_mileage' => 'ArrivalMileage'] as $field => $labelKey) {
+            if (!GETPOSTISSET('mileage_' . $field)) {
+                continue;
+            }
+            $oldValue = (int) ($mileageEvent->array_options['options_' . $field] ?? 0);
+            $newValue = GETPOSTINT('mileage_' . $field);
+            if ($newValue === $oldValue) {
+                continue;
+            }
+            $mileageEvent->array_options['options_' . $field] = $newValue;
+            $changes[] = $langs->transnoentities($labelKey) . ' : '
+                . ($oldValue > 0 ? price($oldValue, 0, '', 1, 0) . ' km' : '-') . ' → '
+                . ($newValue > 0 ? price($newValue, 0, '', 1, 0) . ' km' : '-');
+        }
+
+        if (empty($changes)) {
+            setEventMessages($langs->transnoentities('MileageUnchanged'), null, 'warnings');
+        } else {
+            $trace  = '<br><strong>' . dol_print_date(dol_now(), 'dayhour') . ' - ' . dol_escape_htmltag($user->getFullName($langs)) . '</strong>';
+            $trace .= '<br>' . $langs->transnoentities('MileageCorrected') . ' : ' . implode(' / ', $changes);
+            $trace .= '<br>' . $langs->transnoentities('MileageCorrectionReason') . ' : ' . dol_escape_htmltag($mileageReason);
+
+            $mileageEvent->note_private = (string) $mileageEvent->note_private . $trace;
+
+            $db->begin();
+            $saved = true;
+            foreach (['starting_mileage', 'arrival_mileage'] as $field) {
+                if (GETPOSTISSET('mileage_' . $field) && $mileageEvent->updateExtraField($field) < 0) {
+                    $saved = false;
+                }
+            }
+            if ($saved && $mileageEvent->update($user) > 0) {
+                $db->commit();
+                setEventMessages($langs->transnoentities('MileageCorrectedConfirm'), []);
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
+                exit;
+            }
+            $db->rollback();
+            setEventMessages($mileageEvent->error, $mileageEvent->errors, 'errors');
+        }
+    }
+}
+
 if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object->fk_lot) && $object->fk_lot > 0) {
     $error           = 0;
     $eventCategoryId = GETPOSTINT('event_category_id');
@@ -327,6 +414,36 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
     if ($eventCategoryId <= 0 || $selectedCat->fetch($eventCategoryId) <= 0 || (int) $selectedCat->fk_parent !== $parentCategoryId) {
         setEventMessages($langs->transnoentities('VehicleEventType') . ' ' . $langs->transnoentities('NotValid'), null, 'errors');
         $error++;
+    }
+
+    // The form no longer offers a document already attached to this vehicle, a crafted POST must not either (issue #426)
+    foreach (dolicar_get_vehicle_event_linkable_types() as $typeKey => $linkableType) {
+        $fkLinkedElement = GETPOSTINT($linkableType['field']);
+        if ($fkLinkedElement > 0 && isset($linkedElementIds[$typeKey][$fkLinkedElement])) {
+            setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities($linkableType['label'])), null, 'errors');
+            $error++;
+        }
+    }
+    foreach ($expenseReportLineIds as $expenseReportLineId) {
+        if (isset($linkedElementIds['expensereportline'][$expenseReportLineId])) {
+            setEventMessages($langs->transnoentities('VehicleEventElementAlreadyLinked', $langs->transnoentities('DoliCarExpenseReportLines')), null, 'errors');
+            $error++;
+            break;
+        }
+    }
+    // The whole report would count again the lines already attached to another event
+    if (!$error && empty($expenseReportLineIds) && $fkExpenseReport > 0 && !empty($linkedElementIds['expensereportline'])) {
+        $expenseReport = new ExpenseReport($db);
+        if ($expenseReport->fetch($fkExpenseReport) > 0) {
+            $expenseReport->fetch_lines();
+            foreach ((array) $expenseReport->lines as $line) {
+                if (isset($linkedElementIds['expensereportline'][(int) $line->rowid])) {
+                    setEventMessages($langs->transnoentities('VehicleEventExpenseReportPartlyLinked'), null, 'errors');
+                    $error++;
+                    break;
+                }
+            }
+        }
     }
 
     if (!$error) {
@@ -383,7 +500,7 @@ if ($action == 'add_vehicle_event' && !empty($permissiontoadd) && !empty($object
                 }
                 foreach ($eventMediaFiles as $eventMediaFile) {
                     // Index the move, dol_add_file_process() has recorded the temp path in llx_ecm_files
-                    dol_move($eventMediaFile['fullname'], $eventFinalDir . '/' . $eventMediaFile['name'], 0, 1, 0, 1);
+                    dol_move($eventMediaFile['fullname'], $eventFinalDir . '/' . $eventMediaFile['name'], '0', 1, 0, 1);
                 }
             }
             saturne_invalidate_upload_token($eventUploadContext, 'dolicar', 'vehicle_event');
@@ -418,7 +535,7 @@ if ($id > 0 || !empty($ref)) {
 
     // Photo editor modal — its DOM must exist at page load, otherwise selecting a photo in the
     // media block of the add-event form does nothing
-    require_once __DIR__ . '/../../../saturne/core/tpl/medias/photo_editor_modal.tpl.php';
+    require_once dol_buildpath('/saturne/core/tpl/medias/photo_editor_modal.tpl.php');
 }
 
 // End of page

@@ -55,7 +55,7 @@ function dolicar_admin_prepare_head(): array
     $head[$h][2] = 'publicinterface';
     $h++;
 
-    $head[$h][0] = dol_buildpath('/saturne/admin/pwa.php', 1). '?module_name=DoliCar&start_url=' . dol_buildpath('custom/dolicar/public/agenda/public_vehicle_logbook.php?entity=' . $conf->entity, 3);
+    $head[$h][0] = dol_buildpath('/saturne/admin/pwa.php', 1). '?module_name=DoliCar&start_url=' . dol_buildpath('/dolicar/public/agenda/public_vehicle_logbook.php', 3) . '?entity=' . $conf->entity;
     $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-mobile pictofixedwidth"></i>' . $langs->trans('PWA') : '<i class="fas fa-mobile"></i>';
     $head[$h][2] = 'pwa';
     $h++;

@@ -191,7 +191,7 @@ if ($api == 'apiplaqueimmatriculation.com') {
 
                 $registrationCertificateId = $object->update($user);
 
-                $backtopage = dol_buildpath('custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
+                $backtopage = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
             } else {
 
                 $_POST['fk_product'] = $productId;
@@ -326,7 +326,7 @@ if ($api == 'immatriculationapi.com') {
 
                 $registrationCertificateId = $object->update($user);
 
-                $backtopage = dol_buildpath('custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
+                $backtopage = dol_buildpath('/dolicar/view/registrationcertificatefr/registrationcertificatefr_card.php', 1) . '?id=' . $registrationCertificateId;
             } else {
                 $_POST['fk_product'] = $productId;
                 $_POST['fk_lot']     = $productLotID;

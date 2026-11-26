@@ -27,6 +27,7 @@
  */
 
 $problemSuccess  = GETPOSTINT('problem');
+$problemMailSent = GETPOSTINT('mailsent');
 $repairSuccess   = GETPOSTINT('repair');
 $successIsDepart = $isVehicleOut;
 $successAction   = $successIsDepart ? ($lastUnfinishedActionComm[0] ?? null) : ($lastActionComm[0] ?? null);
@@ -38,7 +39,7 @@ $successAction   = $successIsDepart ? ($lastUnfinishedActionComm[0] ?? null) : (
             <i class="fas fa-check"></i>
         </div>
         <h2><?php echo $langs->trans('ProblemReportSent'); ?></h2>
-        <p><?php echo $langs->trans('ProblemReportSentDesc'); ?></p>
+        <p><?php echo $langs->trans($problemMailSent ? 'ProblemReportSentDesc' : 'ProblemReportSentNoMailDesc'); ?></p>
 
         <div class="plv2-success__recap">
             <div class="plv2-success__row">

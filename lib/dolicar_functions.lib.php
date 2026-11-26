@@ -400,7 +400,7 @@ function dolicar_get_invoice_warranties(CommonObject $invoice): array
  */
 function dolicar_set_invoice_warranties(CommonObject $invoice, array $warranties): int
 {
-    $invoice->array_options['options_warranty_end'] = !empty($warranties) ? json_encode(array_values($warranties), JSON_UNESCAPED_UNICODE) : '';
+    $invoice->array_options['options_warranty_end'] = !empty($warranties) ? json_encode(array_values($warranties)) : '';
 
     return $invoice->insertExtraFields();
 }

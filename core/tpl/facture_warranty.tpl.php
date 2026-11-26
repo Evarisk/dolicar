@@ -32,7 +32,7 @@
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 // Load Saturne libraries
-require_once __DIR__ . '/../../../saturne/lib/medias.lib.php';
+dol_include_once('/saturne/lib/medias.lib.php');
 
 // Load DoliCar libraries
 require_once __DIR__ . '/../../lib/dolicar_functions.lib.php';

@@ -57,7 +57,7 @@
             </div>
 
             <div class="plv2-card">
-                <h3><i class="fas fa-gauge"></i> <?php echo $langs->trans('RepairMileage'); ?></h3>
+                <h3><i class="fas fa-tachometer-alt"></i> <?php echo $langs->trans('RepairMileage'); ?></h3>
                 <div class="plv2-form-group">
                     <input type="number"
                            name="repair_mileage"

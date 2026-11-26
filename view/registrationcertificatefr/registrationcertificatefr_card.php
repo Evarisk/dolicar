@@ -47,7 +47,7 @@ require_once __DIR__ . '/../../class/dolicardocuments/livretentretien.class.php'
 require_once __DIR__ . '/../../class/dolicardocuments/vehiclelogbookdocument.class.php';
 require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
 if (isModEnabled('digiquali')) {
-    require_once __DIR__ . '/../../../digiquali/class/sheet.class.php';
+    dol_include_once('/digiquali/class/sheet.class.php');
 }
 
 // Global variables definitions
@@ -152,11 +152,21 @@ if (empty($resHook)) {
         require_once __DIR__ . '/../../core/tpl/dolicar_registrationcertificatefr_immatriculation_api_fetch_action.tpl.php';
     }
 
+
+    // An archived vehicle (sold, out of the fleet) is read-only : reactivate it first
+    if ($object->id > 0 && $object->isArchived() && in_array($action, ['edit', 'update', 'update_extras', 'set_societe', 'set_project'], true)) {
+        setEventMessages($langs->trans('ArchivedVehicleReadOnly'), [], 'errors');
+        $action = '';
+    }
+
     // Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
     require_once DOL_DOCUMENT_ROOT . '/core/actions_addupdatedelete.inc.php';
 
+    // Actions confirm_archive, confirm_unarchive
+    require_once dol_buildpath('/saturne/core/tpl/actions/object_workflow_actions.tpl.php');
+
     // Actions set_thirdparty, set_project
-    require_once __DIR__ . '/../../../saturne/core/tpl/actions/banner_actions.tpl.php';
+    require_once dol_buildpath('/saturne/core/tpl/actions/banner_actions.tpl.php');
 
     // Actions builddoc, forcebuilddoc, remove_file
     $upload_dir = '';
@@ -180,7 +190,9 @@ if (empty($resHook)) {
         }
 
         $requestedModel = GETPOST('model', 'alpha');
-        if (($action === 'builddoc' || GETPOST('forcebuilddoc')) && strpos($requestedModel, 'vehiclelogbookdocument') !== false) {
+        // Every model registered under the vehiclelogbookdocument type by modDoliCar::init(): the logbook and the two
+        // trip sheets, which write in vehiclelogbookdocument/<ref> too
+        if (($action === 'builddoc' || GETPOST('forcebuilddoc')) && preg_match('/vehiclelogbookdocument|vehiclephotossheet|vehiclestatesheet/', $requestedModel)) {
             $document   = new VehicleLogBookDocument($db);
             $upload_dir = $dirOutput . '/vehiclelogbookdocument/' . dol_sanitizeFileName($object->ref);
         } else {
@@ -195,7 +207,7 @@ if (empty($resHook)) {
             'tmparray'         => [],
             'hideTemplateName' => 0,
         ];
-        require_once __DIR__ . '/../../../saturne/core/tpl/documents/documents_action.tpl.php';
+        require_once dol_buildpath('/saturne/core/tpl/documents/documents_action.tpl.php');
     }
 }
 
@@ -384,15 +396,23 @@ if (($id || $ref) && $action == 'edit') {
     print'<tr class="field_fk_lot"><td>';
     print $langs->trans('DolicarBatch');
     print '</td><td>';
-    $productLotsData = [];
-    $productLots     = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . GETPOST('fk_product') > 0 ? GETPOST('fk_product') : $object->fk_product]);
+    // Lots of the product picked in the form (AJAX reload after a product change), else of the product of the carte grise
+    $fkProductForLots = GETPOSTINT('fk_product') > 0 ? GETPOSTINT('fk_product') : (int) $object->fk_product;
+    $productLotsData  = [];
+    $productLots      = saturne_fetch_all_object_type('ProductLot', '', '', 0, 0, ['customsql' => 't.fk_product = ' . $fkProductForLots]);
     if (is_array($productLots) && !empty($productLots)) {
         foreach ($productLots as $productLotSingle) {
             $productLotsData[$productLotSingle->id] = $productLotSingle->batch;
         }
     }
-    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOST('fk_lot') > 0 ? GETPOST('fk_lot') : $object->fk_lot, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
-    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ((GETPOST('fk_product') > 0) ? '&fk_product=' . GETPOST('fk_product') : ($object->fk_product > 0 ? '&fk_product=' . $object->fk_product : '')) . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?action=create') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
+    // The attached lot stays offered while the product is unchanged, even if it belongs to another product: missing
+    // from the list, it would be posted as -1 and saving the form would detach it from the carte grise
+    if ($fkProductForLots == (int) $object->fk_product && $object->fk_lot > 0 && !isset($productLotsData[$object->fk_lot]) && $productLot->fetch($object->fk_lot) > 0) {
+        $productLotsData[$productLot->id] = $productLot->batch;
+    }
+    print img_picto('', 'lot', 'class="pictofixedwidth"') . $form::selectarray('fk_lot', $productLotsData, GETPOSTINT('fk_lot') > 0 ? GETPOSTINT('fk_lot') : $object->fk_lot, $langs->transnoentities('SelectProductLots'), '', '', '', '', '', '','', 'maxwidth500 widthcentpercentminusx');
+    // Back to this edit form once the lot is created, not to the creation of another carte grise
+    print '<a class="butActionNew" href="' . DOL_URL_ROOT . '/product/stock/productlot_card.php?action=create' . ($fkProductForLots > 0 ? '&fk_product=' . $fkProductForLots : '') . '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=edit') . '"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddProductLot') . '"></span></a>';
     print '</td></tr>';
 
     // Common attributes
@@ -405,9 +425,43 @@ if (($id || $ref) && $action == 'edit') {
 
     print dol_get_fiche_end();
 
+    // Fill fields from a carte grise JSON file — advanced panel, collapsed by default.
+    // Import is done client-side: it only fills the edit form, the user reviews then saves.
+    print '<div class="dolicar-json-import-panel">';
+    print '<div class="qc-section-header collapsible collapsed">';
+    print '<div class="qc-section-title">';
+    print '<i class="fas fa-file-code"></i>';
+    print $langs->trans('FillFromCarteGriseJson');
+    print '</div>';
+    print '<i class="fas fa-chevron-down qc-chevron"></i>';
+    print '</div>';
+
+    print '<div class="qc-section-body collapsed">';
+    print '<div class="dolicar-json-import"';
+    print ' data-error-invalid="' . dol_escape_htmltag($langs->trans('ErrorInvalidCarteGriseJson')) . '"';
+    print ' data-confirm-plate="' . dol_escape_htmltag($langs->trans('ConfirmJsonPlateMismatch')) . '"';
+    print ' data-fields-filled="' . dol_escape_htmltag($langs->trans('FieldsFilledFromJson')) . '">';
+    print '<label class="qc-dropzone qc-dropzone--compact" for="dolicar-json-file-edit">';
+    print '<input type="file" id="dolicar-json-file-edit" accept=".json,application/json">';
+    print '<i class="fas fa-file-upload qc-dropzone-icon"></i>';
+    print '<div class="qc-dropzone-meta">';
+    print '<div class="qc-dropzone-text">' . $langs->trans('DropJsonFileHere') . '</div>';
+    print '<div class="qc-dropzone-hint">' . $langs->trans('FillFromCarteGriseJsonHelp') . '</div>';
+    print '<div class="qc-dropzone-file"><i class="fas fa-file-code"></i> <span class="qc-dropzone-filename"></span></div>';
+    print '</div>';
+    print '</label>';
+    print '<button type="button" class="qc-btn qc-btn-primary dolicar-json-apply" disabled>';
+    print '<i class="fas fa-file-import"></i> ' . $langs->trans('ImportJson');
+    print '</button>';
+    print '</div>'; // .dolicar-json-import
+    print '</div>'; // .qc-section-body
+
+    print '</div>'; // .dolicar-json-import-panel
+
     print $form->buttonsSaveCancel();
 
-    print '</form>'; ?>
+    print '</form>';
+    ?>
 
     <script>
         const $editTable     = $('.tableforfieldedit');
@@ -457,6 +511,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         $formConfirm .= $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('Delete'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
     }
 
+    // Confirmation to archive (vehicle sold, out of the fleet)
+    if ($action == 'archive' && !$object->isArchived()) {
+        $formConfirm .= $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('ArchiveVehicle'), $langs->trans('ConfirmArchiveVehicle', $object->a_registration_number), 'confirm_archive', '', 'yes', 1);
+    }
+
     // Call Hook formConfirm
     $parameters = ['formConfirm' => $formConfirm];
     $resHook    = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
@@ -478,6 +537,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     // Common attributes
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_view.tpl.php';
+
+    // Current mileage, read from the vehicle history (trips, maintenance, invoices)
+    $currentMileage = dolicar_get_vehicle_current_mileage((int) $object->fk_lot);
+    print '<tr class="field_current_mileage"><td class="titlefieldmiddle">' . $langs->trans('CurrentMileage') . '</td>';
+    print '<td class="valuefield">' . ($currentMileage > 0 ? price($currentMileage, 0, '', 1, 0) . ' ' . $langs->trans('km') : '') . '</td></tr>';
 
     // Other attributes. Fields from hook formObjectOptions and Extrafields
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_view.tpl.php';
@@ -530,10 +594,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     </script>
     <?php
 
-    if (isModEnabled('digiquali') && !empty($object->fk_lot) && $object->fk_lot > 0 && !empty($digiQualiSheets)) {
-        $controlCardUrl = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1);
-        $backToPage     = dol_buildpath('/custom/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
-        $logoUrl        = dol_buildpath('/custom/digiquali/img/digiquali_color.svg', 1);
+    if (isModEnabled('digiquali') && !$object->isArchived() && !empty($object->fk_lot) && $object->fk_lot > 0 && !empty($digiQualiSheets)) {
+        $controlCardUrl = dol_buildpath('/digiquali/view/control/control_card.php', 1);
+        $backToPage     = dol_buildpath('/digiquali/view/control/control_card.php', 1) . '?id=__ID__';
+        $logoUrl        = dol_buildpath('/digiquali/img/digiquali_color.svg', 1);
 
         $sheetsForJs = [];
         foreach ($digiQualiSheets as $digiQualiSheet) {
@@ -578,8 +642,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         }
 
         if (empty($resHook)) {
-            $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-edit pictofixedwidth"></i>' . $langs->trans('Modify') : '<i class="fas fa-edit fa-2x"></i>';
-            print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=edit&token=' . newToken(), '', $permissiontoadd);
+            if (!$object->isArchived()) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-edit pictofixedwidth"></i>' . $langs->trans('Modify') : '<i class="fas fa-edit fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=edit&token=' . newToken(), '', $permissiontoadd);
+            }
 
             if (isModEnabled('propal')) {
                 $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans('NewPropal') : '<i class="fas fa-file-signature fa-2x"></i>';
@@ -594,6 +660,15 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
             if (isModEnabled('fichinter')) {
                 $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-ambulance"></i>' . ' ' . $langs->trans('NewIntervention') : '<i class="fas fa-ambulance fa-2x"></i>';
                 print dolGetButtonAction($displayButton, '', 'default', dol_buildpath('fichinter/card.php?action=create&socid=' . $object->fk_soc, 3), '', $permissiontoadd);
+            }
+
+            // Archive a sold vehicle : its history stays, it leaves the lists and the public logbook
+            if ($object->isArchived()) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-box-open pictofixedwidth"></i>' . $langs->trans('ReactivateVehicle') : '<i class="fas fa-box-open fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=confirm_unarchive&token=' . newToken(), '', $permissiontoadd);
+            } elseif ((int) $object->status === RegistrationCertificateFr::STATUS_VALIDATED) {
+                $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-archive pictofixedwidth"></i>' . $langs->trans('ArchiveVehicle') : '<i class="fas fa-archive fa-2x"></i>';
+                print dolGetButtonAction($displayButton, '', 'default', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=archive&token=' . newToken(), '', $permissiontoadd);
             }
 
             $displayButton = $conf->browser->layout == 'classic' ? '<i class="fas fa-trash pictofixedwidth"></i>' . $langs->trans('Delete') : '<i class="fas fa-trash fa-2x"></i>';

@@ -33,6 +33,11 @@ require_once DOL_DOCUMENT_ROOT . '/core/modules/DolibarrModules.class.php';
 class modDoliCar extends DolibarrModules
 {
     /**
+     * @var int[] Minimum version of Saturne required by module, same format as need_dolibarr_version: checked by init() and by the Saturne index page
+     */
+    public $need_saturne_version = [23, 9, 1];
+
+    /**
      * Constructor. Define names, constants, directories, boxes, permissions
      *
      * @param DoliDB $db Database handler
@@ -42,8 +47,8 @@ class modDoliCar extends DolibarrModules
         global $conf, $langs;
         $this->db = $db;
 
-        if (file_exists(__DIR__ . '/../../../saturne/lib/saturne_functions.lib.php')) {
-            require_once __DIR__ . '/../../../saturne/lib/saturne_functions.lib.php';
+        if (file_exists(dol_buildpath('/saturne/lib/saturne_functions.lib.php'))) {
+            dol_include_once('/saturne/lib/saturne_functions.lib.php');
             saturne_load_langs(['dolicar@dolicar']);
         } else {
             $this->error++;
@@ -78,7 +83,7 @@ class modDoliCar extends DolibarrModules
         $this->editor_url  = 'https://www.evarisk.com';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '23.0.0';
+        $this->version = '23.3.1';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -132,7 +137,8 @@ class modDoliCar extends DolibarrModules
                     'orderlist',
                     'invoicelist',
                     'main',
-                    'publiccontrol'
+                    'publiccontrol',
+                    'emailtemplates'
                 ]
             ],
             // Set this to 1 if features of module are opened to external users
@@ -160,7 +166,8 @@ class modDoliCar extends DolibarrModules
 
         // Prerequisites
         $this->phpmin                = [7, 4]; // Minimum version of PHP required by module
-        $this->need_dolibarr_version = [20, 0]; // Minimum version of Dolibarr required by module
+        $this->need_dolibarr_version = [23, 0]; // Minimum version of Dolibarr required by module
+        $this->max_dolibarr_version = [24, 0]; // Maximum version of Dolibarr supported by module
 
         // Messages at activation
         $this->warnings_activation     = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
@@ -237,16 +244,16 @@ class modDoliCar extends DolibarrModules
         // $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@dolicar:$user->rights->othermodule->read:/dolicar/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key
         // $this->tabs[] = array('data'=>'objecttype:-tabname:NU:conditiontoremove');
         $this->tabs   = [];
-        $pictoPath    = dol_buildpath('custom/dolicar/img/dolicar_color.png', 1);
+        $pictoPath    = dol_buildpath('/dolicar/img/dolicar_color.png', 1);
         $pictoModule  = img_picto('', $pictoPath, '', 1, 0, 0, '', 'pictoModule');
-        $this->tabs[] = ['data' => 'productlot:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot'];
-        $this->tabs[] = ['data' => 'thirdparty:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty'];
-        $this->tabs[] = ['data' => 'product:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product'];
-        $this->tabs[] = ['data' => 'project:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/custom/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project'];
+        $this->tabs[] = ['data' => 'productlot:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=productlot'];
+        $this->tabs[] = ['data' => 'thirdparty:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=thirdparty'];
+        $this->tabs[] = ['data' => 'product:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=product'];
+        $this->tabs[] = ['data' => 'project:+registrationcertificatefr:' . $pictoModule . ucfirst($langs->trans('RegistrationCertificateFr')) . ':dolicar@dolicar:$user->rights->dolicar->registrationcertificatefr->read:/dolicar/view/registrationcertificatefr/registrationcertificatefr_list.php?fromid=__ID__&fromtype=project'];
 
         // Warranties granted by an invoice, on their own tab (issue #475)
-        $this->tabs[] = ['data' => 'invoice:+dolicarwarranty:' . $pictoModule . ucfirst($langs->trans('Warranties')) . ':dolicar@dolicar:$user->hasRight("facture", "lire"):/custom/dolicar/view/facture_warranty.php?id=__ID__'];
-        $this->tabs[] = ['data' => 'supplier_invoice:+dolicarwarranty:' . $pictoModule . ucfirst($langs->trans('Warranties')) . ':dolicar@dolicar:$user->hasRight("fournisseur", "facture", "lire") || $user->hasRight("supplier_invoice", "lire"):/custom/dolicar/view/facture_warranty.php?id=__ID__&element=invoice_supplier'];
+        $this->tabs[] = ['data' => 'invoice:+dolicarwarranty:' . $pictoModule . ucfirst($langs->trans('Warranties')) . ':dolicar@dolicar:$user->hasRight("facture", "lire"):/dolicar/view/facture_warranty.php?id=__ID__'];
+        $this->tabs[] = ['data' => 'supplier_invoice:+dolicarwarranty:' . $pictoModule . ucfirst($langs->trans('Warranties')) . ':dolicar@dolicar:$user->hasRight("fournisseur", "facture", "lire") || $user->hasRight("supplier_invoice", "lire"):/dolicar/view/facture_warranty.php?id=__ID__&element=invoice_supplier'];
 
         // Dictionaries
         $this->dictionaries = [];
@@ -384,6 +391,22 @@ class modDoliCar extends DolibarrModules
         $this->menu[$r++] = [
             'fk_menu'  => 'fk_mainmenu=dolicar',
             'type'     => 'left',
+            'titre'    => $langs->transnoentities('WarehouseFleet'),
+            'prefix'   => '<i class="fas fa-warehouse pictofixedwidth"></i>',
+            'mainmenu' => 'dolicar',
+            'leftmenu' => 'warehousefleet',
+            'url'      => '/dolicar/view/dolicarwarehouse.php',
+            'langs'    => 'dolicar@dolicar',
+            'position' => 1000 + $r,
+            'enabled'  => 'isModEnabled("dolicar") && isModEnabled("stock")',
+            'perms'    => '$user->rights->dolicar->registrationcertificatefr->read',
+            'target'   => '',
+            'user'     => 0
+        ];
+
+        $this->menu[$r++] = [
+            'fk_menu'  => 'fk_mainmenu=dolicar',
+            'type'     => 'left',
             'titre'    => $langs->transnoentities('ThirdParty'),
             'prefix'   => '<i class="fas fa-building pictofixedwidth" style=" color: #6c6aa8;"></i>',
             'mainmenu' => 'dolicar',
@@ -484,7 +507,7 @@ class modDoliCar extends DolibarrModules
             'prefix'   => '<i class="fas fa-globe pictofixedwidth"></i>',
             'mainmenu' => 'dolicar',
             'leftmenu' => 'public_interface',
-            'url'      => '/custom/dolicar/admin/publicinterface.php',
+            'url'      => '/dolicar/admin/publicinterface.php',
             'langs'    => 'dolicar@dolicar',
             'position' => 1000 + $r,
             'enabled'  => '$conf->dolicar->enabled',
@@ -523,6 +546,27 @@ class modDoliCar extends DolibarrModules
     {
         global $conf, $langs, $user;
 
+        // Saturne provides the functions used below : refuse the activation rather than a fatal error when it is missing
+        if (!function_exists('saturne_load_langs')) {
+            $this->error = $langs->trans('activateModuleDependNotSatisfied', $this->name, 'modSaturne', $this->name);
+            return -1;
+        }
+
+        // Saturne ships separately: refuse one older than need_saturne_version, it lacks functions this release calls
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+        dol_include_once('/saturne/core/modules/modSaturne.class.php');
+        $saturneVersion = class_exists('modSaturne') ? (new modSaturne($this->db))->version : '';
+        if (versioncompare(explode('.', $saturneVersion), $this->need_saturne_version) < 0) {
+            $langs->load('admin'); // activateModuleDependNotSatisfied, not loaded when the Saturne index page runs init()
+            $this->error = $langs->trans('activateModuleDependNotSatisfied', $this->name, 'modSaturne >= ' . versiontostring($this->need_saturne_version) . ' (' . ($saturneVersion ?: '-') . ')', $this->name);
+            return -1;
+        }
+
+        // Dolibarr runs init() before activating $this->depends, without reloading $conf : activate them first, $conf is reloaded after each one
+        if (function_exists('saturne_activate_module_dependencies') && saturne_activate_module_dependencies($this) < 0) {
+            return -1;
+        }
+
         // Permissions
         $this->remove($options);
 
@@ -537,10 +581,11 @@ class modDoliCar extends DolibarrModules
         dolibarr_set_const($this->db, 'DOLICAR_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
         // Create extrafields during init
+        require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
         $commonExtraFieldsValue = ['entity' => 0, 'langfile' => 'dolicar@dolicar', 'enabled' => "isModEnabled('dolicar')"];
 
         $extraFieldsArrays = [
-            'registration_number'       => ['Label' => 'RegistrationNumber',        'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 10, 'list' => 5],
+            'registration_number'       => ['Label' => 'DoliCarRegistrationNumber', 'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 10, 'list' => 5],
             'vehicle_model'             => ['Label' => 'VehicleModel',              'type' => 'varchar', 'length' => 255, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 20, 'list' => 5],
             'VIN_number'                => ['Label' => 'VINNumber',                 'type' => 'varchar', 'length' => 128, 'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 30, 'list' => 5],
             'first_registration_date'   => ['Label' => 'FirstRegistrationDate',     'type' => 'date',                     'elementtype' => ['propal', 'commande', 'facture'], 'position' => $this->numero . 40, 'list' => 5],
@@ -557,9 +602,18 @@ class modDoliCar extends DolibarrModules
             // service instead of creating a second one (issue #475)
             'repair_service'            => ['Label' => 'VehicleRepairService',      'type' => 'int',                      'elementtype' => ['dolicar_registrationcertificatefr'], 'position' => $this->numero . 100, 'list' => 0],
 
+            // Position of a warehouse on the fleet map, filled by hand or by its geocoding action (issue #445)
+            'dolicar_latitude'  => ['Label' => 'Latitude',  'type' => 'varchar', 'length' => 32, 'elementtype' => ['entrepot'], 'position' => $this->numero . 90, 'list' => 1, 'alwayseditable' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('stock')"],
+            'dolicar_longitude' => ['Label' => 'Longitude', 'type' => 'varchar', 'length' => 32, 'elementtype' => ['entrepot'], 'position' => $this->numero . 91, 'list' => 1, 'alwayseditable' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('stock')"],
+
             'starting_mileage' => ['Label' => 'StartingMileage', 'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 10, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
             'arrival_mileage'  => ['Label' => 'ArrivalMileage',  'type' => 'int',  'elementtype' => ['actioncomm'], 'position' => 20, 'alwayseditable' => 1, 'list' => 1, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
-            'json'             => ['Label' => 'JSON',            'type' => 'text', 'elementtype' => ['actioncomm'], 'position' => 30, 'alwayseditable' => 1, 'list' => 0, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"]
+            'json'             => ['Label' => 'JSON',            'type' => 'text', 'elementtype' => ['actioncomm'], 'position' => 30, 'alwayseditable' => 1, 'list' => 0, 'enabled' => "isModEnabled('dolicar') && isModEnabled('agenda')"],
+
+            // Tag of a file attached to a carte grise, picked in its documents tab: hidden from the forms of the ECM module
+            'dolicar_file_tag' => ['Label' => 'FileTag', 'type' => 'select', 'elementtype' => ['ecm_files'], 'position' => $this->numero . 100, 'list' => 0, 'params' => array_map(function (array $fileTag): string {
+                return $fileTag['label'];
+            }, dolicar_get_file_tags())]
         ];
 
         saturne_manage_extrafields($extraFieldsArrays, $commonExtraFieldsValue);
@@ -600,7 +654,7 @@ class modDoliCar extends DolibarrModules
         require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
         require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
         require_once DOL_DOCUMENT_ROOT . '/product/class/productbatch.class.php';
-        require_once __DIR__ . '/../../../saturne/lib/object.lib.php';
+        dol_include_once('/saturne/lib/object.lib.php');
 
         if (getDolGlobalInt('DOLICAR_INTERNE_WAREHOUSE_ID') <= 0) {
             $oldWarehouseID = getDolGlobalInt('DOLICAR_DEFAULT_WAREHOUSE_ID');
@@ -691,7 +745,7 @@ class modDoliCar extends DolibarrModules
             $brandTagID      = $category->create($user);
 
             if ($brandTagID > 0) {
-                $filename = DOL_DOCUMENT_ROOT . '/custom/dolicar/core/car_brands.txt';
+                $filename = dol_buildpath('/dolicar/core/car_brands.txt', 0);
                 $file     = fopen($filename, 'r');
                 if ($file) {
                     while (($line = fgets($file)) !== false) {

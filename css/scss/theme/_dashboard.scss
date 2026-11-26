@@ -1,0 +1,40 @@
+@use 'tokens' as *;
+
+/* DoliCar modern theme: dashboard widgets (class/dolicardashboard.class.php) */
+
+#{$dc-scope} {
+  /* Overdue technical controls: tinted pills, from amber to a solid red as the delay grows */
+  .dolicar-overdue-days {
+    @include dc-pill;
+    font-variant-numeric: tabular-nums;
+
+    &--level1 {
+      border-color: rgba(233, 173, 79, 0.45);
+      background: $dc-warning-soft;
+      color: $dc-warning-text;
+    }
+
+    &--level2 {
+      border-color: rgba(234, 88, 12, 0.3);
+      background: rgba(234, 88, 12, 0.12);
+      color: #c2410c;
+    }
+
+    &--level3 {
+      border-color: rgba(224, 83, 83, 0.3);
+      background: $dc-danger-soft;
+      color: $dc-danger-text;
+    }
+
+    &--level4 {
+      border-color: $dc-danger;
+      background: $dc-danger;
+      color: #ffffff;
+    }
+  }
+
+  .dolicar-overdue-date {
+    color: $dc-danger-text;
+    font-weight: 600;
+  }
+}

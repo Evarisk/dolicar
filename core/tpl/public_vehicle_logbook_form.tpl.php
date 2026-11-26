@@ -24,11 +24,13 @@
 /**
  * Rendered by public/agenda/public_vehicle_logbook.php (inherits its scope).
  * Expects: $actionType, $vehicleUrl, $logoUrl, $langs, $registrationCertificateFR, $form,
- *          $preselectedDriverId, $conf, $user, $lastArrivalMileage, $lastUnfinishedActionComm,
- *          $tripUploadSubDir, $publicInterfaceUseSignatory
+ *          $preselectedDriverId, $preselectedDriverType, $preselectedDriverLastname,
+ *          $preselectedDriverFirstname, $preselectedDriverPhone, $conf, $user, $lastArrivalMileage,
+ *          $lastUnfinishedActionComm, $tripUploadSubDir, $publicInterfaceUseSignatory
  */
 
-$isDepart = ($actionType === 'depart');
+$isDepart     = ($actionType === 'depart');
+$isFreeDriver = ($preselectedDriverType === 'free');
 ?>
 <!-- ===== SCREEN 3 : formulaire départ / retour ===== -->
 <div class="plv2-header plv2-header--dark">
@@ -52,44 +54,79 @@ $isDepart = ($actionType === 'depart');
     <input type="hidden" name="action_type" value="<?php echo dol_escape_htmltag($actionType); ?>">
 
     <div class="plv2-form">
-        <!-- Identité -->
-        <?php if ($isDepart) : ?>
-            <div class="plv2-card">
-                <h3><i class="fas fa-user"></i> <?php echo $langs->trans('Driver'); ?> <span class="plv2-req">*</span></h3>
+        <!-- Identité : au départ celui qui prend le véhicule, au retour celui qui le rend, qui
+             n'est pas toujours le même. Les deux écrans postent les mêmes champs. -->
+        <div class="plv2-card">
+            <h3><i class="fas fa-user"></i> <?php echo $isDepart ? $langs->trans('Driver') : $langs->trans('ReturnedBy'); ?> <span class="plv2-req">*</span></h3>
 
-                <div class="plv2-seg" id="plv2-driver-type">
-                    <button type="button" class="plv2-seg__btn active" data-type="internal">
-                        <i class="fas fa-user-tie"></i> <?php echo $langs->trans('DriverInternal'); ?>
-                    </button>
-                    <button type="button" class="plv2-seg__btn" data-type="external">
-                        <i class="fas fa-user-friends"></i> <?php echo $langs->trans('DriverExternal'); ?>
-                    </button>
+            <div class="plv2-seg plv2-seg--three" id="plv2-driver-type">
+                <button type="button" class="plv2-seg__btn<?php echo $isFreeDriver ? '' : ' active'; ?>" data-type="internal">
+                    <i class="fas fa-user-tie"></i> <?php echo $langs->trans('DriverInternal'); ?>
+                </button>
+                <button type="button" class="plv2-seg__btn" data-type="external">
+                    <i class="fas fa-user-friends"></i> <?php echo $langs->trans('DriverExternal'); ?>
+                </button>
+                <button type="button" class="plv2-seg__btn<?php echo $isFreeDriver ? ' active' : ''; ?>" data-type="free">
+                    <i class="fas fa-pen"></i> <?php echo $langs->trans('DriverFree'); ?>
+                </button>
+            </div>
+            <input type="hidden" name="driver_type" id="plv2-driver-type-value" value="<?php echo $isFreeDriver ? 'free' : 'internal'; ?>">
+
+            <!-- Conducteur interne -->
+            <div class="plv2-form-group" id="plv2-driver-internal"<?php echo $isFreeDriver ? ' hidden' : ''; ?>>
+                <?php echo $form->select_dolusers($preselectedDriverId, 'driver_user_id', 1, null, 0, '', '', (string) $conf->entity); ?>
+            </div>
+
+            <!-- Conducteur externe : tiers puis contact -->
+            <div id="plv2-driver-external" hidden>
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('ThirdParty'); ?></label>
+                    <?php
+                    dolicarGrantThirdpartyView($user);
+                    // forcecombo=0 so Dolibarr attaches its native select2 (full list rendered inline,
+                    // no server-side autocomplete which would fail on this public page).
+                    echo $form->select_thirdparty_list(0, 'driver_socid', '', '1', 0, 0, [], '', 0, 0, '', '', false, [], 0);
+                    ?>
                 </div>
-                <input type="hidden" name="driver_type" id="plv2-driver-type-value" value="internal">
-
-                <!-- Conducteur interne -->
-                <div class="plv2-form-group" id="plv2-driver-internal">
-                    <?php echo $form->select_dolusers($preselectedDriverId, 'driver_user_id', 1, null, 0, '', '', (string) $conf->entity); ?>
-                </div>
-
-                <!-- Conducteur externe : tiers puis contact -->
-                <div id="plv2-driver-external" style="display: none;">
-                    <div class="plv2-form-group">
-                        <label><?php echo $langs->trans('ThirdParty'); ?></label>
-                        <?php
-                        dolicarGrantThirdpartyView($user);
-                        // forcecombo=0 so Dolibarr attaches its native select2 (full list rendered inline,
-                        // no server-side autocomplete which would fail on this public page).
-                        echo $form->select_thirdparty_list(0, 'driver_socid', '', '1', 0, 0, [], '', 0, 0, '', '', false, [], 0);
-                        ?>
-                    </div>
-                    <div class="plv2-form-group">
-                        <label><?php echo $langs->trans('Contact'); ?></label>
-                        <?php echo $form->selectcontacts(-1, '', 'driver_contact_id', 1); ?>
-                    </div>
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('Contact'); ?></label>
+                    <?php echo $form->selectcontacts(-1, '', 'driver_contact_id', 1); ?>
                 </div>
             </div>
-        <?php endif; ?>
+
+            <!-- Conducteur libre : personne qui n'est ni un utilisateur ni un contact connu.
+                 Les valeurs sont pre-remplies depuis les cookies poses au precedent passage
+                 (vehicleLogbook.js) pour que la meme personne n'ait plus qu'a valider. -->
+            <div id="plv2-driver-free"<?php echo $isFreeDriver ? '' : ' hidden'; ?>>
+                <div class="plv2-field-row">
+                    <div class="plv2-form-group">
+                        <label><?php echo $langs->trans('DriverLastname'); ?> <span class="plv2-req">*</span></label>
+                        <input type="text"
+                               name="driver_free_lastname"
+                               id="plv2-driver-free-lastname"
+                               value="<?php echo dol_escape_htmltag($preselectedDriverLastname); ?>"
+                               autocomplete="family-name"
+                               <?php echo $isFreeDriver ? 'required' : ''; ?>>
+                    </div>
+                    <div class="plv2-form-group">
+                        <label><?php echo $langs->trans('DriverFirstname'); ?></label>
+                        <input type="text"
+                               name="driver_free_firstname"
+                               id="plv2-driver-free-firstname"
+                               value="<?php echo dol_escape_htmltag($preselectedDriverFirstname); ?>"
+                               autocomplete="given-name">
+                    </div>
+                </div>
+                <div class="plv2-form-group">
+                    <label><?php echo $langs->trans('DriverPhone'); ?></label>
+                    <input type="tel"
+                           name="driver_free_phone"
+                           id="plv2-driver-free-phone"
+                           value="<?php echo dol_escape_htmltag($preselectedDriverPhone); ?>"
+                           autocomplete="tel">
+                </div>
+            </div>
+        </div>
 
         <!-- Date / Heure + Kilométrage (compacté sur 2 colonnes) -->
         <div class="plv2-card-row">
@@ -107,14 +144,21 @@ $isDepart = ($actionType === 'depart');
 
             <!-- Kilométrage -->
             <div class="plv2-card">
-                <h3><i class="fas fa-gauge"></i> <?php echo $langs->trans('Mileage'); ?></h3>
+                <h3><i class="fas fa-tachometer-alt"></i> <?php echo $langs->trans('Mileage'); ?></h3>
                 <div class="plv2-form-group">
                     <label>
                         <?php echo $isDepart ? $langs->trans('StartingMileage') : $langs->trans('ArrivalMileage'); ?>
                         <span class="plv2-req">*</span>
                     </label>
+                    <?php // The mileage to beat is read before typing, not after: it sits above the field,
+                          // where the eye already is when the keyboard covers the bottom of the screen ?>
                     <?php if ($isDepart) :
                         $minKm = $lastArrivalMileage ?? 0; ?>
+                        <?php if ($minKm > 0) : ?>
+                            <div class="plv2-km-hint">
+                                <?php echo $langs->trans('LastKnownMileage'); ?> : <strong><?php echo number_format($minKm, 0, ',', ' ') . ' km'; ?></strong>
+                            </div>
+                        <?php endif; ?>
                         <input type="number"
                                name="options_starting_mileage"
                                class="plv2-km-input"
@@ -122,28 +166,21 @@ $isDepart = ($actionType === 'depart');
                                value="<?php echo $minKm > 0 ? $minKm : ''; ?>"
                                placeholder="000000"
                                required>
-                        <?php if ($minKm > 0) : ?>
-                            <div class="plv2-km-hint">
-                                <?php echo $langs->trans('LastKnownMileage'); ?> : <strong><?php echo number_format($minKm, 0, ',', ' ') . ' km'; ?></strong>
-                            </div>
-                        <?php endif; ?>
                     <?php else :
-                        $startKm    = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
-                        $minKmRetour = $startKm > 0 ? $startKm : 0;
-                        $maxKmRetour = $startKm + getDolGlobalInt('DOLICAR_PUBLIC_MAX_ARRIVAL_MILEAGE', 1000); ?>
-                        <input type="number"
-                               name="options_arrival_mileage"
-                               class="plv2-km-input"
-                               min="<?php echo $minKmRetour; ?>"
-                               max="<?php echo $maxKmRetour; ?>"
-                               value="<?php echo $startKm > 0 ? $startKm : ''; ?>"
-                               placeholder="000000"
-                               required>
+                        $startKm     = (int) ($lastUnfinishedActionComm[0]->array_options['options_starting_mileage'] ?? 0);
+                        $minKmRetour = $startKm > 0 ? $startKm : 0; ?>
                         <?php if ($startKm > 0) : ?>
                             <div class="plv2-km-hint">
                                 <?php echo $langs->trans('DepartureMileage'); ?> : <strong><?php echo number_format($startKm, 0, ',', ' ') . ' km'; ?></strong>
                             </div>
                         <?php endif; ?>
+                        <input type="number"
+                               name="options_arrival_mileage"
+                               class="plv2-km-input"
+                               min="<?php echo $minKmRetour; ?>"
+                               value="<?php echo $startKm > 0 ? $startKm : ''; ?>"
+                               placeholder="000000"
+                               required>
                     <?php endif; ?>
                 </div>
             </div>
