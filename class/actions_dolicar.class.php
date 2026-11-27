@@ -146,7 +146,8 @@ class ActionsDoliCar
                     $object->array_options['options_registration_number']     = $registrationCertificateFr->a_registration_number;
                     $object->array_options['options_vehicle_model']           = $product->label;
                     $object->array_options['options_VIN_number']              = $productLot->batch;
-                    $object->array_options['options_first_registration_date'] = dol_print_date($registrationCertificateFr->b_first_registration_date, 'day');
+                    // A timestamp: the extrafield is of type date, a formatted string was saved as NULL
+                    $object->array_options['options_first_registration_date'] = $registrationCertificateFr->b_first_registration_date;
                     $object->array_options['options_linked_product']          = $registrationCertificateFr->fk_product;
                     $object->array_options['options_linked_lot']              = $registrationCertificateFr->fk_lot;
                     $object->update($user);
