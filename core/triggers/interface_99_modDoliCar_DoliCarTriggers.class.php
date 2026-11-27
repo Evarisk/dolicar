@@ -152,11 +152,9 @@ class InterfaceDoliCarTriggers extends DolibarrTriggers
 
                     $registrationCertificateFr->add_object_linked($object->element, $object->id);
 
-                    $object->note_public  = $langs->transnoentities('DoliCarRegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
-                    $object->note_public .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
-                    $object->note_public .= $langs->transnoentities('VINNumber') . ' : ' . (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
-                    $object->note_public .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
-                    $object->note_public .= $langs->transnoentities('Mileage') . ' : ' . ($object->array_options['options_mileage'] > 0 ? price($object->array_options['options_mileage'], 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
+                    // The vehicle block joins the note typed or copied at creation, it does not replace it (issue #328)
+                    require_once __DIR__ . '/../../lib/dolicar_registrationcertificatefr.lib.php';
+                    $object->note_public = dolicar_merge_vehicle_note($object->note_public, dolicar_get_vehicle_note_block($object));
 
                     $object->setValueFrom('note_public', $object->note_public);
                 }
