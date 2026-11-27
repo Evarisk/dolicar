@@ -396,7 +396,8 @@ if (empty($resHook)) {
 
     // Repair — create an event in the vehicle history (logbook) with optional photo/voice comments
     if ($action == 'add_repair') {
-        $repairDate    = dol_stringtotime(GETPOST('repair_date'));
+        // The datetime-local fields are prefilled in the server timezone (dol_print_date): read them back in it, not as GMT
+        $repairDate    = dol_stringtotime(GETPOST('repair_date'), 'tzserver');
         $repairMileage = GETPOSTINT('repair_mileage');
         $repairComment = GETPOST('repair_comment', 'restricthtml');
 
@@ -547,8 +548,9 @@ if (empty($resHook)) {
             $actionComm->elementtype = $productLot->element;
             $actionComm->type_code   = 'AC_PUBLIC';
             $actionComm->code        = 'AC_' . strtoupper($productLot->element) . '_ADD_PUBLIC_VEHICLE_LOG_BOOK';
-            $actionComm->datep       = dol_stringtotime(GETPOST('start_date_and_hour'));
-            $actionComm->datef       = dol_stringtotime(GETPOST('end_date_and_hour'));
+            // Same timezone as the prefilled datetime-local fields, see add_repair
+            $actionComm->datep       = dol_stringtotime(GETPOST('start_date_and_hour'), 'tzserver');
+            $actionComm->datef       = dol_stringtotime(GETPOST('end_date_and_hour'), 'tzserver');
             $actionComm->fk_element  = $productLot->id;
             $actionComm->userownerid = 0;
             $actionComm->percentage  = -1;
@@ -567,7 +569,7 @@ if (empty($resHook)) {
 
             $actionCommID = $actionComm->create($user);
         } else {
-            $lastUnfinishedActionComm[0]->datef = dol_stringtotime(GETPOST('end_date_and_hour'));
+            $lastUnfinishedActionComm[0]->datef = dol_stringtotime(GETPOST('end_date_and_hour'), 'tzserver');
 
             // Whoever brings the vehicle back is not always the one who took it: the return screen
             // asks again, and the answer is kept beside the departure driver rather than over it.
