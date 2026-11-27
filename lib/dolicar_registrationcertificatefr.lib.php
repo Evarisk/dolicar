@@ -341,6 +341,81 @@ function dolicar_vehicle_event_note_excerpt(?string $note, int $length = 80): st
 }
 
 /**
+ * Vehicle block that DoliCar writes in the public note of a proposal, an order or an invoice.
+ *
+ * @param  CommonObject $object  Proposal, order or invoice carrying the DoliCar extrafields
+ * @param  int|null     $mileage Mileage to show, null for the one of the extrafield
+ * @return string                One "label : value<br>" line per vehicle data
+ */
+function dolicar_get_vehicle_note_block(CommonObject $object, ?int $mileage = null): string
+{
+    global $langs;
+
+    $langs->loadLangs(['dolicar@dolicar']);
+
+    $options = $object->array_options;
+    $mileage = $mileage ?? (int) ($options['options_mileage'] ?? 0);
+
+    // A timestamp when set by the creation form, already a formatted date when set from the registration certificate
+    $firstRegistrationDate = $options['options_first_registration_date'] ?? '';
+    if (is_numeric($firstRegistrationDate)) {
+        $firstRegistrationDate = $firstRegistrationDate > 0 ? dol_print_date($firstRegistrationDate, 'day') : '';
+    }
+
+    $values = [
+        'DoliCarRegistrationNumber' => $options['options_registration_number'] ?? '',
+        'VehicleModel'              => $options['options_vehicle_model'] ?? '',
+        'VINNumber'                 => $options['options_VIN_number'] ?? '',
+        'FirstRegistrationDate'     => $firstRegistrationDate,
+    ];
+
+    $block = '';
+    foreach ($values as $key => $value) {
+        $value  = dol_strlen((string) $value) > 0 ? $value : $langs->transnoentities('NoData');
+        $block .= $langs->transnoentities($key) . ' : ' . $value . '<br>';
+    }
+    $mileageLabel = ($mileage > 0 ? price($mileage, 0, '', 1, 0) : 0) . ' ' . $langs->trans('km');
+    $block       .= $langs->transnoentities('Mileage') . ' : ' . $mileageLabel . '<br>';
+
+    return $block;
+}
+
+/**
+ * Put the vehicle block in a public note, keeping what the note already holds (issue #328).
+ *
+ * A block written before is replaced where it stands, otherwise the block goes on top of the note.
+ *
+ * @param  string|null $notePublic Current public note
+ * @param  string      $block      Vehicle block, see dolicar_get_vehicle_note_block()
+ * @return string                  Public note with the vehicle block
+ */
+function dolicar_merge_vehicle_note(?string $notePublic, string $block): string
+{
+    global $langs;
+
+    $langs->loadLangs(['dolicar@dolicar']);
+
+    $notePublic = (string) $notePublic;
+
+    // The lines of dolicar_get_vehicle_note_block(), in their order, whatever their values
+    $linePatterns = [];
+    foreach (['DoliCarRegistrationNumber', 'VehicleModel', 'VINNumber', 'FirstRegistrationDate', 'Mileage'] as $key) {
+        $linePatterns[] = preg_quote($langs->transnoentities($key), '/') . '\s*:[^<]*<br\s*\/?>\s*';
+    }
+
+    $count  = 0;
+    $merged = preg_replace_callback('/' . implode('', $linePatterns) . '/u', function () use ($block) {
+        return $block;
+    }, $notePublic, 1, $count);
+
+    if ($count > 0 && $merged !== null) {
+        return $merged;
+    }
+
+    return $block . $notePublic;
+}
+
+/**
  * Find the vehicle history event an invoice is already attached to.
  *
  * The automatic push and a manual link from the add-event form land in the same element_element row,

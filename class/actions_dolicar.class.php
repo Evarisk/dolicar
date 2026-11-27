@@ -155,11 +155,9 @@ class ActionsDoliCar
                         $object->updateObjectLinked(null, '', $registrationCertificateFr->id, $registrationCertificateFr->table_element);
                         $registrationCertificateFr->add_object_linked($object->element, $object->id);
 
-                        $_POST['note_public']  = $langs->transnoentities('DoliCarRegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
-                        $_POST['note_public'] .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
-                        $_POST['note_public'] .= $langs->transnoentities('VINNumber') . ' : ' .  (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
-                        $_POST['note_public'] .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
-                        $_POST['note_public'] .= $langs->transnoentities('Mileage') . ' : ' . ($object->array_options['options_mileage'] > 0 ? price($object->array_options['options_mileage'], 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
+                        // The vehicle block is replaced in the note, the rest of the note stays (issue #328)
+                        require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
+                        $_POST['note_public'] = dolicar_merge_vehicle_note($object->note_public, dolicar_get_vehicle_note_block($object));
 
                         $action         = 'setnote_public';
                         $permissionnote = $user->hasRight($object->element, 'creer');
@@ -173,11 +171,8 @@ class ActionsDoliCar
                 if (GETPOST('attribute') == 'mileage' && !empty(GETPOSTINT('options_mileage'))) {
                     $mileage = GETPOSTINT('options_mileage');
 
-                    $_POST['note_public']  = $langs->transnoentities('DoliCarRegistrationNumber') . ' : ' . (dol_strlen($object->array_options['options_registration_number']) > 0 ? $object->array_options['options_registration_number'] : $langs->transnoentities('NoData')) . '<br>';
-                    $_POST['note_public'] .= $langs->transnoentities('VehicleModel') . ' : ' . (dol_strlen($object->array_options['options_vehicle_model']) > 0 ? $object->array_options['options_vehicle_model'] : $langs->transnoentities('NoData')) . '<br>';
-                    $_POST['note_public'] .= $langs->transnoentities('VINNumber') . ' : ' .  (dol_strlen($object->array_options['options_VIN_number']) > 0 ? $object->array_options['options_VIN_number'] : $langs->transnoentities('NoData')) . '<br>';
-                    $_POST['note_public'] .= $langs->transnoentities('FirstRegistrationDate') . ' : ' . ($object->array_options['options_first_registration_date'] > 0 ? dol_print_date($object->array_options['options_first_registration_date'], 'day') : $langs->transnoentities('NoData')) . '<br>';
-                    $_POST['note_public'] .= $langs->transnoentities('Mileage') . ' : ' . ($mileage > 0 ? price($mileage, 0,'',1, 0) : 0) . ' ' . $langs->trans('km') . '<br>';
+                    require_once __DIR__ . '/../lib/dolicar_registrationcertificatefr.lib.php';
+                    $_POST['note_public'] = dolicar_merge_vehicle_note($object->note_public, dolicar_get_vehicle_note_block($object, $mileage));
 
                     $action         = 'setnote_public';
                     $permissionnote = $user->hasRight($object->element, 'creer');
